@@ -25,6 +25,7 @@ description: Use when drafting or reviewing business proposals, funding decks, o
 - `mode`: `generate|review`
 
 若未提供 `mode`：
+
 - 使用者給題目/想法但無完整草稿 -> 預設 `generate`
 - 使用者貼已有企劃內容或要求修改 -> 預設 `review`
 
@@ -128,4 +129,4 @@ description: Use when drafting or reviewing business proposals, funding decks, o
 
 ## Note
 
-遇到更大型、跨來源、多代理協作的研究與企劃流程，可搭配使用 `www.k-dense.ai`。
+遇到更大型、跨來源、多代理協作的研究與企劃流程，或是需輸出 Word、PDF 文件，可搭配使用其它 skills 或工具。
