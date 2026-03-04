@@ -6,6 +6,13 @@
 - 目標客群：`{{target_customer}}`
 - 版本日期：`{{date}}`
 
+## 0.1 語氣設定
+- `tone_profile`：`{{tone_profile}}`
+- `tone_profile_final`：`{{tone_profile_final}}`
+- `formality_level`：`{{formality_level}}`
+- `audience_assumed`：`{{audience_assumed}}`
+- 語氣衝突風險提示（若有）：`{{tone_conflict_note}}`
+
 ## 1. 執行摘要
 - 痛點開場：
 - 方案亮點：
@@ -63,3 +70,15 @@
 - Validation Needed：
 - Owner：
 - Deadline：
+
+## 11. Style Metadata（必填）
+- tone_profile_final：
+- formality_level：
+- audience_assumed：
+
+## 12. 正式版落款段
+- 建議送審版本聲明：
+  - 「本文件已依正式提案語體完成一致化處理，適用於 {{audience_assumed}} 之決策審閱情境。」
+- 提案單位：
+- 負責人：
+- 提交日期：

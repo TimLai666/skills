@@ -29,15 +29,34 @@
 | timeline | string | no | 例如 3、6、12 個月 |
 | goal_kpi | list | yes | KPI + 門檻 |
 | mode | string | no | generate/review |
+| tone_profile | string | no | executive_formal/investor_formal/consulting_formal/gov_formal/auto |
+| formality_level | string | no | standard/strict，預設 strict |
+| audience | string | no | 受眾描述，用於覆寫語氣判斷 |
 
-## 4) 缺資料時的處理
+## 4) 語氣自動映射（混合策略）
+
+若 `tone_profile=auto`：
+
+1. 先依 `proposal_type` 預設：
+   - `internal -> executive_formal`
+   - `fundraising -> investor_formal`
+   - `partnership -> consulting_formal`
+2. 再以 `audience` 或 prompt 關鍵詞覆寫：
+   - 政府、標案、審議、公部門、法遵 -> `gov_formal`
+   - 董事會、管理層、經營會議 -> `executive_formal`
+   - 投資人、VC、基金、IR -> `investor_formal`
+   - 顧問、策略報告、MECE -> `consulting_formal`
+
+若使用者明確指定 `tone_profile`，優先於自動映射。
+
+## 5) 缺資料時的處理
 
 - 不中止流程，但必須在輸出中標示：
   - `Assumption`：當前假設值
   - `Validation Needed`：需要補齊的資料與負責人
   - `Risk`：若假設錯誤的影響
 
-## 5) 任務起始句模板
+## 6) 任務起始句模板
 
 可用以下句型啟動：
 
@@ -45,3 +64,5 @@
   - 「以下依據既有資料建立假設版企劃，已標示需驗證欄位。」
 - 審稿模式：
   - 「先給決策風險最高的缺陷，再提供逐段重寫版本。」
+- 正式版模式：
+  - 「以下內容已依 `{{tone_profile_final}}` 語體與 `{{formality_level}}` 正式度規範完成潤飾。」
