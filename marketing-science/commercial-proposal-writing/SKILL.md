@@ -1,6 +1,6 @@
 ---
 name: commercial-proposal-writing
-description: Use when drafting or reviewing business proposals, funding decks, formal proposal outputs, and proposal optimization tasks that require STP/4P strategy, business model articulation, financial risk analysis, and evidence-backed decision writing. Trigger on requests such as 商業企劃, 正式提案, 董事會版本, 投資人版本, 標案版本, 募資 deck, 提案優化, STP/4P, 商業模式, 財務風險, 提案審稿.
+description: Use when drafting or reviewing business proposals, funding decks, formal proposal outputs, and proposal optimization tasks that require STP/4P strategy, business model articulation, financial risk analysis, and evidence-backed decision writing. Trigger on requests such as 商業企劃, 正式提案, 董事會版本, 投資人版本, 標案版本, 募資 deck, 提案優化, STP/4P, 商業模式, 財務風險, 提案審稿, 資料不足先問.
 ---
 
 # 商業企劃寫作
@@ -12,7 +12,7 @@ description: Use when drafting or reviewing business proposals, funding decks, f
 
 ## Input Contract
 
-先標準化輸入欄位，缺值時明確標記假設：
+先標準化輸入欄位，缺值時先進資料充足性檢查，不直接生成內容：
 
 - `proposal_type`: `internal|fundraising|partnership`
 - `industry`: 產業與子領域
@@ -27,10 +27,31 @@ description: Use when drafting or reviewing business proposals, funding decks, f
 - `formality_level`: `standard|strict`（預設 `strict`）
 - `audience`: 受眾描述（可覆寫自動判斷）
 
+## Data Sufficiency Gate（強制前置）
+
+所有 `generate/review` 請求先檢查核心阻斷欄位：
+
+- `proposal_type`
+- `target_customer`
+- `problem_statement`
+- `goal_kpi`
+- `available_data`
+
+規則：
+
+1. 缺任一核心欄位 -> 不進入正文生成，改輸出 `MissingDataQueryOutput`。
+2. 使用者補齊後 -> 重新檢查，通過才進入原本流程。
+3. 使用者明確表示「沒有資料」-> 提供 A/B/C/D 方案選單，等待使用者選擇。
+4. 使用者未選擇方案前 -> 不輸出完整企劃正文。
+
+## Mode Routing
+
 若未提供 `mode`：
 
 - 使用者給題目/想法但無完整草稿 -> 預設 `generate`
 - 使用者貼已有企劃內容或要求修改 -> 預設 `review`
+
+`review` 補充規則：若未提供原稿或關鍵段落，先要求貼上內容，不可憑空審稿。
 
 若 `tone_profile=auto`：採混合策略映射
 
@@ -46,9 +67,19 @@ description: Use when drafting or reviewing business proposals, funding decks, f
 
 ## Output Contract
 
+### MissingDataQueryOutput（資料不足時優先輸出）
+
+當核心欄位不足時，固定輸出：
+
+- `missing_fields`: 缺失欄位清單
+- `why_needed`: 每欄位用途（為何必要）
+- `questions_to_user`: 精準提問清單（可直接回填）
+- `no_data_options`: A/B/C/D 方案選單
+- `next_step_rule`: 「補資料或選方案後才進入 generate/review」
+
 ### DraftOutput (`mode=generate`)
 
-必含以下章節，順序不可變：
+僅在通過 Data Sufficiency Gate 後輸出，必含以下章節：
 
 1. 執行摘要
 2. 問題定義
@@ -69,7 +100,7 @@ description: Use when drafting or reviewing business proposals, funding decks, f
 
 ### ReviewOutput (`mode=review`)
 
-必含：
+僅在通過 Data Sufficiency Gate 且有可審核原稿時輸出，必含：
 
 1. `缺陷清單`（Critical/Major/Minor）
 2. `重寫建議`（逐段）
@@ -85,9 +116,31 @@ description: Use when drafting or reviewing business proposals, funding decks, f
 
 `review` 模式最少輸出 8 條「口語句 -> 正式句」對照；短稿可降為 5 條並標註原因。
 
+## No-Data Options（使用者明確無資料）
+
+固定提供以下選單：
+
+- **A. 最快假設版（當日可產出）**
+  - 以通用假設建立草案，全部假設顯式標註，不可偽裝為真實資料。
+- **B. 輕量訪談驗證版（2-5 天）**
+  - 先做少量訪談/內部盤點，再輸出企劃，降低假設風險。
+- **C. 小規模數據蒐集後正式版（1-2 週）**
+  - 先蒐集最小可用數據，再輸出可送審版本。
+- **D. 客製方案**
+  - 依使用者限制（時程/可取得資料/受眾）客製流程。
+
+預設不自動替使用者選 A/B/C/D。
+
+## No-Hallucination Rules（硬性禁令）
+
+1. 不得自行臆測關鍵數據（市場規模、轉換率、財務數字、KPI 基準）。
+2. 不得把猜測寫成事實句。
+3. 若採假設，必須標示：`Assumption` + `Validation Needed` + `Risk`。
+4. 若使用者要求「先填數字」但未提供來源，先回問來源或切換到 A 假設版。
+
 ## Mandatory Strategy Flow
 
-所有任務都要走同一主流程：
+通過資料閘後再走主流程：
 
 1. 行銷環境分析
 2. 消費者行為分析
@@ -147,20 +200,25 @@ description: Use when drafting or reviewing business proposals, funding decks, f
 ### Generate
 
 1. 依 [01-intake-and-mode-selection.md](./references/01-intake-and-mode-selection.md) 收斂輸入與語氣。
-2. 套用 [02-proposal-structure-template.md](./references/02-proposal-structure-template.md) 產生章節骨架。
-3. 套用 [03-stp-4p-framework-map.md](./references/03-stp-4p-framework-map.md) 填入 STP/4P 分析。
-4. 需要量化時使用 [04-statistical-method-playbook.md](./references/04-statistical-method-playbook.md) 對應方法與 Python 模板。
-5. 套用 [05-financial-risk-modeling-guide.md](./references/05-financial-risk-modeling-guide.md) 完成財務與風險。
-6. 最末執行語氣 polish（避免先美化後被重寫覆蓋）。
-7. 輸出 DraftOutput + Style Metadata。
+2. 先過 Data Sufficiency Gate。
+3. 若缺資料則輸出 MissingDataQueryOutput。
+4. 若通過，套用 [02-proposal-structure-template.md](./references/02-proposal-structure-template.md) 產生章節骨架。
+5. 套用 [03-stp-4p-framework-map.md](./references/03-stp-4p-framework-map.md) 填入 STP/4P 分析。
+6. 需要量化時使用 [04-statistical-method-playbook.md](./references/04-statistical-method-playbook.md) 對應方法與 Python 模板。
+7. 套用 [05-financial-risk-modeling-guide.md](./references/05-financial-risk-modeling-guide.md) 完成財務與風險。
+8. 最末執行語氣 polish（避免先美化後被重寫覆蓋）。
+9. 輸出 DraftOutput + Style Metadata。
 
 ### Review
 
-1. 先依 [06-review-rubric-and-rewrite-rules.md](./references/06-review-rubric-and-rewrite-rules.md) 評分。
-2. 找出阻礙決策的高風險缺陷（論點斷裂、數字不一致、證據不足）。
-3. 執行語氣違規掃描與「口語句 -> 正式句」轉換。
-4. 先給優先修正順序，再提供逐段重寫。
-5. 輸出 ReviewOutput + 語氣修正清單。
+1. 先確認有可審核原稿內容。
+2. 先過 Data Sufficiency Gate（重點檢查 `target_customer`, `problem_statement`, `goal_kpi`, `available_data`）。
+3. 若缺資料或缺原稿，輸出 MissingDataQueryOutput 或原稿補件請求。
+4. 若通過，依 [06-review-rubric-and-rewrite-rules.md](./references/06-review-rubric-and-rewrite-rules.md) 評分。
+5. 找出阻礙決策的高風險缺陷（論點斷裂、數字不一致、證據不足）。
+6. 執行語氣違規掃描與「口語句 -> 正式句」轉換。
+7. 先給優先修正順序，再提供逐段重寫。
+8. 輸出 ReviewOutput + 語氣修正清單。
 
 ## Resources
 

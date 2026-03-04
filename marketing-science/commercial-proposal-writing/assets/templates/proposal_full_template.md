@@ -1,5 +1,7 @@
 # 商業企劃書（完整模板）
 
+> 缺核心資料時請勿直接填寫完整章節。先輸出 `MissingDataQueryOutput` 並等待補件或方案選擇。
+
 ## 0. 基本資訊
 - 提案類型：`{{proposal_type}}`
 - 產業：`{{industry}}`
@@ -12,6 +14,18 @@
 - `formality_level`：`{{formality_level}}`
 - `audience_assumed`：`{{audience_assumed}}`
 - 語氣衝突風險提示（若有）：`{{tone_conflict_note}}`
+
+## 0.2 資料來源與可信度標記（必填）
+- 核心資料來源：
+  - 市場資料：`{{source_market}}`
+  - 客戶資料：`{{source_customer}}`
+  - 財務資料：`{{source_financial}}`
+  - KPI 基準：`{{source_kpi}}`
+- 資料可信度：`high|medium|low`
+- 若為假設資料，必須列示：
+  - `Assumption`：
+  - `Validation Needed`：
+  - `Risk`：
 
 ## 1. 執行摘要
 - 痛點開場：
@@ -78,7 +92,7 @@
 
 ## 12. 正式版落款段
 - 建議送審版本聲明：
-  - 「本文件已依正式提案語體完成一致化處理，適用於 {{audience_assumed}} 之決策審閱情境。」
+  - 「本文件已依正式提案語體完成一致化處理，且關鍵數據具來源或已明確標示假設與風險。」
 - 提案單位：
 - 負責人：
 - 提交日期：
