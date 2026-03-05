@@ -1,4 +1,4 @@
-﻿---
+---
 name: landing-page-studio
 description: Use when creating high-conversion landing pages with modern visual effects, including SVG/WebGL animation, autonomous multi-iteration optimization, and dual output modes (single-file HTML or React project). Trigger on requests like landing page, LP, hero section build, animated marketing page, conversion page redesign, or style variants A-L/custom.
 ---
