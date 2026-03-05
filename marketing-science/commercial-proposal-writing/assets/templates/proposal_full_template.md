@@ -1,6 +1,7 @@
-# 商業企劃書（完整模板）
+# 商業企劃書（思考骨架模板）
 
 > 缺核心資料時請勿直接填寫完整章節。先輸出 `MissingDataQueryOutput` 並等待補件或方案選擇。
+> 本模板僅供思考與內容盤點。最終交付請輸出完整 `narrative_body`，並附 `template_coverage_map` 摘要。
 
 ## 0. 基本資訊
 - 提案類型：`{{proposal_type}}`
@@ -85,14 +86,18 @@
 - Owner：
 - Deadline：
 
-## 11. Style Metadata（必填）
+## 11. style_metadata（必填）
 - tone_profile_final：
 - formality_level：
 - audience_assumed：
 
-## 12. 正式版落款段
-- 建議送審版本聲明：
-  - 「本文件已依正式提案語體完成一致化處理，且關鍵數據具來源或已明確標示假設與風險。」
-- 提案單位：
-- 負責人：
-- 提交日期：
+## 12. template_coverage_map（附錄摘要）
+| 模板要點 | 正文章節 | 關鍵落地句 | 是否覆蓋 |
+| --- | --- | --- | --- |
+| 痛點與影響 |  |  |  |
+| 目標客群與 STP |  |  |  |
+| 4P 策略 |  |  |  |
+| 財務推導 |  |  |  |
+| 風險與對策 |  |  |  |
+| 里程碑 |  |  |  |
+| Ask |  |  |  |

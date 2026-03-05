@@ -9,6 +9,7 @@ description: Use when drafting or reviewing business proposals, funding decks, f
 
 把商業企劃視為「讓決策者說 Yes 的商業說服文件」。
 本技能提供雙模式流程：`generate` 產生完整企劃稿，`review` 審稿並重寫關鍵段落，並內建可切換正式語氣檔位。
+模板用於思考與檢核，不是最終交付格式；最終交付必須是可送審的敘事正文。
 
 ## Input Contract
 
@@ -79,7 +80,14 @@ description: Use when drafting or reviewing business proposals, funding decks, f
 
 ### DraftOutput (`mode=generate`)
 
-僅在通過 Data Sufficiency Gate 後輸出，必含以下章節：
+僅在通過 Data Sufficiency Gate 後輸出，採雙層規格：
+
+1. `narrative_body`：可直接送審的連續敘事正文（主輸出）
+2. `template_coverage_map`：模板要點 -> 正文章節映射摘要（附錄）
+3. `coverage_status`: `pass|fail`
+4. `style_metadata`
+
+`narrative_body` 必含章節：
 
 1. 執行摘要
 2. 問題定義
@@ -90,9 +98,8 @@ description: Use when drafting or reviewing business proposals, funding decks, f
 7. 執行計畫與團隊
 8. 財務預估與風險評估
 9. 決策請求（Ask）
-10. `Style Metadata`
 
-`Style Metadata` 固定輸出：
+`style_metadata` 固定輸出：
 
 - `tone_profile_final`
 - `formality_level`
@@ -107,14 +114,30 @@ description: Use when drafting or reviewing business proposals, funding decks, f
 3. `重寫片段`（至少 3 段關鍵段落）
 4. `優先修正順序`（本週必修、次要修正、可延後）
 5. `語氣修正清單`
-
-`語氣修正清單` 固定輸出：
-
-- `口語化問題`
-- `不夠正式句`
-- `替換建議句`
+6. `missing_template_content`（模板思考但未進正文的項目）
+7. `reintegrated_rewrite`（補回後段落）
 
 `review` 模式最少輸出 8 條「口語句 -> 正式句」對照；短稿可降為 5 條並標註原因。
+
+## Template-to-Narrative Rules（防填表硬規則）
+
+1. 模板是思考輸入骨架，不是最終輸出格式。
+2. 每個模板核心欄位都要有對應正文位置與落地句。
+3. 禁止只輸出章節標題、清單、占位符（例如 `{{...}}`）。
+4. 表格可少量保留，但只能作為敘事後的佐證，不可取代正文。
+
+## Content Preservation Gate（內容保全閘）
+
+輸出前必檢查以下模板核心項是否已敘事化進正文：
+
+- STP
+- 4P
+- 財務推導
+- 風險與對策
+- 里程碑
+- Ask
+
+若缺任一項，`coverage_status=fail`，先補寫正文，不可直接交付。
 
 ## No-Data Options（使用者明確無資料）
 
@@ -194,6 +217,7 @@ description: Use when drafting or reviewing business proposals, funding decks, f
 3. 結論是否可追溯到數據或可驗證假設
 4. 是否避免空話開場（例如「本企劃旨在」）
 5. 是否通過正式語氣檢核表（見 [08-output-polish-checklist.md](./references/08-output-polish-checklist.md)）
+6. 是否通過內容保全檢查（`template_coverage_map` 與 `coverage_status`）
 
 ## Mode Workflow
 
@@ -202,12 +226,12 @@ description: Use when drafting or reviewing business proposals, funding decks, f
 1. 依 [01-intake-and-mode-selection.md](./references/01-intake-and-mode-selection.md) 收斂輸入與語氣。
 2. 先過 Data Sufficiency Gate。
 3. 若缺資料則輸出 MissingDataQueryOutput。
-4. 若通過，套用 [02-proposal-structure-template.md](./references/02-proposal-structure-template.md) 產生章節骨架。
-5. 套用 [03-stp-4p-framework-map.md](./references/03-stp-4p-framework-map.md) 填入 STP/4P 分析。
-6. 需要量化時使用 [04-statistical-method-playbook.md](./references/04-statistical-method-playbook.md) 對應方法與 Python 模板。
-7. 套用 [05-financial-risk-modeling-guide.md](./references/05-financial-risk-modeling-guide.md) 完成財務與風險。
-8. 最末執行語氣 polish（避免先美化後被重寫覆蓋）。
-9. 輸出 DraftOutput + Style Metadata。
+4. 若通過，套用 [02-proposal-structure-template.md](./references/02-proposal-structure-template.md) 作為思考骨架。
+5. 先生成完整 `narrative_body`（連續正文）。
+6. 再輸出 `template_coverage_map`，確認模板要點都有落到正文。
+7. 套用統計與財務規則完善內容。
+8. 最末執行語氣 polish。
+9. 輸出 DraftOutput。
 
 ### Review
 
@@ -215,10 +239,9 @@ description: Use when drafting or reviewing business proposals, funding decks, f
 2. 先過 Data Sufficiency Gate（重點檢查 `target_customer`, `problem_statement`, `goal_kpi`, `available_data`）。
 3. 若缺資料或缺原稿，輸出 MissingDataQueryOutput 或原稿補件請求。
 4. 若通過，依 [06-review-rubric-and-rewrite-rules.md](./references/06-review-rubric-and-rewrite-rules.md) 評分。
-5. 找出阻礙決策的高風險缺陷（論點斷裂、數字不一致、證據不足）。
-6. 執行語氣違規掃描與「口語句 -> 正式句」轉換。
-7. 先給優先修正順序，再提供逐段重寫。
-8. 輸出 ReviewOutput + 語氣修正清單。
+5. 檢查 `missing_template_content`。
+6. 透過 `reintegrated_rewrite` 把遺漏模板思考補回正文。
+7. 輸出 ReviewOutput。
 
 ## Resources
 
