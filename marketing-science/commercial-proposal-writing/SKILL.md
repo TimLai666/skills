@@ -11,7 +11,7 @@ description: Use when drafting or reviewing internal proposals, fundraising deck
 本 skill 採雙模式：`generate` 產出完整企劃，`review` 審查既有企劃並重寫關鍵段落。
 主流程固定為：提案分類 -> Audience 與 Ask 明確化 -> 企劃五問 -> 九段式說服結構 -> 健檢。
 
-這不是全包式市場研究 skill。商業模式深化：參照 [business-model-architect](../business-model-architect/SKILL.md)。統計方法與 `scripts/*.py` 僅在明確要求研究分析時載入。
+這不是全包式市場研究 skill。商業模式深化：使用 `business-model-architect`。統計方法與 `scripts/*.py` 僅在明確要求研究分析時載入。
 
 ## Input Contract
 
@@ -241,4 +241,4 @@ description: Use when drafting or reviewing internal proposals, fundraising deck
 
 ## Note
 
-需求升級為商業模式重設、渠道與收入設計、30 天驗證實驗時，參照 [business-model-architect](../business-model-architect/SKILL.md)。
+需求升級為商業模式重設、通路與收入設計、30 天驗證實驗時，使用 `business-model-architect`。
