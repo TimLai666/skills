@@ -1,37 +1,19 @@
-# 商業企劃審稿報告（思考骨架模板）
+# 商業企劃審稿報告模板
 
-> 本模板用於審稿盤點。最終回覆需輸出完整敘事審稿意見，不可僅貼本模板。
+> 本模板用於審稿盤點。最終回覆必須是完整審稿意見與重寫內容，不可只貼模板。
 
 ## 0. 文件資訊
 - 原稿名稱：`{{doc_name}}`
 - 審稿日期：`{{date}}`
-- 審稿模式：`review`
-- 語氣檔位：`{{tone_profile_final}}`
-- 正式度：`{{formality_level}}`
+- 受眾：`{{audience}}`
+- 提案類型：`{{proposal_type}}`
 
-## 0.1 原稿可審核性檢查（前置）
-- 是否已提供原稿全文或關鍵段落：`yes|no`
-- 若否，先回問：
-  - 「請提供原稿或至少貼上以下章節：執行摘要、問題定義、財務與 Ask。」
-- 未提供原稿前：不得輸出虛構審稿內容。
+## 1. 是否可進入決策會議
+- `Yes | No | Conditional`
+- 目前最大阻礙：
 
-## 1. 總結
-- 一句話判斷：
-- 是否可進入決策會議：`Yes / No / Conditional`
-- 當前最大阻礙：
+## 2. `findings_by_severity`
 
-## 2. 評分
-| 維度 | 分數 | 說明 |
-| --- | ---: | --- |
-| 問題清晰度 |  |  |
-| 策略完整度 |  |  |
-| 證據可信度 |  |  |
-| 執行可行性 |  |  |
-| 財務風險嚴謹度 |  |  |
-| 正式語體成熟度 |  |  |
-| 總分 |  |  |
-
-## 3. 缺陷清單（依嚴重度）
 ### Critical
 1.
 
@@ -41,45 +23,60 @@
 ### Minor
 1.
 
-## 4. 優先修正順序
-### 本週必修
-1.
+## 3. `logic_gaps`
+- `Why -> What -> How -> Proof -> Ask` 缺口：
 
-### 次要修正
-1.
+## 4. `numerical_inconsistencies`
+- 前後不一致數字：
+- 缺公式數字：
+- 假設未標示數字：
 
-### 可延後
-1.
+## 5. `missing_sections`
+- 缺少章節：
+- 缺少 Ask：
+- 缺少風險：
 
-## 5. 重寫建議（逐段）
-- 原段落問題：
-- 目標句：
-- 證據句：
-- 行動句：
-
-## 6. 重寫片段（至少 3 段）
-### 重寫段落 1
-
-### 重寫段落 2
-
-### 重寫段落 3
-
-## 7. 語氣修正清單（至少 8 條，短稿可 5 條）
-| 口語句/不夠正式句 | 替換建議句（正式版） | 修正理由 |
+## 6. `common_mistake_flags`
+| 項目 | pass/fail | 說明 |
 | --- | --- | --- |
-|  |  |  |
+| generic_opening |  |  |
+| report_dumping |  |  |
+| everyone_problem |  |  |
+| kpi_without_backsolve |  |  |
+| competitor_list_only |  |  |
+| feature_without_outcome |  |  |
+| channel_without_effectiveness |  |  |
+| gantt_without_trust |  |  |
+| numbers_without_logic |  |  |
+| hidden_risks |  |  |
+| missing_ask |  |  |
+| empty_corporate_language |  |  |
 
-## 8. missing_template_content（模板思考遺漏）
-- 遺漏項目：
-- 應補回章節：
-- 影響：
+## 7. `rewrite_priorities`
+- 本週必修：
+- 次要修正：
+- 可延後：
 
-## 9. reintegrated_rewrite（補回後段落）
-- 補回段落 1：
-- 補回段落 2：
+## 8. 關鍵段落重寫
+### 段落 1
+- 原問題：
+- 改寫版本：
 
-## 10. 下一輪審稿檢查點
-- 數字一致性：
-- Ask 清晰度：
-- 風險可追溯性：
-- 語氣 lint 通過情況：
+### 段落 2
+- 原問題：
+- 改寫版本：
+
+### 段落 3
+- 原問題：
+- 改寫版本：
+
+## 9. `reintegrated_rewrite`
+- 補回 Ask：
+- 補回風險：
+- 補回數字邏輯：
+
+## 10. 下一輪檢查點
+- Ask 是否清楚：
+- 數字是否可追問：
+- 風險是否足夠透明：
+- 語氣是否過關：

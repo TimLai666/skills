@@ -1,261 +1,244 @@
 ---
 name: commercial-proposal-writing
-description: Use when drafting or reviewing business proposals, funding decks, formal proposal outputs, and proposal optimization tasks that require STP/4P strategy, business model articulation, financial risk analysis, and evidence-backed decision writing. Trigger on requests such as 商業企劃, 正式提案, 董事會版本, 投資人版本, 標案版本, 募資 deck, 提案優化, STP/4P, 商業模式, 財務風險, 提案審稿, 資料不足先問.
+description: Use when drafting or reviewing internal proposals, fundraising decks, partnership proposals, proposal rewrites, and decision-oriented business plans that must persuade a specific audience to approve resources, invest money, or commit to collaboration. Trigger on requests such as 商業企劃, 內部提案, 募資提案, 合作提案, 提案優化, 提案審稿, 董事會版本, 投資人版本, ask 撰寫, 資料不足處理.
 ---
 
 # 商業企劃寫作
 
 ## Overview
 
-把商業企劃視為「讓決策者說 Yes 的商業說服文件」。
-本技能提供雙模式流程：`generate` 產生完整企劃稿，`review` 審稿並重寫關鍵段落，並內建可切換正式語氣檔位。
-模板用於思考與檢核，不是最終交付格式；最終交付必須是可送審的敘事正文。
+把企劃書視為「讓決策者說 Yes 的商業說服文件」。
+本 skill 採雙模式：`generate` 產出完整企劃，`review` 審查既有企劃並重寫關鍵段落。
+主流程固定為：提案分類 -> Audience 與 Ask 明確化 -> 企劃五問 -> 九段式說服結構 -> 健檢。
+
+這不是全包式市場研究 skill。商業模式深化：參照 [business-model-architect](../business-model-architect/SKILL.md)。統計方法與 `scripts/*.py` 僅在明確要求研究分析時載入。
 
 ## Input Contract
 
-先標準化輸入欄位，缺值時先進資料充足性檢查，不直接生成內容：
+必要欄位如下，不直接跳寫正文：
 
 - `proposal_type`: `internal|fundraising|partnership`
-- `industry`: 產業與子領域
-- `target_customer`: 目標客群輪廓
-- `problem_statement`: 核心痛點
-- `available_data`: 可用數據、來源與限制
-- `budget`: 預算上限與分配原則
-- `timeline`: 里程碑時間範圍
-- `goal_kpi`: 成功指標與門檻
+- `audience`: 誰做決策、誰影響決策、誰使用
+- `decision_goal`: 這份企劃想推動什麼決策
+- `ask`: 要對方批准什麼、投入什麼、何時決定
+- `problem_statement`: 核心問題與不行動代價
+- `target_customer`: 目標客群或受影響對象
+- `available_evidence`: 可用資料、來源、可信度與限制
+- `goal_kpi`: 成功定義與門檻
+- `budget`: 預算、資源或投資需求
+- `timeline`: 里程碑、時程與決策節點
 - `mode`: `generate|review`
 - `tone_profile`: `executive_formal|investor_formal|consulting_formal|gov_formal|auto`
-- `formality_level`: `standard|strict`（預設 `strict`）
-- `audience`: 受眾描述（可覆寫自動判斷）
+- `formality_level`: `standard|strict`，預設 `strict`
 
-## Data Sufficiency Gate（強制前置）
+## Data Sufficiency Gate
 
-所有 `generate/review` 請求先檢查核心阻斷欄位：
+所有請求先檢查：
 
 - `proposal_type`
-- `target_customer`
+- `audience`
+- `decision_goal`
+- `ask`
 - `problem_statement`
+- `target_customer`
+- `available_evidence`
 - `goal_kpi`
-- `available_data`
+
+`budget` 與 `timeline` 若缺失，不得默默補完；應補件，或依 A/B/C/D 方案處理。
 
 規則：
 
-1. 缺任一核心欄位 -> 不進入正文生成，改輸出 `MissingDataQueryOutput`。
-2. 使用者補齊後 -> 重新檢查，通過才進入原本流程。
-3. 使用者明確表示「沒有資料」-> 提供 A/B/C/D 方案選單，等待使用者選擇。
-4. 使用者未選擇方案前 -> 不輸出完整企劃正文。
+1. 缺核心欄位時，不進入 `generate` 或 `review`，先輸出 `MissingDataQueryOutput`。
+2. 明確表示「資料不足」時，輸出 A/B/C/D 路徑，不直接編寫數字。
+3. 所有代填資訊都必須標示 `Assumption`、`Validation Needed`、`Risk`。
+4. `review` 模式若缺原稿或關鍵段落，輸出補件要求，不可憑空審稿。
+
+### MissingDataQueryOutput
+
+- `missing_fields`
+- `why_needed`
+- `questions_to_user`
+- `no_data_options`
+- `next_step_rule`
+
+### No-Data Options
+
+- **A. 最快假設版**
+  - 以保守假設產出草案，全部假設顯式標註。
+- **B. 輕量訪談驗證版**
+  - 執行 2-5 個關鍵訪談或內部訪談後產出企劃。
+- **C. 小規模數據蒐集後正式版**
+  - 蒐集最小可用數據後產出決策版。
+- **D. 客製方案**
+  - 依時程、資料可得性與受眾壓力重排流程。
+
+預設不替使用者自動選擇 A/B/C/D。
 
 ## Mode Routing
 
-若未提供 `mode`：
+未提供 `mode` 時：
 
-- 使用者給題目/想法但無完整草稿 -> 預設 `generate`
-- 使用者貼已有企劃內容或要求修改 -> 預設 `review`
+- 題目、想法、摘要型需求 -> `generate`
+- 已貼草稿、要求修改或審稿 -> `review`
 
-`review` 補充規則：若未提供原稿或關鍵段落，先要求貼上內容，不可憑空審稿。
+若 `tone_profile=auto`：
 
-若 `tone_profile=auto`：採混合策略映射
+- `internal -> executive_formal`
+- `fundraising -> investor_formal`
+- `partnership -> consulting_formal`
 
-1. 先依 `proposal_type`：
-   - `internal -> executive_formal`
-   - `fundraising -> investor_formal`
-   - `partnership -> consulting_formal`
-2. 再依 `audience` 或 prompt 關鍵詞覆寫：
-   - 若包含「政府、標案、審議、公部門、法遵」-> `gov_formal`
-   - 若包含「董事會、經營會議、管理層」-> `executive_formal`
-   - 若包含「投資人、VC、基金、IR」-> `investor_formal`
-   - 若包含「策略顧問、顧問報告、MECE」-> `consulting_formal`
+再依受眾覆寫：
 
-## Output Contract
+- 政府、標案、法遵、審議 -> `gov_formal`
+- 董事會、經營層、主管會議 -> `executive_formal`
+- 投資人、VC、基金、IR -> `investor_formal`
+- 顧問、策略合作、跨部門整合 -> `consulting_formal`
 
-### MissingDataQueryOutput（資料不足時優先輸出）
+## Non-Negotiable Rules
 
-當核心欄位不足時，固定輸出：
+以下是硬性禁則，違反時不得視為可交付版本：
 
-- `missing_fields`: 缺失欄位清單
-- `why_needed`: 每欄位用途（為何必要）
-- `questions_to_user`: 精準提問清單（可直接回填）
-- `no_data_options`: A/B/C/D 方案選單
-- `next_step_rule`: 「補資料或選方案後才進入 generate/review」
+1. 禁止空洞開場。
+   - 不可用「本企劃旨在」「為了提升」這類無資訊開頭。
+   - 執行摘要必須以痛點數據、對比或結果切入。
+2. 禁止只貼產業報告。
+   - 市場論述必須回到市場規模、成長率、需求缺口。
+3. 禁止把問題寫成「大家都有這個問題」。
+   - 必須交代誰痛、痛多大、現有方案為何不行、不做會怎樣。
+4. 禁止 KPI 只有目標沒有推導。
+   - 目標必須可由客戶數、客單價、轉換、曝光或里程碑反推。
+5. 禁止把競品分析寫成名單。
+   - 只選 2-3 個真正有對比價值的對象，回答「為什麼選我」。
+6. 禁止只賣功能不賣成果。
+   - 每個方案段落都要出現「功能 -> 好處 -> 成果」鏈。
+7. 禁止只列通路不證明有效。
+   - 行銷段落必須連到漏斗與單位經濟效益，如 `CAC/LTV/ROAS`。
+8. 禁止只放甘特圖不建立信任。
+   - 執行計畫必須同時交代關鍵能力、過往證明、Go/No-Go 決策點。
+9. 禁止財務數字無推導。
+   - 營收、成本、回收期都必須拆成公式或假設鏈。
+10. 禁止隱藏風險。
+   - 至少揭露三個高機率風險與對應動作。
+11. 禁止沒有 Ask。
+   - 每份企劃都必須明說要什麼資源、何時決策、下一步是什麼。
+12. 禁止翻譯腔與空話。
+   - 語言要正式但自然，避免官樣句、抽象動詞堆疊、無主詞空話。
 
-### DraftOutput (`mode=generate`)
+## Strategy Engine
 
-僅在通過 Data Sufficiency Gate 後輸出，採雙層規格：
+動筆前執行企劃五問：
 
-1. `narrative_body`：可直接送審的連續敘事正文（主輸出）
-2. `template_coverage_map`：模板要點 -> 正文章節映射摘要（附錄）
-3. `coverage_status`: `pass|fail`
-4. `style_metadata`
+1. 為誰解決什麼問題
+2. 為什麼是現在
+3. 憑什麼是我們
+4. 要花多少、賺多少
+5. 成功長什麼樣
 
-`narrative_body` 必含章節：
+這五問的回答固定輸出到 `strategy_answers`，然後再進入正文生成。
+
+## Generate Output Contract
+
+通過 Data Sufficiency Gate 後輸出：
+
+- `strategy_answers`
+- `narrative_body`
+- `key_numbers_logic`
+- `assumption_register`
+- `ask_block`
+- `coverage_status`
+
+`narrative_body` 必須是可直接送審的連續正文，並固定包含九段式結構：
 
 1. 執行摘要
 2. 問題定義
-3. 目標客群與市場區隔
-4. 競爭分析與差異化定位
-5. 方案與商業模式
-6. 行銷策略（產品/價格/通路/推廣）
-7. 執行計畫與團隊
+3. 目標客群與決策旅程
+4. 競爭分析與差異化
+5. 方案設計與商業模式
+6. 行銷策略與推廣計畫
+7. 執行計畫與團隊可信度
 8. 財務預估與風險評估
-9. 決策請求（Ask）
+9. Ask / 決策請求 / 下一步
 
-`style_metadata` 固定輸出：
+`key_numbers_logic` 至少說明：
 
-- `tone_profile_final`
-- `formality_level`
-- `audience_assumed`
+- 營收推導
+- 成本推導
+- KPI 反推
+- 單位經濟效益
 
-### ReviewOutput (`mode=review`)
+`assumption_register` 固定欄位：
 
-僅在通過 Data Sufficiency Gate 且有可審核原稿時輸出，必含：
+- `Assumption`
+- `Validation Needed`
+- `Risk`
 
-1. `缺陷清單`（Critical/Major/Minor）
-2. `重寫建議`（逐段）
-3. `重寫片段`（至少 3 段關鍵段落）
-4. `優先修正順序`（本週必修、次要修正、可延後）
-5. `語氣修正清單`
-6. `missing_template_content`（模板思考但未進正文的項目）
-7. `reintegrated_rewrite`（補回後段落）
+## Review Output Contract
 
-`review` 模式最少輸出 8 條「口語句 -> 正式句」對照；短稿可降為 5 條並標註原因。
+審稿時固定輸出：
 
-## Template-to-Narrative Rules（防填表硬規則）
+- `findings_by_severity`
+- `logic_gaps`
+- `numerical_inconsistencies`
+- `missing_sections`
+- `common_mistake_flags`
+- `rewrite_priorities`
+- `reintegrated_rewrite`
 
-1. 模板是思考輸入骨架，不是最終輸出格式。
-2. 每個模板核心欄位都要有對應正文位置與落地句。
-3. 禁止只輸出章節標題、清單、占位符（例如 `{{...}}`）。
-4. 表格可少量保留，但只能作為敘事後的佐證，不可取代正文。
+`review` 固定流程：
 
-## Content Preservation Gate（內容保全閘）
-
-輸出前必檢查以下模板核心項是否已敘事化進正文：
-
-- STP
-- 4P
-- 財務推導
-- 風險與對策
-- 里程碑
-- Ask
-
-若缺任一項，`coverage_status=fail`，先補寫正文，不可直接交付。
-
-## No-Data Options（使用者明確無資料）
-
-固定提供以下選單：
-
-- **A. 最快假設版（當日可產出）**
-  - 以通用假設建立草案，全部假設顯式標註，不可偽裝為真實資料。
-- **B. 輕量訪談驗證版（2-5 天）**
-  - 先做少量訪談/內部盤點，再輸出企劃，降低假設風險。
-- **C. 小規模數據蒐集後正式版（1-2 週）**
-  - 先蒐集最小可用數據，再輸出可送審版本。
-- **D. 客製方案**
-  - 依使用者限制（時程/可取得資料/受眾）客製流程。
-
-預設不自動替使用者選 A/B/C/D。
-
-## No-Hallucination Rules（硬性禁令）
-
-1. 不得自行臆測關鍵數據（市場規模、轉換率、財務數字、KPI 基準）。
-2. 不得把猜測寫成事實句。
-3. 若採假設，必須標示：`Assumption` + `Validation Needed` + `Risk`。
-4. 若使用者要求「先填數字」但未提供來源，先回問來源或切換到 A 假設版。
-
-## Mandatory Strategy Flow
-
-通過資料閘後再走主流程：
-
-1. 行銷環境分析
-2. 消費者行為分析
-3. 市場競爭分析
-4. STP（市場區隔 -> 目標市場 -> 市場定位）
-5. 4P（產品 -> 價格 -> 通路 -> 推廣）
-6. 行銷方案執行
-7. 行銷績效評估
-
-## Statistical Method Mapping
-
-在對應章節至少給出「方法選擇理由 + 輸入欄位 + 解讀句」：
-
-- 市場區隔：PCA/CFA、KMeans、卡方、ANOVA、Conjoint
-- 目標市場選擇：卡方、ANOVA、Regression、Logistic、Conjoint
-- 產品定位：MDS、Conjoint
-- 4P 驗證：Conjoint、Logistic、Regression
-
-需要技術細節時，載入 [04-statistical-method-playbook.md](./references/04-statistical-method-playbook.md) 並使用 `scripts/` 模板。
-
-## Writing Rules From Draft
-
-執行下列強制規則：
-
-- 執行摘要三層：痛點開場 -> 方案亮點 -> 數字收尾
-- 問題定義四元素：誰痛、痛多大、現有方案不足、不做代價
-- 目標反推法：終局目標倒推漏斗指標
-- 競爭三步：現況掃描、痛點定位、優勢鎖定
-- 價值階梯：功能層 -> 好處層 -> 成果層
-- 行銷漏斗與單位經濟：CAC/LTV/ROAS
-- 財務透明化：每個關鍵數字需可推導
-
-## Formal Tone Rules
-
-正式語氣硬性規範適用所有檔位：
-
-1. 禁用口語字與情緒詞（例如「超、爆、很猛、感覺、應該會」）。
-2. 禁用模糊量詞（例如「很多、很快、大幅」）而無數字佐證。
-3. 禁用無證據承諾句（例如「保證成功」「一定成長」）。
-4. 每段至少包含一個可核對元素：數字、條件、時間、責任人或驗證方法。
-5. 若使用者指定語氣與場景衝突，保留使用者指定並加一行風險提示。
-
-語氣檔位細節與禁用詞，載入 [07-formal-tone-style-guide.md](./references/07-formal-tone-style-guide.md)。
+1. 檢查 `Why -> What -> How -> Proof -> Ask`
+2. 檢查九段式章節缺漏
+3. 檢查數字推導與前後一致
+4. 檢查常見錯誤
+5. 依 `Critical / Major / Minor` 輸出重寫建議與整合版改寫
 
 ## Quality Gates
 
 提交前強制檢查：
 
 1. `Why -> What -> How -> Proof -> Ask` 是否完整
-2. 財務、KPI、時程是否前後一致
-3. 結論是否可追溯到數據或可驗證假設
-4. 是否避免空話開場（例如「本企劃旨在」）
-5. 是否通過正式語氣檢核表（見 [08-output-polish-checklist.md](./references/08-output-polish-checklist.md)）
-6. 是否通過內容保全檢查（`template_coverage_map` 與 `coverage_status`）
+2. 九段式章節是否齊全
+3. Ask 是否具體且可執行
+4. 財務、KPI、時程是否前後一致
+5. 關鍵結論是否來自證據或顯式假設
+6. 是否觸犯任何 Non-Negotiable Rules
+7. 是否通過 [08-output-polish-and-pitch-checklist.md](./references/08-output-polish-and-pitch-checklist.md)
 
 ## Mode Workflow
 
 ### Generate
 
-1. 依 [01-intake-and-mode-selection.md](./references/01-intake-and-mode-selection.md) 收斂輸入與語氣。
+1. 依 [01-intake-and-audience-routing.md](./references/01-intake-and-audience-routing.md) 收斂輸入、模式與受眾。
 2. 先過 Data Sufficiency Gate。
-3. 若缺資料則輸出 MissingDataQueryOutput。
-4. 若通過，套用 [02-proposal-structure-template.md](./references/02-proposal-structure-template.md) 作為思考骨架。
-5. 先生成完整 `narrative_body`（連續正文）。
-6. 再輸出 `template_coverage_map`，確認模板要點都有落到正文。
-7. 套用統計與財務規則完善內容。
-8. 最末執行語氣 polish。
-9. 輸出 DraftOutput。
+3. 缺資料時，輸出 `MissingDataQueryOutput`。
+4. 通過後，依 [02-strategy-thinking-engine.md](./references/02-strategy-thinking-engine.md) 完成企劃五問。
+5. 依 [03-proposal-structure-by-type.md](./references/03-proposal-structure-by-type.md) 判定情境重點。
+6. 依 [04-section-writing-playbook.md](./references/04-section-writing-playbook.md) 生成九段式正文。
+7. 依 [05-financial-assumption-and-risk-guide.md](./references/05-financial-assumption-and-risk-guide.md) 檢查數字與風險。
+8. 依 [07-formal-tone-style-guide.md](./references/07-formal-tone-style-guide.md) 與 [08-output-polish-and-pitch-checklist.md](./references/08-output-polish-and-pitch-checklist.md) 做最終修整。
+9. 輸出 `DraftOutput`。
 
 ### Review
 
-1. 先確認有可審核原稿內容。
-2. 先過 Data Sufficiency Gate（重點檢查 `target_customer`, `problem_statement`, `goal_kpi`, `available_data`）。
-3. 若缺資料或缺原稿，輸出 MissingDataQueryOutput 或原稿補件請求。
-4. 若通過，依 [06-review-rubric-and-rewrite-rules.md](./references/06-review-rubric-and-rewrite-rules.md) 評分。
-5. 檢查 `missing_template_content`。
-6. 透過 `reintegrated_rewrite` 把遺漏模板思考補回正文。
-7. 輸出 ReviewOutput。
+1. 確認有可審核原稿。
+2. 先過 Data Sufficiency Gate。
+3. 依 [06-review-rubric-and-rewrite-rules.md](./references/06-review-rubric-and-rewrite-rules.md) 做結構、數字、常見錯誤檢查。
+4. 針對缺漏章節與 Ask 做 `reintegrated_rewrite`。
+5. 輸出 `ReviewOutput`。
 
 ## Resources
 
-- Intake 與模式判斷： [01-intake-and-mode-selection.md](./references/01-intake-and-mode-selection.md)
-- 章節模板： [02-proposal-structure-template.md](./references/02-proposal-structure-template.md)
-- STP/4P 對照： [03-stp-4p-framework-map.md](./references/03-stp-4p-framework-map.md)
-- 統計方法： [04-statistical-method-playbook.md](./references/04-statistical-method-playbook.md)
-- 財務風險： [05-financial-risk-modeling-guide.md](./references/05-financial-risk-modeling-guide.md)
-- 審稿規則： [06-review-rubric-and-rewrite-rules.md](./references/06-review-rubric-and-rewrite-rules.md)
-- 正式語體指南： [07-formal-tone-style-guide.md](./references/07-formal-tone-style-guide.md)
-- 輸出 polish 清單： [08-output-polish-checklist.md](./references/08-output-polish-checklist.md)
+- Intake 與受眾路由： [01-intake-and-audience-routing.md](./references/01-intake-and-audience-routing.md)
+- 企劃五問： [02-strategy-thinking-engine.md](./references/02-strategy-thinking-engine.md)
+- 三種提案結構差異： [03-proposal-structure-by-type.md](./references/03-proposal-structure-by-type.md)
+- 章節寫作手冊： [04-section-writing-playbook.md](./references/04-section-writing-playbook.md)
+- 財務假設與風險： [05-financial-assumption-and-risk-guide.md](./references/05-financial-assumption-and-risk-guide.md)
+- 審稿與重寫規則： [06-review-rubric-and-rewrite-rules.md](./references/06-review-rubric-and-rewrite-rules.md)
+- 正式語氣指南： [07-formal-tone-style-guide.md](./references/07-formal-tone-style-guide.md)
+- 輸出健檢與簡報演練： [08-output-polish-and-pitch-checklist.md](./references/08-output-polish-and-pitch-checklist.md)
 - 產出模板： [proposal_full_template.md](./assets/templates/proposal_full_template.md), [review_report_template.md](./assets/templates/review_report_template.md)
-- Python 方法模板： `scripts/*.py`
+- 研究分析腳本： `scripts/*.py`，僅在明確要求研究分析時使用
 
 ## Note
 
-遇到更大型、跨來源、多代理協作的研究與企劃流程，或是需輸出 Word、PDF 文件，可搭配使用其它 skills 或工具。
+需求升級為商業模式重設、渠道與收入設計、30 天驗證實驗時，參照 [business-model-architect](../business-model-architect/SKILL.md)。
