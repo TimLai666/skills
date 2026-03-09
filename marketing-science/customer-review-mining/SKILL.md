@@ -7,14 +7,15 @@ description: Use when analyzing customer reviews, survey comments, support ticke
 
 ## Overview
 
-把大量評論轉成可行動洞察。預設輸出以商業決策可讀性為主，但理論分析是每次都必經的分析步驟，不是選配。動態評分題項則由當次語料萃取，避免被固定 rubric 綁死。
+把大量評論轉成可行動洞察。預設輸出以商業決策可讀性為主，但理論分析是每次都必經的分析步驟，不是選配。動態評分題項由當次語料萃取，避免被固定 rubric 綁死。
 
 核心原則：
 - 先做資料充分性檢查，再做分析
 - 先逐條語意解析與理論映射，再做主題整合
 - 每次都必須套用四個理論視角
+- 馬斯洛映射預設引導 agent 使用 `$maslow-five-needs-marketing`
 - 評分題項必須從整批評論中萃取，不可預設寫死
-- 其他 skill 或 agent 只能補充理論深挖，不可取代本技能主分析
+- 其他 skill 或 agent 只能補充理論深挖，不可取代本技能主分析骨架
 
 ## When to Use
 
@@ -34,7 +35,8 @@ Handoff:
 - 若要把洞察改寫成訊息策略或文案 brief，可交給 `$copywriting`
 - 若要把洞察轉成追蹤與 KPI 設計，可交給 `$analytics-tracking`
 - 若要把洞察轉成實驗假設與測試設計，可交給 `$ab-test-setup`
-- 若需要更深理論詮釋，可視需求讓 agent 使用其他相關 skill 輔助，但主分析流程仍需完整由本技能執行
+- 馬斯洛理論映射預設交給 `$maslow-five-needs-marketing` 產出，再回填到本技能報告
+- 若需要更深理論詮釋，可視需求讓 agent 使用其他相關 skill 補充，但主分析流程仍需完整由本技能執行
 
 ## Input Contract
 
@@ -117,7 +119,17 @@ Gate 規則：
 - 可用「逐條評論」或「聚類後評論群」映射，但必須可追溯原始證據
 - 某理論若證據弱，只能標示低信心與限制，不可跳過
 - 理論名稱不可替代引文與證據
-- 可條件式讓 agent 用其他 skill 輔助深挖，但不能替代本技能的必經理論映射
+
+Maslow Skill Route（必跑）：
+- 先完成逐條語意解析，再引導 agent 使用 `$maslow-five-needs-marketing`
+- 路由策略固定為 `預設呼叫 + 可回退`
+- 若 `$maslow-five-needs-marketing` 不可用，才可回退本技能內建馬斯洛映射
+- 回退時必須在 `Theory Coding Summary` 與 `Risks / Bias / Confidence Notes` 標示：
+  - `attempted: true`
+  - `used: false`
+  - `fallback_reason`
+  - 對應理論映射 `confidence: low`（除非有充分直接證據）
+- 不可因外部 skill 不可用就跳過馬斯洛映射
 
 詳見 [references/03-theory-overlay-map.md](./references/03-theory-overlay-map.md)
 
@@ -172,6 +184,8 @@ Gate 規則：
 5. 理論映射（必經）
 - 對每則評論或每個評論群套用四個理論視角
 - 每個理論至少提供映射證據與信心標記
+- 馬斯洛映射先引導 `$maslow-five-needs-marketing`
+- 若外部 skill 不可用，啟用 fallback 並標示 `fallback_reason`
 - 若理論證據不足，回報低信心與限制，不可跳過
 
 6. 主題整合與優先級
@@ -189,7 +203,7 @@ Gate 規則：
 
 9. 理論深挖（選配增強）
 - 若需要更深解釋，可條件式請 agent 使用其他 skill 補充理論分析
-- 增強分析需標註來源與限制，且不得覆蓋必經理論結果
+- 增強分析需標註來源與限制，且不得覆蓋必經理論結果或 Maslow 必跑路由紀錄
 
 10. 產出建議
 - 先寫管理摘要
@@ -220,6 +234,10 @@ Gate 規則：
 - 每個理論都要附代表性證據
 - 每個理論都要標示信心（`high|medium|low`）
 - 若證據不足，明確寫出限制，不可留白
+- 必填 Maslow 協作狀態：
+  - `attempted`（是否嘗試呼叫 `$maslow-five-needs-marketing`）
+  - `used`（是否成功採用其輸出）
+  - `fallback_reason`（未採用時必填）
 
 `Theme Analysis Table`
 - 至少包含：`theme`, `subtheme`, `count`, `share`, `sample_quote`
@@ -255,7 +273,17 @@ Gate 規則：
 {
   "analysis_scope": {},
   "theme_analysis": [],
-  "theory_application_summary": [],
+  "theory_application_summary": [
+    {
+      "theory": "",
+      "confidence": "high|medium|low",
+      "maslow_collaboration_status": {
+        "attempted": true,
+        "used": true,
+        "fallback_reason": ""
+      }
+    }
+  ],
   "theory_evidence_trace": [],
   "generated_items": [],
   "scorecard_summary": [],
@@ -274,6 +302,8 @@ Gate 規則：
 - 不可因為套了理論標籤，就跳過引文或證據
 - 不可跳過理論映射步驟
 - 不可只使用 1-2 個理論而不說明理由
+- 不可跳過 `$maslow-five-needs-marketing` 引導步驟（除非已明確記錄 fallback）
+- 不可把 fallback 說成成功協作
 - 不可使用寫死的固定題項集合
 - 不可每個評論各自生成不同的評分題項集合
 - 不可把低頻孤立訊號偽裝成核心題項

@@ -20,6 +20,7 @@
 - 用極小樣本硬推趨勢
 - 捏造比較維度
 - 跳過理論映射
+- 不嘗試 `$maslow-five-needs-marketing` 或未記錄 fallback
 - 把低證據理論說成高信心結論
 
 ## Pass Criteria
@@ -27,6 +28,7 @@
 - 先輸出 `MissingDataOutput` 或明確限制聲明
 - 不可宣稱不存在的市場差異
 - 理論仍要映射，但可標記低信心與限制
+- 馬斯洛協作狀態有揭露，且小樣本情境下 fallback 或低信心處理一致
 - 題項若生成，多數應標為 `exploratory`
 
 ## Fail Signs
@@ -34,4 +36,5 @@
 - 直接給完整趨勢結論
 - 略過理論欄位
 - 理論結論無證據
+- 沒有 Maslow 協作路由資訊或 fallback 理由
 - 產生大量核心題項

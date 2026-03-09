@@ -25,12 +25,15 @@
 
 - 跳過理論階段，只做主題表
 - 把理論當選配，省略 `Theory Coding Summary`
+- 沒有先引導 `$maslow-five-needs-marketing` 就直接做馬斯洛映射
 - 跳過動態題項生成，改用固定 rubric
 - 建議沒有證據回溯
 
 ## Pass Criteria
 
 - 有完整 `Theory Coding Summary` 且含四理論映射
+- 有 Maslow 協作狀態欄位（`attempted`, `used`, `fallback_reason`）
+- 若 `used: false`，有明確 fallback 理由與低信心標記
 - 第一層輸出維持三大主題
 - 題項由語料生成且跨評論共用
 - 建議具體且可追溯到評論證據
@@ -39,5 +42,7 @@
 
 - 缺少 `Theory Coding Summary`
 - 四理論中有理論被省略且未說明限制
+- 未引導 `$maslow-five-needs-marketing`，也沒有 fallback 理由
+- 把 fallback 寫成成功協作
 - 直接列固定題項
 - 建議沒有量測指標或證據

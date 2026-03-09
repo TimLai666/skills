@@ -16,6 +16,10 @@
 - 每個理論都要附證據或證據索引
 - 每個理論都要附信心等級
 - 證據不足時要寫限制，不可空白
+- 馬斯洛協作狀態必填：
+  - `attempted`
+  - `used`
+  - `fallback_reason`（`used: false` 時必填）
 
 ### 3. Theme Analysis Table
 
@@ -64,8 +68,27 @@
 {
   "analysis_scope": {},
   "theme_analysis": [],
-  "theory_application_summary": [],
-  "theory_evidence_trace": [],
+  "theory_application_summary": [
+    {
+      "theory": "",
+      "confidence": "high|medium|low",
+      "maslow_collaboration_status": {
+        "attempted": true,
+        "used": true,
+        "fallback_reason": ""
+      }
+    }
+  ],
+  "theory_evidence_trace": [
+    {
+      "theory": "",
+      "mapping_unit": "review|cluster",
+      "evidence_refs": [],
+      "source_skill": "maslow-five-needs-marketing|customer-review-mining:fallback|customer-review-mining",
+      "confidence": "high|medium|low",
+      "limitations": []
+    }
+  ],
   "generated_items": [],
   "scorecard_summary": [],
   "priority_actions": [],
@@ -80,6 +103,8 @@
 - 是否執行四理論必經映射
 - 是否每個理論都有證據與信心等級
 - 是否在證據不足時標示限制而非跳過理論
+- 是否先嘗試 `$maslow-five-needs-marketing`，失敗時才 fallback
+- 是否明確區分「成功協作」與「fallback」
 - 是否先生成共用題項，再評分單篇評論
 - 是否合併同義題項
 - 是否避免低頻訊號被升格為核心題項
