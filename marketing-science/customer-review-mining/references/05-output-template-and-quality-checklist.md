@@ -2,13 +2,22 @@
 
 ## Default Output Shape
 
+以下段落皆為預設必填，`Theory Coding Summary` 不可省略。
+
 ### 1. Executive Summary
 
 - 2-5 點最高價值結論
 - 每點都要連到具體評論證據
-- 不要把理論名詞塞滿摘要
+- 不要把理論名詞堆成摘要
 
-### 2. Theme Analysis Table
+### 2. Theory Coding Summary (Required)
+
+- 四個理論都要有映射結果
+- 每個理論都要附證據或證據索引
+- 每個理論都要附信心等級
+- 證據不足時要寫限制，不可空白
+
+### 3. Theme Analysis Table
 
 建議欄位：
 
@@ -20,49 +29,46 @@
 | negative_rate | avg_severity | impact_score |
 | ---: | ---: | ---: |
 
-### 3. Priority Actions
+### 4. Dynamic Item Set Summary
+
+- 列出本次生成的共用題項
+- 標示 `core` 與 `exploratory`
+- 需附簡短定義與證據線索
+
+### 5. Dynamic Scorecard Summary
+
+- 顯示高分與低分題項
+- 顯示覆蓋率與低信心題項
+
+### 6. Priority Actions
 
 建議欄位：
 
 | priority | action | rationale | expected_outcome | metric |
 | ---: | --- | --- | --- | --- |
 
-### 4. Risks / Bias / Confidence Notes
+### 7. Risks / Bias / Confidence Notes
 
 至少檢查：
-- 樣本量是否過小
-- 資料來源是否偏單一渠道
-- 是否有語言或地區偏差
-- 是否存在時間切片問題
-- 哪些推論屬於低信心
-
-## Optional Sections
-
-### 5. Dynamic Item Set Summary
-
-- 列出本次生成的共用題項
-- 說明哪些是 `core`，哪些是 `exploratory`
-
-### 6. Dynamic Scorecard Summary
-
-- 只列最值得看的高低分題項
-- 指出覆蓋率低或低信心題項
-
-### 7. Theory Coding Summary
-
-- 只保留最有用理論洞察
-- 若有其他 skill 協作，標示是條件式補充
+- 樣本量與代表性
+- 來源偏差
+- 語言偏差
+- 時間切片問題
+- 推論信心邊界
 
 ### 8. Appendix (JSON)
+
+使用者要求結構化輸出時附上。最小欄位：
 
 ```json
 {
   "analysis_scope": {},
   "theme_analysis": [],
+  "theory_application_summary": [],
+  "theory_evidence_trace": [],
   "generated_items": [],
   "scorecard_summary": [],
   "priority_actions": [],
-  "theory_coding_summary": [],
   "evidence": []
 }
 ```
@@ -70,10 +76,12 @@
 ## Quality Checklist
 
 - 是否先做 Data Sufficiency Gate
-- 是否保留三大主題作為第一層分類
+- 是否先做逐條語意解析
+- 是否執行四理論必經映射
+- 是否每個理論都有證據與信心等級
+- 是否在證據不足時標示限制而非跳過理論
 - 是否先生成共用題項，再評分單篇評論
 - 是否合併同義題項
-- 是否避免單一低頻訊號被升格為核心題項
-- 是否避免不必要的理論堆疊
-- 是否明確標示偏誤與信心限制
-- 是否在需要時才啟用 agent 協作理論分析
+- 是否避免低頻訊號被升格為核心題項
+- 是否避免無證據因果推論
+- 是否保持理論摘要精簡，不壓過商業結論

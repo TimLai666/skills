@@ -7,13 +7,14 @@ description: Use when analyzing customer reviews, survey comments, support ticke
 
 ## Overview
 
-把大量評論轉成可行動洞察。預設輸出以商業決策可讀性為主，理論分析與動態評分題項作為第二層補充，只有在需要時才展開完整結構化附錄。
+把大量評論轉成可行動洞察。預設輸出以商業決策可讀性為主，但理論分析是每次都必經的分析步驟，不是選配。動態評分題項則由當次語料萃取，避免被固定 rubric 綁死。
 
 核心原則：
 - 先做資料充分性檢查，再做分析
-- 先用三大商業主題整理，再補理論與評分題項
+- 先逐條語意解析與理論映射，再做主題整合
+- 每次都必須套用四個理論視角
 - 評分題項必須從整批評論中萃取，不可預設寫死
-- 理論可由其他 skill 或 agent 輔助，但只在需要時才啟用
+- 其他 skill 或 agent 只能補充理論深挖，不可取代本技能主分析
 
 ## When to Use
 
@@ -22,7 +23,7 @@ Use when:
 - 需要比較不同產品、版本、渠道、地區或客群的評論差異
 - 需要把質性回饋整理成產品、客服、營運或行銷可執行建議
 - 需要從整批評論中提煉一組共用評分題項，再回頭對每則評論做一致化評分
-- 需要在商業摘要之外，加上理論視角或請 agent 協助做更深的解釋
+- 需要把評論分析建立在明確理論框架上
 
 Do not use:
 - 沒有實際評論文本，只想憑空推論顧客感受
@@ -33,7 +34,7 @@ Handoff:
 - 若要把洞察改寫成訊息策略或文案 brief，可交給 `$copywriting`
 - 若要把洞察轉成追蹤與 KPI 設計，可交給 `$analytics-tracking`
 - 若要把洞察轉成實驗假設與測試設計，可交給 `$ab-test-setup`
-- 若需要更深的理論詮釋，可視需求讓 agent 使用其他相關 skill 輔助，但不可讓外部 skill 取代本 skill 的主分析骨架
+- 若需要更深理論詮釋，可視需求讓 agent 使用其他相關 skill 輔助，但主分析流程仍需完整由本技能執行
 
 ## Input Contract
 
@@ -93,21 +94,36 @@ Gate 規則：
 
 詳見 [references/02-theme-taxonomy.md](./references/02-theme-taxonomy.md)
 
-### Theory Overlay
+### Per-Review Semantic Parsing
 
-第二層是理論輔助視角，用來補充解釋評論，不用來取代證據或主題表：
+每則評論先做逐條語意解析，至少標記以下四類訊號：
+- 產品屬性與描述一致性
+- 使用感受與功能表現
+- 消費者需求與利益感知
+- 服務體驗與互動脈絡
+
+這一步是理論映射的前置輸入，不可省略。
+
+### Mandatory Theory Mapping
+
+每次分析都必須套用四個理論視角，並提供證據追溯：
 - Product Positioning Theory
 - Purchase Motivation Theory
 - Maslow's Hierarchy of Needs
 - Word-of-Mouth Motivation Theory
 
-理論使用規則：
-- 預設先完成本 skill 的主分析
-- 只有在使用者要求更深理論框架、跨模型對照或外部專業輔助時，才條件式請 agent 使用其他 skill
-- 理論摘要必須附評論證據，不可只列概念名詞
-- 不可讓理論部分壓過商業輸出
+理論規則：
+- 四個理論在每次分析都要出現映射結果
+- 可用「逐條評論」或「聚類後評論群」映射，但必須可追溯原始證據
+- 某理論若證據弱，只能標示低信心與限制，不可跳過
+- 理論名稱不可替代引文與證據
+- 可條件式讓 agent 用其他 skill 輔助深挖，但不能替代本技能的必經理論映射
 
 詳見 [references/03-theory-overlay-map.md](./references/03-theory-overlay-map.md)
+
+### Theme Synthesis And Prioritization
+
+完成必經理論映射後，才可進行三大主題整合、子主題歸納與優先級排序。
 
 ### Corpus-Derived Scorecard
 
@@ -149,40 +165,47 @@ Gate 規則：
 - 保留 `raw_text` 與 `clean_text`
 - 多語資料先分語言再整併
 
-4. 進行第一層主題分析
-- 先分類到三大主題
+4. 逐條語意解析（必經）
+- 逐條標記產品屬性、使用感受、需求訊號、服務互動
+- 建立可回溯的評論語意標註
+
+5. 理論映射（必經）
+- 對每則評論或每個評論群套用四個理論視角
+- 每個理論至少提供映射證據與信心標記
+- 若理論證據不足，回報低信心與限制，不可跳過
+
+6. 主題整合與優先級
+- 以三大主題整合前述語意與理論結果
 - 整理子主題、代表性引文與大致佔比
 
-5. 生成共用評分題項
+7. 生成共用評分題項
 - 從整批評論抽候選題項
 - 做動態正規化與命名
 - 標出核心題項與 `exploratory` 題項
 
-6. 回頭評分每則評論
+8. 回頭評分每則評論
 - 使用同一組題項做 `0-7` 分評分
 - 匯總成題項層級的統計摘要
 
-7. 視需要補理論分析
-- 預設只補最有用的 1-3 個理論視角
-- 若使用者要更深研究型輸出，可條件式請 agent 使用其他 skill 輔助
+9. 理論深挖（選配增強）
+- 若需要更深解釋，可條件式請 agent 使用其他 skill 補充理論分析
+- 增強分析需標註來源與限制，且不得覆蓋必經理論結果
 
-8. 產出建議
+10. 產出建議
 - 先寫管理摘要
-- 再列主題表、動態題項摘要與優先行動
+- 再列理論摘要、主題表、動態題項摘要與優先行動
 - 只有在使用者要求結構化輸出時，才展開完整 JSON 附錄
 
 ## Output Contract
 
 預設輸出順序：
 1. `Executive Summary`
-2. `Theme Analysis Table`
-3. `Priority Actions`
-4. `Risks / Bias / Confidence Notes`
-
-選配輸出：
-5. `Dynamic Item Set Summary`
-6. `Dynamic Scorecard Summary`
-7. `Theory Coding Summary`
+2. `Theory Coding Summary`
+3. `Theme Analysis Table`
+4. `Dynamic Item Set Summary`
+5. `Dynamic Scorecard Summary`
+6. `Priority Actions`
+7. `Risks / Bias / Confidence Notes`
 8. `Appendix (JSON)`
 
 ### Primary Output Rules
@@ -192,9 +215,24 @@ Gate 規則：
 - 每點都要可回溯到評論證據
 - 不要用理論名詞塞滿摘要
 
+`Theory Coding Summary`（必填）
+- 四個理論都要有映射結果
+- 每個理論都要附代表性證據
+- 每個理論都要標示信心（`high|medium|low`）
+- 若證據不足，明確寫出限制，不可留白
+
 `Theme Analysis Table`
 - 至少包含：`theme`, `subtheme`, `count`, `share`, `sample_quote`
 - 若資料足夠，可加：`negative_rate`, `avg_severity`, `impact_score`
+
+`Dynamic Item Set Summary`
+- 列出本次分析產生的共用題項
+- 每個題項至少附：`label`, `definition`, `evidence_cues`, `status`
+- `status` 僅能是 `core` 或 `exploratory`
+
+`Dynamic Scorecard Summary`
+- 呈現高分與低分題項
+- 標示題項覆蓋率、平均分與低信心題項
 
 `Priority Actions`
 - 只保留最值得做的 3-5 項
@@ -209,31 +247,19 @@ Gate 規則：
 
 ### Secondary Output Rules
 
-`Dynamic Item Set Summary`
-- 列出本次分析產生的共用題項
-- 每個題項至少附：`label`, `definition`, `evidence_cues`, `status`
-- `status` 僅能是 `core` 或 `exploratory`
-
-`Dynamic Scorecard Summary`
-- 呈現高分與低分題項
-- 標示題項覆蓋率、平均分與低信心題項
-
-`Theory Coding Summary`
-- 只總結最有解釋力的理論視角
-- 每個視角至少附 1 句代表性評論或摘要證據
-- 若本次有 agent 使用其他 skill 協助，需標示該協作是條件式加值，不是主分析來源
-
 `Appendix (JSON)`
 - 只有使用者要求結構化輸出時附上
+- JSON 最小欄位不得缺少理論相關欄位
 
 ```json
 {
   "analysis_scope": {},
   "theme_analysis": [],
+  "theory_application_summary": [],
+  "theory_evidence_trace": [],
   "generated_items": [],
   "scorecard_summary": [],
   "priority_actions": [],
-  "theory_coding_summary": [],
   "evidence": []
 }
 ```
@@ -246,6 +272,8 @@ Gate 規則：
 - 不可用單一評論宣稱整體趨勢
 - 不可做無證據支撐的因果推論
 - 不可因為套了理論標籤，就跳過引文或證據
+- 不可跳過理論映射步驟
+- 不可只使用 1-2 個理論而不說明理由
 - 不可使用寫死的固定題項集合
 - 不可每個評論各自生成不同的評分題項集合
 - 不可把低頻孤立訊號偽裝成核心題項

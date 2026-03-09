@@ -2,40 +2,43 @@
 
 ## RED: Baseline Findings From Previous Skill
 
-- 主檔內容存在編碼汙染風險
-- 存在固定 14 題項假設
-- 沒有語料級共用題項生成步驟
-- 沒有條件式 agent 協作理論流程
-- 容易讓模型在證據不足時仍完成完整評分
+- 理論流程是條件式，與「理論必經」要求衝突
+- Workflow 順序未強制「逐條語意解析 -> 理論映射 -> 主題整合」
+- `Theory Coding Summary` 不是必填段落
+- JSON 最小欄位缺少理論必填欄位
+- 壓力場景未完整覆蓋理論必經失敗模式
 
 ## GREEN: Post-Redesign Checks
 
 - `SKILL.md` frontmatter 只有 `name` 與 `description`
 - description 以 `Use when...` 開頭
-- 預設語言與內容為 UTF-8 繁體中文
-- 明確定義三大主題
-- 明確定義動態題項生成與 `0-7` 分規則
-- 明確定義條件式理論協作
-- 有 `MissingDataOutput`
-- 有雙層輸出契約
-- 已建立 5 份 reference 檔
-- 已建立 3 份 pressure scenario 與 1 份 checklist
+- 明確定義「理論必經」與四理論全覆蓋
+- Workflow 已固定為：
+  - 逐條語意解析
+  - 必經理論映射
+  - 主題整合
+  - 動態題項生成與評分
+- `Theory Coding Summary` 為預設必填段落
+- JSON 最小欄位包含：
+  - `theory_application_summary`
+  - `theory_evidence_trace`
+- 動態題項仍為語料級共用集合
+- 外部 skill 協作仍是補充，不是主流程替代
 
-## REFACTOR: What To Recheck After Use
+## REFACTOR: Mandatory Theory Compliance Checks
 
-- 題項是否為整批評論共用，而不是逐篇漂移
-- 同義題項是否有正常合併
-- 低頻訊號是否被錯誤升格為核心題項
-- 理論協作是否變成強制流程
-- Executive Summary 是否過度理論化
-- 是否仍有無證據因果推論
+- 是否每次都套用四理論
+- 是否每個理論都有證據追溯
+- 是否每個理論都有信心等級
+- 是否在低證據時標示限制而非跳過
+- 是否避免理論段落過長壓過商業重點
+- 是否仍阻擋無證據因果推論
 
 ## Acceptance Gate
 
-只有在以下都成立時，才可宣稱重構完成：
+只有以下都成立，才可宣稱完成：
 
-- 結構完整
-- 無固定題項依賴
-- 動態題項規則可執行
-- 條件式 agent 協作規則明確
-- 驗證資產齊備
+- 理論流程為必經且可驗證
+- 輸出契約含理論必填段落與欄位
+- 動態題項規則保持有效
+- 壓力場景可捕捉理論必經違規

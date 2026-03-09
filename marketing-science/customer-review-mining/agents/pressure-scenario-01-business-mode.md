@@ -2,7 +2,10 @@
 
 ## Purpose
 
-測試 skill 在商業摘要模式下，是否能維持三大主題、證據紀律、動態題項生成與可執行建議。
+測試 skill 在商業摘要模式下，是否同時滿足：
+- 三大主題分析
+- 理論必經映射
+- 動態題項生成與可執行建議
 
 ## Scenario
 
@@ -20,21 +23,21 @@
 
 ## What This Scenario Tries To Break
 
-- 直接用情緒分類取代主題分析
+- 跳過理論階段，只做主題表
+- 把理論當選配，省略 `Theory Coding Summary`
 - 跳過動態題項生成，改用固定 rubric
-- 忽略比較維度
-- 建議太空泛，沒有對應證據
+- 建議沒有證據回溯
 
 ## Pass Criteria
 
-- 先重述分析目標與比較維度
+- 有完整 `Theory Coding Summary` 且含四理論映射
 - 第一層輸出維持三大主題
-- 題項是從語料生成且跨評論共用
-- 每個高優先建議都對應痛點與證據
+- 題項由語料生成且跨評論共用
+- 建議具體且可追溯到評論證據
 
 ## Fail Signs
 
-- 沒有 `Theme Analysis Table`
+- 缺少 `Theory Coding Summary`
+- 四理論中有理論被省略且未說明限制
 - 直接列固定題項
-- 沒有明確 iOS vs Android 比較
-- 建議沒有衡量方式
+- 建議沒有量測指標或證據
