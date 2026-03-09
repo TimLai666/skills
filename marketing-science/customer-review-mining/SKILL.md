@@ -187,6 +187,7 @@ Maslow Skill Route（必跑）：
 - 馬斯洛映射先引導 `$maslow-five-needs-marketing`
 - 若外部 skill 不可用，啟用 fallback 並標示 `fallback_reason`
 - 若理論證據不足，回報低信心與限制，不可跳過
+- 交叉參考：見 [Example A/B](./references/06-end-to-end-examples.md)
 
 6. 主題整合與優先級
 - 以三大主題整合前述語意與理論結果
@@ -196,10 +197,12 @@ Maslow Skill Route（必跑）：
 - 從整批評論抽候選題項
 - 做動態正規化與命名
 - 標出核心題項與 `exploratory` 題項
+- 交叉參考：見 [Example D](./references/06-end-to-end-examples.md)
 
 8. 回頭評分每則評論
 - 使用同一組題項做 `0-7` 分評分
 - 匯總成題項層級的統計摘要
+- 交叉參考：見 [Example D](./references/06-end-to-end-examples.md)
 
 9. 理論深挖（選配增強）
 - 若需要更深解釋，可條件式請 agent 使用其他 skill 補充理論分析
@@ -316,6 +319,7 @@ Maslow Skill Route（必跑）：
 - [references/03-theory-overlay-map.md](./references/03-theory-overlay-map.md)
 - [references/04-dynamic-item-generation-and-scoring.md](./references/04-dynamic-item-generation-and-scoring.md)
 - [references/05-output-template-and-quality-checklist.md](./references/05-output-template-and-quality-checklist.md)
+- [references/06-end-to-end-examples.md](./references/06-end-to-end-examples.md)
 
 ## Validation Assets
 

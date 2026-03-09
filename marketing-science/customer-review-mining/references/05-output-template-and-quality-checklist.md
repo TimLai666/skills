@@ -96,6 +96,197 @@
 }
 ```
 
+## Business-Readable Report Sample
+
+```markdown
+## Executive Summary
+- 近期負評主要集中在 `service_experience` 的回覆延遲與問題未閉環，影響續購意願。
+- `product_performance` 整體評價中性偏正，但「安裝便利性」在新手客群明顯偏低。
+- `value_perception` 呈現分化：高分評論強調 CP 值，低分評論集中在期望落差與描述一致性。
+
+## Theory Coding Summary
+- Product Positioning Theory：`medium`
+  - 映射：尺寸適配、安裝便利性、描述一致性
+  - 證據：R12, R37, R88
+- Purchase Motivation Theory：`high`
+  - 映射：功能性動機、保障性動機、關係性動機
+  - 證據：R08, R21, R63, R91
+- Maslow's Hierarchy of Needs：`medium`
+  - 映射：安全需求、尊重需求最明顯
+  - 證據：R15, R46, R102
+  - maslow_collaboration_status: `attempted=true`, `used=true`, `fallback_reason=""`
+- Word-of-Mouth Motivation Theory：`medium`
+  - 映射：助人利他、情緒表達
+  - 證據：R04, R29, R54
+
+## Theme Analysis Table
+| theme | subtheme | count | share | sample_quote |
+| --- | --- | ---: | ---: | --- |
+| service_experience | response_speed | 28 | 28% | 「客服三天才回，錯過安裝時程」 |
+| product_performance | installability | 24 | 24% | 「功能有到位，但安裝說明不清楚」 |
+| value_perception | value_for_money | 20 | 20% | 「價格合理，但實際表現沒有預期高」 |
+
+## Dynamic Item Set Summary
+- `response_speed`：回覆與處理速度（core）
+- `issue_resolution`：問題是否一次解決（core）
+- `installability`：安裝便利性與教學清楚度（core）
+- `value_for_money`：價格與體驗是否匹配（core）
+- `pro_installation_tip`：進階安裝技巧分享（exploratory）
+
+## Dynamic Scorecard Summary
+- 高分題項：`product_fit`(5.9), `value_for_money`(5.4)
+- 低分題項：`response_speed`(3.1), `issue_resolution`(2.9)
+- 低信心題項：`pro_installation_tip`（覆蓋率 4%）
+
+## Priority Actions
+| priority | action | rationale | expected_outcome | metric |
+| ---: | --- | --- | --- | --- |
+| 1 | 設定客服首回 SLA 24h | 回覆延遲為最大負評來源 | 降低服務負評占比 | response_speed avg_score |
+| 2 | 重寫安裝教學內容 | 新手客群安裝困難高頻出現 | 降低安裝相關客服單 | installability avg_score |
+| 3 | 補強商品頁描述一致性 | 期望落差影響價值感知 | 降低退貨與負評率 | value_perception negative_rate |
+
+## Risks / Bias / Confidence Notes
+- 樣本以近 30 天評論為主，季節性波動未完全反映。
+- Android 渠道樣本明顯高於 iOS，跨渠道比較需保守解讀。
+- 理論映射依引文證據進行，低頻訊號僅作 exploratory。
+```
+
+## Appendix JSON Sample
+
+```json
+{
+  "analysis_scope": {
+    "goal": "Identify pain points, compare iOS vs Android, and prioritize actions",
+    "time_window": "last_30_days",
+    "channels": ["app_store", "support_ticket"],
+    "sample_size": 100
+  },
+  "theme_analysis": [
+    {
+      "theme": "service_experience",
+      "subtheme": "response_speed",
+      "count": 28,
+      "share": 0.28,
+      "sample_quote": "客服三天才回，錯過安裝時程"
+    },
+    {
+      "theme": "product_performance",
+      "subtheme": "installability",
+      "count": 24,
+      "share": 0.24,
+      "sample_quote": "功能有到位，但安裝說明不清楚"
+    }
+  ],
+  "theory_application_summary": [
+    {
+      "theory": "Product Positioning Theory",
+      "confidence": "medium",
+      "maslow_collaboration_status": {
+        "attempted": false,
+        "used": false,
+        "fallback_reason": "not_applicable_for_non_maslow_theory"
+      }
+    },
+    {
+      "theory": "Purchase Motivation Theory",
+      "confidence": "high",
+      "maslow_collaboration_status": {
+        "attempted": false,
+        "used": false,
+        "fallback_reason": "not_applicable_for_non_maslow_theory"
+      }
+    },
+    {
+      "theory": "Maslow's Hierarchy of Needs",
+      "confidence": "medium",
+      "maslow_collaboration_status": {
+        "attempted": true,
+        "used": true,
+        "fallback_reason": ""
+      }
+    },
+    {
+      "theory": "Word-of-Mouth Motivation Theory",
+      "confidence": "medium",
+      "maslow_collaboration_status": {
+        "attempted": false,
+        "used": false,
+        "fallback_reason": "not_applicable_for_non_maslow_theory"
+      }
+    }
+  ],
+  "theory_evidence_trace": [
+    {
+      "theory": "Maslow's Hierarchy of Needs",
+      "mapping_unit": "review",
+      "evidence_refs": ["R15", "R46", "R102"],
+      "source_skill": "maslow-five-needs-marketing",
+      "confidence": "medium",
+      "limitations": []
+    },
+    {
+      "theory": "Word-of-Mouth Motivation Theory",
+      "mapping_unit": "review",
+      "evidence_refs": ["R04", "R29", "R54"],
+      "source_skill": "customer-review-mining",
+      "confidence": "medium",
+      "limitations": []
+    }
+  ],
+  "generated_items": [
+    {
+      "label": "response_speed",
+      "definition": "顧客對回覆與處理速度的評價",
+      "parent_theme": "service_experience",
+      "evidence_cues": ["回很慢", "等三天", "很快回覆"],
+      "status": "core"
+    },
+    {
+      "label": "pro_installation_tip",
+      "definition": "評論中提及進階安裝技巧與專業建議",
+      "parent_theme": "product_performance",
+      "evidence_cues": ["要先校正", "專業工具才好裝"],
+      "status": "exploratory"
+    }
+  ],
+  "scorecard_summary": [
+    {
+      "label": "response_speed",
+      "coverage": 0.41,
+      "avg_score": 3.1,
+      "high_score_rate": 0.12,
+      "low_score_rate": 0.48
+    },
+    {
+      "label": "value_for_money",
+      "coverage": 0.36,
+      "avg_score": 5.4,
+      "high_score_rate": 0.42,
+      "low_score_rate": 0.11
+    }
+  ],
+  "priority_actions": [
+    {
+      "priority": 1,
+      "action": "設定客服首回 SLA 24h",
+      "rationale": "回覆延遲是最大負評來源",
+      "expected_outcome": "降低服務負評占比",
+      "metric": "response_speed avg_score"
+    }
+  ],
+  "evidence": [
+    {
+      "ref": "R12",
+      "quote": "客服三天才回，錯過安裝時程"
+    },
+    {
+      "ref": "R88",
+      "quote": "價格合理，但實際表現沒有預期高"
+    }
+  ]
+}
+```
+
 ## Quality Checklist
 
 - 是否先做 Data Sufficiency Gate

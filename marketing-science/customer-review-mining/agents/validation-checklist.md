@@ -7,6 +7,7 @@
 - `Theory Coding Summary` 不是必填段落
 - JSON 最小欄位缺少理論必填欄位
 - 未明確規範 `$maslow-five-needs-marketing` 的必跑路由與 fallback 記錄
+- 缺少單一文件的端到端範例鏈（input -> theory -> dynamic items -> output）
 - 壓力場景未完整覆蓋理論必經失敗模式
 
 ## GREEN: Post-Redesign Checks
@@ -31,6 +32,12 @@
 - `theory_evidence_trace` 可標記 `source_skill`
 - 動態題項仍為語料級共用集合
 - 外部 skill 協作仍是補充，不是主流程替代
+- `references/06-end-to-end-examples.md` 已存在且可從 `SKILL.md` 直接導覽
+- 範例同時覆蓋：
+  - 成功協作（Maslow used=true）
+  - fallback（attempted=true, used=false）
+  - 小樣本低信心情境
+  - 同義題項合併前後對照
 
 ## REFACTOR: Mandatory Theory Compliance Checks
 
@@ -42,6 +49,8 @@
 - 是否避免把 fallback 說成成功協作
 - 是否避免理論段落過長壓過商業重點
 - 是否仍阻擋無證據因果推論
+- 是否有完整 JSON appendix 範例且欄位齊全
+- 是否避免在範例中復活固定 14 題 rubric
 
 ## Acceptance Gate
 
