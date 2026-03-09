@@ -47,6 +47,10 @@
 - `5-6`: 明確提及
 - `7`: 強烈且完整表達
 
+輸出後續統計與分群所需矩陣：
+- `review_item_score_matrix`：列 = review、欄 = core item
+- 若有 `customer_id`，再生成 `customer_item_score_matrix`（同客戶每題項取中位數）
+
 ## Item Quality Rules
 
 - 題項必須來自整批語料，不可單篇即興生成
@@ -54,6 +58,7 @@
 - 題項命名必須可比較，不可過長或過於口語
 - 單一孤立訊號只能標成 `exploratory`
 - 不可為了表格完整而補造題項
+- 分群只能使用 `core` 題項分數，`exploratory` 不可進主分群矩陣
 
 ## Recommended Aggregates
 

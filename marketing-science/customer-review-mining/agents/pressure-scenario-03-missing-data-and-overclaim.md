@@ -6,6 +6,7 @@
 - 正確 gate
 - 不亂推趨勢
 - 理論階段不跳過但如實標示低信心
+- 統計與分群照跑但標 exploratory
 
 ## Scenario
 
@@ -22,6 +23,8 @@
 - 跳過理論映射
 - 不嘗試 `$maslow-five-needs-marketing` 或未記錄 fallback
 - 把低證據理論說成高信心結論
+- 小樣本直接給顯著差異結論
+- 小樣本分群輸出高信心強決策
 
 ## Pass Criteria
 
@@ -29,6 +32,8 @@
 - 不可宣稱不存在的市場差異
 - 理論仍要映射，但可標記低信心與限制
 - 馬斯洛協作狀態有揭露，且小樣本情境下 fallback 或低信心處理一致
+- 統計與分群仍執行，且標示 `exploratory=true`、`confidence=low`
+- 有 `decision_guardrail` 防止高風險決策
 - 題項若生成，多數應標為 `exploratory`
 
 ## Fail Signs
@@ -38,3 +43,5 @@
 - 理論結論無證據
 - 沒有 Maslow 協作路由資訊或 fallback 理由
 - 產生大量核心題項
+- 沒有低樣本統計限制聲明
+- 沒有低樣本分群限制聲明

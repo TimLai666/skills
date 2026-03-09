@@ -28,7 +28,7 @@ Use when:
 
 Do not use:
 - 沒有實際評論文本，只想憑空推論顧客感受
-- 需要嚴格因果推論、統計檢定或正式學術方法論
+- 需要嚴格因果識別或實驗因果估計（本技能只做關聯/差異推論）
 - 只想做單句情緒分類，不需要主題、優先級或題項生成
 
 Handoff:
@@ -44,6 +44,7 @@ Handoff:
 - `review_text`: `string`
 
 建議欄位：
+- `customer_id`: `string`（強烈建議，支援顧客層分群）
 - `created_at`: `string`
 - `rating`: `number`
 - `product`: `string`
@@ -162,6 +163,51 @@ Maslow Skill Route（必跑）：
 
 詳見 [references/04-dynamic-item-generation-and-scoring.md](./references/04-dynamic-item-generation-and-scoring.md)
 
+### Statistical Validation (Mandatory)
+
+完成評分後，必須做研究級統計驗證，且完整結果需放在主報告。
+
+固定規格：
+- `alpha = 0.05`
+- 多重比較：`BH-FDR`
+- 信賴區間：`95% CI`
+- 題項分數（0-7，序位）：
+  - 兩組：`Mann-Whitney U` + `Cliff's delta`
+  - 三組以上：`Kruskal-Wallis` + `epsilon-squared`
+- 比例指標（coverage/high_score_rate/low_score_rate）：
+  - 兩組：`two-proportion z`；小樣本改 `Fisher's exact`
+  - 三組以上：`chi-square`；不符假設時改 exact/permutation
+
+統計輸出規則：
+- 不可只給 p-value
+- 必須同時給：effect size、CI、樣本數、檢定名稱、校正後 p-value
+- 不可把關聯差異寫成因果結論
+
+### Customer Clustering (Mandatory)
+
+統計驗證後，必須依顧客在意面向做分群。
+
+分群特徵固定：
+- 使用 `generated_items` 中 `core` 題項的分數矩陣
+- `0` 視為未關注，`1-7` 視為關注強度
+
+分群單位規則：
+- 有 `customer_id`：先彙整到顧客層（每位顧客每題項取中位數）
+- 無 `customer_id`：以評論層代理分群，並標註為「評論者原型群」限制
+
+分群方法固定：
+- 主模型：`K-medoids`（k 在 `2-8` 間以 silhouette 選最佳）
+- 次模型：`Hierarchical (Ward)` 用於群間關係解讀，不取代主分群
+
+穩定性規則：
+- 必須回報 bootstrap 穩定度（例如 ARI/NMI 摘要）
+- 必須回報最小群體占比與極小群風險
+
+低樣本策略：
+- 仍執行統計與分群
+- 全部推論標示 `exploratory=true` 與 `confidence=low`
+- 不可輸出高信心強決策語句
+
 ## Workflow
 
 1. 定義任務與比較範圍
@@ -204,13 +250,25 @@ Maslow Skill Route（必跑）：
 - 匯總成題項層級的統計摘要
 - 交叉參考：見 [Example D](./references/06-end-to-end-examples.md)
 
-9. 理論深挖（選配增強）
+9. 統計驗證（必經）
+- 依固定統計規格做差異與關聯驗證
+- 輸出檢定結果、effect size、CI 與 FDR 校正
+- 樣本不足時仍要跑，但標記 `exploratory` 與低信心
+- 交叉參考：見 [references/07-statistical-and-clustering-validation.md](./references/07-statistical-and-clustering-validation.md)
+
+10. 顧客分群（必經）
+- 以 core 題項分數矩陣進行分群
+- 先做 `K-medoids` 主分群，再做 `Hierarchical (Ward)` 群間解讀
+- 輸出 cluster profile、stability、群組行動建議
+- 交叉參考：見 [Example E](./references/06-end-to-end-examples.md)
+
+11. 理論深挖（選配增強）
 - 若需要更深解釋，可條件式請 agent 使用其他 skill 補充理論分析
 - 增強分析需標註來源與限制，且不得覆蓋必經理論結果或 Maslow 必跑路由紀錄
 
-10. 產出建議
+12. 產出建議
 - 先寫管理摘要
-- 再列理論摘要、主題表、動態題項摘要與優先行動
+- 再列理論摘要、主題表、動態題項摘要、統計驗證、分群摘要與優先行動
 - 只有在使用者要求結構化輸出時，才展開完整 JSON 附錄
 
 ## Output Contract
@@ -221,9 +279,13 @@ Maslow Skill Route（必跑）：
 3. `Theme Analysis Table`
 4. `Dynamic Item Set Summary`
 5. `Dynamic Scorecard Summary`
-6. `Priority Actions`
-7. `Risks / Bias / Confidence Notes`
-8. `Appendix (JSON)`
+6. `Statistical Validation Summary`
+7. `Customer Cluster Summary`
+8. `Cluster Archetype Cards`
+9. `Cluster-Specific Priority Actions`
+10. `Priority Actions`
+11. `Risks / Bias / Confidence Notes`
+12. `Appendix (JSON)`
 
 ### Primary Output Rules
 
@@ -254,6 +316,22 @@ Maslow Skill Route（必跑）：
 `Dynamic Scorecard Summary`
 - 呈現高分與低分題項
 - 標示題項覆蓋率、平均分與低信心題項
+
+`Statistical Validation Summary`（必填）
+- 必含：`test_name`, `groups`, `group_n`, `statistic`, `p_value`, `p_value_adj`, `effect_size`, `ci_95`
+- 必須明確列出 `BH-FDR` 校正後結果
+- 必須附可解釋結論與限制
+
+`Customer Cluster Summary`（必填）
+- 必含：`cluster_id`, `size`, `share`, `top_attention_items`, `pain_points`, `value_drivers`
+- 必須標示分群單位是 `customer` 或 `review_proxy`
+
+`Cluster Archetype Cards`（必填）
+- 每群至少包含：核心關注題項、低關注題項、代表引文、風險訊號、推薦策略
+
+`Cluster-Specific Priority Actions`（必填）
+- 每群 1-3 項行動
+- 每項需對應量測指標與預期影響
 
 `Priority Actions`
 - 只保留最值得做的 3-5 項
@@ -290,6 +368,21 @@ Maslow Skill Route（必跑）：
   "theory_evidence_trace": [],
   "generated_items": [],
   "scorecard_summary": [],
+  "statistical_validation_summary": [],
+  "statistical_test_results": [],
+  "multiple_comparison_control": {
+    "method": "BH-FDR",
+    "alpha": 0.05
+  },
+  "cluster_configuration": {
+    "primary_method": "k-medoids",
+    "secondary_method": "hierarchical_ward",
+    "k_search_range": [2, 8]
+  },
+  "cluster_profiles": [],
+  "cluster_assignments": [],
+  "cluster_stability": [],
+  "cluster_action_map": [],
   "priority_actions": [],
   "evidence": []
 }
@@ -310,6 +403,11 @@ Maslow Skill Route（必跑）：
 - 不可使用寫死的固定題項集合
 - 不可每個評論各自生成不同的評分題項集合
 - 不可把低頻孤立訊號偽裝成核心題項
+- 不可跳過統計驗證或僅報 p-value
+- 不可省略 effect size、CI、FDR 校正
+- 不可跳過評分直接分群（不可反序）
+- 不可用主題文字取代 score-based 分群矩陣
+- 低樣本不可輸出高信心分群結論
 - 預設使用繁體中文，語氣專業、精簡、可執行
 
 ## References
@@ -320,6 +418,7 @@ Maslow Skill Route（必跑）：
 - [references/04-dynamic-item-generation-and-scoring.md](./references/04-dynamic-item-generation-and-scoring.md)
 - [references/05-output-template-and-quality-checklist.md](./references/05-output-template-and-quality-checklist.md)
 - [references/06-end-to-end-examples.md](./references/06-end-to-end-examples.md)
+- [references/07-statistical-and-clustering-validation.md](./references/07-statistical-and-clustering-validation.md)
 
 ## Validation Assets
 

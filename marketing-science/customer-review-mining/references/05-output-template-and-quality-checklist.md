@@ -2,95 +2,88 @@
 
 ## Default Output Shape
 
-以下段落皆為預設必填，`Theory Coding Summary` 不可省略。
+以下段落皆為預設必填：
 
-### 1. Executive Summary
+1. `Executive Summary`
+2. `Theory Coding Summary`
+3. `Theme Analysis Table`
+4. `Dynamic Item Set Summary`
+5. `Dynamic Scorecard Summary`
+6. `Statistical Validation Summary`
+7. `Customer Cluster Summary`
+8. `Cluster Archetype Cards`
+9. `Cluster-Specific Priority Actions`
+10. `Priority Actions`
+11. `Risks / Bias / Confidence Notes`
+12. `Appendix (JSON)`
 
-- 2-5 點最高價值結論
-- 每點都要連到具體評論證據
-- 不要把理論名詞堆成摘要
+## Required Section Specs
 
-### 2. Theory Coding Summary (Required)
+### Statistical Validation Summary (Required)
 
-- 四個理論都要有映射結果
-- 每個理論都要附證據或證據索引
-- 每個理論都要附信心等級
-- 證據不足時要寫限制，不可空白
-- 馬斯洛協作狀態必填：
-  - `attempted`
-  - `used`
-  - `fallback_reason`（`used: false` 時必填）
+每個核心比較都要包含：
 
-### 3. Theme Analysis Table
+| comparison_id | metric | test_name | group_n | statistic | p_value | p_value_adj | effect_size | ci_95 | interpretation |
+| --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- | --- |
 
-建議欄位：
+固定規格：
+- `alpha = 0.05`
+- 多重比較修正：`BH-FDR`
+- `95% CI`
+- 禁止只報 p-value
 
-| theme | subtheme | count | share | sample_quote |
-| --- | --- | ---: | ---: | --- |
+### Customer Cluster Summary (Required)
 
-若資料足夠可加：
+每群至少包含：
 
-| negative_rate | avg_severity | impact_score |
-| ---: | ---: | ---: |
+| cluster_id | size | share | unit | top_attention_items | low_attention_items | pain_points | value_drivers |
+| --- | ---: | ---: | --- | --- | --- | --- | --- |
 
-### 4. Dynamic Item Set Summary
+其中：
+- `unit` 只能是 `customer` 或 `review_proxy`
+- `review_proxy` 必須同時附限制說明
 
-- 列出本次生成的共用題項
-- 標示 `core` 與 `exploratory`
-- 需附簡短定義與證據線索
+### Cluster Archetype Cards (Required)
 
-### 5. Dynamic Scorecard Summary
+每群應輸出：
+- `who_they_are`
+- `what_they_care_about`
+- `what_blocks_them`
+- `evidence_quotes`
+- `action_focus`
 
-- 顯示高分與低分題項
-- 顯示覆蓋率與低信心題項
+### Cluster-Specific Priority Actions (Required)
 
-### 6. Priority Actions
+每群 1-3 項行動：
 
-建議欄位：
+| cluster_id | action | rationale | expected_outcome | metric |
+| --- | --- | --- | --- | --- |
 
-| priority | action | rationale | expected_outcome | metric |
-| ---: | --- | --- | --- | --- |
-
-### 7. Risks / Bias / Confidence Notes
-
-至少檢查：
-- 樣本量與代表性
-- 來源偏差
-- 語言偏差
-- 時間切片問題
-- 推論信心邊界
-
-### 8. Appendix (JSON)
-
-使用者要求結構化輸出時附上。最小欄位：
+## Appendix (JSON) Minimum Schema
 
 ```json
 {
   "analysis_scope": {},
   "theme_analysis": [],
-  "theory_application_summary": [
-    {
-      "theory": "",
-      "confidence": "high|medium|low",
-      "maslow_collaboration_status": {
-        "attempted": true,
-        "used": true,
-        "fallback_reason": ""
-      }
-    }
-  ],
-  "theory_evidence_trace": [
-    {
-      "theory": "",
-      "mapping_unit": "review|cluster",
-      "evidence_refs": [],
-      "source_skill": "maslow-five-needs-marketing|customer-review-mining:fallback|customer-review-mining",
-      "confidence": "high|medium|low",
-      "limitations": []
-    }
-  ],
+  "theory_application_summary": [],
+  "theory_evidence_trace": [],
   "generated_items": [],
   "scorecard_summary": [],
+  "statistical_validation_summary": [],
+  "statistical_test_results": [],
+  "multiple_comparison_control": {
+    "method": "BH-FDR",
+    "alpha": 0.05
+  },
+  "cluster_configuration": {
+    "primary_method": "k-medoids",
+    "secondary_method": "hierarchical_ward",
+    "k_search_range": [2, 8]
+  },
+  "cluster_profiles": [],
+  "cluster_assignments": [],
+  "cluster_stability": [],
+  "cluster_action_map": [],
   "priority_actions": [],
   "evidence": []
 }
@@ -100,55 +93,62 @@
 
 ```markdown
 ## Executive Summary
-- 近期負評主要集中在 `service_experience` 的回覆延遲與問題未閉環，影響續購意願。
-- `product_performance` 整體評價中性偏正，但「安裝便利性」在新手客群明顯偏低。
-- `value_perception` 呈現分化：高分評論強調 CP 值，低分評論集中在期望落差與描述一致性。
+- `service_experience` 的回覆延遲是最大痛點，且在高價值客群更明顯。
+- 分群結果顯示「效率敏感群」與「價值敏感群」的關注面向明確分化。
+- 統計檢定顯示 iOS 與 Android 在 `response_speed` 分數差異顯著，且效果量中等。
 
 ## Theory Coding Summary
-- Product Positioning Theory：`medium`
-  - 映射：尺寸適配、安裝便利性、描述一致性
-  - 證據：R12, R37, R88
-- Purchase Motivation Theory：`high`
-  - 映射：功能性動機、保障性動機、關係性動機
-  - 證據：R08, R21, R63, R91
-- Maslow's Hierarchy of Needs：`medium`
-  - 映射：安全需求、尊重需求最明顯
-  - 證據：R15, R46, R102
-  - maslow_collaboration_status: `attempted=true`, `used=true`, `fallback_reason=""`
-- Word-of-Mouth Motivation Theory：`medium`
-  - 映射：助人利他、情緒表達
-  - 證據：R04, R29, R54
+- 四理論均有映射與證據；Maslow 協作狀態為 `attempted=true`, `used=true`。
 
 ## Theme Analysis Table
 | theme | subtheme | count | share | sample_quote |
 | --- | --- | ---: | ---: | --- |
-| service_experience | response_speed | 28 | 28% | 「客服三天才回，錯過安裝時程」 |
-| product_performance | installability | 24 | 24% | 「功能有到位，但安裝說明不清楚」 |
-| value_perception | value_for_money | 20 | 20% | 「價格合理，但實際表現沒有預期高」 |
+| service_experience | response_speed | 42 | 0.30 | 「客服回覆要等兩天」 |
+| product_performance | installability | 31 | 0.22 | 「功能有到位，但安裝門檻高」 |
+| value_perception | value_for_money | 28 | 0.20 | 「價格可以，但期待更穩定」 |
 
 ## Dynamic Item Set Summary
-- `response_speed`：回覆與處理速度（core）
-- `issue_resolution`：問題是否一次解決（core）
-- `installability`：安裝便利性與教學清楚度（core）
-- `value_for_money`：價格與體驗是否匹配（core）
-- `pro_installation_tip`：進階安裝技巧分享（exploratory）
+- `response_speed` (core)
+- `issue_resolution` (core)
+- `installability` (core)
+- `value_for_money` (core)
+- `advanced_install_tip` (exploratory)
 
 ## Dynamic Scorecard Summary
-- 高分題項：`product_fit`(5.9), `value_for_money`(5.4)
-- 低分題項：`response_speed`(3.1), `issue_resolution`(2.9)
-- 低信心題項：`pro_installation_tip`（覆蓋率 4%）
+- 低分題項：`response_speed`(3.0), `issue_resolution`(3.2)
+- 高分題項：`value_for_money`(5.5)
+
+## Statistical Validation Summary
+| comparison_id | metric | test_name | group_n | statistic | p_value | p_value_adj | effect_size | ci_95 | interpretation |
+| --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| C1 | response_speed_score (iOS vs Android) | Mann-Whitney U | 160 vs 190 | 11234 | 0.004 | 0.011 | 0.29 (Cliff's delta) | [0.14, 0.42] | 差異顯著且具實務意義 |
+| C2 | low_score_rate (iOS vs Android) | two-proportion z | 160 vs 190 | 2.66 | 0.008 | 0.016 | 0.13 (risk diff) | [0.03, 0.22] | Android 低分率較高 |
+
+## Customer Cluster Summary
+| cluster_id | size | share | unit | top_attention_items | low_attention_items | pain_points | value_drivers |
+| --- | ---: | ---: | --- | --- | --- | --- | --- |
+| CL1 | 118 | 0.34 | customer | response_speed, issue_resolution | appearance | 回覆慢、問題未閉環 | 快速回覆與一次解決 |
+| CL2 | 142 | 0.40 | customer | value_for_money, product_fit | advanced_install_tip | 價值落差 | 價格與效能匹配 |
+| CL3 | 90 | 0.26 | customer | installability | response_speed | 安裝門檻 | 教學清晰度 |
+
+## Cluster Archetype Cards
+- CL1 效率敏感群：重視回覆速度與解決效率，對等待高度不耐。
+- CL2 價值敏感群：重視 CP 值與符合預期，對價格/效能落差敏感。
+- CL3 上手門檻群：重視安裝與教學，容易被初期摩擦勸退。
+
+## Cluster-Specific Priority Actions
+| cluster_id | action | rationale | expected_outcome | metric |
+| --- | --- | --- | --- | --- |
+| CL1 | 客服首回 SLA 24h + 未結案追蹤 | 主要痛點集中在等待與未閉環 | 降低低分率 | response_speed avg_score |
+| CL2 | 強化商品頁效能邊界說明 | 降低期望落差 | 提升 value_for_money | value_perception negative_rate |
+| CL3 | 重寫安裝導引與影片 | 降低上手門檻 | 提升 installability | installability avg_score |
 
 ## Priority Actions
-| priority | action | rationale | expected_outcome | metric |
-| ---: | --- | --- | --- | --- |
-| 1 | 設定客服首回 SLA 24h | 回覆延遲為最大負評來源 | 降低服務負評占比 | response_speed avg_score |
-| 2 | 重寫安裝教學內容 | 新手客群安裝困難高頻出現 | 降低安裝相關客服單 | installability avg_score |
-| 3 | 補強商品頁描述一致性 | 期望落差影響價值感知 | 降低退貨與負評率 | value_perception negative_rate |
+- 跨群通用優先項 3-5 條，需對應主題、量測與時程。
 
 ## Risks / Bias / Confidence Notes
-- 樣本以近 30 天評論為主，季節性波動未完全反映。
-- Android 渠道樣本明顯高於 iOS，跨渠道比較需保守解讀。
-- 理論映射依引文證據進行，低頻訊號僅作 exploratory。
+- 若缺 `customer_id`，群組單位為 `review_proxy`，解讀需保守。
+- 小樣本分群必標記 `exploratory=true` 與 `confidence=low`。
 ```
 
 ## Appendix JSON Sample
@@ -156,46 +156,10 @@
 ```json
 {
   "analysis_scope": {
-    "goal": "Identify pain points, compare iOS vs Android, and prioritize actions",
-    "time_window": "last_30_days",
-    "channels": ["app_store", "support_ticket"],
-    "sample_size": 100
+    "goal": "Score -> statistical validation -> customer clustering",
+    "sample_size": 350
   },
-  "theme_analysis": [
-    {
-      "theme": "service_experience",
-      "subtheme": "response_speed",
-      "count": 28,
-      "share": 0.28,
-      "sample_quote": "客服三天才回，錯過安裝時程"
-    },
-    {
-      "theme": "product_performance",
-      "subtheme": "installability",
-      "count": 24,
-      "share": 0.24,
-      "sample_quote": "功能有到位，但安裝說明不清楚"
-    }
-  ],
   "theory_application_summary": [
-    {
-      "theory": "Product Positioning Theory",
-      "confidence": "medium",
-      "maslow_collaboration_status": {
-        "attempted": false,
-        "used": false,
-        "fallback_reason": "not_applicable_for_non_maslow_theory"
-      }
-    },
-    {
-      "theory": "Purchase Motivation Theory",
-      "confidence": "high",
-      "maslow_collaboration_status": {
-        "attempted": false,
-        "used": false,
-        "fallback_reason": "not_applicable_for_non_maslow_theory"
-      }
-    },
     {
       "theory": "Maslow's Hierarchy of Needs",
       "confidence": "medium",
@@ -204,100 +168,96 @@
         "used": true,
         "fallback_reason": ""
       }
-    },
-    {
-      "theory": "Word-of-Mouth Motivation Theory",
-      "confidence": "medium",
-      "maslow_collaboration_status": {
-        "attempted": false,
-        "used": false,
-        "fallback_reason": "not_applicable_for_non_maslow_theory"
-      }
-    }
-  ],
-  "theory_evidence_trace": [
-    {
-      "theory": "Maslow's Hierarchy of Needs",
-      "mapping_unit": "review",
-      "evidence_refs": ["R15", "R46", "R102"],
-      "source_skill": "maslow-five-needs-marketing",
-      "confidence": "medium",
-      "limitations": []
-    },
-    {
-      "theory": "Word-of-Mouth Motivation Theory",
-      "mapping_unit": "review",
-      "evidence_refs": ["R04", "R29", "R54"],
-      "source_skill": "customer-review-mining",
-      "confidence": "medium",
-      "limitations": []
     }
   ],
   "generated_items": [
+    { "label": "response_speed", "status": "core" },
+    { "label": "value_for_money", "status": "core" }
+  ],
+  "statistical_validation_summary": [
     {
-      "label": "response_speed",
-      "definition": "顧客對回覆與處理速度的評價",
-      "parent_theme": "service_experience",
-      "evidence_cues": ["回很慢", "等三天", "很快回覆"],
-      "status": "core"
-    },
-    {
-      "label": "pro_installation_tip",
-      "definition": "評論中提及進階安裝技巧與專業建議",
-      "parent_theme": "product_performance",
-      "evidence_cues": ["要先校正", "專業工具才好裝"],
-      "status": "exploratory"
+      "comparison_id": "C1",
+      "metric": "response_speed_score",
+      "test_name": "Mann-Whitney U",
+      "group_n": "160 vs 190",
+      "statistic": 11234,
+      "p_value": 0.004,
+      "p_value_adj": 0.011,
+      "effect_size": "0.29 (Cliff's delta)",
+      "ci_95": [0.14, 0.42],
+      "interpretation": "significant_with_practical_effect"
     }
   ],
-  "scorecard_summary": [
+  "statistical_test_results": [
     {
-      "label": "response_speed",
-      "coverage": 0.41,
-      "avg_score": 3.1,
-      "high_score_rate": 0.12,
-      "low_score_rate": 0.48
-    },
-    {
-      "label": "value_for_money",
-      "coverage": 0.36,
-      "avg_score": 5.4,
-      "high_score_rate": 0.42,
-      "low_score_rate": 0.11
+      "comparison_id": "C2",
+      "metric": "low_score_rate",
+      "test_name": "two-proportion z",
+      "groups": ["ios", "android"],
+      "group_n": [160, 190],
+      "statistic": 2.66,
+      "p_value": 0.008,
+      "p_value_adj": 0.016,
+      "effect_size": "0.13 (risk diff)",
+      "ci_95": [0.03, 0.22],
+      "assumption_checks": ["normal_approx_ok"],
+      "conclusion": "android_higher_low_score_rate",
+      "caveats": []
     }
   ],
-  "priority_actions": [
+  "multiple_comparison_control": {
+    "method": "BH-FDR",
+    "alpha": 0.05
+  },
+  "cluster_configuration": {
+    "primary_method": "k-medoids",
+    "secondary_method": "hierarchical_ward",
+    "k_search_range": [2, 8],
+    "selected_k": 3
+  },
+  "cluster_profiles": [
     {
-      "priority": 1,
-      "action": "設定客服首回 SLA 24h",
-      "rationale": "回覆延遲是最大負評來源",
-      "expected_outcome": "降低服務負評占比",
-      "metric": "response_speed avg_score"
+      "cluster_id": "CL1",
+      "size": 118,
+      "share": 0.34,
+      "unit": "customer",
+      "top_attention_items": ["response_speed", "issue_resolution"],
+      "low_attention_items": ["appearance"],
+      "pain_points": ["slow_response"],
+      "value_drivers": ["fast_issue_resolution"],
+      "recommended_actions": ["sla_24h"]
     }
   ],
-  "evidence": [
+  "cluster_assignments": [],
+  "cluster_stability": [
     {
-      "ref": "R12",
-      "quote": "客服三天才回，錯過安裝時程"
-    },
-    {
-      "ref": "R88",
-      "quote": "價格合理，但實際表現沒有預期高"
+      "method": "bootstrap_200",
+      "ari_mean": 0.72,
+      "nmi_mean": 0.76,
+      "min_cluster_share": 0.26
     }
-  ]
+  ],
+  "cluster_action_map": [
+    {
+      "cluster_id": "CL1",
+      "actions": ["sla_24h", "ticket_follow_up"]
+    }
+  ],
+  "priority_actions": [],
+  "evidence": []
 }
 ```
 
 ## Quality Checklist
 
 - 是否先做 Data Sufficiency Gate
-- 是否先做逐條語意解析
-- 是否執行四理論必經映射
-- 是否每個理論都有證據與信心等級
-- 是否在證據不足時標示限制而非跳過理論
-- 是否先嘗試 `$maslow-five-needs-marketing`，失敗時才 fallback
-- 是否明確區分「成功協作」與「fallback」
-- 是否先生成共用題項，再評分單篇評論
-- 是否合併同義題項
-- 是否避免低頻訊號被升格為核心題項
-- 是否避免無證據因果推論
-- 是否保持理論摘要精簡，不壓過商業結論
+- 是否先做逐條語意解析與四理論映射
+- 是否先生成共享題項並完成逐條評分
+- 是否評分後才做統計與分群（不可反序）
+- 是否完成統計檢定 + `BH-FDR` + effect size + CI
+- 是否避免只報 p-value
+- 是否以 `core` 題項分數矩陣做分群
+- 是否同時輸出 `K-medoids` 主分群與 `Hierarchical (Ward)` 群間解讀
+- 是否回報分群穩定度（bootstrap ARI/NMI）與最小群體占比
+- 低樣本是否標記 `exploratory=true` 與 `confidence=low`
+- 是否避免把關聯差異寫成因果結論

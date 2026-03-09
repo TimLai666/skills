@@ -10,6 +10,8 @@
 - 用四個理論框架分析評論
 - 顯示三大主題與優先項
 - 附上動態題項摘要
+- 做群組差異統計驗證
+- 依在意面向做顧客分群
 - 必要時可請 agent 用其他 skill 補充深度詮釋
 
 ## What This Scenario Tries To Break
@@ -18,6 +20,8 @@
 - 理論標籤沒有證據
 - 題項不是語料級共用集合
 - 跳過 `$maslow-five-needs-marketing` 協作路由
+- 跳過統計驗證或只報 p-value
+- 直接用主題描述分群，未使用 score matrix
 - 無條件把外部 skill 當主流程
 
 ## Pass Criteria
@@ -28,6 +32,8 @@
 - 馬斯洛映射有協作狀態追蹤（`attempted`, `used`, `fallback_reason`）
 - `theory_evidence_trace` 含 `source_skill`
 - 題項先語料生成再回頭評分
+- 統計段落含：test、p/p_adj、effect size、CI
+- 分群段落含：K-medoids 主分群 + Ward 群間解讀 + stability
 - 外部 skill 僅作補充，不取代主流程
 
 ## Fail Signs
@@ -37,4 +43,6 @@
 - 沒有引導 `$maslow-five-needs-marketing` 且無 fallback 記錄
 - `source_skill` 缺失或把 fallback 偽裝為外部成功協作
 - 題項逐篇漂移
+- 統計未做 FDR 或缺 effect size/CI
+- 分群沒有 cluster profile、stability、群組行動
 - 直接用外部 skill 替代本技能分析
