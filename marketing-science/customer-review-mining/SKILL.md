@@ -1,36 +1,39 @@
 ---
 name: customer-review-mining
-description: Use when analyzing customer reviews, survey comments, support tickets, app store feedback, or social replies to identify pain points, compare segments, or summarize customer perception for product, service, and messaging decisions.
+description: Use when analyzing customer reviews, survey comments, support tickets, app store feedback, or social replies to identify pain points, compare segments, generate corpus-level scoring items, or summarize customer perception for product, service, and messaging decisions.
 ---
 
 # Customer Review Mining
 
 ## Overview
 
-將大量評論轉成可行動洞察。預設輸出以商業決策可讀性為主，理論編碼與 14 題項評分作為第二層分析框架，只有在需要時才展開完整附錄。
+把大量評論轉成可行動洞察。預設輸出以商業決策可讀性為主，理論分析與動態評分題項作為第二層補充，只有在需要時才展開完整結構化附錄。
 
 核心原則：
-- 先有證據，再有結論
 - 先做資料充分性檢查，再做分析
-- 先給管理可用摘要，再補理論與結構化細節
+- 先用三大商業主題整理，再補理論與評分題項
+- 評分題項必須從整批評論中萃取，不可預設寫死
+- 理論可由其他 skill 或 agent 輔助，但只在需要時才啟用
 
 ## When to Use
 
 Use when:
-- 需要從評論找出主要痛點、抱怨原因、滿意驅動因子
+- 需要從評論找出主要痛點、滿意驅動因子與優先改善方向
 - 需要比較不同產品、版本、渠道、地區或客群的評論差異
 - 需要把質性回饋整理成產品、客服、營運或行銷可執行建議
-- 需要在商業摘要之外，補上理論編碼、需求層次或口碑動機視角
+- 需要從整批評論中提煉一組共用評分題項，再回頭對每則評論做一致化評分
+- 需要在商業摘要之外，加上理論視角或請 agent 協助做更深的解釋
 
 Do not use:
 - 沒有實際評論文本，只想憑空推論顧客感受
-- 需要嚴格因果推論、統計檢定或學術研究設計
-- 只需要單純情緒分類，不需要主題、優先級或行動建議
+- 需要嚴格因果推論、統計檢定或正式學術方法論
+- 只想做單句情緒分類，不需要主題、優先級或題項生成
 
 Handoff:
-- 若需要把洞察改寫成文案方向或訊息測試 brief，交給 `$copywriting`
-- 若需要追蹤方案、事件命名或 KPI 實作，交給 `$analytics-tracking`
-- 若需要實驗設計或變體假設，交給 `$ab-test-setup`
+- 若要把洞察改寫成訊息策略或文案 brief，可交給 `$copywriting`
+- 若要把洞察轉成追蹤與 KPI 設計，可交給 `$analytics-tracking`
+- 若要把洞察轉成實驗假設與測試設計，可交給 `$ab-test-setup`
+- 若需要更深的理論詮釋，可視需求讓 agent 使用其他相關 skill 輔助，但不可讓外部 skill 取代本 skill 的主分析骨架
 
 ## Input Contract
 
@@ -71,9 +74,9 @@ Handoff:
 
 Gate 規則：
 - 沒有 `review_text`：停止分析
-- 有評論但沒有分析目標：先要求界定要找痛點、比較對象或追蹤期間
-- 樣本極少：可做觀察，不可宣稱趨勢
-- 關鍵欄位缺失時可分析，但要明確標示侷限
+- 有評論但沒有分析目標：先界定是找痛點、找滿意驅動因子、比較差異，或產出建議
+- 樣本極少：可做探索性觀察，不可宣稱趨勢
+- 關鍵欄位缺失時仍可分析，但要明確標示限制
 
 詳見 [references/01-intake-and-scope-gate.md](./references/01-intake-and-scope-gate.md)
 
@@ -86,51 +89,50 @@ Gate 規則：
 - `product_performance`
 - `value_perception`
 
-這一層決定預設報告與優先級排序。不要讓理論標籤取代這三個主題。
+這一層決定預設報告與優先級排序。不要讓理論標籤或動態題項取代這三個主題。
 
 詳見 [references/02-theme-taxonomy.md](./references/02-theme-taxonomy.md)
 
 ### Theory Overlay
 
-第二層是理論輔助視角，用來解釋評論，不用來取代證據：
+第二層是理論輔助視角，用來補充解釋評論，不用來取代證據或主題表：
 - Product Positioning Theory
 - Purchase Motivation Theory
 - Maslow's Hierarchy of Needs
 - Word-of-Mouth Motivation Theory
 
-理論用途：
-- 幫助整理評論在說哪一種價值、需求或分享動機
-- 幫助補充研究型輸出或 appendix
-- 不可直接把理論名稱當作結論
+理論使用規則：
+- 預設先完成本 skill 的主分析
+- 只有在使用者要求更深理論框架、跨模型對照或外部專業輔助時，才條件式請 agent 使用其他 skill
+- 理論摘要必須附評論證據，不可只列概念名詞
+- 不可讓理論部分壓過商業輸出
 
 詳見 [references/03-theory-overlay-map.md](./references/03-theory-overlay-map.md)
 
-### 14-Item Scorecard
+### Corpus-Derived Scorecard
 
-第三層是結構化評分，只在有明確語意證據時使用。每題 `0-7` 分：
-- `0`: 沒提到
-- `1-3`: 間接或輕微提及
-- `4`: 中立、模糊或有保留
+第三層是動態評分題項。題項必須先從整批評論中萃取，再以同一組題項回頭評分每則評論。
+
+流程固定如下：
+1. 從整批評論抽取候選題項
+2. 合併同義詞、重複描述與近似概念
+3. 為每個題項定義短標籤、定義與證據線索
+4. 用同一組題項對每則評論做 `0-7` 分評分
+
+評分規則：
+- `0`: 沒提到或沒有足夠證據
+- `1-3`: 間接、輕微、模糊提及
+- `4`: 中立、保留或正反混雜
 - `5-6`: 明確提及
 - `7`: 強烈且完整表達
 
-14 題項：
-- 運送快速
-- 包裝品質
-- 容易溝通
-- 顧客支持
-- 解決問題
-- 信任賣家
-- 再購意願
-- 尺寸適配
-- 容易安裝
-- 外觀設計
-- 品質良好
-- 符合預期
-- 高 CP 值
-- 與描述一致
+題項規則：
+- 題項必須來自重複評論訊號，而不是單一句話
+- 僅被單一孤立評論支持的題項，預設標成 `exploratory`，不納入核心分數集
+- 題項名稱必須可比較、可聚合、可回溯
+- 不可每個評論各自生成不同題項集合
 
-詳見 [references/04-scoring-rubric-14-items.md](./references/04-scoring-rubric-14-items.md)
+詳見 [references/04-dynamic-item-generation-and-scoring.md](./references/04-dynamic-item-generation-and-scoring.md)
 
 ## Workflow
 
@@ -143,46 +145,52 @@ Gate 規則：
 - 缺欄位或樣本過小時先回報限制
 
 3. 清理與標準化文本
-- 去除空白、重複、廣告、無意義文字
+- 去除空白、重複、廣告與無意義文字
 - 保留 `raw_text` 與 `clean_text`
 - 多語資料先分語言再整併
 
-4. 進行三層分析
-- 第一層：分類到三大主題
-- 第二層：補充理論視角
-- 第三層：必要時做 14 題項評分
+4. 進行第一層主題分析
+- 先分類到三大主題
+- 整理子主題、代表性引文與大致佔比
 
-5. 量化與排序
-- 至少計算 `count`、`share`
-- 若有情緒或嚴重度訊號，可補 `negative_rate`、`avg_severity`
-- 若做優先級排序，可用 `impact_score = count * avg_severity * business_weight`
-- 沒有足夠資訊時計算簡化版優先級，但要標示假設
+5. 生成共用評分題項
+- 從整批評論抽候選題項
+- 做動態正規化與命名
+- 標出核心題項與 `exploratory` 題項
 
-6. 產出建議
+6. 回頭評分每則評論
+- 使用同一組題項做 `0-7` 分評分
+- 匯總成題項層級的統計摘要
+
+7. 視需要補理論分析
+- 預設只補最有用的 1-3 個理論視角
+- 若使用者要更深研究型輸出，可條件式請 agent 使用其他 skill 輔助
+
+8. 產出建議
 - 先寫管理摘要
-- 再列主題表與優先行動
-- 只有在使用者要求研究型或結構化輸出時，才展開理論摘要與 JSON 附錄
+- 再列主題表、動態題項摘要與優先行動
+- 只有在使用者要求結構化輸出時，才展開完整 JSON 附錄
 
 ## Output Contract
 
 預設輸出順序：
-
 1. `Executive Summary`
 2. `Theme Analysis Table`
 3. `Priority Actions`
 4. `Risks / Bias / Confidence Notes`
 
 選配輸出：
-
-5. `Theory Coding Summary`
-6. `14-Item Scorecard Summary`
-7. `Appendix (JSON)`
+5. `Dynamic Item Set Summary`
+6. `Dynamic Scorecard Summary`
+7. `Theory Coding Summary`
+8. `Appendix (JSON)`
 
 ### Primary Output Rules
 
 `Executive Summary`
 - 2-5 點結論
 - 每點都要可回溯到評論證據
+- 不要用理論名詞塞滿摘要
 
 `Theme Analysis Table`
 - 至少包含：`theme`, `subtheme`, `count`, `share`, `sample_quote`
@@ -201,13 +209,19 @@ Gate 規則：
 
 ### Secondary Output Rules
 
+`Dynamic Item Set Summary`
+- 列出本次分析產生的共用題項
+- 每個題項至少附：`label`, `definition`, `evidence_cues`, `status`
+- `status` 僅能是 `core` 或 `exploratory`
+
+`Dynamic Scorecard Summary`
+- 呈現高分與低分題項
+- 標示題項覆蓋率、平均分與低信心題項
+
 `Theory Coding Summary`
 - 只總結最有解釋力的理論視角
 - 每個視角至少附 1 句代表性評論或摘要證據
-
-`14-Item Scorecard Summary`
-- 呈現高分與低分題項
-- 標示哪些題項因缺乏證據而未評分或低信心
+- 若本次有 agent 使用其他 skill 協助，需標示該協作是條件式加值，不是主分析來源
 
 `Appendix (JSON)`
 - 只有使用者要求結構化輸出時附上
@@ -216,9 +230,10 @@ Gate 規則：
 {
   "analysis_scope": {},
   "theme_analysis": [],
+  "generated_items": [],
+  "scorecard_summary": [],
   "priority_actions": [],
   "theory_coding_summary": [],
-  "scorecard_summary": [],
   "evidence": []
 }
 ```
@@ -231,7 +246,9 @@ Gate 規則：
 - 不可用單一評論宣稱整體趨勢
 - 不可做無證據支撐的因果推論
 - 不可因為套了理論標籤，就跳過引文或證據
-- 不可在證據不足時強行完成 14 題項評分
+- 不可使用寫死的固定題項集合
+- 不可每個評論各自生成不同的評分題項集合
+- 不可把低頻孤立訊號偽裝成核心題項
 - 預設使用繁體中文，語氣專業、精簡、可執行
 
 ## References
@@ -239,7 +256,7 @@ Gate 規則：
 - [references/01-intake-and-scope-gate.md](./references/01-intake-and-scope-gate.md)
 - [references/02-theme-taxonomy.md](./references/02-theme-taxonomy.md)
 - [references/03-theory-overlay-map.md](./references/03-theory-overlay-map.md)
-- [references/04-scoring-rubric-14-items.md](./references/04-scoring-rubric-14-items.md)
+- [references/04-dynamic-item-generation-and-scoring.md](./references/04-dynamic-item-generation-and-scoring.md)
 - [references/05-output-template-and-quality-checklist.md](./references/05-output-template-and-quality-checklist.md)
 
 ## Validation Assets

@@ -38,25 +38,31 @@
 
 ## Optional Sections
 
-### 5. Theory Coding Summary
+### 5. Dynamic Item Set Summary
 
-- 只保留 1-4 條最有用理論洞察
-- 每條都附代表性證據
+- 列出本次生成的共用題項
+- 說明哪些是 `core`，哪些是 `exploratory`
 
-### 6. 14-Item Scorecard Summary
+### 6. Dynamic Scorecard Summary
 
 - 只列最值得看的高低分題項
-- 指出未評分或低信心題項
+- 指出覆蓋率低或低信心題項
 
-### 7. Appendix (JSON)
+### 7. Theory Coding Summary
+
+- 只保留最有用理論洞察
+- 若有其他 skill 協作，標示是條件式補充
+
+### 8. Appendix (JSON)
 
 ```json
 {
   "analysis_scope": {},
   "theme_analysis": [],
+  "generated_items": [],
+  "scorecard_summary": [],
   "priority_actions": [],
   "theory_coding_summary": [],
-  "scorecard_summary": [],
   "evidence": []
 }
 ```
@@ -65,8 +71,9 @@
 
 - 是否先做 Data Sufficiency Gate
 - 是否保留三大主題作為第一層分類
-- 是否用引文或摘要證據支撐每個高價值結論
-- 是否避免從單一評論推出整體結論
+- 是否先生成共用題項，再評分單篇評論
+- 是否合併同義題項
+- 是否避免單一低頻訊號被升格為核心題項
 - 是否避免不必要的理論堆疊
 - 是否明確標示偏誤與信心限制
-- 是否在沒有證據時讓題項維持 `0`
+- 是否在需要時才啟用 agent 協作理論分析
