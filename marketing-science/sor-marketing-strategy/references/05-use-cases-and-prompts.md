@@ -70,3 +70,35 @@
   - `proof_points`
   - `cta_directions`
 - 再建議用 `$copywriting` 成稿
+
+## 6) 草稿案例模板：服飾品牌 + 網紅廣告提升點擊
+
+### Use Case
+
+當使用者想用 S-O-R 解析「網紅廣告是否真的提升點擊，或只是短期聲量」。
+
+### Prompt
+
+`以服飾品牌為例，請用 $sor-marketing-strategy 設計網紅廣告方案，目標提升點擊率。請輸出 S/O/R 三段具體措施、KPI ladder、以及低效刺激微調閉環。`
+
+### Output Focus
+
+- `stimulus_design_measures` 要有受眾定義、素材角度、投放位置
+- `response_measurement_measures` 要有 CTR 與活動參與率
+- `optimization_loop` 要點出低效刺激與下一輪測試
+
+## 7) 草稿案例模板：互動體驗提升參與感
+
+### Use Case
+
+當使用者想強化「互動體驗 -> 被理解感 -> 參與行為」這條路徑。
+
+### Prompt
+
+`請用 $sor-marketing-strategy 以互動體驗活動為例，設計提升顧客參與感的策略。請特別輸出 organism 的 attitude_brand_affinity 變化與 response 的 activity_participation_rate。`
+
+### Output Focus
+
+- `organism_influence_measures` 要明確寫認知、情感、態度改變
+- `response_measurement_measures` 要含活動參與率與後續轉換指標
+- `optimization_loop` 要有資料回看節點與微調行動

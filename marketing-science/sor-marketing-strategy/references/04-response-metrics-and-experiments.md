@@ -29,6 +29,29 @@
   - notification mute
   - complaint/support rate
 
+## Activity Participation Rate
+
+對應草稿中的「活動參與率」，在這個 skill 中統一命名為 `activity_participation_rate`。
+
+定義：
+- 在指定期間內，完成指定活動行為的人數占可參與人數的比例。
+
+計算口徑：
+
+```text
+activity_participation_rate
+= unique_users_completed_activity / unique_users_eligible_for_activity
+```
+
+適用場景：
+- 品牌活動、直播互動、社群任務、會員任務、門市體驗活動。
+- S-O-R 中常用來衡量 `engagement` 層級的 response。
+
+使用注意：
+- 需要明確定義 `eligible`，避免把無法參與的人算進分母。
+- 若活動分多步驟，另補 step-level participation，避免只看總參與率。
+- 建議與 `conversion` 或 `repurchase` 一起觀察，避免只優化活動熱度。
+
 ## Experiment Mapping
 
 把 S-O-R 假設寫成：

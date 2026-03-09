@@ -36,6 +36,7 @@
 | --- | --- | --- | --- | --- |
 | cognitive |  |  |  |  |
 | emotional |  |  |  |  |
+| attitude_brand_affinity |  |  |  |  |
 | trust_risk |  |  |  |  |
 | value_appraisal |  |  |  |  |
 | intrusiveness_friction |  |  |  |  |
@@ -50,7 +51,33 @@
 | repurchase |  |  |  |
 | advocacy |  |  |  |
 
-## 3) Strategy Actions
+## 3) S/O/R 三段具體措施
+
+### Stimulus Design Measures
+
+| Measure | Objective | Audience/Channel | Success Signal |
+| --- | --- | --- | --- |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
+
+### Organism Influence Measures
+
+| Measure | Target Psychology Shift | Evidence Or Assumption | Success Signal |
+| --- | --- | --- | --- |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
+
+### Response Measurement Measures
+
+| Measure | Response Level | Metric Definition | Decision Threshold |
+| --- | --- | --- | --- |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
+
+## 4) Strategy Actions
 
 | Objective | Stimulus Change | Expected Organism Shift | Target Response | Owner |
 | --- | --- | --- | --- | --- |
@@ -58,7 +85,7 @@
 |  |  |  |  |  |
 |  |  |  |  |  |
 
-## 4) Channel Plan
+## 5) Channel Plan
 
 | Channel | Message Role | Stimulus Type | Timing | Success Signal |
 | --- | --- | --- | --- | --- |
@@ -66,35 +93,65 @@
 |  |  |  |  |  |
 |  |  |  |  |  |
 
-## 5) KPI Ladder
+## 6) KPI Ladder
 
 | Goal | Leading Metric | Result Metric | Guardrail | Window |
 | --- | --- | --- | --- | --- |
 |  |  |  |  |  |
 |  |  |  |  |  |
 
-## 6) Experiment Plan
+## 7) Experiment Plan
 
 | Hypothesis | Control | Variant | Primary Metric | Guardrails | Decision Rule |
 | --- | --- | --- | --- | --- | --- |
 |  |  |  |  |  |  |
 |  |  |  |  |  |  |
 
-## 7) Message Strategy Brief
+## 8) Optimization Loop
+
+### Response Data To Review
+
+- Data Point 1:
+- Data Point 2:
+- Data Point 3:
+
+### Low Efficiency Stimuli
+
+| Stimulus | Why Low Efficiency | Evidence |
+| --- | --- | --- |
+|  |  |  |
+|  |  |  |
+
+### Tuning Actions
+
+| Action | Expected Impact | Owner | ETA |
+| --- | --- | --- | --- |
+|  |  |  |  |
+|  |  |  |  |
+
+### Next Test
+
+- Hypothesis:
+- Control:
+- Variant:
+- Primary Metric:
+- Guardrails:
+
+## 9) Message Strategy Brief
 
 - Core Tension:
 - Message Angles:
 - Proof Points:
 - CTA Directions:
 
-## 8) Risks And Ethics
+## 10) Risks And Ethics
 
 | Risk | Why It Matters | Mitigation | Validation Needed |
 | --- | --- | --- | --- |
 |  |  |  |  |
 |  |  |  |  |
 
-## 9) Next 30 Day Actions
+## 11) Next 30 Day Actions
 
 | Week | Action | Owner | Deliverable |
 | --- | --- | --- | --- |

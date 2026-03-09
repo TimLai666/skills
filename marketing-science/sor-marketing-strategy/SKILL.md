@@ -109,6 +109,7 @@ Stimulus 五類：
 把消費者內在歷程拆成以下五類：
 - `cognitive`：是否看懂、是否容易比較、是否降低認知負荷
 - `emotional`：是否感到被理解、被重視、安心、興奮、好奇
+- `attitude_brand_affinity`：是否形成正向態度、品牌好感與「這家店很貼心」的判斷
 - `trust_risk`：是否相信品牌、是否覺得風險可控
 - `value_appraisal`：是否認為值得、相關、划算、符合自我需求
 - `intrusiveness_friction`：是否覺得被打擾、被監視、被硬推、被迫行動
@@ -152,10 +153,19 @@ Response 依商業成熟度拆成五級：
     "organism": [],
     "response": []
   },
+  "stimulus_design_measures": [],
+  "organism_influence_measures": [],
+  "response_measurement_measures": [],
   "strategy_actions": [],
   "channel_plan": [],
   "kpi_ladder": [],
   "experiment_plan": [],
+  "optimization_loop": {
+    "response_data_to_review": [],
+    "low_efficiency_stimuli": [],
+    "tuning_actions": [],
+    "next_test": ""
+  },
   "risks_and_ethics": [],
   "next_30_day_actions": []
 }
@@ -164,10 +174,14 @@ Response 依商業成熟度拆成五級：
 欄位要求：
 - `executive_summary`：2-5 點關鍵判斷
 - `sor_map`：至少各列出 3 個高影響因子，並串成因果鏈
+- `stimulus_design_measures`：對應草稿的「Stimulus 設計方式」，至少列 3 項具體措施
+- `organism_influence_measures`：對應草稿的「Organism 影響方式」，至少列 3 項具體措施
+- `response_measurement_measures`：對應草稿的「Response 測量方式」，至少列 3 項具體措施
 - `strategy_actions`：每項行動包含 `objective`、`stimulus_change`、`expected_organism_shift`、`target_response`
 - `channel_plan`：至少標出 `channel`、`message_role`、`timing`
 - `kpi_ladder`：每個目標 response 都要有 leading 與 lagging 指標
 - `experiment_plan`：列出優先測試假設、control/variant 概念、風險與最小可行測試
+- `optimization_loop`：固定包含 `response_data_to_review`、`low_efficiency_stimuli`、`tuning_actions`、`next_test`
 - `risks_and_ethics`：至少覆蓋 trust、intrusiveness、measurement gaps
 - `next_30_day_actions`：拆成週或階段
 
