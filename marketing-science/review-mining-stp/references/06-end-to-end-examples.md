@@ -32,6 +32,7 @@
 - 輸出完整 `Segmentation Summary`、`Targeting Summary`、`Positioning Summary`、`Integrated STP Actions`
 - `Segmentation Summary` 內含人／貨／場、`System 1 / System 2`、Maslow 關鍵字
 - `Positioning Summary` 內含理想點與四象限策略
+- `Positioning Summary` 內含真實散佈圖、品牌點、理想點、由原點出發的屬性向量、座標表與向量表
 
 ## Example B: Segmentation Only
 
@@ -101,6 +102,10 @@
 - 先建立 `Positioning Scorecard`
 - 預設 `positioning_method_used = factor_analysis`
 - 輸出 `POD / POP`、理想點分析與四象限策略矩陣
+- 輸出 `Perceptual Map Figure`
+- 圖面保留品牌點與理想點
+- 圖面疊加由原點 `(0,0)` 出發的屬性向量
+- 輸出 `Perceptual Map Coordinate Table` 與 `Perceptual Map Vector Table`
 
 ## Example E: Custom Missing Prerequisite
 
@@ -119,6 +124,32 @@
 - 回傳 `MissingPrerequisiteOutput`
 - `acceptable_upstream_artifacts` 至少列出 `positioning_scorecard`
 - `auto_backfill_allowed=false`
+
+## Example G: MDS Without Attribute Vectors
+
+### Input
+
+```json
+{
+  "run_mode": "positioning",
+  "analysis_goal": "使用品牌相似性資料建立知覺圖",
+  "positioning_method": "mds",
+  "upstream_artifacts": {
+    "brand_similarity_matrix": [
+      [0, 2, 5],
+      [2, 0, 3],
+      [5, 3, 0]
+    ]
+  },
+  "brands": ["品牌A", "品牌B", "品牌C"]
+}
+```
+
+### Expected Output Requirements
+
+- 輸出品牌點 / 理想點散佈圖
+- 明示 `attribute_vectors_not_defined`
+- 不輸出假的向量表
 
 ## Example F: Cluster Share Guardrail
 

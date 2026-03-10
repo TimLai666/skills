@@ -37,6 +37,10 @@
   - 理想點
   - `factor_analysis` default
   - `MDS` exception rule
+  - 真實散佈圖
+  - 品牌點保留
+  - 原點屬性向量
+  - 座標表與向量表
   - `POD / POP`
   - 訴求 / 改善 / 改變 / 放棄
 - `Dynamic Scorecard Summary` 明確要求信度 / 效度分析
@@ -56,6 +60,9 @@
 - 是否漏掉 `cluster >5%`
 - 是否漏掉 `LLM bridge -> positioning scorecard`
 - 是否漏掉 `ideal point`
+- 是否漏掉 `perceptual map figure`
+- 是否漏掉 `brand points retained`
+- 是否漏掉 `attribute vectors from origin`
 - 是否漏掉 `POD / POP`
 - 是否漏掉 `訴求 / 改善 / 改變 / 放棄`
 - 是否可從 `references/07-review-mining-improve-traceability.md` 完成最終對照

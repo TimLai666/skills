@@ -47,7 +47,11 @@
 - `positioning_scorecard`
 - `dynamic_scorecard_summary`
 - `positioning_method_used`
-- `perceptual_map_summary`
+- `perceptual_map_figure`
+- `perceptual_map_coordinate_table`
+- `perceptual_map_vector_table`
+- `perceptual_map_method`
+- `perceptual_map_interpretation`
 - `positioning_diagnostics`
 - `strategy_matrix`
 
@@ -85,6 +89,10 @@
 - targeting 是否明確做 target selection
 - positioning 是否有品牌欄與理想點
 - positioning 是否預設使用 `factor_analysis`
+- positioning 是否輸出真實散佈圖
+- positioning 是否保留品牌點
+- positioning 是否輸出由原點出發的屬性向量
+- positioning 是否附座標表與向量表
 - `Dynamic Scorecard Summary` 是否包含信度 / 效度分析
 - 是否有 `POD / POP`
 - 是否有訴求 / 改善 / 改變 / 放棄

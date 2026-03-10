@@ -18,6 +18,7 @@ description: Use when customer reviews, survey comments, support tickets, app st
 - `貨` 類訊號必須標記 `System 1 / System 2`。
 - Maslow 分析必須列出五需求關鍵字。
 - 定位分析以前必須先建立定位評分表。
+- 知覺圖輸出必須為真實散佈圖，且保留品牌點、理想點與原點屬性向量。
 - 預設輸出語言為繁體中文。
 
 ## Trigger Conditions
@@ -237,6 +238,11 @@ Gate 規則：
 - 預設方法：`factor_analysis`
 - 僅在輸入為品牌相似性或非屬性資料時使用 `MDS`
 - 輸出中必須標示 `positioning_method_used`
+- `factor_analysis` 路徑下，知覺圖必須為真實散佈圖，圖面中保留品牌點與理想點，並疊加由原點 `(0,0)` 出發的屬性向量
+- 品牌點 / 理想點座標來源為因素分數；屬性向量來源為因素負荷量
+- `MDS` 路徑下，品牌點 / 理想點座標來源為 MDS 座標；若輸入不是屬性資料，不得偽造屬性向量
+- 圖面後製僅限於標籤避讓、顏色分層、理想點特殊符號、向量箭頭、圖例、軸標、透明度與字體調整
+- 不得刪除品牌點、改變實際座標、以示意線替代真實向量，或將向量起點移離原點
 
 定位輸出必含：
 
@@ -245,6 +251,11 @@ Gate 規則：
 - 理想點分析
 - 競爭態勢分析
 - `POD / POP`
+- `Perceptual Map Figure`
+- `Perceptual Map Coordinate Table`
+- `Perceptual Map Vector Table`
+- `Perceptual Map Method`
+- `Perceptual Map Interpretation`
 - 四象限策略矩陣：
   - 訴求重點
   - 改善重點
@@ -277,6 +288,10 @@ Gate 規則：
 - 不得跳過 `System 1 / System 2`、Maslow keywords 或 cluster `>5%` guardrail。
 - 不得只做差異表而不做 target selection。
 - 不得先畫知覺圖再補定位評分表。
+- 不得以知覺圖摘要替代圖像輸出。
+- 不得刪除品牌點。
+- 不得將屬性向量起點設為非原點。
+- 不得在 `MDS` 下捏造屬性向量。
 - 不得省略理想點、`POD / POP` 或四象限策略矩陣。
 - 不得將 `factor_analysis` 與 `MDS` 無規則混用。
 - 不得省略 `Dynamic Scorecard Summary` 的信度 / 效度說明。
