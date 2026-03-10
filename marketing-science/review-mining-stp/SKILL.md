@@ -210,12 +210,24 @@ Gate 規則：
 
 - 連續或序位反應變數：`ANOVA / post-hoc / regression`
 - 二元反應變數：`chi-square / logistic regression`
+- 成對比較預設使用 `post-hoc (Tukey HSD, alpha=0.05)`
 
 輸出規則：
 
 - 不得只停留於差異表。
 - 必須明確輸出優先目標市場、次優先市場、暫不投入市場。
 - 每項選擇均需附統計依據、市場規模 / 占比與品牌適配理由。
+
+`Hard Rule`（必驗）：
+
+- 若有可用輪廓欄位（`profile_*`），必須輸出 `profile_significance_summary`。
+- 若有 ANOVA 顯著變數（`p<0.05`），必須輸出對應 `pairwise_comparison_table`。
+- 若無可用輪廓欄位，`profile_significance_summary` 必須回 `status=not_available` 與明確原因。
+
+`Recommendation`（建議）：
+
+- 在目標選擇後補充 `proactive_marketing_notes`，說明如何從反應式策略轉為需求塑造。
+- 依目標客群與差異化屬性補充 `usp_translation_candidates`，連接分析結果與訴求語句。
 
 參見 [references/03-targeting.md](./references/03-targeting.md)。
 
@@ -243,6 +255,8 @@ Gate 規則：
 - `MDS` 路徑下，品牌點 / 理想點座標來源為 MDS 座標；若輸入不是屬性資料，不得偽造屬性向量
 - 圖面後製僅限於標籤避讓、顏色分層、理想點特殊符號、向量箭頭、圖例、軸標、透明度與字體調整
 - 不得刪除品牌點、改變實際座標、以示意線替代真實向量，或將向量起點移離原點
+- `factor_analysis` 路徑必須輸出 `projection_interpretation`（品牌點沿屬性向量投影與理想點投影重要性判讀）
+- `MDS` 路徑若無屬性向量，`projection_interpretation` 必須標示 `not_available` 與原因
 
 定位輸出必含：
 
@@ -256,6 +270,7 @@ Gate 規則：
 - `Perceptual Map Vector Table`
 - `Perceptual Map Method`
 - `Perceptual Map Interpretation`
+- `Projection Interpretation`
 - 四象限策略矩陣：
   - 訴求重點
   - 改善重點
@@ -278,6 +293,8 @@ Gate 規則：
 - `Positioning Summary`
 - `Integrated STP Actions`
 - `Appendix (JSON)`
+- `proactive_marketing_notes`（recommendation）
+- `usp_translation_candidates`（recommendation）
 
 參見 [references/05-output-contract-and-quality-rules.md](./references/05-output-contract-and-quality-rules.md)。
 
@@ -287,11 +304,13 @@ Gate 規則：
 - 不得因 partial / custom run 省略 prerequisite trace。
 - 不得跳過 `System 1 / System 2`、Maslow keywords 或 cluster `>5%` guardrail。
 - 不得只做差異表而不做 target selection。
+- 不得省略 `profile_significance_summary`（可用輪廓欄位時）與 `pairwise_comparison_table`（ANOVA 顯著時）。
 - 不得先畫知覺圖再補定位評分表。
 - 不得以知覺圖摘要替代圖像輸出。
 - 不得刪除品牌點。
 - 不得將屬性向量起點設為非原點。
 - 不得在 `MDS` 下捏造屬性向量。
+- 不得省略 `projection_interpretation`。
 - 不得省略理想點、`POD / POP` 或四象限策略矩陣。
 - 不得將 `factor_analysis` 與 `MDS` 無規則混用。
 - 不得省略 `Dynamic Scorecard Summary` 的信度 / 效度說明。

@@ -6,6 +6,8 @@
 
 ## Required Traceability Checks
 
+> 本版依指定「排除第 1 項（Body 欄位優先規則）」，其餘缺漏項目必須可追蹤。
+
 ### 核心概念
 
 - [ ] Maslow 五需求均有對應關鍵字
@@ -27,6 +29,9 @@
 - [ ] 含 `potential-target-market`
 - [ ] 連續反應變數使用 `ANOVA / regression`
 - [ ] 二元反應變數使用 `chi-square / logistic regression`
+- [ ] 有輪廓欄位時輸出 `profile_significance_summary`
+- [ ] 無輪廓欄位時輸出 `not_available + reason`
+- [ ] ANOVA 顯著時輸出 `pairwise_comparison_table`
 - [ ] 輸出含 `target selection decision`
 
 ### Positioning
@@ -37,12 +42,19 @@
 - [ ] 定位基礎含屬性功能 / 利益用途 / 品牌個性形象
 - [ ] 預設使用 `factor_analysis`
 - [ ] 僅在相似性資料時使用 `MDS`
+- [ ] `factor_analysis` 路徑輸出 `projection_interpretation`
+- [ ] `MDS` 無向量時輸出 `projection_interpretation.not_available + reason`
 - [ ] 含關鍵因素評估
 - [ ] 含標竿分析
 - [ ] 含理想點分析
 - [ ] 含競爭態勢分析
 - [ ] 含 `POD / POP`
 - [ ] 含訴求 / 改善 / 改變 / 放棄
+
+### Recommendation Outputs
+
+- [ ] 可選輸出 `proactive_marketing_notes`
+- [ ] 可選輸出 `usp_translation_candidates`
 
 ### Partial / Custom Run
 

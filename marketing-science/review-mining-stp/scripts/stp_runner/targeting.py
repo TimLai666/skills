@@ -26,6 +26,104 @@ def load_targeting_inputs(
     return dataset, segmentation
 
 
+def _safe_float(value: Any) -> float:
+    return float(value) if value is not None else 0.0
+
+
+def _build_profile_significance_summary(dataset: Any) -> dict[str, Any]:
+    from scipy.stats import chi2_contingency
+    import pandas as pd
+
+    profile_columns = [column for column in dataset.columns if column.startswith("profile_")]
+    if not profile_columns:
+        return {
+            "status": "not_available",
+            "alpha": 0.05,
+            "variables": [],
+            "significant_variables": [],
+            "reason": "No profile_* columns were provided in targeting_dataset.csv.",
+        }
+
+    profile_results = []
+    for column in profile_columns:
+        table = pd.crosstab(dataset["cluster"], dataset[column])
+        if table.shape[0] < 2 or table.shape[1] < 2:
+            continue
+        chi2, p_value, dof, _ = chi2_contingency(table)
+        profile_results.append(
+            {
+                "variable": column,
+                "method": "chi_square",
+                "chi2": _safe_float(chi2),
+                "p_value": _safe_float(p_value),
+                "dof": int(dof),
+                "significant": bool(p_value < 0.05),
+            }
+        )
+
+    if not profile_results:
+        return {
+            "status": "not_available",
+            "alpha": 0.05,
+            "variables": [],
+            "significant_variables": [],
+            "reason": (
+                "Profile columns were provided but lacked enough categorical variation "
+                "for chi-square significance tests."
+            ),
+        }
+
+    return {
+        "status": "available",
+        "alpha": 0.05,
+        "variables": profile_results,
+        "significant_variables": [
+            item["variable"] for item in profile_results if bool(item["significant"])
+        ],
+        "reason": "",
+    }
+
+
+def _build_pairwise_comparison_table(dataset: Any, columns: list[str]) -> list[dict[str, Any]]:
+    from statsmodels.stats.multicomp import pairwise_tukeyhsd
+
+    results: list[dict[str, Any]] = []
+    tested_columns = list(dict.fromkeys(columns))
+    for column in tested_columns:
+        sample = dataset[["cluster", column]].dropna()
+        if sample["cluster"].nunique() < 2:
+            continue
+        try:
+            tukey = pairwise_tukeyhsd(endog=sample[column], groups=sample["cluster"], alpha=0.05)
+        except Exception:
+            continue
+        table_data = tukey.summary().data
+        headers = [str(value) for value in table_data[0]]
+        for row_values in table_data[1:]:
+            row = dict(zip(headers, row_values))
+            reject_value = row.get("reject", False)
+            if isinstance(reject_value, bool):
+                significant = reject_value
+            else:
+                significant = str(reject_value).strip().lower() == "true"
+            results.append(
+                {
+                    "variable": column,
+                    "method": "tukey_hsd",
+                    "group1": str(row.get("group1")),
+                    "group2": str(row.get("group2")),
+                    "comparison": f"{row.get('group1')} vs {row.get('group2')}",
+                    "mean_diff": _safe_float(row.get("meandiff")),
+                    "p_value": _safe_float(row.get("p-adj")),
+                    "lower": _safe_float(row.get("lower")),
+                    "upper": _safe_float(row.get("upper")),
+                    "significant": bool(significant),
+                    "alpha": 0.05,
+                }
+            )
+    return results
+
+
 def run_targeting(dataset: Any, segmentation: dict[str, Any]) -> dict[str, Any]:
     import pandas as pd
     from scipy.stats import chi2_contingency, f_oneway
@@ -107,6 +205,11 @@ def run_targeting(dataset: Any, segmentation: dict[str, Any]) -> dict[str, Any]:
     )
     normalized["score"] = normalized.mean(axis=1)
     selected_cluster = str(normalized["score"].idxmax())
+    profile_significance_summary = _build_profile_significance_summary(dataset)
+    pairwise_comparison_table = _build_pairwise_comparison_table(
+        dataset,
+        current_columns + potential_continuous,
+    )
 
     return {
         "current_target_market": current_results,
@@ -114,7 +217,10 @@ def run_targeting(dataset: Any, segmentation: dict[str, Any]) -> dict[str, Any]:
         "method_selection": {
             "continuous_response": "ANOVA / regression",
             "binary_response": "chi-square / logistic regression",
+            "pairwise_post_hoc": "Tukey HSD (alpha=0.05)",
         },
+        "profile_significance_summary": profile_significance_summary,
+        "pairwise_comparison_table": pairwise_comparison_table,
         "target_selection_decision": {
             "selected_cluster": selected_cluster,
             "score": round(float(normalized.loc[selected_cluster, "score"]), 4),

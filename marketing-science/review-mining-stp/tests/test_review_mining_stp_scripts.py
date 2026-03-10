@@ -92,26 +92,39 @@ def build_segmentation_rows() -> list[dict[str, object]]:
     return rows
 
 
-def build_targeting_rows() -> list[dict[str, object]]:
+def build_targeting_rows(include_profiles: bool = True) -> list[dict[str, object]]:
     rows: list[dict[str, object]] = []
     specs = {
-        "segment_0": (140, 4.6, 0.88, 1, 1, 4.2),
-        "segment_1": (95, 3.9, 0.52, 1, 0, 3.6),
-        "segment_2": (70, 3.2, 0.31, 0, 0, 2.4),
+        "segment_0": (140, 4.6, 0.88, 1, 1, 4.2, "female", "shopping", "variety"),
+        "segment_1": (95, 3.9, 0.52, 1, 0, 3.6, "male", "gaming", "news"),
+        "segment_2": (70, 3.2, 0.31, 0, 0, 2.4, "male", "sports", "drama"),
     }
-    for cluster, (value, loyalty, active, potential, tried, intent) in specs.items():
+    for cluster, (
+        value,
+        loyalty,
+        active,
+        potential,
+        tried,
+        intent,
+        gender,
+        leisure,
+        channel,
+    ) in specs.items():
         for idx in range(18):
-            rows.append(
-                {
-                    "cluster": cluster,
-                    "current_value": value + idx,
-                    "loyalty_score": loyalty + (idx % 4) * 0.05,
-                    "active_rate": active - (idx % 3) * 0.01,
-                    "potential_conversion": potential,
-                    "tried_before": tried,
-                    "intent_score": intent + (idx % 3) * 0.1,
-                }
-            )
+            row: dict[str, object] = {
+                "cluster": cluster,
+                "current_value": value + idx,
+                "loyalty_score": loyalty + (idx % 4) * 0.05,
+                "active_rate": active - (idx % 3) * 0.01,
+                "potential_conversion": potential,
+                "tried_before": tried,
+                "intent_score": intent + (idx % 3) * 0.1,
+            }
+            if include_profiles:
+                row["profile_gender"] = gender
+                row["profile_leisure"] = leisure if idx % 5 else "mixed"
+                row["profile_channel"] = channel
+            rows.append(row)
     return rows
 
 
@@ -155,12 +168,12 @@ def build_ideal_point() -> dict[str, object]:
     }
 
 
-def make_input_dir(base: Path, include_similarity: bool = False) -> Path:
+def make_input_dir(base: Path, include_similarity: bool = False, include_profiles: bool = True) -> Path:
     input_dir = base / "input"
     input_dir.mkdir()
     write_json(input_dir / "review_foundation.json", build_review_foundation())
     write_csv(input_dir / "segmentation_variables.csv", build_segmentation_rows())
-    write_csv(input_dir / "targeting_dataset.csv", build_targeting_rows())
+    write_csv(input_dir / "targeting_dataset.csv", build_targeting_rows(include_profiles=include_profiles))
     write_csv(input_dir / "positioning_scorecard.csv", build_positioning_rows())
     write_json(input_dir / "brands.json", build_brands_payload(include_similarity=include_similarity))
     write_json(input_dir / "ideal_point.json", build_ideal_point())
@@ -227,6 +240,22 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
             )
             self.assertEqual(validator.returncode, 0, validator.stderr)
 
+            targeting = json.loads((output_dir / "targeting_results.json").read_text(encoding="utf-8"))
+            self.assertIn("profile_significance_summary", targeting)
+            self.assertEqual(targeting["profile_significance_summary"]["status"], "available")
+            self.assertIn("pairwise_comparison_table", targeting)
+            self.assertTrue(targeting["pairwise_comparison_table"])
+
+            diagnostics = json.loads(
+                (output_dir / "positioning_diagnostics.json").read_text(encoding="utf-8")
+            )
+            self.assertIn("projection_interpretation", diagnostics)
+            self.assertEqual(diagnostics["projection_interpretation"]["status"], "defined")
+
+            appendix = json.loads((output_dir / "appendix.json").read_text(encoding="utf-8"))
+            self.assertIn("proactive_marketing_notes", appendix)
+            self.assertIn("usp_translation_candidates", appendix)
+
     def test_segmentation_only_outputs_clusters_above_threshold(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
@@ -281,6 +310,7 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
                 (output_dir / "positioning_diagnostics.json").read_text(encoding="utf-8")
             )
             self.assertTrue(diagnostics["attribute_vectors_not_defined"])
+            self.assertEqual(diagnostics["projection_interpretation"]["status"], "not_available")
 
     def test_custom_missing_prerequisite_writes_missing_prerequisite_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -349,6 +379,82 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
             )
             self.assertNotEqual(validator.returncode, 0)
             self.assertIn("origin", validator.stderr.lower())
+
+    def test_targeting_without_profile_columns_reports_not_available(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            input_dir = make_input_dir(tmp_path, include_profiles=False)
+            output_dir = tmp_path / "output"
+
+            result = self.run_command(
+                [
+                    str(RUN_SCRIPT),
+                    "--run-mode",
+                    "full",
+                    "--input-dir",
+                    str(input_dir),
+                    "--output-dir",
+                    str(output_dir),
+                ],
+                cwd=ROOT,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+            targeting = json.loads((output_dir / "targeting_results.json").read_text(encoding="utf-8"))
+            summary = targeting["profile_significance_summary"]
+            self.assertEqual(summary["status"], "not_available")
+            self.assertTrue(summary["reason"])
+
+            validator = self.run_command(
+                [
+                    str(VALIDATE_SCRIPT),
+                    "--run-mode",
+                    "full",
+                    "--output-dir",
+                    str(output_dir),
+                ],
+                cwd=ROOT,
+            )
+            self.assertEqual(validator.returncode, 0, validator.stderr)
+
+    def test_validator_rejects_missing_projection_interpretation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            input_dir = make_input_dir(tmp_path)
+            output_dir = tmp_path / "output"
+
+            result = self.run_command(
+                [
+                    str(RUN_SCRIPT),
+                    "--run-mode",
+                    "positioning",
+                    "--input-dir",
+                    str(input_dir),
+                    "--output-dir",
+                    str(output_dir),
+                ],
+                cwd=ROOT,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+            diagnostics = json.loads(
+                (output_dir / "positioning_diagnostics.json").read_text(encoding="utf-8")
+            )
+            diagnostics.pop("projection_interpretation", None)
+            write_json(output_dir / "positioning_diagnostics.json", diagnostics)
+
+            validator = self.run_command(
+                [
+                    str(VALIDATE_SCRIPT),
+                    "--run-mode",
+                    "positioning",
+                    "--output-dir",
+                    str(output_dir),
+                ],
+                cwd=ROOT,
+            )
+            self.assertNotEqual(validator.returncode, 0)
+            self.assertIn("projection_interpretation", validator.stderr)
 
 
 if __name__ == "__main__":

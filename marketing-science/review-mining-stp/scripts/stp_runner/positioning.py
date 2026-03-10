@@ -212,6 +212,60 @@ def run_positioning(
         else:
             strategy_matrix["abandon"].append(attribute)
 
+    if not attribute_vectors_not_defined and vector_rows:
+        projection_summary = []
+        for vector in vector_rows:
+            vector_norm = math.sqrt((vector["x_end"] ** 2) + (vector["y_end"] ** 2))
+            if vector_norm == 0:
+                continue
+            ideal_projection = (
+                ideal_coords["x"] * vector["x_end"] + ideal_coords["y"] * vector["y_end"]
+            ) / vector_norm
+            brand_projection_rows = []
+            for label in brand_matrix.index:
+                row = coordinates_by_label[label]
+                projection_value = (row["x"] * vector["x_end"] + row["y"] * vector["y_end"]) / vector_norm
+                brand_projection_rows.append(
+                    {
+                        "brand": str(label),
+                        "projection": round(float(projection_value), 4),
+                    }
+                )
+            brand_projection_rows.sort(key=lambda item: item["projection"], reverse=True)
+            projection_summary.append(
+                {
+                    "attribute": vector["label"],
+                    "ideal_projection": round(float(ideal_projection), 4),
+                    "leading_brand": brand_projection_rows[0]["brand"],
+                    "leading_projection": brand_projection_rows[0]["projection"],
+                    "brand_rankings": brand_projection_rows,
+                }
+            )
+        projection_summary.sort(key=lambda item: item["ideal_projection"], reverse=True)
+        projection_interpretation = {
+            "status": "defined",
+            "method": "factor_analysis",
+            "rule": (
+                "Brand performance is interpreted by projecting brand points onto attribute vectors "
+                "from the origin; ideal-point projection indicates relative attribute importance."
+            ),
+            "attribute_projection_summary": projection_summary,
+            "importance_interpretation": (
+                "Higher ideal-point projection values imply higher relative importance for the segment."
+            ),
+        }
+    else:
+        projection_interpretation = {
+            "status": "not_available",
+            "method": positioning_method_used,
+            "reason": (
+                "Attribute vectors are not defined in this MDS run because the input is similarity-based "
+                "rather than attribute-based."
+            ),
+            "attribute_projection_summary": [],
+            "importance_interpretation": "",
+        }
+
     diagnostics = {
         "attribute_vectors_not_defined": attribute_vectors_not_defined,
         "key_factor_assessment": top_attributes,
@@ -220,6 +274,7 @@ def run_positioning(
         "competition_landscape": sorted(brand_distance_table, key=lambda item: item["distance_to_ideal"]),
         "pod_pop": {"pod": pod, "pop": pop},
         "strategy_matrix": strategy_matrix,
+        "projection_interpretation": projection_interpretation,
     }
     interpretation = (
         f"{nearest['brand']} is closest to the ideal point. "
@@ -238,6 +293,7 @@ def run_positioning(
         "positioning_method_used": positioning_method_used,
         "perceptual_map_method": perceptual_map_method,
         "perceptual_map_interpretation": interpretation,
+        "projection_interpretation": projection_interpretation,
         "positioning_diagnostics": diagnostics,
         "strategy_matrix": strategy_matrix,
     }

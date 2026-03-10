@@ -37,6 +37,8 @@
 - `current_target_market`
 - `potential_target_market`
 - `method_selection`
+- `profile_significance_summary`
+- `pairwise_comparison_table`
 - `target_selection_decision`
 - `target_selection_rationale`
 
@@ -52,6 +54,7 @@
 - `perceptual_map_vector_table`
 - `perceptual_map_method`
 - `perceptual_map_interpretation`
+- `projection_interpretation`
 - `positioning_diagnostics`
 - `strategy_matrix`
 
@@ -73,6 +76,8 @@
   "targeting_summary": {},
   "positioning_summary": {},
   "integrated_stp_actions": [],
+  "proactive_marketing_notes": [],
+  "usp_translation_candidates": [],
   "risks_bias_confidence_notes": [],
   "evidence": []
 }
@@ -87,12 +92,15 @@
 - 分群是否遵守 `每群占比 > 5%`
 - targeting 是否分 current / potential 兩條路徑
 - targeting 是否明確做 target selection
+- targeting 是否輸出 `profile_significance_summary`
+- targeting 是否在 ANOVA 顯著時輸出 `pairwise_comparison_table`
 - positioning 是否有品牌欄與理想點
 - positioning 是否預設使用 `factor_analysis`
 - positioning 是否輸出真實散佈圖
 - positioning 是否保留品牌點
 - positioning 是否輸出由原點出發的屬性向量
 - positioning 是否附座標表與向量表
+- positioning 是否輸出 `projection_interpretation`
 - `Dynamic Scorecard Summary` 是否包含信度 / 效度分析
 - 是否有 `POD / POP`
 - 是否有訴求 / 改善 / 改變 / 放棄
