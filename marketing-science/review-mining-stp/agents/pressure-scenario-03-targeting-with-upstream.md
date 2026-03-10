@@ -1,47 +1,32 @@
-# Pressure Scenario 03: Missing Data And Overclaim
+# Pressure Scenario 03: Targeting With Upstream
 
 ## Purpose
 
-測試 skill 在資料不足時，能否同時做到：
-- 正確 gate
-- 不亂推趨勢
-- 理論階段不跳過但如實標示低信心
-- 統計與分群照跑但標 exploratory
+驗證 targeting 模式是否正確使用 upstream artifacts。
 
 ## Scenario
 
-使用者只貼 4 則評論，沒有時間、渠道、產品資訊，卻要求：
-- 找出最重要趨勢
-- 比較不同市場差異
-- 建立完整題項評分
-- 推論流失主因
+輸入條件：
 
-## What This Scenario Tries To Break
+- `run_mode=targeting`
+- 已提供 `segment_profiles`
+- 已提供 `comparison_axes`
+- 無原始評論
 
-- 用極小樣本硬推趨勢
-- 捏造比較維度
-- 跳過理論映射
-- 不嘗試 `$maslow-five-needs-marketing` 或未記錄 fallback
-- 把低證據理論說成高信心結論
-- 小樣本直接給顯著差異結論
-- 小樣本分群輸出高信心強決策
+## Failure Modes Under Test
+
+- 忽略 upstream artifacts
+- 因無評論而誤判無法執行 targeting
+- 僅做比較表，不做 target selection
 
 ## Pass Criteria
 
-- 先輸出 `MissingDataOutput` 或明確限制聲明
-- 不可宣稱不存在的市場差異
-- 理論仍要映射，但可標記低信心與限制
-- 馬斯洛協作狀態有揭露，且小樣本情境下 fallback 或低信心處理一致
-- 統計與分群仍執行，且標示 `exploratory=true`、`confidence=low`
-- 有 `decision_guardrail` 防止高風險決策
-- 題項若生成，多數應標為 `exploratory`
+- 正確使用 `segment_profiles`
+- 不強迫回到 segmentation
+- 產出 `Current Target Market Summary`、`Potential Target Market Summary`、`Target Selection Decision`
 
 ## Fail Signs
 
-- 直接給完整趨勢結論
-- 略過理論欄位
-- 理論結論無證據
-- 沒有 Maslow 協作路由資訊或 fallback 理由
-- 產生大量核心題項
-- 沒有低樣本統計限制聲明
-- 沒有低樣本分群限制聲明
+- 回 `MissingDataOutput`
+- 忽略 artifacts
+- 缺少 selection decision

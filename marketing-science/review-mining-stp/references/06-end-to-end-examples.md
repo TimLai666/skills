@@ -1,24 +1,25 @@
 # End-To-End Examples
 
-## Example A: 正常協作（Maslow 成功引導）
+## Example A: Full STP
 
-### Input（最小可執行）
+### Input
 
 ```json
 {
-  "analysis_goal": "找出近 30 天痛點並提出優先行動",
+  "run_mode": "full",
+  "analysis_goal": "根據評論完成 STP 並提出優先策略",
   "reviews": [
     {
       "id": "R01",
       "customer_id": "C001",
-      "review_text": "客服回覆快，但安裝說明不夠清楚",
+      "review_text": "包裝質感好，適合和朋友分享，但價格有點高",
       "channel": "app_store",
       "rating": 3
     },
     {
       "id": "R02",
       "customer_id": "C002",
-      "review_text": "價格合理，功能有改善，會考慮再買",
+      "review_text": "提神效果不錯，會回購，但希望價格再合理一點",
       "channel": "app_store",
       "rating": 5
     }
@@ -26,223 +27,111 @@
 }
 ```
 
-### Expected Behavior
+### Expected Output Requirements
 
-- 先做逐條語意解析，再做四理論映射。
-- 馬斯洛映射先引導 `$maslow-five-needs-marketing`。
-- 產出三大主題、共享動態題項、統計驗證與分群摘要。
+- 輸出完整 `Segmentation Summary`、`Targeting Summary`、`Positioning Summary`、`Integrated STP Actions`
+- `Segmentation Summary` 內含人／貨／場、`System 1 / System 2`、Maslow 關鍵字
+- `Positioning Summary` 內含理想點與四象限策略
 
-### Theory Trace（節錄）
-
-```json
-{
-  "theory": "Maslow's Hierarchy of Needs",
-  "mapping_unit": "review",
-  "evidence_refs": ["R01", "R02"],
-  "source_skill": "maslow-five-needs-marketing",
-  "confidence": "medium",
-  "limitations": []
-}
-```
-
----
-
-## Example B: Maslow Fallback（不可用時回退）
-
-### Trigger
-
-- 嘗試引導 `$maslow-five-needs-marketing` 失敗（不可用或回傳無效）。
-
-### Required Output Markers
-
-```json
-{
-  "theory": "Maslow's Hierarchy of Needs",
-  "maslow_collaboration_status": {
-    "attempted": true,
-    "used": false,
-    "fallback_reason": "skill_unavailable_or_invalid_response"
-  },
-  "confidence": "low"
-}
-```
-
-### Evidence Trace（節錄）
-
-```json
-{
-  "theory": "Maslow's Hierarchy of Needs",
-  "mapping_unit": "cluster",
-  "evidence_refs": ["R10", "R11", "R14"],
-  "source_skill": "customer-review-mining:fallback",
-  "confidence": "low",
-  "limitations": ["maslow_external_skill_unavailable"]
-}
-```
-
----
-
-## Example C: 小樣本限制（統計與分群照跑，但 exploratory）
+## Example B: Segmentation Only
 
 ### Input
 
 ```json
 {
-  "analysis_goal": "找出主要問題並比較市場差異",
+  "run_mode": "segmentation",
+  "analysis_goal": "只建立市場區隔與畫像",
   "reviews": [
-    { "id": "R1", "review_text": "客服慢", "rating": 2 },
-    { "id": "R2", "review_text": "裝起來有點難", "rating": 3 },
-    { "id": "R3", "review_text": "價格還可以", "rating": 4 },
-    { "id": "R4", "review_text": "功能普通", "rating": 3 }
+    { "id": "R11", "review_text": "跟同事一起喝很有氣氛，包裝也很體面" },
+    { "id": "R12", "review_text": "CP 值普通，但提神效果夠" }
   ]
 }
 ```
 
-### Expected Behavior
+### Expected Output Requirements
 
-- 統計與分群仍執行，不可跳過。
-- 全部推論標記 `exploratory=true`、`confidence=low`。
-- 不可輸出高信心強決策語句。
+- 僅輸出 segmentation 相關段落
+- 不輸出完整 targeting / positioning
+- 若分群初跑出現 `<5%` 小群，`Execution Scope Summary` 必須記錄重跑
 
-### Example Statistical Output（節錄）
-
-```json
-{
-  "comparison_id": "S1",
-  "test_name": "Mann-Whitney U",
-  "p_value": 0.19,
-  "p_value_adj": 0.27,
-  "effect_size": "0.18 (Cliff's delta)",
-  "ci_95": [-0.12, 0.45],
-  "exploratory": true,
-  "confidence": "low",
-  "limitations": ["small_sample_size"]
-}
-```
-
-### Example Clustering Output（節錄）
-
-```json
-{
-  "cluster_configuration": {
-    "primary_method": "k-medoids",
-    "selected_k": 2
-  },
-  "cluster_stability": {
-    "ari_mean": 0.32,
-    "nmi_mean": 0.37,
-    "exploratory": true,
-    "confidence": "low"
-  },
-  "decision_guardrail": "Do not use as high-confidence policy decision"
-}
-```
-
----
-
-## Example D: 動態題項正規化（同義詞合併）
-
-### Candidate Mentions（Before）
-
-- 回覆快、客服秒回、溝通迅速、等待過久
-- CP 值高、價格划算、值得買、價格合理
-
-### Normalized Shared Items（After）
-
-```json
-[
-  {
-    "label": "response_speed",
-    "definition": "顧客對客服回覆與處理速度的評價",
-    "parent_theme": "service_experience",
-    "evidence_cues": ["回覆快", "客服秒回", "等待過久"],
-    "status": "core"
-  },
-  {
-    "label": "value_for_money",
-    "definition": "顧客對價格與整體體驗匹配度的評價",
-    "parent_theme": "value_perception",
-    "evidence_cues": ["CP 值高", "價格划算", "價格合理"],
-    "status": "core"
-  }
-]
-```
-
-### Scoring Consistency Rule
-
-- 同一分析範圍內，所有評論都使用同一組 shared items。
-- 不可逐篇新建題項；低頻新訊號先標 `exploratory`。
-
----
-
-## Example E: Scorecard -> Clustering（必經鏈路）
+## Example C: Targeting With Upstream Artifacts
 
 ### Input
 
 ```json
 {
-  "analysis_goal": "依在意面向分群並制定群組策略",
-  "reviews": [
-    { "id": "R11", "customer_id": "U01", "review_text": "客服回覆慢，但價格還可以" },
-    { "id": "R12", "customer_id": "U01", "review_text": "問題回覆要催很多次" },
-    { "id": "R21", "customer_id": "U02", "review_text": "價格合理、性能符合預期" },
-    { "id": "R22", "customer_id": "U03", "review_text": "安裝教學不清楚，但產品本身不錯" }
-  ]
+  "run_mode": "targeting",
+  "analysis_goal": "界定現有與潛在目標市場",
+  "upstream_artifacts": {
+    "segment_profiles": [
+      { "segment_id": "S1", "share": 0.38, "traits": ["重視提神", "對價格敏感"] },
+      { "segment_id": "S2", "share": 0.27, "traits": ["重視分享情境", "偏好包裝質感"] }
+    ]
+  },
+  "comparison_axes": ["loyalty", "purchased_or_not"]
 }
 ```
 
-### Required Pipeline
+### Expected Output Requirements
 
-1. 生成 `generated_items`（只用 `core` 題項進分群）
-2. 逐則評分得到 score matrix
-3. 先做統計驗證（含 FDR + effect size + CI）
-4. 跑 `K-medoids`（k=2..8, silhouette 選 k）
-5. 用 `Hierarchical (Ward)` 解讀群間關係
-6. 產出 `cluster_action_map`
+- 直接使用 `segment_profiles`
+- 執行 `current-target-market` 與 `potential-target-market`
+- 依反應變數型態切分方法
+- 最終輸出必含 `Target Selection Decision`
 
-### Example Output（節錄）
+## Example D: Positioning Only
+
+### Input
 
 ```json
 {
-  "cluster_configuration": {
-    "primary_method": "k-medoids",
-    "secondary_method": "hierarchical_ward",
-    "k_search_range": [2, 8],
-    "selected_k": 3
-  },
-  "cluster_profiles": [
-    {
-      "cluster_id": "CL1",
-      "size": 1,
-      "share": 0.33,
-      "top_attention_items": ["response_speed", "issue_resolution"],
-      "low_attention_items": ["value_for_money"],
-      "pain_points": ["slow_response"],
-      "value_drivers": ["fast_resolution"],
-      "recommended_actions": ["sla_24h", "ticket_follow_up"]
-    },
-    {
-      "cluster_id": "CL2",
-      "size": 1,
-      "share": 0.33,
-      "top_attention_items": ["value_for_money", "product_fit"],
-      "low_attention_items": ["response_speed"],
-      "pain_points": ["expectation_gap"],
-      "value_drivers": ["stable_performance"],
-      "recommended_actions": ["pricing_copy_alignment"]
-    }
-  ],
-  "cluster_stability": [
-    {
-      "method": "bootstrap_200",
-      "ari_mean": 0.71,
-      "nmi_mean": 0.75,
-      "min_cluster_share": 0.22
-    }
-  ],
-  "cluster_action_map": [
-    { "cluster_id": "CL1", "actions": ["sla_24h", "priority_response_queue"] },
-    { "cluster_id": "CL2", "actions": ["value_message_rewrite"] }
+  "run_mode": "positioning",
+  "analysis_goal": "只做定位評分表與知覺圖",
+  "brands": ["品牌A", "品牌B", "品牌C"],
+  "ideal_point_definition": "消費者心中最理想的即飲咖啡",
+  "reviews": [
+    { "id": "R21", "review_text": "品牌A包裝有質感，但價格偏高" },
+    { "id": "R22", "review_text": "品牌B價格合理，但形象普通" }
   ]
 }
 ```
+
+### Expected Output Requirements
+
+- 先建立 `Positioning Scorecard`
+- 預設 `positioning_method_used = factor_analysis`
+- 輸出 `POD / POP`、理想點分析與四象限策略矩陣
+
+## Example E: Custom Missing Prerequisite
+
+### Input
+
+```json
+{
+  "run_mode": "custom",
+  "analysis_goal": "只畫知覺圖",
+  "requested_modules": ["perceptual-map"]
+}
+```
+
+### Expected Output Requirements
+
+- 回傳 `MissingPrerequisiteOutput`
+- `acceptable_upstream_artifacts` 至少列出 `positioning_scorecard`
+- `auto_backfill_allowed=false`
+
+## Example F: Cluster Share Guardrail
+
+```json
+{
+  "initial_k": 4,
+  "initial_cluster_shares": [0.51, 0.29, 0.14, 0.04],
+  "rerun_trigger": "lowest_share_below_threshold",
+  "threshold": 0.05
+}
+```
+
+### Expected Output Requirements
+
+- 若最低 share `< 0.05`，降低 `k`
+- `Execution Scope Summary` 必須記錄 `cluster_threshold`、`reruns_performed`、`final_k`

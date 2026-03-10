@@ -1,94 +1,70 @@
 # Validation Checklist
 
-## RED: Baseline Findings From Previous Skill
+## RED: Baseline Failures To Replace
 
-- 理論流程是條件式，與「理論必經」要求衝突
-- Workflow 順序未強制「逐條語意解析 -> 理論映射 -> 主題整合」
-- `Theory Coding Summary` 不是必填段落
-- JSON 最小欄位缺少理論必填欄位
-- 未明確規範 `$maslow-five-needs-marketing` 的必跑路由與 fallback 記錄
-- 缺少單一文件的端到端範例鏈（input -> theory -> dynamic items -> output）
-- 缺少「評分後必做統計驗證與分群」的固定流程
-- 缺少統計檢定完整欄位（FDR、effect size、CI）
-- 缺少分群穩定度與低樣本 guardrail
-- 壓力場景未完整覆蓋理論必經失敗模式
+- 舊 skill 非 STP router
+- 不支援 stage-aware `run_mode`
+- 不支援 `MissingPrerequisiteOutput`
+- 缺少 `current-target-market` / `potential-target-market`
+- 缺少品牌欄 + 理想點的定位評分表契約
+- 缺少 `POD / POP`
+- 缺少四象限策略矩陣
+- 缺少 `每群占比 > 5%` rerun guardrail
 
-## GREEN: Post-Redesign Checks
+## GREEN: Required Post-Upgrade Checks
 
-- `SKILL.md` frontmatter 只有 `name` 與 `description`
+- `SKILL.md` name 已改為 `review-mining-stp`
 - description 以 `Use when...` 開頭
-- 明確定義「理論必經」與四理論全覆蓋
-- 明確定義 Maslow 路由為 `預設呼叫 + 可回退`
-- Workflow 已固定為：
-  - 逐條語意解析
-  - 必經理論映射
-  - 主題整合
-  - 動態題項生成與評分
-  - 統計驗證
-  - 顧客分群
-- `Theory Coding Summary` 為預設必填段落
-- `Theory Coding Summary` 有 Maslow 協作狀態欄位：
-  - `attempted`
-  - `used`
-  - `fallback_reason`
-- JSON 最小欄位包含：
-  - `theory_application_summary`
-  - `theory_evidence_trace`
-- `theory_evidence_trace` 可標記 `source_skill`
-- 動態題項仍為語料級共用集合
-- 外部 skill 協作仍是補充，不是主流程替代
-- `Do not use` 不再禁止統計檢定，僅禁止因果過度宣稱
-- `customer_id` 已列為強烈建議欄位
-- 主報告必含：
-  - `Statistical Validation Summary`
-  - `Customer Cluster Summary`
-  - `Cluster Archetype Cards`
-  - `Cluster-Specific Priority Actions`
-- JSON 最小欄位已包含：
-  - `statistical_validation_summary`
-  - `statistical_test_results`
-  - `multiple_comparison_control`
-  - `cluster_configuration`
-  - `cluster_profiles`
-  - `cluster_assignments`
-  - `cluster_stability`
-  - `cluster_action_map`
-- `references/06-end-to-end-examples.md` 已存在且可從 `SKILL.md` 直接導覽
-- `references/07-statistical-and-clustering-validation.md` 已存在且可從 `SKILL.md` 導覽
-- 範例同時覆蓋：
-  - 成功協作（Maslow used=true）
-  - fallback（attempted=true, used=false）
-  - 小樣本低信心情境
-  - 同義題項合併前後對照
-  - Scorecard -> Clustering 完整鏈路（Example E）
+- `run_mode` 含 `full | segmentation | targeting | positioning | custom`
+- `requested_modules` 已定義固定白名單
+- 含 `MissingPrerequisiteOutput`
+- `Execution Scope Summary` 為永遠必填
+- segmentation 明確包含：
+  - 人／貨／場
+  - `System 1 / System 2`
+  - Maslow 五需求關鍵字
+  - 區隔變數 taxonomy
+  - `>5%` rerun guardrail
+- targeting 明確包含：
+  - `current-target-market`
+  - `potential-target-market`
+  - `ANOVA / regression`
+  - `chi-square / logistic regression`
+  - `Target Selection Decision`
+- positioning 明確包含：
+  - 定位評分表
+  - 品牌欄
+  - 理想點
+  - `factor_analysis` default
+  - `MDS` exception rule
+  - `POD / POP`
+  - 訴求 / 改善 / 改變 / 放棄
+- `Dynamic Scorecard Summary` 明確要求信度 / 效度分析
+- references 已改為 STP 規格語氣
+- validation scenarios 已覆蓋：
+  - full STP
+  - segmentation only
+  - targeting with upstream
+  - positioning only
+  - custom missing prerequisite
 
-## REFACTOR: Mandatory Theory Compliance Checks
+## REFACTOR: Final Audit Checks
 
-- 是否每次都套用四理論
-- 是否每個理論都有證據追溯
-- 是否每個理論都有信心等級
-- 是否在低證據時標示限制而非跳過
-- 是否先嘗試 `$maslow-five-needs-marketing`，失敗才 fallback
-- 是否避免把 fallback 說成成功協作
-- 是否避免理論段落過長壓過商業重點
-- 是否仍阻擋無證據因果推論
-- 是否有完整 JSON appendix 範例且欄位齊全
-- 是否避免在範例中復活固定 14 題 rubric
-- 是否先評分再分群（不可反序）
-- 是否使用 `core` 題項共享分數矩陣分群
-- 是否同時輸出 `K-medoids` 主分群與 `Ward` 群間解讀
-- 是否有統計檢定 + FDR + effect size + CI
-- 是否有 bootstrap 分群穩定度（ARI/NMI）與最小群體占比
-- 低樣本是否 `exploratory=true` 且 `confidence=low`
-- 是否避免把關聯差異寫成因果
+- 是否仍有舊 skill 名稱殘留識別字
+- 是否仍有對話式主流程敘述
+- 是否漏掉 `Maslow keywords`
+- 是否漏掉 `cluster >5%`
+- 是否漏掉 `LLM bridge -> positioning scorecard`
+- 是否漏掉 `ideal point`
+- 是否漏掉 `POD / POP`
+- 是否漏掉 `訴求 / 改善 / 改變 / 放棄`
+- 是否可從 `references/07-review-mining-improve-traceability.md` 完成最終對照
 
 ## Acceptance Gate
 
-只有以下都成立，才可宣稱完成：
+僅在下列條件全部成立時，方可視為完成：
 
-- 理論流程為必經且可驗證
-- 輸出契約含理論必填段落與欄位
-- Maslow 協作路由與 fallback 可審計
-- 動態題項規則保持有效
-- 統計與分群規則可審計且可重現
-- 壓力場景可捕捉理論必經違規
+- skill 身份已改成 `review-mining-stp`
+- full / partial / custom 三種操作方式均已明確定義
+- `review-mining-improve.md` 的核心要求均有落點
+- 壓力場景足以驗證 renamed skill、partial run 與 STP 完整鏈

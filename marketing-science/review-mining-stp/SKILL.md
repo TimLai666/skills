@@ -1,56 +1,62 @@
 ---
-name: customer-review-mining
-description: Use when analyzing customer reviews, survey comments, support tickets, app store feedback, or social replies to identify pain points, compare segments, generate corpus-level scoring items, or summarize customer perception for product, service, and messaging decisions.
+name: review-mining-stp
+description: Use when customer reviews, survey comments, support tickets, app store feedback, or social replies need to be converted into STP analysis. Supports full review-to-strategy workflows and partial execution for segmentation, targeting, positioning, or custom submodules with upstream artifacts.
 ---
 
-# Customer Review Mining
+# Review Mining STP
 
 ## Overview
 
-把大量評論轉成可行動洞察。預設輸出以商業決策可讀性為主，但理論分析是每次都必經的分析步驟，不是選配。動態評分題項由當次語料萃取，避免被固定 rubric 綁死。
+本技能用於將顧客評論資料轉換為可審計、可局部執行的 STP 分析框架。評論探勘構成證據底座；主流程固定為 `Segmentation -> Targeting -> Positioning -> Strategy`。
 
-核心原則：
+執行原則：
 
-- 先做資料充分性檢查，再做分析
-- 先逐條語意解析與理論映射，再做主題整合
-- 每次都必須套用四個理論視角
-- 馬斯洛映射預設引導 agent 使用 `maslow-five-needs-marketing` skill
-- 評分題項必須從整批評論中萃取，不可預設寫死
-- 其他 skill 或 agent 只能補充理論深挖，不可取代本技能主分析骨架
+- 先進行 intake、scope 與 dependency gate。
+- `full` 執行完整 STP；`segmentation`、`targeting`、`positioning` 允許局部執行。
+- `custom` 僅執行指定子模組，並保留 prerequisite trace。
+- 分群必須符合 `每群占比 > 5%`；不合格時降低 `k` 並重新執行。
+- `貨` 類訊號必須標記 `System 1 / System 2`。
+- Maslow 分析必須列出五需求關鍵字。
+- 定位分析以前必須先建立定位評分表。
+- 預設輸出語言為繁體中文。
 
-## When to Use
+## Trigger Conditions
 
-Use when:
+適用條件：
 
-- 需要從評論找出主要痛點、滿意驅動因子與優先改善方向
-- 需要比較不同產品、版本、渠道、地區或客群的評論差異
-- 需要把質性回饋整理成產品、客服、營運或行銷可執行建議
-- 需要從整批評論中提煉一組共用評分題項，再回頭對每則評論做一致化評分
-- 需要把評論分析建立在明確理論框架上
+- 任務目標為將評論資料整理為 `Segmentation -> Targeting -> Positioning -> Strategy` 分析。
+- 任務僅需執行 `segmentation`、`targeting`、`positioning` 其中一段。
+- 任務需依指定子模組執行局部分析，例如 `perceptual-map` 或 `target-selection`。
+- 任務需將人／貨／場訊號轉換為市場區隔、目標市場與品牌定位結論。
+- 任務需建立定位評分表、理想點、知覺圖與四象限策略矩陣。
 
-Do not use:
+排除條件：
 
-- 沒有實際評論文本，只想憑空推論顧客感受
-- 需要嚴格因果識別或實驗因果估計（本技能只做關聯/差異推論）
-- 只想做單句情緒分類，不需要主題、優先級或題項生成
+- 無評論文本，亦無可重用 upstream artifacts，且仍要求 STP 分析。
+- 任務僅為單句情緒分類。
+- 任務核心為因果識別、實驗估計或媒體投放優化。
+- 任務僅需文案成稿，不需分析骨架。
 
-Handoff:
+## Transfer Conditions
 
-- 若要把洞察改寫成訊息策略或文案 brief，可交給 `$copywriting`
-- 若要把洞察轉成追蹤與 KPI 設計，可交給 `$analytics-tracking`
-- 若要把洞察轉成實驗假設與測試設計，可交給 `$ab-test-setup`
-- 馬斯洛理論映射預設交給 `$maslow-five-needs-marketing` 產出，再回填到本技能報告
-- 若需要更深理論詮釋，可視需求讓 agent 使用其他相關 skill 補充，但主分析流程仍需完整由本技能執行
+- 文案 brief 成稿需求：輸出分析結論後轉交 `$copywriting`。
+- 追蹤設計需求：輸出目標市場與定位假設後轉交 `$analytics-tracking`。
+- 實驗設計需求：輸出 target selection 與定位假設後轉交 `$ab-test-setup`。
+- Maslow 深化需求：允許引導 `$maslow-five-needs-marketing` 補充，但本技能維持主流程控制權。
 
 ## Input Contract
 
-最低需求：
+必要欄位：
 
-- `review_text`: `string`
+- `run_mode`: `full | segmentation | targeting | positioning | custom`
+- `analysis_goal`: `string`
+- `reviews` 或 `review_text`
 
 建議欄位：
 
-- `customer_id`: `string`（強烈建議，支援顧客層分群）
+- `requested_modules`: `string[]`，僅 `custom` 必填
+- `upstream_artifacts`: `object`
+- `customer_id`: `string`
 - `created_at`: `string`
 - `rating`: `number`
 - `product`: `string`
@@ -58,6 +64,10 @@ Handoff:
 - `locale`: `string`
 - `segment`: `string`
 - `version`: `string`
+- `comparison_axes`: `string[]`
+- `brands`: `string[]`
+- `ideal_point_definition`: `string`
+- `positioning_method`: `factor_analysis | mds | auto`
 
 可接受格式：
 
@@ -65,14 +75,23 @@ Handoff:
 - `JSON`
 - 純文字清單
 
-規模建議：
+`custom` 白名單子模組：
 
-- `20` 到 `20,000` 則評論可直接分析
-- 超過 `20,000` 則先分批、抽樣或分群
+- `review-foundation`
+- `segmentation-variables`
+- `segment-clustering`
+- `segment-profiles`
+- `current-target-market`
+- `potential-target-market`
+- `target-selection`
+- `positioning-scorecard`
+- `perceptual-map`
+- `positioning-diagnostics`
+- `strategy-matrix`
 
-## Data Sufficiency Gate
+## Intake And Dependency Gates
 
-若缺少最低分析條件，先回傳 `MissingDataOutput`，不要直接下結論。
+資料不足時，回傳 `MissingDataOutput`：
 
 ```json
 {
@@ -80,398 +99,205 @@ Handoff:
   "why_needed": {},
   "questions_to_user": [],
   "temporary_assumptions": [],
-  "next_step_rule": "只有在 review_text 與分析目標足夠清楚時才進入評論探勘。"
+  "next_step_rule": "補齊必要欄位後再進入 STP 分析。"
+}
+```
+
+partial / custom run 缺少上游產物時，回傳 `MissingPrerequisiteOutput`：
+
+```json
+{
+  "requested_stage": "",
+  "missing_prerequisites": [],
+  "acceptable_upstream_artifacts": [],
+  "auto_backfill_allowed": false,
+  "next_step_rule": "若有原始評論可補跑最小必要前置；若沒有，先補 upstream artifacts。"
 }
 ```
 
 Gate 規則：
 
-- 沒有 `review_text`：停止分析
-- 有評論但沒有分析目標：先界定是找痛點、找滿意驅動因子、比較差異，或產出建議
-- 樣本極少：可做探索性觀察，不可宣稱趨勢
-- 關鍵欄位缺失時仍可分析，但要明確標示限制
+- `run_mode=custom` 且缺少 `requested_modules`：停止。
+- 缺少 `reviews` / `review_text` 且缺少可用 `upstream_artifacts`：停止。
+- `targeting` 缺少 segment 輸出時：
+  - 有原始評論：補跑 `review-foundation -> segmentation-variables -> segment-clustering -> segment-profiles`。
+  - 無原始評論：回 `MissingPrerequisiteOutput`。
+- `positioning` 缺少 scorecard / brands / ideal point 時：
+  - 有原始評論：補跑 `review-foundation -> positioning-scorecard`。
+  - 無原始評論：回 `MissingPrerequisiteOutput`。
+- 樣本極少時，允許探索性分析；不得輸出高信心市場決策語句。
+
+參見 [references/01-router-and-gates.md](./references/01-router-and-gates.md)。
+
+## Execution Router
+
+預設執行鏈：
+
+- `full`
+  - `review-foundation`
+  - `segmentation-variables`
+  - `segment-clustering`
+  - `segment-profiles`
+  - `current-target-market`
+  - `potential-target-market`
+  - `target-selection`
+  - `positioning-scorecard`
+  - `perceptual-map`
+  - `positioning-diagnostics`
+  - `strategy-matrix`
+- `segmentation`
+  - `review-foundation`
+  - `segmentation-variables`
+  - `segment-clustering`
+  - `segment-profiles`
+- `targeting`
+  - 優先使用 `upstream_artifacts.segment_profiles`
+  - 缺件時補跑最小 segmentation 前置
+  - 再執行 `current-target-market`、`potential-target-market`、`target-selection`
+- `positioning`
+  - 優先使用 `upstream_artifacts.positioning_scorecard`
+  - 缺件時補跑 `review-foundation -> positioning-scorecard`
+  - 再執行 `perceptual-map`、`positioning-diagnostics`、`strategy-matrix`
+- `custom`
+  - 僅執行 `requested_modules`
+  - 輸出中必須標示自動補上的 prerequisite trace
+
+所有 mode 必填段落：
+
+- `Execution Scope Summary`
+- `Risks / Bias / Confidence Notes`
+
+## Segmentation Rules
+
+`Segmentation` 階段的分析主軸為人／貨／場：
+
+- `人`：消費者特質、需求、動機、輪廓線索
+- `貨`：產品特色、購買觸發、定位基礎
+- `場`：使用情境、消費情境、場景線索
+
+強制規則：
+
+- `貨` 必須分類為 `System 1` 或 `System 2`。
+- Maslow 分析必須列出：
+  - 生理需求
+  - 安全需求
+  - 社交需求
+  - 尊重需求
+  - 自我實現需求
+- 區隔變數 taxonomy 必須覆蓋：
+  - 地理統計
+  - 人口統計
+  - 心理統計
+  - 行為變數
+- 分群前須整理區隔變數或動機因子。
+- 分群後每群占比必須 `> 5%`。
+- 任一群 `< 5%` 時，降低群數並重新執行，直到全部合格。
+- 每群均需輸出明確特徵描述與消費者畫像敘事。
+
+參見 [references/02-segmentation.md](./references/02-segmentation.md)。
+
+## Targeting Rules
+
+`Targeting` 階段固定包含兩條分析路徑：
+
+- `current-target-market`
+  - 現有高價值、忠誠、活躍、重度消費客群
+- `potential-target-market`
+  - 曾購與否、意圖、潛力、可爭取客群
+
+方法規則：
+
+- 連續或序位反應變數：`ANOVA / post-hoc / regression`
+- 二元反應變數：`chi-square / logistic regression`
+
+輸出規則：
+
+- 不得只停留於差異表。
+- 必須明確輸出優先目標市場、次優先市場、暫不投入市場。
+- 每項選擇均需附統計依據、市場規模 / 占比與品牌適配理由。
+
+參見 [references/03-targeting.md](./references/03-targeting.md)。
+
+## Positioning Rules
 
-詳見 [references/01-intake-and-scope-gate.md](./references/01-intake-and-scope-gate.md)
+`Positioning` 階段以前必須先建立定位評分表，再進行知覺圖與定位診斷。
 
-## Analysis Model
+定位評分表規格：
 
-### Primary Business Taxonomy
+- 欄位必含 `品牌欄` 與 `理想點`
+- 列必含：
+  - 屬性功能
+  - 利益與用途
+  - 品牌個性與形象
+- 每格代表品牌在定位基礎上的平均表現
+- `Dynamic Scorecard Summary` 必須包含信度 / 效度分析
 
-第一層分類固定只用三大主題：
+知覺圖方法規則：
 
-- `service_experience`
-- `product_performance`
-- `value_perception`
+- 預設方法：`factor_analysis`
+- 僅在輸入為品牌相似性或非屬性資料時使用 `MDS`
+- 輸出中必須標示 `positioning_method_used`
 
-這一層決定預設報告與優先級排序。不要讓理論標籤或動態題項取代這三個主題。
+定位輸出必含：
 
-詳見 [references/02-theme-taxonomy.md](./references/02-theme-taxonomy.md)
+- 關鍵因素評估
+- 標竿分析
+- 理想點分析
+- 競爭態勢分析
+- `POD / POP`
+- 四象限策略矩陣：
+  - 訴求重點
+  - 改善重點
+  - 改變重點
+  - 放棄重點
 
-### Per-Review Semantic Parsing
-
-每則評論先做逐條語意解析，至少標記以下四類訊號：
-
-- 產品屬性與描述一致性
-- 使用感受與功能表現
-- 消費者需求與利益感知
-- 服務體驗與互動脈絡
-
-這一步是理論映射的前置輸入，不可省略。
-
-### Mandatory Theory Mapping
-
-每次分析都必須套用四個理論視角，並提供證據追溯：
-
-- Product Positioning Theory
-- Purchase Motivation Theory
-- Maslow's Hierarchy of Needs
-- Word-of-Mouth Motivation Theory
-
-理論規則：
-
-- 四個理論在每次分析都要出現映射結果
-- 可用「逐條評論」或「聚類後評論群」映射，但必須可追溯原始證據
-- 某理論若證據弱，只能標示低信心與限制，不可跳過
-- 理論名稱不可替代引文與證據
-
-Maslow Skill Route（必跑）：
-
-- 先完成逐條語意解析，再引導 agent 使用 `$maslow-five-needs-marketing`
-- 路由策略固定為 `預設呼叫 + 可回退`
-- 若 `$maslow-five-needs-marketing` 不可用，才可回退本技能內建馬斯洛映射
-- 回退時必須在 `Theory Coding Summary` 與 `Risks / Bias / Confidence Notes` 標示：
-  - `attempted: true`
-  - `used: false`
-  - `fallback_reason`
-  - 對應理論映射 `confidence: low`（除非有充分直接證據）
-- 不可因外部 skill 不可用就跳過馬斯洛映射
-
-詳見 [references/03-theory-overlay-map.md](./references/03-theory-overlay-map.md)
-
-### Theme Synthesis And Prioritization
-
-完成必經理論映射後，才可進行三大主題整合、子主題歸納與優先級排序。
-
-### Corpus-Derived Scorecard
-
-第三層是動態評分題項。題項必須先從整批評論中萃取，再以同一組題項回頭評分每則評論。
-
-流程固定如下：
-
-1. 從整批評論抽取候選題項
-2. 合併同義詞、重複描述與近似概念
-3. 為每個題項定義短標籤、定義與證據線索
-4. 用同一組題項對每則評論做 `0-7` 分評分
-
-評分規則：
-
-- `0`: 沒提到或沒有足夠證據
-- `1-3`: 間接、輕微、模糊提及
-- `4`: 中立、保留或正反混雜
-- `5-6`: 明確提及
-- `7`: 強烈且完整表達
-
-題項規則：
-
-- 題項必須來自重複評論訊號，而不是單一句話
-- 僅被單一孤立評論支持的題項，預設標成 `exploratory`，不納入核心分數集
-- 題項名稱必須可比較、可聚合、可回溯
-- 不可每個評論各自生成不同題項集合
-
-詳見 [references/04-dynamic-item-generation-and-scoring.md](./references/04-dynamic-item-generation-and-scoring.md)
-
-### Statistical Validation (Mandatory)
-
-完成評分後，必須做研究級統計驗證，且完整結果需放在主報告。
-
-固定規格：
-
-- `alpha = 0.05`
-- 多重比較：`BH-FDR`
-- 信賴區間：`95% CI`
-- 題項分數（0-7，序位）：
-  - 兩組：`Mann-Whitney U` + `Cliff's delta`
-  - 三組以上：`Kruskal-Wallis` + `epsilon-squared`
-- 比例指標（coverage/high_score_rate/low_score_rate）：
-  - 兩組：`two-proportion z`；小樣本改 `Fisher's exact`
-  - 三組以上：`chi-square`；不符假設時改 exact/permutation
-
-統計輸出規則：
-
-- 不可只給 p-value
-- 必須同時給：effect size、CI、樣本數、檢定名稱、校正後 p-value
-- 不可把關聯差異寫成因果結論
-
-### Customer Clustering (Mandatory)
-
-統計驗證後，必須依顧客在意面向做分群。
-
-分群特徵固定：
-
-- 使用 `generated_items` 中 `core` 題項的分數矩陣
-- `0` 視為未關注，`1-7` 視為關注強度
-
-分群單位規則：
-
-- 有 `customer_id`：先彙整到顧客層（每位顧客每題項取中位數）
-- 無 `customer_id`：以評論層代理分群，並標註為「評論者原型群」限制
-
-分群方法固定：
-
-- 主模型：`K-medoids`（k 在 `2-8` 間以 silhouette 選最佳）
-- 次模型：`Hierarchical (Ward)` 用於群間關係解讀，不取代主分群
-
-穩定性規則：
-
-- 必須回報 bootstrap 穩定度（例如 ARI/NMI 摘要）
-- 必須回報最小群體占比與極小群風險
-
-低樣本策略：
-
-- 仍執行統計與分群
-- 全部推論標示 `exploratory=true` 與 `confidence=low`
-- 不可輸出高信心強決策語句
-
-## Workflow
-
-1. 定義任務與比較範圍
-
-- 重述分析目標
-- 鎖定比較維度，例如時間、版本、地區、產品、渠道、客群
-
-2. 執行資料充分性檢查
-
-- 套用 Data Sufficiency Gate
-- 缺欄位或樣本過小時先回報限制
-
-3. 清理與標準化文本
-
-- 去除空白、重複、廣告與無意義文字
-- 保留 `raw_text` 與 `clean_text`
-- 多語資料先分語言再整併
-
-4. 逐條語意解析（必經）
-
-- 逐條標記產品屬性、使用感受、需求訊號、服務互動
-- 建立可回溯的評論語意標註
-
-5. 理論映射（必經）
-
-- 對每則評論或每個評論群套用四個理論視角
-- 每個理論至少提供映射證據與信心標記
-- 馬斯洛映射先引導 `$maslow-five-needs-marketing`
-- 若外部 skill 不可用，啟用 fallback 並標示 `fallback_reason`
-- 若理論證據不足，回報低信心與限制，不可跳過
-- 交叉參考：見 [Example A/B](./references/06-end-to-end-examples.md)
-
-6. 主題整合與優先級
-
-- 以三大主題整合前述語意與理論結果
-- 整理子主題、代表性引文與大致佔比
-
-7. 生成共用評分題項
-
-- 從整批評論抽候選題項
-- 做動態正規化與命名
-- 標出核心題項與 `exploratory` 題項
-- 交叉參考：見 [Example D](./references/06-end-to-end-examples.md)
-
-8. 回頭評分每則評論
-
-- 使用同一組題項做 `0-7` 分評分
-- 匯總成題項層級的統計摘要
-- 交叉參考：見 [Example D](./references/06-end-to-end-examples.md)
-
-9. 統計驗證（必經）
-
-- 依固定統計規格做差異與關聯驗證
-- 輸出檢定結果、effect size、CI 與 FDR 校正
-- 樣本不足時仍要跑，但標記 `exploratory` 與低信心
-- 交叉參考：見 [references/07-statistical-and-clustering-validation.md](./references/07-statistical-and-clustering-validation.md)
-
-10. 顧客分群（必經）
-
-- 以 core 題項分數矩陣進行分群
-- 先做 `K-medoids` 主分群，再做 `Hierarchical (Ward)` 群間解讀
-- 輸出 cluster profile、stability、群組行動建議
-- 交叉參考：見 [Example E](./references/06-end-to-end-examples.md)
-
-11. 理論深挖（選配增強）
-
-- 若需要更深解釋，可條件式請 agent 使用其他 skill 補充理論分析
-- 增強分析需標註來源與限制，且不得覆蓋必經理論結果或 Maslow 必跑路由紀錄
-
-12. 產出建議
-
-- 先寫管理摘要
-- 再列理論摘要、主題表、動態題項摘要、統計驗證、分群摘要與優先行動
-- 只有在使用者要求結構化輸出時，才展開完整 JSON 附錄
+參見 [references/04-positioning.md](./references/04-positioning.md)。
 
 ## Output Contract
 
-預設輸出順序：
+依 mode 輸出對應段落；以下段落永遠保留：
 
-1. `Executive Summary`
-2. `Theory Coding Summary`
-3. `Theme Analysis Table`
-4. `Dynamic Item Set Summary`
-5. `Dynamic Scorecard Summary`
-6. `Statistical Validation Summary`
-7. `Customer Cluster Summary`
-8. `Cluster Archetype Cards`
-9. `Cluster-Specific Priority Actions`
-10. `Priority Actions`
-11. `Risks / Bias / Confidence Notes`
-12. `Appendix (JSON)`
+- `Execution Scope Summary`
+- `Risks / Bias / Confidence Notes`
 
-### Primary Output Rules
+可依需求輸出：
 
-`Executive Summary`
+- `Segmentation Summary`
+- `Targeting Summary`
+- `Positioning Summary`
+- `Integrated STP Actions`
+- `Appendix (JSON)`
 
-- 2-5 點結論
-- 每點都要可回溯到評論證據
-- 不要用理論名詞塞滿摘要
-
-`Theory Coding Summary`（必填）
-
-- 四個理論都要有映射結果
-- 每個理論都要附代表性證據
-- 每個理論都要標示信心（`high|medium|low`）
-- 若證據不足，明確寫出限制，不可留白
-- 必填 Maslow 協作狀態：
-  - `attempted`（是否嘗試呼叫 `$maslow-five-needs-marketing`）
-  - `used`（是否成功採用其輸出）
-  - `fallback_reason`（未採用時必填）
-
-`Theme Analysis Table`
-
-- 至少包含：`theme`, `subtheme`, `count`, `share`, `sample_quote`
-- 若資料足夠，可加：`negative_rate`, `avg_severity`, `impact_score`
-
-`Dynamic Item Set Summary`
-
-- 列出本次分析產生的共用題項
-- 每個題項至少附：`label`, `definition`, `evidence_cues`, `status`
-- `status` 僅能是 `core` 或 `exploratory`
-
-`Dynamic Scorecard Summary`
-
-- 呈現高分與低分題項
-- 標示題項覆蓋率、平均分與低信心題項
-
-`Statistical Validation Summary`（必填）
-
-- 必含：`test_name`, `groups`, `group_n`, `statistic`, `p_value`, `p_value_adj`, `effect_size`, `ci_95`
-- 必須明確列出 `BH-FDR` 校正後結果
-- 必須附可解釋結論與限制
-
-`Customer Cluster Summary`（必填）
-
-- 必含：`cluster_id`, `size`, `share`, `top_attention_items`, `pain_points`, `value_drivers`
-- 必須標示分群單位是 `customer` 或 `review_proxy`
-
-`Cluster Archetype Cards`（必填）
-
-- 每群至少包含：核心關注題項、低關注題項、代表引文、風險訊號、推薦策略
-
-`Cluster-Specific Priority Actions`（必填）
-
-- 每群 1-3 項行動
-- 每項需對應量測指標與預期影響
-
-`Priority Actions`
-
-- 只保留最值得做的 3-5 項
-- 每項都要對應主題、原因、預期影響與衡量方式
-
-`Risks / Bias / Confidence Notes`
-
-- 樣本偏差
-- 來源偏差
-- 語言偏差
-- 時間範圍限制
-- 推論信心
-
-### Secondary Output Rules
-
-`Appendix (JSON)`
-
-- 只有使用者要求結構化輸出時附上
-- JSON 最小欄位不得缺少理論相關欄位
-
-```json
-{
-  "analysis_scope": {},
-  "theme_analysis": [],
-  "theory_application_summary": [
-    {
-      "theory": "",
-      "confidence": "high|medium|low",
-      "maslow_collaboration_status": {
-        "attempted": true,
-        "used": true,
-        "fallback_reason": ""
-      }
-    }
-  ],
-  "theory_evidence_trace": [],
-  "generated_items": [],
-  "scorecard_summary": [],
-  "statistical_validation_summary": [],
-  "statistical_test_results": [],
-  "multiple_comparison_control": {
-    "method": "BH-FDR",
-    "alpha": 0.05
-  },
-  "cluster_configuration": {
-    "primary_method": "k-medoids",
-    "secondary_method": "hierarchical_ward",
-    "k_search_range": [2, 8]
-  },
-  "cluster_profiles": [],
-  "cluster_assignments": [],
-  "cluster_stability": [],
-  "cluster_action_map": [],
-  "priority_actions": [],
-  "evidence": []
-}
-```
-
-詳見 [references/05-output-template-and-quality-checklist.md](./references/05-output-template-and-quality-checklist.md)
+參見 [references/05-output-contract-and-quality-rules.md](./references/05-output-contract-and-quality-rules.md)。
 
 ## Hard Rules
 
-- 不可臆測不存在的欄位、分數或比較維度
-- 不可用單一評論宣稱整體趨勢
-- 不可做無證據支撐的因果推論
-- 不可因為套了理論標籤，就跳過引文或證據
-- 不可跳過理論映射步驟
-- 不可只使用 1-2 個理論而不說明理由
-- 不可跳過 `$maslow-five-needs-marketing` 引導步驟（除非已明確記錄 fallback）
-- 不可把 fallback 說成成功協作
-- 不可使用寫死的固定題項集合
-- 不可每個評論各自生成不同的評分題項集合
-- 不可把低頻孤立訊號偽裝成核心題項
-- 不可跳過統計驗證或僅報 p-value
-- 不可省略 effect size、CI、FDR 校正
-- 不可跳過評分直接分群（不可反序）
-- 不可用主題文字取代 score-based 分群矩陣
-- 低樣本不可輸出高信心分群結論
-- 預設使用繁體中文，語氣專業、精簡、可執行
+- 不得臆測不存在的品牌、理想點、區隔變數或比較維度。
+- 不得因 partial / custom run 省略 prerequisite trace。
+- 不得跳過 `System 1 / System 2`、Maslow keywords 或 cluster `>5%` guardrail。
+- 不得只做差異表而不做 target selection。
+- 不得先畫知覺圖再補定位評分表。
+- 不得省略理想點、`POD / POP` 或四象限策略矩陣。
+- 不得將 `factor_analysis` 與 `MDS` 無規則混用。
+- 不得省略 `Dynamic Scorecard Summary` 的信度 / 效度說明。
+- 不得以高信心語氣包裝低樣本或缺件分析。
+- 完成前必須再對照一次 `review-mining-improve.md`。
 
 ## References
 
-- [references/01-intake-and-scope-gate.md](./references/01-intake-and-scope-gate.md)
-- [references/02-theme-taxonomy.md](./references/02-theme-taxonomy.md)
-- [references/03-theory-overlay-map.md](./references/03-theory-overlay-map.md)
-- [references/04-dynamic-item-generation-and-scoring.md](./references/04-dynamic-item-generation-and-scoring.md)
-- [references/05-output-template-and-quality-checklist.md](./references/05-output-template-and-quality-checklist.md)
+- [references/01-router-and-gates.md](./references/01-router-and-gates.md)
+- [references/02-segmentation.md](./references/02-segmentation.md)
+- [references/03-targeting.md](./references/03-targeting.md)
+- [references/04-positioning.md](./references/04-positioning.md)
+- [references/05-output-contract-and-quality-rules.md](./references/05-output-contract-and-quality-rules.md)
 - [references/06-end-to-end-examples.md](./references/06-end-to-end-examples.md)
-- [references/07-statistical-and-clustering-validation.md](./references/07-statistical-and-clustering-validation.md)
+- [references/07-review-mining-improve-traceability.md](./references/07-review-mining-improve-traceability.md)
 
 ## Validation Assets
 
-- [agents/pressure-scenario-01-business-mode.md](./agents/pressure-scenario-01-business-mode.md)
-- [agents/pressure-scenario-02-theory-mode.md](./agents/pressure-scenario-02-theory-mode.md)
-- [agents/pressure-scenario-03-missing-data-and-overclaim.md](./agents/pressure-scenario-03-missing-data-and-overclaim.md)
+- [agents/pressure-scenario-01-full-stp.md](./agents/pressure-scenario-01-full-stp.md)
+- [agents/pressure-scenario-02-segmentation-only.md](./agents/pressure-scenario-02-segmentation-only.md)
+- [agents/pressure-scenario-03-targeting-with-upstream.md](./agents/pressure-scenario-03-targeting-with-upstream.md)
+- [agents/pressure-scenario-04-positioning-only.md](./agents/pressure-scenario-04-positioning-only.md)
+- [agents/pressure-scenario-05-custom-missing-prereq.md](./agents/pressure-scenario-05-custom-missing-prereq.md)
 - [agents/validation-checklist.md](./agents/validation-checklist.md)

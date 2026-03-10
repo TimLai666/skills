@@ -1,52 +1,37 @@
-# Intake And Scope Gate
+# Router And Gates
 
-## Goal
+## Purpose
 
-在任何評論分析前，先確認資料與任務是否足以支持結論。
+本文件定義 STP 執行模式、依賴條件與 gate 回應格式。
 
-## Minimum Inputs
+## Run Modes
 
-- `review_text`
-- 明確分析目標，至少一種：
-  - 找痛點
-  - 找滿意驅動因子
-  - 比較兩組以上評論
-  - 產出行動建議
-  - 生成共用評分題項
+- `full`
+- `segmentation`
+- `targeting`
+- `positioning`
+- `custom`
 
-## Recommended Inputs
+## Custom Modules
 
-- `created_at`
-- `rating`
-- `product`
-- `channel`
-- `locale`
-- `segment`
-- `version`
+- `review-foundation`
+- `segmentation-variables`
+- `segment-clustering`
+- `segment-profiles`
+- `current-target-market`
+- `potential-target-market`
+- `target-selection`
+- `positioning-scorecard`
+- `perceptual-map`
+- `positioning-diagnostics`
+- `strategy-matrix`
 
-## Gate Decisions
+## Dependency Rules
 
-### Proceed
-
-可進入分析的條件：
-- 有實際評論文本
-- 任務目標清楚
-- 樣本量足以支持所要求的結論層級
-
-### Proceed With Limits
-
-資料不足但仍可做探索性分析：
-- 樣本很小，但使用者只要初步觀察
-- 缺少時間或渠道欄位，無法做比較，只能做整體摘要
-- 缺少評分欄位，仍可做主題與動態題項整理
-
-### Stop And Return MissingDataOutput
-
-以下情況不要硬做：
-- 沒有 `review_text`
-- 不知道要分析什麼問題
-- 使用者要求比較，但缺少可比較欄位或分組資訊
-- 使用者要求趨勢判讀，但沒有時間資訊且樣本不足
+- `segmentation` 需要原始評論。
+- `targeting` 需要 `segment_profiles` 或可回補的原始評論。
+- `positioning` 需要 `positioning_scorecard` 或可回補的原始評論。
+- `strategy-matrix` 需要 `positioning-diagnostics`。
 
 ## MissingDataOutput
 
@@ -56,24 +41,38 @@
   "why_needed": {},
   "questions_to_user": [],
   "temporary_assumptions": [],
-  "next_step_rule": "補齊最低必要資訊後再進入評論探勘。"
+  "next_step_rule": "補齊必要欄位後再進入 STP 分析。"
 }
 ```
 
-## Example
+## MissingPrerequisiteOutput
 
 ```json
 {
-  "missing_fields": ["review_text", "analysis_goal"],
-  "why_needed": {
-    "review_text": "沒有原始評論就無法做任何主題或題項生成",
-    "analysis_goal": "不知道是要找痛點、比較版本，還是萃取共用題項"
-  },
-  "questions_to_user": [
-    "請提供評論原文或檔案",
-    "請指定本次分析要回答的主要問題"
-  ],
-  "temporary_assumptions": [],
-  "next_step_rule": "補齊後再分析"
+  "requested_stage": "",
+  "missing_prerequisites": [],
+  "acceptable_upstream_artifacts": [],
+  "auto_backfill_allowed": false,
+  "next_step_rule": "若有原始評論可補跑最小必要前置；若沒有，先補 upstream artifacts。"
 }
 ```
+
+## Backfill Policy
+
+- `targeting` 缺 segmentation 產物但有評論：允許補跑 `review-foundation -> segmentation-variables -> segment-clustering -> segment-profiles`
+- `positioning` 缺 scorecard 但有評論：允許補跑 `review-foundation -> positioning-scorecard`
+- 缺少評論且缺少 upstream artifacts：不得執行分析
+
+## Required Output: Execution Scope Summary
+
+每次輸出均需交代：
+
+- `run_mode`
+- `requested_modules`
+- `modules_executed`
+- `auto_backfilled_modules`
+- `upstream_artifacts_used`
+- `comparison_axes`
+- `brands`
+- `positioning_method_used`
+- `scope_limits`

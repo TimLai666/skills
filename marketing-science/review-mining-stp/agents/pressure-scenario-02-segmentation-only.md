@@ -1,48 +1,33 @@
-# Pressure Scenario 02: Theory Mode
+# Pressure Scenario 02: Segmentation Only
 
 ## Purpose
 
-測試 skill 在理論導向需求下，是否遵守理論必經規格並保留商業主題骨架。
+驗證 segmentation-only 模式是否維持輸出邊界。
 
 ## Scenario
 
-使用者提供 120 則評論，要求：
-- 用四個理論框架分析評論
-- 顯示三大主題與優先項
-- 附上動態題項摘要
-- 做群組差異統計驗證
-- 依在意面向做顧客分群
-- 必要時可請 agent 用其他 skill 補充深度詮釋
+輸入條件：
 
-## What This Scenario Tries To Break
+- 任務僅要求市場區隔與消費者畫像
+- 不要求定位與知覺圖
 
-- 只套用 1-2 個理論
-- 理論標籤沒有證據
-- 題項不是語料級共用集合
-- 跳過 `$maslow-five-needs-marketing` 協作路由
-- 跳過統計驗證或只報 p-value
-- 直接用主題描述分群，未使用 score matrix
-- 無條件把外部 skill 當主流程
+## Failure Modes Under Test
+
+- segmentation only 卻輸出完整 STP
+- 缺少區隔變數 taxonomy
+- 缺少人／貨／場
+- 缺少 `System 1 / System 2`
+- 缺少 Maslow keywords
 
 ## Pass Criteria
 
-- 四理論全部出現映射結果
-- 每個理論都有證據與信心等級
-- 理論證據弱時有低信心與限制聲明
-- 馬斯洛映射有協作狀態追蹤（`attempted`, `used`, `fallback_reason`）
-- `theory_evidence_trace` 含 `source_skill`
-- 題項先語料生成再回頭評分
-- 統計段落含：test、p/p_adj、effect size、CI
-- 分群段落含：K-medoids 主分群 + Ward 群間解讀 + stability
-- 外部 skill 僅作補充，不取代主流程
+- 僅輸出 `Segmentation Summary`
+- 含群體占比表
+- 含 `<5%` rerun 規則
+- 每群含清楚輪廓與敘事
 
 ## Fail Signs
 
-- 少於四理論且未解釋
-- 理論結論沒有證據引用
-- 沒有引導 `$maslow-five-needs-marketing` 且無 fallback 記錄
-- `source_skill` 缺失或把 fallback 偽裝為外部成功協作
-- 題項逐篇漂移
-- 統計未做 FDR 或缺 effect size/CI
-- 分群沒有 cluster profile、stability、群組行動
-- 直接用外部 skill 替代本技能分析
+- 提前輸出 targeting / positioning
+- 缺少 cluster threshold
+- 缺少 Maslow 關鍵字
