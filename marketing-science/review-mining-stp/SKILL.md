@@ -308,6 +308,16 @@ Gate 規則：
 - [references/06-end-to-end-examples.md](./references/06-end-to-end-examples.md)
 - [references/07-review-mining-improve-traceability.md](./references/07-review-mining-improve-traceability.md)
 
+## Scripts
+
+- Install runtime dependencies with `python -m pip install -r requirements.txt`
+- Execute artifact-based STP analysis with `python scripts/run_review_mining_stp.py --run-mode full --input-dir <artifacts> --output-dir <output>`
+- Execute partial runs with `--run-mode segmentation|targeting|positioning|custom`
+- Use `--requested-modules` only with `--run-mode custom`
+- Validate outputs with `python scripts/validate_review_mining_stp.py --run-mode <mode> --output-dir <output>`
+- Internal implementation is split across `scripts/stp_runner/router.py`, `segmentation.py`, `targeting.py`, `positioning.py`, `reporting.py`, `io.py`, and `validation.py`
+- Script boundary is artifact-only. Raw review text must be converted into structured artifacts by the agent layer before invoking the scripts.
+
 ## Validation Assets
 
 - [agents/pressure-scenario-01-full-stp.md](./agents/pressure-scenario-01-full-stp.md)
