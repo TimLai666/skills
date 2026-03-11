@@ -1,13 +1,14 @@
 ---
 name: customer-journey-mapper
-description: Use when a customer journey map, CJM, or touchpoint-based purchase journey must be designed from a customer persona and product or service, especially when the user mentions 顧客旅程地圖, Customer Journey Map, CJM, 顧客輪廓, 接觸點, or 關鍵時刻.
+description: Use when the final customer journey map, CJM, or touchpoint-based journey table must be produced from a completed persona, product or service, or a `handoff_to_customer_journey_mapper` block, especially when the user asks for 顧客旅程地圖, CJM, final journey table, or wants prior persona/framing work turned into the finished map.
 ---
 
 # Customer Journey Mapper
 
 ## Overview
 
-Create a complete customer journey map in Traditional Chinese from the customer's point of view.
+Create the final customer journey map in Traditional Chinese from the customer's point of view.
+This skill is downstream of persona definition and journey-framing work.
 
 Default output is one Markdown table in transposed vertical form:
 `項目 | 認知 | 考慮/研究 | 決策/購買 | 使用 | 關係建立`
@@ -29,14 +30,16 @@ The row order is fixed:
 
 Use this skill when:
 
-- the user wants a customer journey map or CJM
-- the task starts from a customer persona and a product or service
-- the user wants stages, touchpoints, emotions, key moments, marketing methods, or service ideas arranged into one journey
+- the user wants the finished customer journey map or CJM table itself
+- the task already has a clear persona and a product or service
+- the task includes a `handoff_to_customer_journey_mapper` block from upstream framing work
+- the user wants stages, touchpoints, emotions, key moments, marketing methods, or service ideas arranged into one final journey table
 - the output should be practical for proposals, workshops, internal strategy, or coursework
 
 Do not use this skill when:
 
-- the task is only a persona profile with no journey
+- the task is only a persona profile, 人物誌, 顧客輪廓, or target audience definition with no final journey map
+- the task is only 5W1H, touchpoint discovery, or journey pre-analysis; use `customer-persona-framer`
 - the task is only a funnel KPI dashboard with no customer narrative
 - the user wants a service blueprint with backstage operations; this skill is customer-facing only
 
@@ -53,6 +56,13 @@ Optional:
 - `目標市場`
 - `目前接觸點`
 - `輸出用途`
+- `handoff_to_customer_journey_mapper`
+
+If `handoff_to_customer_journey_mapper` is present:
+
+- treat the block as authoritative input
+- do not re-ask fields that are already present
+- let explicit user overrides outside the block win over the handoff block
 
 Default assumptions:
 
@@ -63,6 +73,8 @@ Default assumptions:
 ## Data Sufficiency Gate
 
 If both required inputs are clear enough, generate the table directly.
+
+If a `handoff_to_customer_journey_mapper` block contains at least `顧客輪廓` and `產品或服務`, generate directly from the handoff.
 
 If information is missing and the user did not ask for speed:
 
@@ -120,13 +132,15 @@ Preferred format:
 
 ## Workflow
 
-1. Read the persona and the product or service.
-2. Infer or confirm the purchase and use context.
-3. Build the journey from the customer's point of view, not the brand's point of view.
-4. Fill the five stages in order unless the user supplied different stages.
-5. Write `動機` before `行動` in every stage.
-6. Make `科技服務`, `行銷方法`, and `目標` logically connected.
-7. Do a final check for format, language, and customer viewpoint.
+1. Read the direct inputs and any `handoff_to_customer_journey_mapper` block.
+2. Normalize the effective inputs, using explicit user overrides over handoff values.
+3. Read the persona and the product or service.
+4. Infer or confirm the purchase and use context.
+5. Build the journey from the customer's point of view, not the brand's point of view.
+6. Fill the five stages in order unless the user supplied different stages.
+7. Write `動機` before `行動` in every stage.
+8. Make `科技服務`, `行銷方法`, and `目標` logically connected.
+9. Do a final check for format, language, and customer viewpoint.
 
 ## Quality Rules
 
@@ -139,6 +153,7 @@ Preferred format:
 - make `行銷方法` match the stage and touchpoint
 - make `目標` describe what the service or marketing action is trying to achieve
 - do not fall back to a horizontal table where each stage is a row
+- if the input is persona-only or framing-only, do not force a final table; route the work to `customer-persona-framer`
 
 ## Short Example
 
@@ -158,4 +173,4 @@ Output shape:
 
 ## Suggested Prompt
 
-Use `$customer-journey-mapper` to create a complete customer journey map in Traditional Chinese from `顧客輪廓` and `產品或服務`, using a transposed Markdown table where `動機` appears before `行動`.
+Use `$customer-journey-mapper` to create the final Traditional Chinese customer journey map from `顧客輪廓` and `產品或服務`, or from a `handoff_to_customer_journey_mapper` block, using a transposed Markdown table where `動機` appears before `行動`.
