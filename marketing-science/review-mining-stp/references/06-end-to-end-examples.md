@@ -36,9 +36,10 @@ The agent layer:
 
 1. reads each review one by one
 2. extracts a corpus-level attribute catalog with definitions, mention counts, and example quotes
-3. scores each attribute with paired `salience + valence`
-4. assigns dynamic theme names plus theory annotations
-5. preserves verbatim `review_text`
+3. freezes that attribute catalog for the scoring run
+4. scores each attribute with paired `salience + valence`
+5. assigns dynamic theme names plus theory annotations
+6. preserves verbatim `review_text`
 
 ### Runnable Artifacts
 

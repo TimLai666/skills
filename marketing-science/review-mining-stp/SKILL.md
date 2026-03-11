@@ -39,6 +39,7 @@ The agent layer is the main process. It is responsible for:
 
 - reading every review one by one
 - extracting at least 30 important attributes from the full review set whenever the corpus supports it
+- freezing the attribute catalog before formal scoring begins
 - inferring scored items from the full review set
 - assigning each item to dynamic themes inferred from the full review set
 - attaching theory metadata at both family and subtheory level
@@ -66,10 +67,11 @@ The agent layer must score every review against every inferred attribute on two 
 Scoring workflow:
 
 1. Read each review one by one.
-2. Extract or refine the attribute catalog from the full corpus.
-3. Score each inferred attribute with paired `salience + valence`.
-4. Convert qualitative review text into quantitative data.
-5. Use the scored output for downstream statistical analysis and research models.
+2. Run an attribute-discovery pass across the full corpus.
+3. Freeze the attribute catalog with definitions, theory annotations, and paired score-column names.
+4. Score every review against the frozen attribute catalog with paired `salience + valence`.
+5. Convert qualitative review text into quantitative data.
+6. Use the scored output for downstream statistical analysis and research models.
 
 If upstream information is incomplete, the agent layer may produce `MissingDataOutput`.
 
@@ -93,6 +95,7 @@ The scripts do not:
 - infer items from raw review text
 - define the scoring rubric
 - enforce the wording of the scoring process
+- change the attribute catalog during statistical execution
 - rewrite review quotes
 - auto-backfill missing scored artifacts
 

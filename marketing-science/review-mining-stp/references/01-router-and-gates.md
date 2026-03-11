@@ -12,6 +12,7 @@ The agent layer handles:
 
 - raw `reviews` or `review_text`
 - extracting or curating the corpus-level attribute catalog
+- freezing that catalog before formal scoring starts
 - inferring scored items from the full corpus
 - applying paired `salience` and `valence` scoring to every inferred attribute for every review
 - assigning dynamic `theme` names inferred from the corpus
@@ -41,6 +42,7 @@ The scripts may emit:
 - `positioning_scorecard.csv`
 
 They do not accept raw reviews and they do not define the scoring workflow.
+They also do not modify the frozen attribute catalog while statistics are running.
 
 ## Canonical Input Rules
 
