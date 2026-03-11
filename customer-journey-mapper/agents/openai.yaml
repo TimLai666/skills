@@ -1,0 +1,4 @@
+interface:
+  display_name: "顧客旅程地圖"
+  short_description: "根據顧客輪廓與產品服務資訊輸出繁體中文顧客旅程地圖"
+  default_prompt: "Use $customer-journey-mapper to create a Traditional Chinese customer journey map from 顧客輪廓 and 產品或服務 in a transposed Markdown table where 動機 appears before 行動."
