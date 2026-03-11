@@ -37,7 +37,7 @@ The agent layer:
 1. reads each review one by one
 2. infers scored items from the full corpus
 3. scores each item on the `0-7` scale
-4. assigns theory tags and three-theme mapping
+4. assigns dynamic theme names plus theory annotations
 5. preserves verbatim `review_text`
 
 ### Runnable Artifacts
@@ -52,6 +52,8 @@ The agent layer:
 
 - scripts emit `segmentation_variables.csv`, `targeting_dataset.csv`, and `positioning_scorecard.csv`
 - the final report names the statistical method and theory used in each major section
+- the final report prints the dynamically inferred themes in the main body
+- the final report prints theory families, subtheories, and `not_evidenced` subtheories in the main body
 - each major section includes finding-level method, reproducibility steps, statistical results, and verbatim review quotes tied to `review_id`
 
 ## Example B: Full STP From A Different Dynamic Schema
@@ -73,12 +75,13 @@ The agent layer:
   - contains custom scored columns such as `delivery_confidence`, `premium_finish`, `everyday_value`
 - `review_foundation.json`
   - maps those columns into `dimension_catalog`
-  - defines `theme_mapping`, `theory_tags`, and `stat_roles`
+  - defines dynamic `theme_mapping`, `theory_annotations`, and `stat_roles`
   - may include `scoring_rubric` as audit metadata, but scripts do not require it
 
 ### Expected Outcome
 
 - scripts and validators work without assuming a fixed item count
+- scripts and validators work without assuming a fixed theme count
 - targeting variables come from `stat_roles`
 - positioning attributes come from `stat_roles` that include `positioning`
 - the report still emits the same finding-level reproducibility package even though the item names changed

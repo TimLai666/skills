@@ -26,11 +26,52 @@ THEORY_DETAILS = {
     },
     "maslow": {
         "name": "Maslow's Hierarchy of Needs",
-        "description": "Used to interpret whether reviews reflect safety, belonging, esteem, or other need layers.",
+        "description": "Used to interpret whether reviews reflect safety, social belonging, esteem, or other need layers.",
     },
 }
-MASLOW_TAGS = {"physiological", "safety", "belonging", "esteem", "self_actualization"}
-DUAL_PROCESS_TAGS = {"system1", "system2"}
+THEORY_TAXONOMY = {
+    "product_positioning": [
+        "attributes",
+        "functions",
+        "benefits",
+        "usage_context_service_experience",
+    ],
+    "purchase_motivation": [
+        "functional",
+        "security",
+        "relational",
+    ],
+    "wom_motivation": [
+        "altruistic",
+        "social_identity",
+        "self_enhancement",
+        "emotional_expression",
+    ],
+    "dual_process": [
+        "system1",
+        "system2",
+    ],
+    "maslow": [
+        "physiological",
+        "safety",
+        "social",
+        "esteem",
+        "self_actualization",
+    ],
+}
+LEGACY_TAG_MAP = {
+    "product_positioning": [("product_positioning", "benefits")],
+    "purchase_motivation": [("purchase_motivation", "functional")],
+    "wom_motivation": [("wom_motivation", "social_identity")],
+    "system1": [("dual_process", "system1")],
+    "system2": [("dual_process", "system2")],
+    "physiological": [("maslow", "physiological")],
+    "safety": [("maslow", "safety")],
+    "social": [("maslow", "social")],
+    "belonging": [("maslow", "social")],
+    "esteem": [("maslow", "esteem")],
+    "self_actualization": [("maslow", "self_actualization")],
+}
 
 
 def _catalog_lookup(foundation: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -43,6 +84,215 @@ def _catalog_lookup(foundation: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 def _item_bundle(*items: tuple[str, str]) -> list[dict[str, str]]:
     return [{"name": name, "description": description} for name, description in items]
+
+
+def _titleize(token: str) -> str:
+    return str(token).replace("_", " ").title()
+
+
+def _subtheory_label(family: str, subtheory: str) -> str:
+    family_labels = {
+        "product_positioning": "Product Positioning",
+        "purchase_motivation": "Purchase Motivation",
+        "wom_motivation": "WOM Motivation",
+        "dual_process": "Dual Process",
+        "maslow": "Maslow",
+    }
+    return f"{family_labels.get(family, _titleize(family))} > {_titleize(subtheory)}"
+
+
+def _dedupe_named_rows(rows: list[dict[str, Any]], keys: tuple[str, ...]) -> list[dict[str, Any]]:
+    deduped: list[dict[str, Any]] = []
+    seen: set[tuple[str, ...]] = set()
+    for row in rows:
+        identity = tuple(str(row.get(key, "")) for key in keys)
+        if identity in seen:
+            continue
+        seen.add(identity)
+        deduped.append(row)
+    return deduped
+
+
+def _theory_entries_for_item(item: dict[str, Any], supporting_label: str) -> list[dict[str, str]]:
+    entries: list[dict[str, str]] = []
+    theory_annotations = item.get("theory_annotations", {})
+    if isinstance(theory_annotations, dict) and theory_annotations:
+        for family, subtheories in theory_annotations.items():
+            family_name = str(family)
+            if not isinstance(subtheories, list):
+                continue
+            for subtheory in subtheories:
+                subtheory_name = str(subtheory)
+                entries.append(
+                    {
+                        "family": family_name,
+                        "subtheory": subtheory_name,
+                        "label": _subtheory_label(family_name, subtheory_name),
+                        "source": "annotated",
+                        "supporting_item": supporting_label,
+                    }
+                )
+    elif isinstance(item.get("theory_tags"), list):
+        for tag in item.get("theory_tags", []):
+            for family_name, subtheory_name in LEGACY_TAG_MAP.get(str(tag), []):
+                entries.append(
+                    {
+                        "family": family_name,
+                        "subtheory": subtheory_name,
+                        "label": _subtheory_label(family_name, subtheory_name),
+                        "source": "legacy_inference",
+                        "supporting_item": supporting_label,
+                    }
+                )
+    return _dedupe_named_rows(entries, ("family", "subtheory", "source", "supporting_item"))
+
+
+def _overlay_theory_entries(foundation: dict[str, Any]) -> list[dict[str, str]]:
+    entries: list[dict[str, str]] = []
+    system_split = foundation.get("system1_system2_split", {})
+    if isinstance(system_split, dict):
+        for subtheory in ["system1", "system2"]:
+            values = system_split.get(subtheory)
+            if isinstance(values, list) and values:
+                entries.append(
+                    {
+                        "family": "dual_process",
+                        "subtheory": subtheory,
+                        "label": _subtheory_label("dual_process", subtheory),
+                        "source": "overlay",
+                        "supporting_item": "system1_system2_split",
+                    }
+                )
+    maslow_keywords = foundation.get("maslow_keywords", {})
+    if isinstance(maslow_keywords, dict):
+        for key, values in maslow_keywords.items():
+            subtheory = "social" if str(key) == "belonging" else str(key)
+            if subtheory in THEORY_TAXONOMY["maslow"] and isinstance(values, list) and values:
+                entries.append(
+                    {
+                        "family": "maslow",
+                        "subtheory": subtheory,
+                        "label": _subtheory_label("maslow", subtheory),
+                        "source": "overlay",
+                        "supporting_item": "maslow_keywords",
+                    }
+                )
+    return _dedupe_named_rows(entries, ("family", "subtheory", "source", "supporting_item"))
+
+
+def _theory_entries_for_columns(
+    foundation: dict[str, Any],
+    columns: list[str],
+    include_segmentation_overlays: bool = False,
+) -> list[dict[str, str]]:
+    catalog = _catalog_lookup(foundation)
+    entries: list[dict[str, str]] = []
+    for column in columns:
+        item = catalog.get(column)
+        if not isinstance(item, dict):
+            continue
+        entries.extend(_theory_entries_for_item(item, _format_label(column, catalog)))
+    if include_segmentation_overlays:
+        entries.extend(_overlay_theory_entries(foundation))
+    return _dedupe_named_rows(entries, ("family", "subtheory", "source", "supporting_item"))
+
+
+def _family_status(entries: list[dict[str, str]], covered_subtheories: list[str]) -> str:
+    if not covered_subtheories:
+        return "not_evidenced"
+    sources = {str(entry.get("source", "")) for entry in entries}
+    if sources == {"legacy_inference"}:
+        return "legacy_inferred"
+    if "legacy_inference" in sources:
+        return "mixed"
+    return "covered"
+
+
+def _themes_for_columns(
+    foundation: dict[str, Any],
+    columns: list[str],
+) -> list[dict[str, Any]]:
+    catalog = _catalog_lookup(foundation)
+    by_theme: dict[str, list[str]] = {}
+    for column in columns:
+        item = catalog.get(column)
+        if not isinstance(item, dict):
+            continue
+        theme = str(item.get("theme", "")).strip()
+        if not theme:
+            continue
+        by_theme.setdefault(theme, []).append(_format_label(column, catalog))
+    return [
+        {
+            "theme": theme,
+            "supporting_items": list(dict.fromkeys(labels)),
+        }
+        for theme, labels in by_theme.items()
+    ]
+
+
+def _theory_coverage_summary(
+    foundation: dict[str, Any],
+    columns: list[str],
+    *,
+    include_segmentation_overlays: bool = False,
+) -> list[dict[str, Any]]:
+    entries = _theory_entries_for_columns(
+        foundation,
+        columns,
+        include_segmentation_overlays=include_segmentation_overlays,
+    )
+    summary: list[dict[str, Any]] = []
+    for family, subtheories in THEORY_TAXONOMY.items():
+        family_entries = [entry for entry in entries if entry.get("family") == family]
+        covered = list(
+            dict.fromkeys(str(entry.get("subtheory", "")) for entry in family_entries if entry.get("subtheory"))
+        )
+        supporting_items = list(
+            dict.fromkeys(str(entry.get("supporting_item", "")) for entry in family_entries if entry.get("supporting_item"))
+        )
+        summary.append(
+            {
+                "theory_family": THEORY_DETAILS[family]["name"],
+                "covered_subtheories": [_subtheory_label(family, subtheory) for subtheory in covered],
+                "not_evidenced_subtheories": [
+                    _subtheory_label(family, subtheory)
+                    for subtheory in subtheories
+                    if subtheory not in covered
+                ],
+                "supporting_items": supporting_items,
+                "evidence_status": _family_status(family_entries, covered),
+            }
+        )
+    return summary
+
+
+def _theme_coverage_summary(
+    foundation: dict[str, Any],
+    findings: list[dict[str, Any]],
+    catalog: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    finding_ids_by_theme: dict[str, list[str]] = {}
+    for finding in findings:
+        for theme_entry in finding.get("themes_used", []):
+            theme_name = str(theme_entry.get("theme", ""))
+            if not theme_name:
+                continue
+            finding_ids_by_theme.setdefault(theme_name, []).append(str(finding.get("finding_id", "")))
+
+    summary: list[dict[str, Any]] = []
+    for theme_name, columns in foundation.get("theme_mapping", {}).items():
+        labels = [_format_label(str(column), catalog) for column in columns]
+        related_findings = list(dict.fromkeys(finding_ids_by_theme.get(str(theme_name), [])))
+        summary.append(
+            {
+                "theme": str(theme_name),
+                "supporting_items": labels,
+                "related_findings": related_findings,
+                "evidence_status": "covered" if related_findings else "not_evidenced",
+            }
+        )
+    return summary
 
 
 def _columns_for_stage(
@@ -86,27 +336,14 @@ def _theories_for_columns(
     columns: list[str],
     include_segmentation_overlays: bool = False,
 ) -> list[dict[str, str]]:
-    catalog = _catalog_lookup(foundation)
-    theory_keys: list[str] = []
-    for column in columns:
-        item = catalog.get(column, {})
-        tags = {str(tag) for tag in item.get("theory_tags", [])}
-        if "product_positioning" in tags:
-            theory_keys.append("product_positioning")
-        if "purchase_motivation" in tags:
-            theory_keys.append("purchase_motivation")
-        if "wom_motivation" in tags:
-            theory_keys.append("wom_motivation")
-        if tags & MASLOW_TAGS:
-            theory_keys.append("maslow")
-        if tags & DUAL_PROCESS_TAGS:
-            theory_keys.append("dual_process")
-    if include_segmentation_overlays:
-        if foundation.get("system1_system2_split"):
-            theory_keys.append("dual_process")
-        if foundation.get("maslow_keywords"):
-            theory_keys.append("maslow")
-    unique_keys = list(dict.fromkeys(theory_keys))
+    entries = _theory_entries_for_columns(
+        foundation,
+        columns,
+        include_segmentation_overlays=include_segmentation_overlays,
+    )
+    unique_keys = list(
+        dict.fromkeys(str(entry.get("family", "")) for entry in entries if entry.get("family"))
+    )
     return [THEORY_DETAILS[key] for key in unique_keys if key in THEORY_DETAILS]
 
 
@@ -541,17 +778,21 @@ def _segmentation_findings(
     ]
     if not top_columns:
         top_columns = relevant_columns[:2]
-    theory_tags = {
-        str(tag)
-        for column in top_columns
-        for tag in catalog.get(column, {}).get("theory_tags", [])
-    }
-    process_labels: list[str] = []
-    if "system1" in theory_tags:
-        process_labels.append("System 1")
-    if "system2" in theory_tags:
-        process_labels.append("System 2")
-    need_labels = [_format_maslow_name(tag) for tag in theory_tags if tag in MASLOW_TAGS]
+    theory_entries = _theory_entries_for_columns(
+        foundation,
+        top_columns,
+        include_segmentation_overlays=True,
+    )
+    process_labels = [
+        _titleize(str(entry.get("subtheory", "")))
+        for entry in theory_entries
+        if entry.get("family") == "dual_process"
+    ]
+    need_labels = [
+        _titleize(str(entry.get("subtheory", "")))
+        for entry in theory_entries
+        if entry.get("family") == "maslow"
+    ]
     if not process_labels:
         process_labels.append("mixed decision processing")
     if not need_labels:
@@ -564,7 +805,7 @@ def _segmentation_findings(
             business_implication="Use motive-based positioning for the lead segment, not only descriptive demographics or channel tags.",
             methods_used=_item_bundle(
                 ("Cluster Profile Aggregation", "Identify the highest-scoring items inside the lead segment after clustering."),
-                ("Theory Tag Overlay", "Map those items back to theory tags from dimension_catalog to interpret the segment psychologically."),
+                ("Theory Overlay", "Map those items back to annotated theory families and subtheories from dimension_catalog to interpret the segment psychologically."),
             ),
             theories_used=_theories_for_columns(foundation, top_columns, include_segmentation_overlays=True) or _fallback_theories("segmentation"),
             reproducibility=_build_reproducibility(
@@ -578,9 +819,9 @@ def _segmentation_findings(
                 analysis_steps=[
                     "Take the largest segment from cluster_share_table.",
                     "Read the lead segment's top scored items from numeric_summary.",
-                    "Overlay the items' theory_tags to interpret System 1 / System 2 and Maslow signals.",
+                    "Overlay the items' theory annotations to interpret System 1 / System 2 and Maslow signals.",
                 ],
-                decision_rule="Explain the segment using the highest-scoring items and their mapped theory tags, rather than free-form interpretation.",
+                decision_rule="Explain the segment using the highest-scoring items and their mapped theory annotations, rather than free-form interpretation.",
             ),
             statistical_results=_build_statistical_results(
                 method_family="descriptive_profile_overlay",
@@ -1093,6 +1334,35 @@ def _stage_findings(
     return _positioning_findings(stage_summary, foundation, score_table, catalog, relevant_columns, positioning_method)
 
 
+def _augment_findings_with_theme_and_theory_details(
+    findings: list[dict[str, Any]],
+    foundation: dict[str, Any],
+    catalog: dict[str, dict[str, Any]],
+    fallback_columns: list[str],
+    *,
+    include_segmentation_overlays: bool = False,
+) -> list[dict[str, Any]]:
+    augmented: list[dict[str, Any]] = []
+    for finding in findings:
+        reproducibility = finding.get("reproducibility", {})
+        finding_columns = [
+            str(column)
+            for column in reproducibility.get("input_columns", [])
+            if str(column) in catalog
+        ]
+        if not finding_columns:
+            finding_columns = [column for column in fallback_columns if column in catalog]
+        updated = dict(finding)
+        updated["themes_used"] = _themes_for_columns(foundation, finding_columns)
+        updated["subtheories_used"] = _theory_entries_for_columns(
+            foundation,
+            finding_columns,
+            include_segmentation_overlays=include_segmentation_overlays,
+        )
+        augmented.append(updated)
+    return augmented
+
+
 def build_stage_report_contract(
     stage: str,
     stage_summary: dict[str, Any] | None,
@@ -1139,7 +1409,7 @@ def build_stage_report_contract(
     enriched["evidence_quote_status"] = evidence_status
     enriched["evidence_quote_reason"] = evidence_reason
     enriched["evidence_quotes"] = evidence_quotes
-    enriched["findings"] = _stage_findings(
+    findings = _stage_findings(
         stage,
         stage_summary,
         foundation,
@@ -1148,6 +1418,23 @@ def build_stage_report_contract(
         relevant_columns,
         positioning_method,
         unit_cluster_map,
+    )
+    enriched["findings"] = _augment_findings_with_theme_and_theory_details(
+        findings,
+        foundation,
+        catalog,
+        relevant_columns,
+        include_segmentation_overlays=include_segmentation_overlays,
+    )
+    enriched["theme_coverage_summary"] = _theme_coverage_summary(
+        foundation,
+        enriched["findings"],
+        catalog,
+    )
+    enriched["theory_coverage_summary"] = _theory_coverage_summary(
+        foundation,
+        relevant_columns,
+        include_segmentation_overlays=include_segmentation_overlays,
     )
     return enriched
 
@@ -1180,6 +1467,48 @@ def _render_quotes(quotes: list[dict[str, Any]], empty_reason: str, indent: str 
     return lines
 
 
+def _render_theme_coverage(summary: list[dict[str, Any]], indent: str = "") -> list[str]:
+    lines: list[str] = []
+    for row in summary:
+        lines.append(
+            f"{indent}- {row.get('theme')}: status={row.get('evidence_status')}; "
+            f"supporting_items={', '.join(row.get('supporting_items', [])) or 'none'}; "
+            f"related_findings={', '.join(row.get('related_findings', [])) or 'none'}"
+        )
+    return lines
+
+
+def _render_theory_coverage(summary: list[dict[str, Any]], indent: str = "") -> list[str]:
+    lines: list[str] = []
+    for row in summary:
+        lines.append(
+            f"{indent}- {row.get('theory_family')}: status={row.get('evidence_status')}; "
+            f"covered={', '.join(row.get('covered_subtheories', [])) or 'none'}; "
+            f"not_evidenced={', '.join(row.get('not_evidenced_subtheories', [])) or 'none'}; "
+            f"supporting_items={', '.join(row.get('supporting_items', [])) or 'none'}"
+        )
+    return lines
+
+
+def _render_themes_used(items: list[dict[str, Any]], indent: str = "") -> list[str]:
+    lines: list[str] = []
+    for item in items:
+        lines.append(
+            f"{indent}- {item.get('theme')}: {', '.join(item.get('supporting_items', [])) or 'none'}"
+        )
+    return lines
+
+
+def _render_subtheories_used(items: list[dict[str, Any]], indent: str = "") -> list[str]:
+    lines: list[str] = []
+    for item in items:
+        lines.append(
+            f"{indent}- {item.get('label')}: source={item.get('source')}; "
+            f"supporting_item={item.get('supporting_item')}"
+        )
+    return lines
+
+
 def _render_finding(finding: dict[str, Any]) -> list[str]:
     reproducibility = finding.get("reproducibility", {})
     statistical_results = finding.get("statistical_results", {})
@@ -1193,6 +1522,10 @@ def _render_finding(finding: dict[str, Any]) -> list[str]:
     lines.extend(_render_described_items(finding.get("methods_used", []), indent="  "))
     lines.append("- Theories used:")
     lines.extend(_render_described_items(finding.get("theories_used", []), indent="  "))
+    lines.append("- Themes used:")
+    lines.extend(_render_themes_used(finding.get("themes_used", []), indent="  "))
+    lines.append("- Subtheories used:")
+    lines.extend(_render_subtheories_used(finding.get("subtheories_used", []), indent="  "))
     lines.append("- Reproducibility:")
     lines.append(f"  - input_artifacts: {', '.join(reproducibility.get('input_artifacts', [])) or 'none'}")
     lines.append(f"  - input_columns: {', '.join(reproducibility.get('input_columns', [])) or 'none'}")
@@ -1230,6 +1563,10 @@ def _render_report_section(title: str, section: dict[str, Any]) -> list[str]:
     lines.extend(_render_described_items(section.get("methods_used", []), indent="  "))
     lines.append("- Theories used:")
     lines.extend(_render_described_items(section.get("theories_used", []), indent="  "))
+    lines.append("- Theme coverage:")
+    lines.extend(_render_theme_coverage(section.get("theme_coverage_summary", []), indent="  "))
+    lines.append("- Theory coverage:")
+    lines.extend(_render_theory_coverage(section.get("theory_coverage_summary", []), indent="  "))
     lines.append(f"- Plain-language explanation: {section.get('plain_language_explanation', 'n/a')}")
     lines.append("- Section-level evidence quotes:")
     lines.extend(

@@ -39,12 +39,11 @@ The agent layer is the main process. It is responsible for:
 
 - reading every review one by one
 - inferring scored items from the full review set
-- assigning each item to one of the three core themes:
-  - `service_experience`
-  - `product_performance`
-  - `value_perception`
-- attaching theory tags such as Product Positioning, Purchase Motivation, WOM Motivation, System 1 / System 2, and Maslow-related needs
+- assigning each item to dynamic themes inferred from the full review set
+- attaching theory metadata at both family and subtheory level
 - preserving the original `review_text` so later report evidence can quote the real source text
+
+Theme names and theme count are not fixed. They come from the corpus, not from a hardcoded taxonomy.
 
 The agent layer must score every review against every inferred item using the fixed scale below:
 
@@ -134,15 +133,30 @@ Each `dimension_catalog` item must include:
 - `column`
 - `label`
 - `theme`
-- `theory_tags`
 - `stat_roles`
 - `plain_language_definition`
 
+Each `dimension_catalog` item should preferably include:
+
+- `theory_annotations`
+
+Legacy compatibility is allowed through:
+
+- `theory_tags`
+
 `theme_mapping` must cover:
 
-- `service_experience`
-- `product_performance`
-- `value_perception`
+- every `dimension_catalog` column exactly once
+- only valid `dimension_catalog` columns
+- the same theme name recorded in each item's `theme`
+
+`theory_annotations` should map each scored item to theory family plus subtheory, for example:
+
+- `product_positioning`
+- `purchase_motivation`
+- `wom_motivation`
+- `dual_process`
+- `maslow`
 
 ### Auto-Discovered Context Files
 
@@ -204,6 +218,8 @@ Each major report section must contain:
 - `What this section is doing`
 - `Statistical methods used`
 - `Theories used`
+- `Theme coverage summary`
+- `Theory coverage summary`
 - `Plain-language explanation`
 - `Evidence quotes`
 
@@ -216,6 +232,8 @@ Each finding must contain:
 - `business_implication`
 - `methods_used`
 - `theories_used`
+- `themes_used`
+- `subtheories_used`
 - `reproducibility`
 - `statistical_results`
 - `plain_language_explanation`
@@ -254,6 +272,13 @@ Evidence-quote rules:
 
 The goal is to make the report readable for non-specialists while keeping every key claim traceable to real review text and reproducible from the emitted statistical artifacts.
 
+The final report should visibly show:
+
+- the dynamically inferred themes for this corpus
+- which findings use which themes
+- theory families plus subtheories
+- which subtheories are `not_evidenced` in the current dataset
+
 ## Hard Rules
 
 - Never blur agent-layer requests with script-layer artifacts.
@@ -262,6 +287,7 @@ The goal is to make the report readable for non-specialists while keeping every 
 - Always keep scored items on the fixed `0-7` scale.
 - Always preserve verbatim `review_text` for evidence quoting.
 - Always state the statistical method and theory used in each major report section.
+- Always show dynamic theme coverage and theory coverage in the report body.
 - Always attach reproducibility steps and statistical results to each finding.
 - Never fabricate evidence quotes or attribute vectors.
 

@@ -22,6 +22,8 @@ Each major summary section must contain:
 - `what_this_section_is_doing`
 - `methods_used`
 - `theories_used`
+- `theme_coverage_summary`
+- `theory_coverage_summary`
 - `plain_language_explanation`
 - `evidence_quote_status`
 - `evidence_quote_reason`
@@ -41,6 +43,27 @@ Must be a non-empty list of objects with:
 
 - `name`
 - `description`
+
+### `theme_coverage_summary`
+
+Must be a non-empty list of objects with:
+
+- `theme`
+- `supporting_items`
+- `related_findings`
+- `evidence_status`
+
+Theme names are dynamic. The contract never assumes a fixed theme count or fixed theme labels.
+
+### `theory_coverage_summary`
+
+Must be a non-empty list of objects with:
+
+- `theory_family`
+- `covered_subtheories`
+- `not_evidenced_subtheories`
+- `supporting_items`
+- `evidence_status`
 
 ### `evidence_quotes`
 
@@ -70,10 +93,29 @@ Each finding must include:
 - `business_implication`
 - `methods_used`
 - `theories_used`
+- `themes_used`
+- `subtheories_used`
 - `reproducibility`
 - `statistical_results`
 - `plain_language_explanation`
 - `evidence_quotes`
+
+### `themes_used`
+
+Each finding-level theme object must include:
+
+- `theme`
+- `supporting_items`
+
+### `subtheories_used`
+
+Each finding-level subtheory object must include:
+
+- `family`
+- `subtheory`
+- `label`
+- `source`
+- `supporting_item`
 
 ### `reproducibility`
 
@@ -201,7 +243,10 @@ Optional factor-analysis diagnostics may retain:
 - Targeting must keep current-market and potential-market outputs plus pairwise comparisons where required.
 - Positioning must keep ideal-point logic, pairwise competition distance, and no fabricated vectors in `MDS`.
 - Reports must explain the method and theory used in language that non-specialists can understand.
+- Reports must show dynamic theme coverage in the report body, not only in appendix-style JSON.
+- Reports must show theory families, subtheories, and `not_evidenced` subtheories in the report body.
 - Reports must explain every major finding with a reproducibility package and a fixed-shape statistical-results package.
 - Evidence quotes must be verbatim and traceable.
 - Validators must not hardcode a fixed item count.
+- Validators must not hardcode a fixed theme count.
 - Validators must not enforce the wording of the scoring workflow.

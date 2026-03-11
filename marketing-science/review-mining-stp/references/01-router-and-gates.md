@@ -13,7 +13,8 @@ The agent layer handles:
 - raw `reviews` or `review_text`
 - inferring scored items from the full corpus
 - applying the `0-7` scoring scale to every inferred item for every review
-- assigning `theme`, `theory_tags`, and `stat_roles`
+- assigning dynamic `theme` names inferred from the corpus
+- assigning `theory_annotations` and `stat_roles`
 - preserving verbatim review text for later evidence quoting
 
 The agent layer emits the scored artifacts that the scripts need.
@@ -74,15 +75,24 @@ Each `dimension_catalog` item must include:
 - `column`
 - `label`
 - `theme`
-- `theory_tags`
 - `stat_roles`
 - `plain_language_definition`
 
-`theme_mapping` must cover:
+Each `dimension_catalog` item should preferably include:
 
-- `service_experience`
-- `product_performance`
-- `value_perception`
+- `theory_annotations`
+
+Legacy compatibility is allowed through:
+
+- `theory_tags`
+
+`theme_mapping` must:
+
+- contain at least one theme
+- keep a non-empty column list for each theme
+- reference only columns present in `dimension_catalog`
+- cover every `dimension_catalog` column exactly once
+- match the `theme` value stored on each `dimension_catalog` item
 
 ## Run Modes
 
@@ -152,6 +162,7 @@ Every completed run must record:
 Each stage summary must keep:
 
 - section-level `methods_used`, `theories_used`, `plain_language_explanation`, and `evidence_quotes`
+- section-level `theme_coverage_summary` and `theory_coverage_summary`
 - a non-empty `findings` list
 
 Each finding must keep:
@@ -161,6 +172,8 @@ Each finding must keep:
 - `business_implication`
 - `methods_used`
 - `theories_used`
+- `themes_used`
+- `subtheories_used`
 - `reproducibility`
 - `statistical_results`
 - `plain_language_explanation`

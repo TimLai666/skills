@@ -289,6 +289,84 @@ def _validate_statistical_results(package: Any, container_name: str) -> None:
         fail(f"{container_name}.result_direction must be non-empty.")
 
 
+def _validate_themes_used(items: Any, container_name: str) -> None:
+    if not isinstance(items, list) or not items:
+        fail(f"{container_name} must be a non-empty list.")
+    for index, item in enumerate(items):
+        if not isinstance(item, dict):
+            fail(f"{container_name}[{index}] must be an object.")
+        require_keys(item, ["theme", "supporting_items"], f"{container_name}[{index}]")
+        if not str(item["theme"]).strip():
+            fail(f"{container_name}[{index}].theme must be non-empty.")
+        if not isinstance(item["supporting_items"], list) or not item["supporting_items"]:
+            fail(f"{container_name}[{index}].supporting_items must be a non-empty list.")
+
+
+def _validate_subtheories_used(items: Any, container_name: str) -> None:
+    if not isinstance(items, list) or not items:
+        fail(f"{container_name} must be a non-empty list.")
+    for index, item in enumerate(items):
+        if not isinstance(item, dict):
+            fail(f"{container_name}[{index}] must be an object.")
+        require_keys(
+            item,
+            ["family", "subtheory", "label", "source", "supporting_item"],
+            f"{container_name}[{index}]",
+        )
+        for key in ["family", "subtheory", "label", "source", "supporting_item"]:
+            if not str(item[key]).strip():
+                fail(f"{container_name}[{index}].{key} must be non-empty.")
+
+
+def _validate_theme_coverage_summary(items: Any, container_name: str) -> None:
+    if not isinstance(items, list) or not items:
+        fail(f"{container_name} must be a non-empty list.")
+    for index, item in enumerate(items):
+        if not isinstance(item, dict):
+            fail(f"{container_name}[{index}] must be an object.")
+        require_keys(
+            item,
+            ["theme", "supporting_items", "related_findings", "evidence_status"],
+            f"{container_name}[{index}]",
+        )
+        if not str(item["theme"]).strip():
+            fail(f"{container_name}[{index}].theme must be non-empty.")
+        if not isinstance(item["supporting_items"], list) or not item["supporting_items"]:
+            fail(f"{container_name}[{index}].supporting_items must be a non-empty list.")
+        if not isinstance(item["related_findings"], list):
+            fail(f"{container_name}[{index}].related_findings must be a list.")
+        if str(item["evidence_status"]) not in {"covered", "not_evidenced"}:
+            fail(f"{container_name}[{index}].evidence_status must be covered or not_evidenced.")
+
+
+def _validate_theory_coverage_summary(items: Any, container_name: str) -> None:
+    if not isinstance(items, list) or not items:
+        fail(f"{container_name} must be a non-empty list.")
+    for index, item in enumerate(items):
+        if not isinstance(item, dict):
+            fail(f"{container_name}[{index}] must be an object.")
+        require_keys(
+            item,
+            [
+                "theory_family",
+                "covered_subtheories",
+                "not_evidenced_subtheories",
+                "supporting_items",
+                "evidence_status",
+            ],
+            f"{container_name}[{index}]",
+        )
+        if not str(item["theory_family"]).strip():
+            fail(f"{container_name}[{index}].theory_family must be non-empty.")
+        for key in ["covered_subtheories", "not_evidenced_subtheories", "supporting_items"]:
+            if not isinstance(item[key], list):
+                fail(f"{container_name}[{index}].{key} must be a list.")
+        if str(item["evidence_status"]) not in {"covered", "not_evidenced", "legacy_inferred", "mixed"}:
+            fail(
+                f"{container_name}[{index}].evidence_status must be covered, not_evidenced, legacy_inferred, or mixed."
+            )
+
+
 def _validate_findings(
     findings: Any,
     container_name: str,
@@ -300,6 +378,8 @@ def _validate_findings(
         "business_implication",
         "methods_used",
         "theories_used",
+        "themes_used",
+        "subtheories_used",
         "reproducibility",
         "statistical_results",
         "plain_language_explanation",
@@ -328,6 +408,14 @@ def _validate_findings(
             f"{container_name}[{index}].theories_used",
             {"name", "description"},
         )
+        _validate_themes_used(
+            finding.get("themes_used"),
+            f"{container_name}[{index}].themes_used",
+        )
+        _validate_subtheories_used(
+            finding.get("subtheories_used"),
+            f"{container_name}[{index}].subtheories_used",
+        )
         _validate_reproducibility_package(
             finding.get("reproducibility"),
             f"{container_name}[{index}].reproducibility",
@@ -355,6 +443,8 @@ def _validate_stage_report_contract(
             "what_this_section_is_doing",
             "methods_used",
             "theories_used",
+            "theme_coverage_summary",
+            "theory_coverage_summary",
             "plain_language_explanation",
             "evidence_quote_status",
             "evidence_quote_reason",
@@ -369,6 +459,14 @@ def _validate_stage_report_contract(
         fail(f"{summary_name}.plain_language_explanation must be non-empty.")
     _validate_described_items(summary.get("methods_used"), f"{summary_name}.methods_used", {"name", "description"})
     _validate_described_items(summary.get("theories_used"), f"{summary_name}.theories_used", {"name", "description"})
+    _validate_theme_coverage_summary(
+        summary.get("theme_coverage_summary"),
+        f"{summary_name}.theme_coverage_summary",
+    )
+    _validate_theory_coverage_summary(
+        summary.get("theory_coverage_summary"),
+        f"{summary_name}.theory_coverage_summary",
+    )
     _validate_evidence_quotes(summary, summary_name, review_lookup, min_count_when_available=2, max_count_when_available=3)
     _validate_findings(summary.get("findings"), f"{summary_name}.findings", review_lookup)
 

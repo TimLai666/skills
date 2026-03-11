@@ -4,20 +4,43 @@ import json
 from pathlib import Path
 from typing import Any
 
-
-CORE_THEMES = {
-    "service_experience",
-    "product_performance",
-    "value_perception",
-}
-
 REQUIRED_DIMENSION_KEYS = {
     "column",
     "label",
     "theme",
-    "theory_tags",
     "stat_roles",
     "plain_language_definition",
+}
+
+THEORY_TAXONOMY = {
+    "product_positioning": {
+        "attributes",
+        "functions",
+        "benefits",
+        "usage_context_service_experience",
+    },
+    "purchase_motivation": {
+        "functional",
+        "security",
+        "relational",
+    },
+    "wom_motivation": {
+        "altruistic",
+        "social_identity",
+        "self_enhancement",
+        "emotional_expression",
+    },
+    "dual_process": {
+        "system1",
+        "system2",
+    },
+    "maslow": {
+        "physiological",
+        "safety",
+        "social",
+        "esteem",
+        "self_actualization",
+    },
 }
 
 
@@ -85,6 +108,44 @@ def _fail_contract(message: str) -> None:
     raise SystemExit(message)
 
 
+def _validate_theory_metadata(column: str, item: dict[str, Any]) -> None:
+    theory_annotations = item.get("theory_annotations")
+    theory_tags = item.get("theory_tags")
+    if theory_annotations is None and theory_tags is None:
+        _fail_contract(
+            f"dimension_catalog column '{column}' must define theory_annotations or theory_tags."
+        )
+
+    if theory_annotations is not None:
+        if not isinstance(theory_annotations, dict) or not theory_annotations:
+            _fail_contract(
+                f"dimension_catalog column '{column}' must define theory_annotations as a non-empty object."
+            )
+        for family, subtheories in theory_annotations.items():
+            family_name = str(family)
+            if family_name not in THEORY_TAXONOMY:
+                _fail_contract(
+                    f"dimension_catalog column '{column}' uses unsupported theory family '{family_name}'."
+                )
+            if not isinstance(subtheories, list) or not subtheories:
+                _fail_contract(
+                    f"dimension_catalog column '{column}' must define theory_annotations.{family_name} as a non-empty list."
+                )
+            invalid_subtheories = sorted(
+                str(subtheory)
+                for subtheory in subtheories
+                if str(subtheory) not in THEORY_TAXONOMY[family_name]
+            )
+            if invalid_subtheories:
+                _fail_contract(
+                    f"dimension_catalog column '{column}' uses unsupported subtheories in theory_annotations.{family_name}: "
+                    + ", ".join(invalid_subtheories)
+                )
+
+    if theory_tags is not None and (not isinstance(theory_tags, list) or not theory_tags):
+        _fail_contract(f"dimension_catalog column '{column}' must define theory_tags as a non-empty list when present.")
+
+
 def validate_canonical_inputs(score_table: Any, foundation: dict[str, Any]) -> dict[str, Any]:
     import pandas as pd
 
@@ -109,12 +170,8 @@ def validate_canonical_inputs(score_table: Any, foundation: dict[str, Any]) -> d
         _fail_contract("review_foundation.json must contain a non-empty dimension_catalog.")
 
     theme_mapping = foundation.get("theme_mapping")
-    if not isinstance(theme_mapping, dict):
-        _fail_contract("review_foundation.json must contain theme_mapping.")
-
-    missing_themes = sorted(theme for theme in CORE_THEMES if theme not in theme_mapping)
-    if missing_themes:
-        _fail_contract("theme_mapping is missing required themes: " + ", ".join(missing_themes))
+    if not isinstance(theme_mapping, dict) or not theme_mapping:
+        _fail_contract("review_foundation.json must contain theme_mapping as a non-empty object.")
 
     dimension_columns: list[str] = []
     role_map: dict[str, list[str]] = {}
@@ -130,19 +187,17 @@ def validate_canonical_inputs(score_table: Any, foundation: dict[str, Any]) -> d
         if column in catalog_by_column:
             _fail_contract(f"dimension_catalog contains duplicate column '{column}'.")
 
-        theme = str(item["theme"])
-        if theme not in CORE_THEMES:
-            _fail_contract(f"dimension_catalog column '{column}' uses unsupported theme '{theme}'.")
+        theme = str(item["theme"]).strip()
+        if not theme:
+            _fail_contract(f"dimension_catalog column '{column}' must define a non-empty theme.")
 
-        theory_tags = item.get("theory_tags")
         stat_roles = item.get("stat_roles")
         plain_language_definition = str(item.get("plain_language_definition", "")).strip()
-        if not isinstance(theory_tags, list) or not theory_tags:
-            _fail_contract(f"dimension_catalog column '{column}' must define theory_tags.")
         if not isinstance(stat_roles, list) or not stat_roles:
             _fail_contract(f"dimension_catalog column '{column}' must define stat_roles.")
         if not plain_language_definition:
             _fail_contract(f"dimension_catalog column '{column}' must define plain_language_definition.")
+        _validate_theory_metadata(column, item)
 
         catalog_by_column[column] = item
         dimension_columns.append(column)
@@ -181,17 +236,47 @@ def validate_canonical_inputs(score_table: Any, foundation: dict[str, Any]) -> d
             "review_scoring_table.csv must provide at least 3 numeric score columns from dimension_catalog."
         )
 
+    normalized_theme_mapping: dict[str, list[str]] = {}
+    column_to_theme: dict[str, str] = {}
     for theme, columns in theme_mapping.items():
-        if theme not in CORE_THEMES:
-            continue
+        theme_name = str(theme).strip()
+        if not theme_name:
+            _fail_contract("theme_mapping keys must be non-empty strings.")
         if not isinstance(columns, list) or not columns:
-            _fail_contract(f"theme_mapping.{theme} must be a non-empty list.")
-        invalid_columns = sorted(column for column in columns if column not in catalog_by_column)
+            _fail_contract(f"theme_mapping.{theme_name} must be a non-empty list.")
+        normalized_columns = [str(column) for column in columns]
+        invalid_columns = sorted(column for column in normalized_columns if column not in catalog_by_column)
         if invalid_columns:
             _fail_contract(
-                f"theme_mapping.{theme} references columns not present in dimension_catalog: "
+                f"theme_mapping.{theme_name} references columns not present in dimension_catalog: "
                 + ", ".join(invalid_columns)
             )
+        normalized_theme_mapping[theme_name] = normalized_columns
+        for column in normalized_columns:
+            if column in column_to_theme:
+                _fail_contract(
+                    f"theme_mapping maps column '{column}' to multiple themes: "
+                    f"{column_to_theme[column]}, {theme_name}."
+                )
+            column_to_theme[column] = theme_name
+
+    missing_theme_columns = sorted(column for column in dimension_columns if column not in column_to_theme)
+    if missing_theme_columns:
+        _fail_contract(
+            "theme_mapping must cover every dimension_catalog column. Missing columns: "
+            + ", ".join(missing_theme_columns)
+        )
+
+    mismatched_columns = sorted(
+        column
+        for column, item in catalog_by_column.items()
+        if str(item.get("theme", "")).strip() != column_to_theme.get(column, "")
+    )
+    if mismatched_columns:
+        _fail_contract(
+            "theme_mapping must match dimension_catalog.theme for every column. Mismatched columns: "
+            + ", ".join(mismatched_columns)
+        )
 
     return {
         "dimension_catalog": dimension_catalog,
@@ -199,7 +284,7 @@ def validate_canonical_inputs(score_table: Any, foundation: dict[str, Any]) -> d
         "dimension_columns": dimension_columns,
         "numeric_dimension_columns": numeric_dimension_columns,
         "role_map": {role: list(dict.fromkeys(columns)) for role, columns in role_map.items()},
-        "theme_mapping": theme_mapping,
+        "theme_mapping": normalized_theme_mapping,
         "unit_id_defaulted": unit_id_defaulted,
     }
 

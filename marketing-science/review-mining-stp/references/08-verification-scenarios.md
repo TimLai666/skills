@@ -30,6 +30,7 @@ Use these scenarios to verify both the layer boundary and the downstream statist
 - Input: a legal `dimension_catalog` with a different set of scored item names
 - Expected:
   - scripts run without assuming a fixed item count
+  - scripts run without assuming a fixed theme count
   - targeting and positioning still derive their variables from `stat_roles`
 
 ## Scenario 4: Input Contract Failure
@@ -38,6 +39,10 @@ Use these scenarios to verify both the layer boundary and the downstream statist
   - missing `review_text`
   - missing `plain_language_definition`
   - incomplete `theme_mapping`
+  - empty `theme_mapping`
+  - `theme_mapping` references an unknown column
+  - one column is mapped to multiple themes
+  - `dimension_catalog.theme` does not match `theme_mapping`
   - score outside `0-7`
 - Expected:
   - router fails early with a contract error
@@ -92,8 +97,9 @@ Use these scenarios to verify both the layer boundary and the downstream statist
 
 - Input: canonical full run with real `review_text`
 - Expected:
-  - each major report section includes methods, theories, plain-language explanation, and evidence quotes
-  - each finding includes methods, theories, reproducibility steps, statistical results, and evidence quotes
+  - each major report section includes methods, theories, `theme_coverage_summary`, `theory_coverage_summary`, plain-language explanation, and evidence quotes
+  - each finding includes methods, theories, `themes_used`, `subtheories_used`, reproducibility steps, statistical results, and evidence quotes
+  - the main `report.md` body directly lists the inferred themes plus `not_evidenced` theory subtheories
   - quotes trace back exactly to the canonical score table
 
 ## Scenario 11: Validator Guardrails
