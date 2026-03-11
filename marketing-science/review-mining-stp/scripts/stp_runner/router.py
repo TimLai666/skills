@@ -19,7 +19,11 @@ from .io import (
     write_json,
 )
 from .positioning import load_positioning_inputs, run_positioning
-from .reporting import build_stage_report_contract, write_execution_files
+from .reporting import (
+    build_attribute_extraction_summary_contract,
+    build_stage_report_contract,
+    write_execution_files,
+)
 from .segmentation import build_segment_summary, load_segmentation_inputs, run_segmentation
 from .targeting import load_targeting_inputs, run_targeting
 
@@ -27,6 +31,7 @@ from .targeting import load_targeting_inputs, run_targeting
 FULL_CANONICAL_REQUIRED = [
     "review_scoring_table.csv",
     "review_foundation.json",
+    "attribute_catalog.csv",
     "analysis_context.json",
     "brands.json",
     "ideal_point.json",
@@ -134,18 +139,21 @@ def _maybe_prepare_canonical_inputs(artifact_paths: list[Path]) -> dict[str, Any
 
     score_path = find_artifact(artifact_paths, "review_scoring_table.csv")
     foundation_path = find_artifact(artifact_paths, "review_foundation.json")
-    if score_path is None or foundation_path is None:
+    attribute_catalog_path = find_artifact(artifact_paths, "attribute_catalog.csv")
+    if score_path is None or foundation_path is None or attribute_catalog_path is None:
         return None
 
     score_table = pd.read_csv(score_path)
     foundation = read_json(foundation_path)
-    contract = validate_canonical_inputs(score_table, foundation)
+    attribute_catalog = pd.read_csv(attribute_catalog_path)
+    contract = validate_canonical_inputs(score_table, foundation, attribute_catalog)
     unit_table = aggregate_review_scoring_table(score_table, contract)
     segmentation_frame = build_segmentation_variables(unit_table, contract)
     positioning_scorecard = build_positioning_scorecard(score_table, contract)
     return {
         "score_table": score_table,
         "foundation": foundation,
+        "attribute_catalog": attribute_catalog,
         "contract": contract,
         "unit_table": unit_table,
         "segmentation_frame": segmentation_frame,
@@ -170,6 +178,20 @@ def _load_reporting_foundation(
     if generated_segmentation and isinstance(generated_segmentation.get("review_foundation"), dict):
         return generated_segmentation["review_foundation"]
     return None
+
+
+def _load_reporting_attribute_catalog(
+    artifact_paths: list[Path],
+    canonical_inputs: dict[str, Any] | None,
+) -> Any | None:
+    if canonical_inputs:
+        return canonical_inputs["attribute_catalog"]
+    attribute_catalog_path = find_artifact(artifact_paths, "attribute_catalog.csv")
+    if attribute_catalog_path is None:
+        return None
+    import pandas as pd
+
+    return pd.read_csv(attribute_catalog_path)
 
 
 def _build_unit_cluster_map(generated_segmentation: dict[str, Any] | None) -> dict[str, str]:
@@ -236,6 +258,7 @@ def main() -> None:
     if args.run_mode == "full" and canonical_inputs:
         _write_frame(output_dir / "review_scoring_table.csv", canonical_inputs["score_table"])
         write_json(output_dir / "review_foundation.json", canonical_inputs["foundation"])
+        _write_frame(output_dir / "attribute_catalog.csv", canonical_inputs["attribute_catalog"])
         write_json(output_dir / "analysis_context.json", analysis_context)
         if brands_path and brands_path.exists():
             write_json(output_dir / "brands.json", read_json(brands_path))
@@ -258,6 +281,7 @@ def main() -> None:
             "final_k": None,
             "scope_limits": list(analysis_context.get("scope_limits", [])),
         },
+        "attribute_extraction_summary": None,
         "segmentation_summary": None,
         "targeting_summary": None,
         "positioning_summary": None,
@@ -302,7 +326,7 @@ def main() -> None:
                 canonical_inputs["foundation"],
                 canonical_inputs["segmentation_frame"],
             )
-            for artifact_name in ["review_scoring_table.csv", "review_foundation.json", "analysis_context.json"]:
+            for artifact_name in ["review_scoring_table.csv", "review_foundation.json", "attribute_catalog.csv", "analysis_context.json"]:
                 if find_artifact(artifact_paths, artifact_name):
                     upstream_artifacts_used.append(artifact_name)
         else:
@@ -350,9 +374,9 @@ def main() -> None:
             targeting_inputs = (
                 prepared_targeting_dataset,
                 generated_segmentation,
-                canonical_inputs["contract"]["role_map"],
+                canonical_inputs["contract"]["expanded_role_map"],
             )
-            for artifact_name in ["review_scoring_table.csv", "review_foundation.json", "analysis_context.json"]:
+            for artifact_name in ["review_scoring_table.csv", "review_foundation.json", "attribute_catalog.csv", "analysis_context.json"]:
                 if find_artifact(artifact_paths, artifact_name):
                     upstream_artifacts_used.append(artifact_name)
         else:
@@ -409,7 +433,7 @@ def main() -> None:
                 read_json(brands_local_path),
                 read_json(ideal_path),
             )
-            for artifact_name in ["review_scoring_table.csv", "review_foundation.json", "brands.json", "ideal_point.json", "analysis_context.json"]:
+            for artifact_name in ["review_scoring_table.csv", "review_foundation.json", "attribute_catalog.csv", "brands.json", "ideal_point.json", "analysis_context.json"]:
                 if find_artifact(artifact_paths, artifact_name) or (
                     artifact_name == "brands.json" and args.brands_file
                 ) or (artifact_name == "ideal_point.json" and args.ideal_point_file):
@@ -466,8 +490,16 @@ def main() -> None:
         canonical_inputs,
         generated_segmentation,
     )
+    reporting_attribute_catalog = _load_reporting_attribute_catalog(
+        artifact_paths,
+        canonical_inputs,
+    )
     score_table_for_reporting = canonical_inputs["score_table"] if canonical_inputs else None
     unit_cluster_map = _build_unit_cluster_map(generated_segmentation)
+    appendix["attribute_extraction_summary"] = build_attribute_extraction_summary_contract(
+        reporting_foundation,
+        reporting_attribute_catalog,
+    )
     appendix["segmentation_summary"] = build_stage_report_contract(
         "segmentation",
         appendix.get("segmentation_summary"),

@@ -202,9 +202,20 @@ def _resolve_comparison_axes(
     potential_columns: list[str],
     role_comparison_columns: list[str],
 ) -> list[str]:
-    requested = [column for column in comparison_axes if column in dataset.columns]
+    requested: list[str] = []
+    available_columns = set(dataset.columns)
+    for column in comparison_axes:
+        column_name = str(column)
+        if column_name in available_columns:
+            requested.append(column_name)
+            continue
+        salience_column = f"{column_name}_salience"
+        valence_column = f"{column_name}_valence"
+        for expanded in [salience_column, valence_column]:
+            if expanded in available_columns:
+                requested.append(expanded)
     if requested:
-        return requested
+        return list(dict.fromkeys(requested))
     if role_comparison_columns:
         return role_comparison_columns
     return list(dict.fromkeys(current_columns + potential_columns))

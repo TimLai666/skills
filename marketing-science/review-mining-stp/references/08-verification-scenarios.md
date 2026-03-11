@@ -17,6 +17,7 @@ Use these scenarios to verify both the layer boundary and the downstream statist
 - Input:
   - `review_scoring_table.csv`
   - `review_foundation.json`
+  - `attribute_catalog.csv`
   - `analysis_context.json`
   - `brands.json`
   - `ideal_point.json`
@@ -37,13 +38,20 @@ Use these scenarios to verify both the layer boundary and the downstream statist
 
 - Input: canonical artifacts missing one of the required conditions
   - missing `review_text`
+  - missing `product`
   - missing `plain_language_definition`
+  - missing paired `*_salience` or `*_valence` column
   - incomplete `theme_mapping`
   - empty `theme_mapping`
   - `theme_mapping` references an unknown column
   - one column is mapped to multiple themes
   - `dimension_catalog.theme` does not match `theme_mapping`
-  - score outside `0-7`
+  - `salience` outside `0-7`
+  - `valence` outside `0-10`
+  - `salience = 0` but `valence` is present
+  - `salience >= 1` but `valence` is missing
+  - missing `attribute_catalog.csv`
+  - fewer than `30` attributes without `shortfall_reason`
 - Expected:
   - router fails early with a contract error
   - scripts do not silently continue
@@ -98,7 +106,8 @@ Use these scenarios to verify both the layer boundary and the downstream statist
 - Input: canonical full run with real `review_text`
 - Expected:
   - each major report section includes methods, theories, `theme_coverage_summary`, `theory_coverage_summary`, plain-language explanation, and evidence quotes
-  - each finding includes methods, theories, `themes_used`, `subtheories_used`, reproducibility steps, statistical results, and evidence quotes
+  - the report body includes the top-level attribute extraction summary with representative attributes
+  - each finding includes methods, axes, theories, `themes_used`, `subtheories_used`, reproducibility steps, statistical results, and evidence quotes
   - the main `report.md` body directly lists the inferred themes plus `not_evidenced` theory subtheories
   - quotes trace back exactly to the canonical score table
 

@@ -11,8 +11,9 @@ This reference defines what belongs to the agent layer, what belongs to the scri
 The agent layer handles:
 
 - raw `reviews` or `review_text`
+- extracting or curating the corpus-level attribute catalog
 - inferring scored items from the full corpus
-- applying the `0-7` scoring scale to every inferred item for every review
+- applying paired `salience` and `valence` scoring to every inferred attribute for every review
 - assigning dynamic `theme` names inferred from the corpus
 - assigning `theory_annotations` and `stat_roles`
 - preserving verbatim review text for later evidence quoting
@@ -28,6 +29,7 @@ Canonical input:
 
 - `review_scoring_table.csv`
 - `review_foundation.json`
+- `attribute_catalog.csv`
 - `analysis_context.json`
 - `brands.json`
 - `ideal_point.json`
@@ -49,13 +51,17 @@ Must be per-review and must include:
 - `review_id`
 - `unit_id`
 - `brand`
+- `product`
 - `review_text`
 
-All scored item columns must:
+All scored attributes must:
 
 - exist in `dimension_catalog`
-- be numeric integers
-- stay in the `0-7` range
+- exist as paired `*_salience` and `*_valence` columns
+- keep `*_salience` as numeric integers inside `0-7`
+- keep `*_valence` as numeric integers inside `0-10`
+- keep `*_valence` empty when `*_salience = 0`
+- keep `*_valence` present when `*_salience >= 1`
 
 The scored item count is dynamic. The contract never assumes a fixed item count.
 
@@ -65,6 +71,7 @@ Must include:
 
 - `dimension_catalog`
 - `theme_mapping`
+- `attribute_extraction_summary`
 
 It may also include audit-only metadata such as:
 
@@ -75,11 +82,11 @@ Each `dimension_catalog` item must include:
 - `column`
 - `label`
 - `theme`
+- `attribute_group`
+- `salience_column`
+- `valence_column`
 - `stat_roles`
 - `plain_language_definition`
-
-Each `dimension_catalog` item should preferably include:
-
 - `theory_annotations`
 
 Legacy compatibility is allowed through:
@@ -93,6 +100,28 @@ Legacy compatibility is allowed through:
 - reference only columns present in `dimension_catalog`
 - cover every `dimension_catalog` column exactly once
 - match the `theme` value stored on each `dimension_catalog` item
+
+### `attribute_catalog.csv`
+
+Must include:
+
+- `attribute_key`
+- `label`
+- `theme`
+- `attribute_group`
+- `definition`
+- `source_type`
+- `mention_count`
+- `salience_column`
+- `valence_column`
+- `example_review_id`
+- `example_quote`
+
+Rules:
+
+- it must align one-to-one with `dimension_catalog`
+- `example_quote` must stay verbatim so downstream evidence is auditable
+- if fewer than `30` attributes are extracted, `attribute_extraction_summary.shortfall_reason` must explain why
 
 ## Run Modes
 
@@ -161,7 +190,8 @@ Every completed run must record:
 
 Each stage summary must keep:
 
-- section-level `methods_used`, `theories_used`, `plain_language_explanation`, and `evidence_quotes`
+- top-level `attribute_extraction_summary` for full runs
+- section-level `axis_modeling_summary`, `methods_used`, `theories_used`, `plain_language_explanation`, and `evidence_quotes`
 - section-level `theme_coverage_summary` and `theory_coverage_summary`
 - a non-empty `findings` list
 
@@ -170,6 +200,7 @@ Each finding must keep:
 - `finding_id`
 - `finding_statement`
 - `business_implication`
+- `axes_used`
 - `methods_used`
 - `theories_used`
 - `themes_used`

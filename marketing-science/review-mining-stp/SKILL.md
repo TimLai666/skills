@@ -38,27 +38,38 @@ Do not use this skill when:
 The agent layer is the main process. It is responsible for:
 
 - reading every review one by one
+- extracting at least 30 important attributes from the full review set whenever the corpus supports it
 - inferring scored items from the full review set
 - assigning each item to dynamic themes inferred from the full review set
 - attaching theory metadata at both family and subtheory level
+- keeping a paired salience and valence scoring plan for every inferred attribute
 - preserving the original `review_text` so later report evidence can quote the real source text
 
 Theme names and theme count are not fixed. They come from the corpus, not from a hardcoded taxonomy.
 
-The agent layer must score every review against every inferred item using the fixed scale below:
+The agent layer must score every review against every inferred attribute on two axes:
 
-- `0`: no relevant meaning appears in the review
-- `1-3`: the review mentions the item slightly or indirectly
-- `4`: the review is neutral or ambiguous on the item
-- `5-6`: the review clearly mentions the item
-- `7`: the review strongly and fully expresses the item
+- `Salience (0-7)`
+  - `0`: no relevant meaning appears in the review
+  - `1-3`: the review mentions the attribute slightly or indirectly
+  - `4`: the review is neutral or ambiguous on how much the attribute matters
+  - `5-6`: the review clearly mentions the attribute
+  - `7`: the review strongly and fully emphasizes the attribute
+- `Valence (0-10)`
+  - `0`: strongly negative evaluation
+  - `5`: mixed, neutral, or unclear evaluation
+  - `10`: strongly positive evaluation
+- dependency rule
+  - when `salience = 0`, `valence` must stay empty
+  - when `salience >= 1`, `valence` must be present
 
 Scoring workflow:
 
 1. Read each review one by one.
-2. Score each inferred item on the `0-7` scale.
-3. Convert qualitative review text into quantitative data.
-4. Use the scored output for downstream statistical analysis and research models.
+2. Extract or refine the attribute catalog from the full corpus.
+3. Score each inferred attribute with paired `salience + valence`.
+4. Convert qualitative review text into quantitative data.
+5. Use the scored output for downstream statistical analysis and research models.
 
 If upstream information is incomplete, the agent layer may produce `MissingDataOutput`.
 
@@ -96,13 +107,20 @@ Required columns:
 - `review_id`
 - `unit_id`
 - `brand`
+- `product`
 - `review_text`
 
-All inferred item columns must:
+All inferred attributes must appear as paired columns:
 
-- appear as separate columns
-- use integer scores only
-- stay inside the `0-7` range
+- `<attribute_key>_salience`
+- `<attribute_key>_valence`
+
+Each pair must follow these rules:
+
+- `*_salience` uses integer scores only and stays inside the `0-7` range
+- `*_valence` uses integer scores only and stays inside the `0-10` range
+- when `*_salience = 0`, `*_valence` must be empty
+- when `*_salience >= 1`, `*_valence` must be present
 
 Optional metadata columns may include:
 
@@ -118,6 +136,7 @@ Required keys for the scripts:
 
 - `dimension_catalog`
 - `theme_mapping`
+- `attribute_extraction_summary`
 - `people_insights`
 - `product_triggers`
 - `context_scenarios`
@@ -133,12 +152,19 @@ Each `dimension_catalog` item must include:
 - `column`
 - `label`
 - `theme`
+- `attribute_group`
+- `salience_column`
+- `valence_column`
 - `stat_roles`
 - `plain_language_definition`
-
-Each `dimension_catalog` item should preferably include:
-
 - `theory_annotations`
+
+`attribute_group` must use one of:
+
+- `attribute_function`
+- `benefit_use`
+- `brand_personality`
+- `brand_image`
 
 Legacy compatibility is allowed through:
 
@@ -158,6 +184,30 @@ Legacy compatibility is allowed through:
 - `dual_process`
 - `maslow`
 
+`attribute_extraction_summary` must record:
+
+- `target_minimum`
+- `actual_count`
+- `shortfall_reason`
+
+### `attribute_catalog.csv`
+
+Required columns:
+
+- `attribute_key`
+- `label`
+- `theme`
+- `attribute_group`
+- `definition`
+- `source_type`
+- `mention_count`
+- `salience_column`
+- `valence_column`
+- `example_review_id`
+- `example_quote`
+
+The catalog is the script-facing bridge from upstream attribute extraction into downstream statistics and report evidence.
+
 ### Auto-Discovered Context Files
 
 - `analysis_context.json`
@@ -170,6 +220,7 @@ Legacy compatibility is allowed through:
 ## Run Modes
 
 - `full`: starts from canonical scored artifacts and emits the three statistical intermediates
+- `full` canonical input requires `review_scoring_table.csv + review_foundation.json + attribute_catalog.csv + analysis_context.json + brands.json + ideal_point.json`
 - `segmentation`: uses `review_foundation.json + segmentation_variables.csv`
 - `targeting`: uses `segment_profiles.json + targeting_dataset.csv`
 - `positioning`: uses `positioning_scorecard.csv + brands.json + ideal_point.json`
@@ -185,6 +236,7 @@ Generated intermediate artifacts in `full` mode:
 
 ### Segmentation
 
+- standardize `salience` and `valence` columns separately, then model them together
 - use `factor_analysis -> K-means`
 - rerun when any cluster falls below the `>5%` guardrail
 - record `cluster_threshold`, `reruns_performed`, and `final_k`
@@ -194,6 +246,7 @@ Generated intermediate artifacts in `full` mode:
 
 - resolve current and potential targeting variables from `dimension_catalog.stat_roles`
 - allow `analysis_context.comparison_axes` to override the default comparison axes
+- model both `salience` and `valence` columns as candidate drivers
 - use `ANOVA / regression` for continuous outcomes
 - use `chi-square / logistic regression` for binary outcomes
 - emit `pairwise_comparison_table` when ANOVA significance justifies post-hoc comparison
@@ -202,6 +255,7 @@ Generated intermediate artifacts in `full` mode:
 ### Positioning
 
 - build the scorecard from `stat_roles` containing `positioning`
+- combine paired `salience` and `valence` features into the perceptual-map feature matrix
 - default to `factor_analysis`
 - allow `MDS` when similarity-based input is explicitly requested
 - include ideal-point distance and pairwise competition distance
@@ -213,9 +267,19 @@ Generated intermediate artifacts in `full` mode:
 
 ## Report Contract
 
+The final report must contain an `Attribute Extraction Summary` that shows:
+
+- `target_minimum`
+- `actual_count`
+- `shortfall_reason`
+- discovered themes
+- attribute-group counts
+- representative attributes with real example quotes
+
 Each major report section must contain:
 
 - `What this section is doing`
+- `Axis modeling summary`
 - `Statistical methods used`
 - `Theories used`
 - `Theme coverage summary`
@@ -230,6 +294,7 @@ Each finding must contain:
 - `finding_id`
 - `finding_statement`
 - `business_implication`
+- `axes_used`
 - `methods_used`
 - `theories_used`
 - `themes_used`
@@ -260,6 +325,7 @@ Each `statistical_results` package must contain:
 - `coefficient`
 - `confidence_interval`
 - `result_direction`
+- `axis_breakdown`
 
 Evidence-quote rules:
 
@@ -284,10 +350,13 @@ The final report should visibly show:
 - Never blur agent-layer requests with script-layer artifacts.
 - Never let scripts consume raw reviews directly.
 - Never hardcode a fixed item count into the validator or statistical pipeline.
-- Always keep scored items on the fixed `0-7` scale.
+- Always use `product` as the product field name.
+- Always keep scoring on the paired `salience 0-7` and `valence 0-10` scales.
 - Always preserve verbatim `review_text` for evidence quoting.
 - Always state the statistical method and theory used in each major report section.
+- Always show how `salience` and `valence` were modeled in each major report section.
 - Always show dynamic theme coverage and theory coverage in the report body.
+- Always show the attribute-extraction summary and representative attributes in the report body.
 - Always attach reproducibility steps and statistical results to each finding.
 - Never fabricate evidence quotes or attribute vectors.
 

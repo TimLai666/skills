@@ -274,6 +274,7 @@ def _validate_statistical_results(package: Any, container_name: str) -> None:
         "coefficient",
         "confidence_interval",
         "result_direction",
+        "axis_breakdown",
     }
     if not isinstance(package, dict):
         fail(f"{container_name} must be an object.")
@@ -287,6 +288,19 @@ def _validate_statistical_results(package: Any, container_name: str) -> None:
         fail(f"{container_name}.sample_size must not be null.")
     if not str(package["result_direction"]).strip():
         fail(f"{container_name}.result_direction must be non-empty.")
+    axis_breakdown = package["axis_breakdown"]
+    if not isinstance(axis_breakdown, dict):
+        fail(f"{container_name}.axis_breakdown must be an object.")
+    if set(axis_breakdown.keys()) != {"salience", "valence"}:
+        fail(f"{container_name}.axis_breakdown must contain salience and valence.")
+    for axis_name, axis_payload in axis_breakdown.items():
+        if axis_payload is None:
+            continue
+        if not isinstance(axis_payload, dict):
+            fail(f"{container_name}.axis_breakdown.{axis_name} must be an object or null.")
+        nested = dict(axis_payload)
+        nested.setdefault("axis_breakdown", {"salience": None, "valence": None})
+        _validate_statistical_results(nested, f"{container_name}.axis_breakdown.{axis_name}")
 
 
 def _validate_themes_used(items: Any, container_name: str) -> None:
@@ -378,6 +392,7 @@ def _validate_findings(
         "business_implication",
         "methods_used",
         "theories_used",
+        "axes_used",
         "themes_used",
         "subtheories_used",
         "reproducibility",
@@ -398,6 +413,8 @@ def _validate_findings(
         for text_key in ["finding_id", "finding_statement", "business_implication", "plain_language_explanation"]:
             if not str(finding[text_key]).strip():
                 fail(f"{container_name}[{index}].{text_key} must be non-empty.")
+        if str(finding.get("axes_used")) not in {"salience", "valence", "mixed"}:
+            fail(f"{container_name}[{index}].axes_used must be salience, valence, or mixed.")
         _validate_described_items(
             finding.get("methods_used"),
             f"{container_name}[{index}].methods_used",
@@ -441,6 +458,7 @@ def _validate_stage_report_contract(
         summary,
         [
             "what_this_section_is_doing",
+            "axis_modeling_summary",
             "methods_used",
             "theories_used",
             "theme_coverage_summary",
@@ -457,6 +475,28 @@ def _validate_stage_report_contract(
         fail(f"{summary_name}.what_this_section_is_doing must be non-empty.")
     if not summary.get("plain_language_explanation"):
         fail(f"{summary_name}.plain_language_explanation must be non-empty.")
+    axis_modeling_summary = summary.get("axis_modeling_summary")
+    if not isinstance(axis_modeling_summary, dict):
+        fail(f"{summary_name}.axis_modeling_summary must be an object.")
+    require_keys(
+        axis_modeling_summary,
+        [
+            "axes_mode",
+            "salience_columns_used",
+            "valence_columns_used",
+            "modeling_rule",
+            "plain_language_explanation",
+        ],
+        f"{summary_name}.axis_modeling_summary",
+    )
+    if str(axis_modeling_summary["axes_mode"]) not in {"salience", "valence", "mixed"}:
+        fail(f"{summary_name}.axis_modeling_summary.axes_mode must be salience, valence, or mixed.")
+    for key in ["salience_columns_used", "valence_columns_used"]:
+        if not isinstance(axis_modeling_summary[key], list):
+            fail(f"{summary_name}.axis_modeling_summary.{key} must be a list.")
+    for key in ["modeling_rule", "plain_language_explanation"]:
+        if not str(axis_modeling_summary[key]).strip():
+            fail(f"{summary_name}.axis_modeling_summary.{key} must be non-empty.")
     _validate_described_items(summary.get("methods_used"), f"{summary_name}.methods_used", {"name", "description"})
     _validate_described_items(summary.get("theories_used"), f"{summary_name}.theories_used", {"name", "description"})
     _validate_theme_coverage_summary(
@@ -469,6 +509,66 @@ def _validate_stage_report_contract(
     )
     _validate_evidence_quotes(summary, summary_name, review_lookup, min_count_when_available=2, max_count_when_available=3)
     _validate_findings(summary.get("findings"), f"{summary_name}.findings", review_lookup)
+
+
+def _validate_attribute_extraction_summary(
+    summary: dict[str, Any],
+    review_lookup: dict[str, str],
+) -> None:
+    require_keys(
+        summary,
+        [
+            "target_minimum",
+            "actual_count",
+            "shortfall_reason",
+            "themes_discovered",
+            "attribute_group_summary",
+            "representative_attributes",
+        ],
+        "attribute_extraction_summary",
+    )
+    if not isinstance(summary["themes_discovered"], list):
+        fail("attribute_extraction_summary.themes_discovered must be a list.")
+    if not isinstance(summary["attribute_group_summary"], list):
+        fail("attribute_extraction_summary.attribute_group_summary must be a list.")
+    if not isinstance(summary["representative_attributes"], list):
+        fail("attribute_extraction_summary.representative_attributes must be a list.")
+    for index, row in enumerate(summary["attribute_group_summary"]):
+        if not isinstance(row, dict):
+            fail(f"attribute_extraction_summary.attribute_group_summary[{index}] must be an object.")
+        require_keys(
+            row,
+            ["attribute_group", "attribute_count"],
+            f"attribute_extraction_summary.attribute_group_summary[{index}]",
+        )
+    for index, row in enumerate(summary["representative_attributes"]):
+        if not isinstance(row, dict):
+            fail(f"attribute_extraction_summary.representative_attributes[{index}] must be an object.")
+        require_keys(
+            row,
+            [
+                "attribute_key",
+                "label",
+                "theme",
+                "attribute_group",
+                "mention_count",
+                "example_review_id",
+                "example_quote",
+            ],
+            f"attribute_extraction_summary.representative_attributes[{index}]",
+        )
+        if review_lookup:
+            review_id = str(row["example_review_id"])
+            if review_id not in review_lookup:
+                fail(
+                    "attribute_extraction_summary representative attribute example_review_id "
+                    f"'{review_id}' does not exist in review_scoring_table.csv."
+                )
+            if str(row["example_quote"]) != review_lookup[review_id]:
+                fail(
+                    "attribute_extraction_summary representative attribute example_quote must "
+                    "exactly match review_scoring_table.csv review_text."
+                )
 
 
 def validate_appendix(output_dir: Path, run_mode: str) -> None:
@@ -503,6 +603,7 @@ def validate_appendix(output_dir: Path, run_mode: str) -> None:
         for artifact_name in [
             "review_scoring_table.csv",
             "review_foundation.json",
+            "attribute_catalog.csv",
             "analysis_context.json",
             "brands.json",
             "ideal_point.json",
@@ -523,6 +624,12 @@ def validate_appendix(output_dir: Path, run_mode: str) -> None:
         fail("Appendix is missing targeting_summary.")
     if run_mode in {"full", "positioning"} and not appendix.get("positioning_summary"):
         fail("Appendix is missing positioning_summary.")
+    if run_mode == "full" and not appendix.get("attribute_extraction_summary"):
+        fail("Appendix is missing attribute_extraction_summary.")
+
+    attribute_extraction_summary = appendix.get("attribute_extraction_summary")
+    if isinstance(attribute_extraction_summary, dict):
+        _validate_attribute_extraction_summary(attribute_extraction_summary, review_lookup)
 
     segmentation_summary = appendix.get("segmentation_summary")
     if isinstance(segmentation_summary, dict):
@@ -634,6 +741,7 @@ def main() -> None:
             [
                 "review_scoring_table.csv",
                 "review_foundation.json",
+                "attribute_catalog.csv",
                 "analysis_context.json",
                 "brands.json",
                 "ideal_point.json",

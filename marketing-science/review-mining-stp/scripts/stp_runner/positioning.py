@@ -27,6 +27,54 @@ def load_positioning_inputs(
     return scorecard, brands, ideal_point
 
 
+def _ideal_value_for_axis(raw_value: Any, axis: str) -> float:
+    if isinstance(raw_value, dict):
+        axis_value = raw_value.get(axis)
+        if axis_value is None:
+            raise SystemExit(f"ideal_point.json attribute entry is missing '{axis}'.")
+        return float(axis_value)
+    scalar = float(raw_value)
+    if axis == "salience":
+        return max(0.0, min(7.0, scalar))
+    return max(0.0, min(10.0, scalar + 3.0))
+
+
+def _build_ideal_feature_map(scorecard: Any, ideal_point: dict[str, Any]) -> dict[str, float]:
+    feature_map: dict[str, float] = {}
+    ideal_attributes = ideal_point.get("attributes", {})
+    if not isinstance(ideal_attributes, dict) or not ideal_attributes:
+        raise SystemExit("ideal_point.json must define a non-empty attributes object.")
+    for row in scorecard[["attribute", "axis", "feature"]].drop_duplicates().to_dict("records"):
+        attribute = str(row["attribute"])
+        axis = str(row["axis"])
+        feature = str(row["feature"])
+        if attribute not in ideal_attributes:
+            continue
+        feature_map[feature] = _ideal_value_for_axis(ideal_attributes[attribute], axis)
+    if not feature_map:
+        raise SystemExit(
+            "ideal_point.json did not provide any attributes that match positioning_scorecard.csv."
+        )
+    return feature_map
+
+
+def _feature_meta(scorecard: Any, shared_columns: list[str]) -> dict[str, dict[str, str]]:
+    rows = scorecard[scorecard["feature"].isin(shared_columns)][["attribute", "axis", "feature"]]
+    return {
+        str(row["feature"]): {
+            "attribute": str(row["attribute"]),
+            "axis": str(row["axis"]),
+        }
+        for row in rows.drop_duplicates().to_dict("records")
+    }
+
+
+def _top_axis_features(rows: list[dict[str, Any]], axis: str, *, reverse: bool) -> list[dict[str, Any]]:
+    axis_rows = [row for row in rows if str(row.get("axis")) == axis]
+    axis_rows.sort(key=lambda row: float(row.get("leader_score", 0.0)), reverse=reverse)
+    return axis_rows[:5]
+
+
 def run_positioning(
     scorecard: Any, brands: dict[str, Any], ideal_point: dict[str, Any], method: str, output_dir: Path
 ) -> dict[str, Any]:
@@ -40,12 +88,24 @@ def run_positioning(
     from sklearn.manifold import MDS
     from sklearn.preprocessing import StandardScaler
 
-    pivot = scorecard.pivot_table(index="brand", columns="attribute", values="score", aggfunc="mean")
-    ideal_series = pd.Series(ideal_point["attributes"], name=ideal_point["label"])
-    shared_columns = [column for column in pivot.columns if column in ideal_series.index]
+    required_scorecard_columns = {"brand", "attribute", "axis", "feature", "score"}
+    if not required_scorecard_columns.issubset(scorecard.columns):
+        missing = sorted(required_scorecard_columns - set(scorecard.columns))
+        raise SystemExit(
+            "positioning_scorecard.csv is missing required columns: " + ", ".join(missing)
+        )
+
+    pivot = scorecard.pivot_table(index="brand", columns="feature", values="score", aggfunc="mean")
+    ideal_feature_map = _build_ideal_feature_map(scorecard, ideal_point)
+    shared_columns = [column for column in pivot.columns if column in ideal_feature_map]
+    if len(shared_columns) < 2:
+        raise SystemExit(
+            "Positioning requires at least two shared salience/valence features between positioning_scorecard.csv and ideal_point.json."
+        )
     pivot = pivot[shared_columns].sort_index()
-    ideal_series = ideal_series[shared_columns]
+    ideal_series = pd.Series({column: ideal_feature_map[column] for column in shared_columns}, name=ideal_point["label"])
     brand_matrix = pivot.copy()
+    feature_meta = _feature_meta(scorecard, shared_columns)
 
     coordinate_rows: list[dict[str, Any]] = []
     vector_rows: list[dict[str, Any]] = []
@@ -68,11 +128,13 @@ def run_positioning(
                     "y": float(factor_scores[idx, 1]),
                 }
             )
-        for idx, attribute in enumerate(combined.columns):
+        for idx, feature in enumerate(combined.columns):
             vector_rows.append(
                 {
-                    "label": str(attribute),
-                    "vector_type": "attribute",
+                    "label": str(feature),
+                    "attribute": feature_meta[str(feature)]["attribute"],
+                    "axis": feature_meta[str(feature)]["axis"],
+                    "vector_type": "attribute_axis",
                     "x_start": 0.0,
                     "y_start": 0.0,
                     "x_end": float(loadings[idx, 0]),
@@ -85,9 +147,9 @@ def run_positioning(
         attribute_vectors_not_defined = False
         perceptual_map_method = {
             "method": positioning_method_used,
-            "brand_point_source": "factor scores",
-            "ideal_point_source": "factor scores",
-            "attribute_vector_source": "factor loadings",
+            "brand_point_source": "factor scores on combined salience + valence feature matrix",
+            "ideal_point_source": "factor scores on the same combined feature matrix",
+            "attribute_vector_source": "factor loadings on feature-level salience/valence axes",
         }
     else:
         similarity_matrix = brands.get("similarity_matrix")
@@ -107,7 +169,10 @@ def run_positioning(
         ideal_vector = ideal_series.to_numpy(dtype=float)
         brand_vectors = brand_matrix.to_numpy(dtype=float)
         weights = brand_vectors @ ideal_vector
-        weights = weights / weights.sum()
+        if float(weights.sum()) == 0.0:
+            weights = np.repeat(1.0 / len(brand_coords), len(brand_coords))
+        else:
+            weights = weights / weights.sum()
         ideal_coord = np.average(brand_coords, axis=0, weights=weights)
 
         for idx, label in enumerate(brand_matrix.index):
@@ -131,8 +196,8 @@ def run_positioning(
         attribute_vectors_not_defined = True
         perceptual_map_method = {
             "method": positioning_method_used,
-            "brand_point_source": "mds coordinates",
-            "ideal_point_source": "weighted centroid from ideal profile",
+            "brand_point_source": "mds coordinates from brand similarity matrix",
+            "ideal_point_source": "weighted centroid from combined dual-axis ideal profile",
             "attribute_vector_source": "attribute_vectors_not_defined",
         }
 
@@ -183,28 +248,31 @@ def run_positioning(
         brand_distance_table.append({"brand": label, "distance_to_ideal": round(distance, 4)})
     nearest = min(brand_distance_table, key=lambda item: item["distance_to_ideal"])
 
-    attribute_benchmarks = []
-    for attribute in shared_columns:
-        scores = pivot[attribute].sort_values(ascending=False)
+    feature_benchmarks: list[dict[str, Any]] = []
+    for feature in shared_columns:
+        scores = pivot[feature].sort_values(ascending=False)
         leader = scores.index[0]
         leader_score = float(scores.iloc[0])
         gap = float(scores.iloc[0] - scores.iloc[1]) if len(scores) > 1 else float(scores.iloc[0])
-        attribute_benchmarks.append(
+        meta = feature_meta[str(feature)]
+        feature_benchmarks.append(
             {
-                "attribute": attribute,
+                "attribute": meta["attribute"],
+                "axis": meta["axis"],
+                "feature": feature,
                 "leader": str(leader),
                 "leader_score": round(leader_score, 4),
-                "ideal_score": round(float(ideal_series[attribute]), 4),
+                "ideal_score": round(float(ideal_series[feature]), 4),
                 "gap_to_next_brand": round(gap, 4),
-                "gap_to_ideal": round(float(ideal_series[attribute] - leader_score), 4),
+                "gap_to_ideal": round(float(ideal_series[feature] - leader_score), 4),
             }
         )
 
-    pod = [item["attribute"] for item in attribute_benchmarks if item["gap_to_next_brand"] >= 0.4]
+    pod = [item["feature"] for item in feature_benchmarks if item["gap_to_next_brand"] >= 0.4]
     pop = [
-        attribute
-        for attribute in shared_columns
-        if float(pivot[attribute].min()) >= float(ideal_series[attribute] - 1.5)
+        feature
+        for feature in shared_columns
+        if float(pivot[feature].min()) >= float(ideal_series[feature] - 1.5)
     ]
 
     competition_landscape = []
@@ -227,18 +295,18 @@ def run_positioning(
 
     brand_name = nearest["brand"]
     strategy_matrix = {"appeal": [], "improve": [], "change": [], "abandon": []}
-    for attribute in shared_columns:
-        brand_score = float(pivot.loc[brand_name, attribute])
-        ideal_score = float(ideal_series[attribute])
+    for feature in shared_columns:
+        brand_score = float(pivot.loc[brand_name, feature])
+        ideal_score = float(ideal_series[feature])
         gap = ideal_score - brand_score
         if gap <= 0.3:
-            strategy_matrix["appeal"].append(attribute)
+            strategy_matrix["appeal"].append(feature)
         elif gap <= 0.8:
-            strategy_matrix["improve"].append(attribute)
+            strategy_matrix["improve"].append(feature)
         elif gap <= 1.4:
-            strategy_matrix["change"].append(attribute)
+            strategy_matrix["change"].append(feature)
         else:
-            strategy_matrix["abandon"].append(attribute)
+            strategy_matrix["abandon"].append(feature)
 
     if not attribute_vectors_not_defined and vector_rows:
         projection_summary = []
@@ -262,7 +330,9 @@ def run_positioning(
             brand_projection_rows.sort(key=lambda item: item["projection"], reverse=True)
             projection_summary.append(
                 {
-                    "attribute": vector["label"],
+                    "attribute": vector["attribute"],
+                    "axis": vector["axis"],
+                    "feature": vector["label"],
                     "ideal_projection": round(float(ideal_projection), 4),
                     "leading_brand": brand_projection_rows[0]["brand"],
                     "leading_projection": brand_projection_rows[0]["projection"],
@@ -274,12 +344,12 @@ def run_positioning(
             "status": "defined",
             "method": "factor_analysis",
             "rule": (
-                "Brand performance is interpreted by projecting brand points onto attribute vectors "
-                "from the origin; ideal-point projection indicates relative attribute importance."
+                "Brand performance is interpreted by projecting brand points onto feature-level salience/valence "
+                "vectors from the origin; ideal-point projection indicates relative importance."
             ),
             "attribute_projection_summary": projection_summary,
             "importance_interpretation": (
-                "Higher ideal-point projection values imply higher relative importance for the segment."
+                "Higher ideal-point projection values imply higher relative importance for that attribute axis."
             ),
         }
     else:
@@ -288,7 +358,7 @@ def run_positioning(
             "method": positioning_method_used,
             "reason": (
                 "Attribute vectors are not defined in this MDS run because the input is similarity-based "
-                "rather than attribute-based."
+                "rather than feature-vector based."
             ),
             "attribute_projection_summary": [],
             "importance_interpretation": "",
@@ -308,7 +378,7 @@ def run_positioning(
                 "status": "defined",
                 "method": "cronbach_alpha",
                 "cronbach_alpha": round(float(cronbach_alpha), 4),
-                "note": "Interpret with caution because the scorecard uses aggregated artifact inputs.",
+                "note": "Interpret with caution because the scorecard uses aggregated dual-axis artifact inputs.",
             }
         else:
             reliability_analysis = {
@@ -322,11 +392,11 @@ def run_positioning(
             "status": "not_available",
             "method": "cronbach_alpha",
             "cronbach_alpha": None,
-            "note": "At least two brands and two attributes are required for reliability estimation.",
+            "note": "At least two brands and two features are required for reliability estimation.",
         }
 
     mean_gap_to_ideal = round(
-        float(sum(item["gap_to_ideal"] for item in attribute_benchmarks) / len(attribute_benchmarks)),
+        float(sum(item["gap_to_ideal"] for item in feature_benchmarks) / len(feature_benchmarks)),
         4,
     )
     validity_analysis = {
@@ -334,69 +404,83 @@ def run_positioning(
         "method": "ideal_point_alignment_proxy",
         "average_gap_to_ideal": mean_gap_to_ideal,
         "attribute_vector_status": "defined" if vector_rows else "not_defined",
-        "note": "Lower average gap suggests the scorecard captures attributes that align with the segment ideal.",
+        "note": "Lower average gap suggests the scorecard captures features that align with the segment ideal.",
     }
 
     highest_scoring_attributes = sorted(
-        attribute_benchmarks,
+        feature_benchmarks,
         key=lambda item: item["leader_score"],
         reverse=True,
     )
     lowest_scoring_attributes = sorted(
-        attribute_benchmarks,
+        feature_benchmarks,
         key=lambda item: item["leader_score"],
     )
 
+    axis_contribution_summary = {
+        "salience_top_features": _top_axis_features(feature_benchmarks, "salience", reverse=True),
+        "valence_top_features": _top_axis_features(feature_benchmarks, "valence", reverse=True),
+        "salience_low_features": _top_axis_features(feature_benchmarks, "salience", reverse=False),
+        "valence_low_features": _top_axis_features(feature_benchmarks, "valence", reverse=False),
+    }
+
     diagnostics = {
         "attribute_vectors_not_defined": attribute_vectors_not_defined,
-        "key_factor_assessment": attribute_benchmarks,
+        "key_factor_assessment": feature_benchmarks,
         "benchmark_analysis": {
             "closest_to_ideal": nearest["brand"],
             "distance_to_ideal": nearest["distance_to_ideal"],
-            "attribute_leaders": attribute_benchmarks,
+            "attribute_leaders": feature_benchmarks,
         },
         "ideal_point_analysis": brand_distance_table,
         "competition_landscape": competition_landscape,
         "pod_pop": {"pod": pod, "pop": pop},
         "strategy_matrix": strategy_matrix,
         "projection_interpretation": projection_interpretation,
+        "axis_contribution_summary": axis_contribution_summary,
     }
     interpretation = (
-        f"{nearest['brand']} is closest to the ideal point. "
-        "Distance between brand points indicates competitive crowding; "
-        "projection along vectors indicates attribute performance."
+        f"{nearest['brand']} is closest to the ideal point on the combined salience and valence map. "
+        "Distance between brand points indicates competitive crowding, while feature vectors indicate which "
+        "attribute-axis combinations pull brands toward the ideal."
     )
 
     scorecard_rows = [
         {
             "brand": str(record["brand"]),
             "attribute": str(record["attribute"]),
+            "axis": str(record["axis"]),
+            "feature": str(record["feature"]),
             "score": float(record["score"]),
             "point_type": "brand",
         }
         for record in scorecard.to_dict("records")
     ]
-    scorecard_rows.extend(
-        {
-            "brand": str(ideal_point["label"]),
-            "attribute": str(attribute),
-            "score": float(score),
-            "point_type": "ideal",
-        }
-        for attribute, score in ideal_series.items()
-    )
+    for feature, score in ideal_series.items():
+        meta = feature_meta[str(feature)]
+        scorecard_rows.append(
+            {
+                "brand": str(ideal_point["label"]),
+                "attribute": meta["attribute"],
+                "axis": meta["axis"],
+                "feature": str(feature),
+                "score": float(score),
+                "point_type": "ideal",
+            }
+        )
 
     return {
         "positioning_scorecard": scorecard_rows,
         "dynamic_scorecard_summary": {
             "brand_count": int(len(brand_matrix)),
-            "attribute_count": int(len(shared_columns)),
+            "feature_count": int(len(shared_columns)),
             "highest_scoring_attributes": highest_scoring_attributes,
             "lowest_scoring_attributes": lowest_scoring_attributes,
             "ideal_point_distance_summary": brand_distance_table,
-            "importance_performance_gap": attribute_benchmarks,
+            "importance_performance_gap": feature_benchmarks,
             "reliability_analysis": reliability_analysis,
             "validity_analysis": validity_analysis,
+            "axis_contribution_summary": axis_contribution_summary,
         },
         "positioning_method_used": positioning_method_used,
         "perceptual_map_figure": figure_path.name,

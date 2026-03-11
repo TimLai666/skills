@@ -82,6 +82,45 @@ def _catalog_lookup(foundation: dict[str, Any]) -> dict[str, dict[str, Any]]:
     }
 
 
+def _base_column_lookup(foundation: dict[str, Any]) -> dict[str, str]:
+    lookup: dict[str, str] = {}
+    for item in foundation.get("dimension_catalog", []):
+        if not isinstance(item, dict):
+            continue
+        column = str(item.get("column", ""))
+        if not column:
+            continue
+        lookup[column] = column
+        salience_column = str(item.get("salience_column", ""))
+        valence_column = str(item.get("valence_column", ""))
+        if salience_column:
+            lookup[salience_column] = column
+        if valence_column:
+            lookup[valence_column] = column
+    return lookup
+
+
+def _axis_for_column(foundation: dict[str, Any], column: str) -> str:
+    for item in foundation.get("dimension_catalog", []):
+        if not isinstance(item, dict):
+            continue
+        if str(item.get("salience_column", "")) == str(column):
+            return "salience"
+        if str(item.get("valence_column", "")) == str(column):
+            return "valence"
+    if str(column).endswith("_salience"):
+        return "salience"
+    if str(column).endswith("_valence"):
+        return "valence"
+    return "mixed"
+
+
+def _normalize_to_base_columns(foundation: dict[str, Any], columns: list[str]) -> list[str]:
+    lookup = _base_column_lookup(foundation)
+    normalized = [lookup.get(str(column), str(column)) for column in columns]
+    return list(dict.fromkeys(normalized))
+
+
 def _item_bundle(*items: tuple[str, str]) -> list[dict[str, str]]:
     return [{"name": name, "description": description} for name, description in items]
 
@@ -187,7 +226,7 @@ def _theory_entries_for_columns(
 ) -> list[dict[str, str]]:
     catalog = _catalog_lookup(foundation)
     entries: list[dict[str, str]] = []
-    for column in columns:
+    for column in _normalize_to_base_columns(foundation, columns):
         item = catalog.get(column)
         if not isinstance(item, dict):
             continue
@@ -208,13 +247,72 @@ def _family_status(entries: list[dict[str, str]], covered_subtheories: list[str]
     return "covered"
 
 
+def build_attribute_extraction_summary_contract(
+    foundation: dict[str, Any] | None,
+    attribute_catalog: Any | None,
+) -> dict[str, Any] | None:
+    if not isinstance(foundation, dict):
+        return None
+    rows: list[dict[str, Any]] = []
+    if hasattr(attribute_catalog, "to_dict"):
+        rows = attribute_catalog.to_dict("records")
+    elif isinstance(attribute_catalog, list):
+        rows = [row for row in attribute_catalog if isinstance(row, dict)]
+
+    extraction_summary = foundation.get("attribute_extraction_summary", {})
+    if not isinstance(extraction_summary, dict):
+        extraction_summary = {}
+
+    theme_counter: dict[str, int] = {}
+    group_counter: dict[str, int] = {}
+    representative_attributes: list[dict[str, Any]] = []
+    sorted_rows = sorted(
+        rows,
+        key=lambda row: (
+            -int(float(row.get("mention_count", 0) or 0)),
+            str(row.get("label", "")),
+        ),
+    )
+    for row in rows:
+        theme = str(row.get("theme", "")).strip()
+        if theme:
+            theme_counter[theme] = theme_counter.get(theme, 0) + 1
+        attribute_group = str(row.get("attribute_group", "")).strip()
+        if attribute_group:
+            group_counter[attribute_group] = group_counter.get(attribute_group, 0) + 1
+    for row in sorted_rows[:5]:
+        representative_attributes.append(
+            {
+                "attribute_key": str(row.get("attribute_key", "")),
+                "label": str(row.get("label", "")),
+                "theme": str(row.get("theme", "")),
+                "attribute_group": str(row.get("attribute_group", "")),
+                "mention_count": int(float(row.get("mention_count", 0) or 0)),
+                "example_review_id": str(row.get("example_review_id", "")),
+                "example_quote": str(row.get("example_quote", "")),
+            }
+        )
+    actual_count = int(extraction_summary.get("actual_count", len(rows) or len(foundation.get("dimension_catalog", []))))
+    return {
+        "target_minimum": int(extraction_summary.get("target_minimum", 30)),
+        "actual_count": actual_count,
+        "shortfall_reason": str(extraction_summary.get("shortfall_reason", "")),
+        "themes_discovered": sorted(theme_counter.keys()),
+        "attribute_group_summary": [
+            {"attribute_group": group, "attribute_count": count}
+            for group, count in sorted(group_counter.items())
+        ],
+        "representative_attributes": representative_attributes,
+    }
+
+
 def _themes_for_columns(
     foundation: dict[str, Any],
     columns: list[str],
 ) -> list[dict[str, Any]]:
     catalog = _catalog_lookup(foundation)
     by_theme: dict[str, list[str]] = {}
-    for column in columns:
+    for column in _normalize_to_base_columns(foundation, columns):
         item = catalog.get(column)
         if not isinstance(item, dict):
             continue
@@ -304,10 +402,14 @@ def _columns_for_stage(
     for item in foundation.get("dimension_catalog", []):
         if not isinstance(item, dict):
             continue
-        column = str(item.get("column", ""))
+        salience_column = str(item.get("salience_column", ""))
+        valence_column = str(item.get("valence_column", ""))
+        expanded_columns = [column for column in [salience_column, valence_column] if column]
+        if not expanded_columns:
+            column = str(item.get("column", ""))
+            expanded_columns = [column] if column else []
         for role in item.get("stat_roles", []):
-            if column:
-                role_map.setdefault(str(role), []).append(column)
+            role_map.setdefault(str(role), []).extend(expanded_columns)
 
     if stage == "segmentation":
         return list(dict.fromkeys(role_map.get("segmentation", [])))
@@ -321,9 +423,9 @@ def _columns_for_stage(
         )
     if stage == "positioning":
         columns = [
-            str(row["attribute"])
+            str(row.get("feature") or row.get("attribute"))
             for row in stage_summary.get("positioning_scorecard", [])
-            if row.get("point_type") == "brand" and row.get("attribute")
+            if row.get("point_type") == "brand" and (row.get("feature") or row.get("attribute"))
         ]
         if columns:
             return list(dict.fromkeys(columns))
@@ -365,6 +467,7 @@ def _quote_candidates(
     score_table: Any,
     relevant_columns: list[str],
     catalog: dict[str, dict[str, Any]],
+    foundation: dict[str, Any],
     unit_cluster_map: dict[str, str] | None = None,
     selected_cluster: str | None = None,
     selected_brand: str | None = None,
@@ -377,6 +480,7 @@ def _quote_candidates(
     relevant_columns = [column for column in relevant_columns if column in score_table.columns]
     if not relevant_columns:
         return []
+    base_lookup = _base_column_lookup(foundation)
 
     frame = score_table.copy()
     if unit_cluster_map:
@@ -413,13 +517,36 @@ def _quote_candidates(
             if numeric_value >= 5:
                 linked_columns.append(column)
         if not linked_columns:
+            def _score_for_sort(current: str) -> float:
+                try:
+                    value = row.get(current)
+                    if value is None:
+                        return 0.0
+                    return float(value)
+                except (TypeError, ValueError):
+                    return 0.0
+
             top_columns = sorted(
                 relevant_columns,
-                key=lambda current: float(row.get(current, 0) or 0),
+                key=_score_for_sort,
                 reverse=True,
             )
-            linked_columns = [column for column in top_columns[:2] if column in catalog]
-        linked_items = [str(catalog.get(column, {}).get("label", column)) for column in linked_columns]
+            linked_columns = top_columns[:2]
+        linked_items = []
+        for column in linked_columns:
+            base_column = base_lookup.get(column, column)
+            label = str(catalog.get(base_column, {}).get("label", base_column))
+            axis = _axis_for_column(foundation, column)
+            linked_items.append(f"{label} ({_titleize(axis)})" if axis != "mixed" else label)
+        if not linked_items:
+            normalized_relevant = [
+                base_lookup.get(column, column)
+                for column in relevant_columns[:2]
+            ]
+            linked_items = [
+                str(catalog.get(column, {}).get("label", column))
+                for column in normalized_relevant
+            ] or ["review evidence"]
         quotes.append(
             {
                 "review_id": str(row["review_id"]),
@@ -494,16 +621,27 @@ def _format_label(column: str, catalog: dict[str, dict[str, Any]]) -> str:
     return str(catalog.get(column, {}).get("label", column))
 
 
+def _format_feature_label(
+    foundation: dict[str, Any],
+    column: str,
+    catalog: dict[str, dict[str, Any]],
+) -> str:
+    base_column = _base_column_lookup(foundation).get(str(column), str(column))
+    label = _format_label(base_column, catalog)
+    axis = _axis_for_column(foundation, column)
+    return f"{label} ({_titleize(axis)})" if axis != "mixed" else label
+
+
 def _format_maslow_name(name: str) -> str:
     return str(name).replace("_", " ")
 
 
 def _stage_input_artifacts(stage: str) -> list[str]:
     if stage == "segmentation":
-        return ["review_foundation.json", "segmentation_variables.csv"]
+        return ["review_foundation.json", "attribute_catalog.csv", "segmentation_variables.csv"]
     if stage == "targeting":
-        return ["targeting_dataset.csv", "segment_profiles.json", "analysis_context.json"]
-    return ["positioning_scorecard.csv", "brands.json", "ideal_point.json"]
+        return ["review_foundation.json", "attribute_catalog.csv", "targeting_dataset.csv", "segment_profiles.json", "analysis_context.json"]
+    return ["review_foundation.json", "attribute_catalog.csv", "positioning_scorecard.csv", "brands.json", "ideal_point.json"]
 
 
 def _build_reproducibility(
@@ -535,6 +673,7 @@ def _build_statistical_results(
     effect_size: Any = None,
     coefficient: Any = None,
     confidence_interval: Any = None,
+    axis_breakdown: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     return {
         "method_family": method_family,
@@ -547,6 +686,7 @@ def _build_statistical_results(
         "coefficient": coefficient,
         "confidence_interval": confidence_interval,
         "result_direction": result_direction,
+        "axis_breakdown": axis_breakdown or {"salience": None, "valence": None},
     }
 
 
@@ -560,6 +700,7 @@ def _build_finding(
     statistical_results: dict[str, Any],
     plain_language_explanation: str,
     evidence_quotes: list[dict[str, Any]],
+    axes_used: str = "mixed",
 ) -> dict[str, Any]:
     return {
         "finding_id": finding_id,
@@ -567,11 +708,65 @@ def _build_finding(
         "business_implication": business_implication,
         "methods_used": methods_used,
         "theories_used": theories_used,
+        "axes_used": axes_used,
         "reproducibility": reproducibility,
         "statistical_results": statistical_results,
         "plain_language_explanation": plain_language_explanation,
         "evidence_quotes": evidence_quotes,
     }
+
+
+def _axes_used_for_columns(foundation: dict[str, Any], columns: list[str]) -> str:
+    axes = {
+        _axis_for_column(foundation, column)
+        for column in columns
+        if _axis_for_column(foundation, column) in {"salience", "valence"}
+    }
+    if axes == {"salience"}:
+        return "salience"
+    if axes == {"valence"}:
+        return "valence"
+    return "mixed"
+
+
+def _axis_modeling_summary(
+    foundation: dict[str, Any],
+    stage: str,
+    relevant_columns: list[str],
+    positioning_method: str | None,
+) -> dict[str, Any]:
+    salience_columns = [column for column in relevant_columns if _axis_for_column(foundation, column) == "salience"]
+    valence_columns = [column for column in relevant_columns if _axis_for_column(foundation, column) == "valence"]
+    if stage == "segmentation":
+        modeling_rule = "Salience and valence columns are standardized separately, then modeled together through factor analysis before K-means clustering."
+    elif stage == "targeting":
+        modeling_rule = "Salience and valence columns are both tested as candidate drivers; continuous variables flow into ANOVA/regression, and binary variables flow into chi-square/logistic models."
+    else:
+        map_method = "factor analysis" if positioning_method != "mds" else "MDS"
+        modeling_rule = f"Salience and valence columns are combined into one feature matrix for the {map_method} perceptual map and ideal-point distance analysis."
+    return {
+        "axes_mode": _axes_used_for_columns(foundation, relevant_columns),
+        "salience_columns_used": salience_columns,
+        "valence_columns_used": valence_columns,
+        "modeling_rule": modeling_rule,
+        "plain_language_explanation": "Salience captures how much an attribute is mentioned; valence captures how positively or negatively that attribute is evaluated.",
+    }
+
+
+def _axis_breakdown_from_result(
+    statistical_results: dict[str, Any],
+    axes_used: str,
+) -> dict[str, Any]:
+    payload = {
+        key: value
+        for key, value in statistical_results.items()
+        if key != "axis_breakdown"
+    }
+    if axes_used == "salience":
+        return {"salience": payload, "valence": None}
+    if axes_used == "valence":
+        return {"salience": None, "valence": payload}
+    return {"salience": payload, "valence": payload}
 
 
 def _segmentation_sample_size(stage_summary: dict[str, Any], score_table: Any) -> int | None:
@@ -683,6 +878,7 @@ def _segmentation_findings(
                 score_table,
                 relevant_columns,
                 catalog,
+                foundation,
                 unit_cluster_map=unit_cluster_map,
                 selected_cluster=lead_cluster,
                 limit=2,
@@ -716,7 +912,7 @@ def _segmentation_findings(
             driver_spread = spread
 
     if driver_column:
-        driver_label = _format_label(driver_column, catalog)
+        driver_label = _format_feature_label(foundation, driver_column, catalog)
         findings.append(
             _build_finding(
                 finding_id="segmentation-key-driver",
@@ -755,6 +951,7 @@ def _segmentation_findings(
                     score_table,
                     [driver_column],
                     catalog,
+                    foundation,
                     unit_cluster_map=unit_cluster_map,
                     selected_cluster=driver_high_cluster,
                     limit=1,
@@ -801,7 +998,7 @@ def _segmentation_findings(
     findings.append(
         _build_finding(
             finding_id="segmentation-psychology-overlay",
-            finding_statement=f"{lead_cluster} is most associated with {', '.join(process_labels)} cues and {', '.join(need_labels)} needs, anchored by {', '.join(_format_label(column, catalog) for column in top_columns)}.",
+            finding_statement=f"{lead_cluster} is most associated with {', '.join(process_labels)} cues and {', '.join(need_labels)} needs, anchored by {', '.join(_format_feature_label(foundation, column, catalog) for column in top_columns)}.",
             business_implication="Use motive-based positioning for the lead segment, not only descriptive demographics or channel tags.",
             methods_used=_item_bundle(
                 ("Cluster Profile Aggregation", "Identify the highest-scoring items inside the lead segment after clustering."),
@@ -828,13 +1025,14 @@ def _segmentation_findings(
                 test_or_model="top_item_theory_overlay",
                 sample_size=int(lead_segment.get("sample_size", 0)),
                 statistic={"top_columns": top_columns},
-                result_direction=f"{lead_cluster} concentrates on {', '.join(_format_label(column, catalog) for column in top_columns)}.",
+        result_direction=f"{lead_cluster} concentrates on {', '.join(_format_feature_label(foundation, column, catalog) for column in top_columns)}.",
             ),
             plain_language_explanation="This finding explains what kind of motive sits underneath the lead segment, so strategy can speak to the real need instead of just the observable behavior.",
             evidence_quotes=_quote_candidates(
                 score_table,
                 top_columns,
                 catalog,
+                foundation,
                 unit_cluster_map=unit_cluster_map,
                 selected_cluster=lead_cluster,
                 limit=1,
@@ -920,13 +1118,14 @@ def _targeting_findings(
                     sample_size=sample_size,
                     statistic=round(selected_score, 4),
                     effect_size=runner_up_gap,
-                    result_direction=f"{selected_cluster} ranks first on {', '.join(comparison_axes) or 'the selected axes'}.",
+                    result_direction=f"{selected_cluster} ranks first on {', '.join(_format_feature_label(foundation, column, catalog) for column in comparison_axes) or 'the selected axes'}.",
                 ),
                 plain_language_explanation="This finding turns multiple target-selection inputs into one ranking, so you can see which segment deserves the first move.",
                 evidence_quotes=_quote_candidates(
                     score_table,
                     comparison_axes or relevant_columns,
                     catalog,
+                    foundation,
                     unit_cluster_map=unit_cluster_map,
                     selected_cluster=selected_cluster,
                     limit=1,
@@ -938,7 +1137,7 @@ def _targeting_findings(
     current_best = _best_record(stage_summary.get("current_target_market", []), "anova")
     if current_best:
         variable = str(current_best.get("variable"))
-        variable_label = _format_label(variable, catalog)
+        variable_label = _format_feature_label(foundation, variable, catalog)
         anova = current_best.get("anova", {})
         pairwise = _first_significant_pairwise(pairwise_table, variable)
         findings.append(
@@ -982,6 +1181,7 @@ def _targeting_findings(
                     score_table,
                     [variable],
                     catalog,
+                    foundation,
                     unit_cluster_map=unit_cluster_map,
                     selected_cluster=selected_cluster or None,
                     limit=1,
@@ -1005,7 +1205,7 @@ def _targeting_findings(
 
     if best_potential:
         variable = str(best_potential.get("variable"))
-        variable_label = _format_label(variable, catalog)
+        variable_label = _format_feature_label(foundation, variable, catalog)
         if best_potential.get("method") == "chi_square_logistic_regression":
             chi_square = best_potential.get("chi_square", {})
             statistical_results = _build_statistical_results(
@@ -1060,6 +1260,7 @@ def _targeting_findings(
                     score_table,
                     [variable],
                     catalog,
+                    foundation,
                     unit_cluster_map=unit_cluster_map,
                     selected_cluster=selected_cluster or None,
                     limit=1,
@@ -1069,22 +1270,26 @@ def _targeting_findings(
     return findings
 
 
-def _positioning_score_lookup(stage_summary: dict[str, Any]) -> tuple[dict[str, dict[str, float]], dict[str, float]]:
+def _positioning_score_lookup(stage_summary: dict[str, Any]) -> tuple[dict[str, dict[str, float]], dict[str, dict[str, Any]], dict[str, float]]:
     brand_scores: dict[str, dict[str, float]] = {}
+    feature_meta: dict[str, dict[str, Any]] = {}
     ideal_scores: dict[str, float] = {}
     for row in stage_summary.get("positioning_scorecard", []):
         if not isinstance(row, dict):
             continue
         brand = str(row.get("brand", ""))
         attribute = str(row.get("attribute", ""))
+        feature = str(row.get("feature") or attribute)
+        axis = str(row.get("axis", "mixed"))
         score = float(row.get("score", 0.0))
-        if not brand or not attribute:
+        if not brand or not feature:
             continue
+        feature_meta[feature] = {"attribute": attribute, "axis": axis}
         if str(row.get("point_type")) == "ideal":
-            ideal_scores[attribute] = score
+            ideal_scores[feature] = score
         else:
-            brand_scores.setdefault(brand, {})[attribute] = score
-    return brand_scores, ideal_scores
+            brand_scores.setdefault(brand, {})[feature] = score
+    return brand_scores, feature_meta, ideal_scores
 
 
 def _positioning_findings(
@@ -1152,6 +1357,7 @@ def _positioning_findings(
                     score_table,
                     relevant_columns,
                     catalog,
+                    foundation,
                     selected_brand=closest_brand,
                     limit=1,
                 ),
@@ -1167,22 +1373,24 @@ def _positioning_findings(
         strongest_attribute = max(attribute_benchmarks, key=lambda row: float(row.get("gap_to_next_brand", 0.0)))
     if strongest_attribute:
         attribute = str(strongest_attribute.get("attribute"))
+        feature = str(strongest_attribute.get("feature") or attribute)
         leader = str(strongest_attribute.get("leader"))
         gap_to_next = float(strongest_attribute.get("gap_to_next_brand", 0.0))
         leader_score = float(strongest_attribute.get("leader_score", 0.0))
+        attribute_label = _format_feature_label(foundation, feature, catalog)
         findings.append(
             _build_finding(
                 finding_id="positioning-strongest-advantage",
-                finding_statement=f"{leader} owns the clearest attribute advantage on {_format_label(attribute, catalog)}.",
-                business_implication=f"Use {_format_label(attribute, catalog)} as a lead proof point when explaining why {leader} is meaningfully different.",
+                finding_statement=f"{leader} owns the clearest attribute advantage on {attribute_label}.",
+                business_implication=f"Use {attribute_label} as a lead proof point when explaining why {leader} is meaningfully different.",
                 methods_used=_item_bundle(
                     ("Brand-Attribute Scorecard", "Compare mean brand scores on each positioning attribute."),
                     ("Attribute Gap Analysis", "Measure the leading brand's gap to the next-best competitor on each attribute."),
                 ),
-                theories_used=_theories_for_columns(foundation, [attribute]) or _fallback_theories("positioning"),
+                theories_used=_theories_for_columns(foundation, [feature]) or _fallback_theories("positioning"),
                 reproducibility=_build_reproducibility(
                     input_artifacts=_stage_input_artifacts("positioning"),
-                    input_columns=[attribute],
+                    input_columns=[feature],
                     filters=[f"leader brand = {leader}"],
                     preprocessing=["Aggregate attribute scores by brand before comparing attribute leaders."],
                     analysis_steps=[
@@ -1199,20 +1407,21 @@ def _positioning_findings(
                     statistic=round(gap_to_next, 4),
                     effect_size=round(gap_to_next, 4),
                     coefficient=round(leader_score, 4),
-                    result_direction=f"{leader} leads {_format_label(attribute, catalog)} by {gap_to_next:.4f} points over the next brand.",
+                    result_direction=f"{leader} leads {attribute_label} by {gap_to_next:.4f} points over the next brand.",
                 ),
                 plain_language_explanation="This is the attribute where one brand most clearly owns a distinctive edge, making it a strong candidate for competitive messaging.",
                 evidence_quotes=_quote_candidates(
                     score_table,
-                    [attribute],
+                    [feature],
                     catalog,
+                    foundation,
                     selected_brand=leader,
                     limit=1,
                 ),
             )
         )
 
-    brand_scores, ideal_scores = _positioning_score_lookup(stage_summary)
+    brand_scores, feature_meta, ideal_scores = _positioning_score_lookup(stage_summary)
     gap_attribute = ""
     gap_value = -1.0
     gap_brand_score = 0.0
@@ -1227,11 +1436,12 @@ def _positioning_findings(
                 gap_brand_score = float(brand_score)
                 gap_ideal_score = ideal_score
     if gap_attribute:
+        gap_label = _format_feature_label(foundation, gap_attribute, catalog)
         findings.append(
             _build_finding(
                 finding_id="positioning-main-gap",
-                finding_statement=f"{closest_brand}'s biggest ideal-point gap is {_format_label(gap_attribute, catalog)}.",
-                business_implication=f"Improve {_format_label(gap_attribute, catalog)} before expanding awareness, otherwise traffic growth will amplify an avoidable positioning weakness.",
+                finding_statement=f"{closest_brand}'s biggest ideal-point gap is {gap_label}.",
+                business_implication=f"Improve {gap_label} before expanding awareness, otherwise traffic growth will amplify an avoidable positioning weakness.",
                 methods_used=_item_bundle(
                     ("Brand-Attribute Scorecard", "Compare the brand's current attribute score with the ideal profile score."),
                     ("Ideal-Point Gap Analysis", "Measure the distance between the brand and ideal score for each attribute."),
@@ -1255,13 +1465,14 @@ def _positioning_findings(
                     sample_size=sample_size,
                     statistic=round(gap_value, 4),
                     coefficient={"brand_score": round(gap_brand_score, 4), "ideal_score": round(gap_ideal_score, 4)},
-                    result_direction=f"{closest_brand} trails the ideal most strongly on {_format_label(gap_attribute, catalog)}.",
+                    result_direction=f"{closest_brand} trails the ideal most strongly on {gap_label}.",
                 ),
                 plain_language_explanation="Even the brand nearest to the ideal still has a weakest link. This shows where the next product or messaging improvement would matter most.",
                 evidence_quotes=_quote_candidates(
                     score_table,
                     [gap_attribute],
                     catalog,
+                    foundation,
                     selected_brand=closest_brand,
                     limit=1,
                 ),
@@ -1309,8 +1520,8 @@ def _positioning_findings(
                 ),
                 plain_language_explanation="These two brands look most similar on the map, so the market may struggle to see why one should win over the other.",
                 evidence_quotes=_merge_quotes(
-                    _quote_candidates(score_table, relevant_columns, catalog, selected_brand=brand_a, limit=1),
-                    _quote_candidates(score_table, relevant_columns, catalog, selected_brand=brand_b, limit=1),
+                    _quote_candidates(score_table, relevant_columns, catalog, foundation, selected_brand=brand_a, limit=1),
+                    _quote_candidates(score_table, relevant_columns, catalog, foundation, selected_brand=brand_b, limit=1),
                 ),
             )
         )
@@ -1348,17 +1559,37 @@ def _augment_findings_with_theme_and_theory_details(
         finding_columns = [
             str(column)
             for column in reproducibility.get("input_columns", [])
-            if str(column) in catalog
+            if str(column)
         ]
         if not finding_columns:
-            finding_columns = [column for column in fallback_columns if column in catalog]
+            finding_columns = list(fallback_columns)
+        base_columns = _normalize_to_base_columns(foundation, finding_columns)
+        fallback_base_columns = _normalize_to_base_columns(foundation, list(fallback_columns))
         updated = dict(finding)
-        updated["themes_used"] = _themes_for_columns(foundation, finding_columns)
-        updated["subtheories_used"] = _theory_entries_for_columns(
+        axes_used = _axes_used_for_columns(foundation, finding_columns)
+        updated["axes_used"] = axes_used
+        themes_used = _themes_for_columns(foundation, base_columns)
+        if not themes_used:
+            themes_used = _themes_for_columns(foundation, fallback_base_columns)
+        updated["themes_used"] = themes_used
+        subtheories_used = _theory_entries_for_columns(
             foundation,
-            finding_columns,
+            base_columns,
             include_segmentation_overlays=include_segmentation_overlays,
         )
+        if not subtheories_used:
+            subtheories_used = _theory_entries_for_columns(
+                foundation,
+                fallback_base_columns,
+                include_segmentation_overlays=include_segmentation_overlays,
+            )
+        updated["subtheories_used"] = subtheories_used
+        statistical_results = dict(updated.get("statistical_results", {}))
+        statistical_results["axis_breakdown"] = _axis_breakdown_from_result(
+            statistical_results,
+            axes_used,
+        )
+        updated["statistical_results"] = statistical_results
         augmented.append(updated)
     return augmented
 
@@ -1389,6 +1620,7 @@ def build_stage_report_contract(
         score_table,
         relevant_columns,
         catalog,
+        foundation,
         unit_cluster_map=unit_cluster_map,
         selected_cluster=selected_cluster,
         selected_brand=selected_brand,
@@ -1399,6 +1631,12 @@ def build_stage_report_contract(
     enriched = dict(stage_summary)
     enriched["what_this_section_is_doing"] = _what_this_section_is_doing(stage)
     enriched["methods_used"] = _stage_methods(stage, positioning_method)
+    enriched["axis_modeling_summary"] = _axis_modeling_summary(
+        foundation,
+        stage,
+        relevant_columns,
+        positioning_method,
+    )
     theories_used = _theories_for_columns(
         foundation,
         relevant_columns,
@@ -1509,6 +1747,61 @@ def _render_subtheories_used(items: list[dict[str, Any]], indent: str = "") -> l
     return lines
 
 
+def _render_axis_modeling(summary: dict[str, Any], indent: str = "") -> list[str]:
+    return [
+        f"{indent}- axes_mode: {summary.get('axes_mode', 'n/a')}",
+        f"{indent}- salience_columns_used: {', '.join(summary.get('salience_columns_used', [])) or 'none'}",
+        f"{indent}- valence_columns_used: {', '.join(summary.get('valence_columns_used', [])) or 'none'}",
+        f"{indent}- modeling_rule: {summary.get('modeling_rule', 'n/a')}",
+        f"{indent}- plain_language_explanation: {summary.get('plain_language_explanation', 'n/a')}",
+    ]
+
+
+def _render_axis_breakdown(axis_breakdown: dict[str, Any], indent: str = "") -> list[str]:
+    lines: list[str] = []
+    for axis in ["salience", "valence"]:
+        payload = axis_breakdown.get(axis)
+        if payload is None:
+            lines.append(f"{indent}- {axis}: null")
+            continue
+        lines.append(
+            f"{indent}- {axis}: test_or_model={payload.get('test_or_model')}; "
+            f"statistic={_stringify(payload.get('statistic'))}; "
+            f"p_value={_stringify(payload.get('p_value'))}; "
+            f"result_direction={payload.get('result_direction')}"
+        )
+    return lines
+
+
+def _render_attribute_extraction_summary(summary: dict[str, Any]) -> list[str]:
+    lines = [
+        "",
+        "## Attribute Extraction Summary",
+        f"- target_minimum: {summary.get('target_minimum', 'n/a')}",
+        f"- actual_count: {summary.get('actual_count', 'n/a')}",
+        f"- shortfall_reason: {summary.get('shortfall_reason') or 'none'}",
+        f"- themes_discovered: {', '.join(summary.get('themes_discovered', [])) or 'none'}",
+        "- Attribute groups:",
+    ]
+    for row in summary.get("attribute_group_summary", []):
+        lines.append(
+            f"  - {row.get('attribute_group')}: {row.get('attribute_count')} attributes"
+        )
+    if not summary.get("attribute_group_summary"):
+        lines.append("  - none")
+    lines.append("- Representative attributes:")
+    for row in summary.get("representative_attributes", []):
+        lines.append(
+            "  - "
+            f"{row.get('label')} [{row.get('theme')} / {row.get('attribute_group')}]: "
+            f"mention_count={row.get('mention_count')}; "
+            f"example=[{row.get('example_review_id')}] \"{row.get('example_quote')}\""
+        )
+    if not summary.get("representative_attributes"):
+        lines.append("  - none")
+    return lines
+
+
 def _render_finding(finding: dict[str, Any]) -> list[str]:
     reproducibility = finding.get("reproducibility", {})
     statistical_results = finding.get("statistical_results", {})
@@ -1517,6 +1810,7 @@ def _render_finding(finding: dict[str, Any]) -> list[str]:
         f"### Finding {finding.get('finding_id')}",
         f"- Finding statement: {finding.get('finding_statement', 'n/a')}",
         f"- Business implication: {finding.get('business_implication', 'n/a')}",
+        f"- Axes used: {finding.get('axes_used', 'n/a')}",
         "- Statistical methods used:",
     ]
     lines.extend(_render_described_items(finding.get("methods_used", []), indent="  "))
@@ -1547,6 +1841,8 @@ def _render_finding(finding: dict[str, Any]) -> list[str]:
         "result_direction",
     ]:
         lines.append(f"  - {key}: {_stringify(statistical_results.get(key))}")
+    lines.append("  - axis_breakdown:")
+    lines.extend(_render_axis_breakdown(statistical_results.get("axis_breakdown", {}), indent="    "))
     lines.append(f"- Plain-language explanation: {finding.get('plain_language_explanation', 'n/a')}")
     lines.append("- Evidence quotes:")
     lines.extend(_render_quotes(finding.get("evidence_quotes", []), "No evidence quotes were attached to this finding.", indent="  "))
@@ -1558,8 +1854,12 @@ def _render_report_section(title: str, section: dict[str, Any]) -> list[str]:
         "",
         f"## {title}",
         f"- What this section is doing: {section.get('what_this_section_is_doing', 'n/a')}",
-        "- Statistical methods used:",
+        "- Axis modeling summary:",
     ]
+    lines.extend(_render_axis_modeling(section.get("axis_modeling_summary", {}), indent="  "))
+    lines.extend([
+        "- Statistical methods used:",
+    ])
     lines.extend(_render_described_items(section.get("methods_used", []), indent="  "))
     lines.append("- Theories used:")
     lines.extend(_render_described_items(section.get("theories_used", []), indent="  "))
@@ -1607,6 +1907,9 @@ def write_report(output_dir: Path, run_mode: str, appendix: dict[str, Any]) -> N
         "- Output quality depends on the quality of upstream scored artifacts.",
         "- Statistical outputs are directional; validate with domain review before decisions.",
     ]
+    attribute_extraction_summary = appendix.get("attribute_extraction_summary")
+    if isinstance(attribute_extraction_summary, dict):
+        lines.extend(_render_attribute_extraction_summary(attribute_extraction_summary))
 
     section_map = [
         ("Segmentation Summary", appendix.get("segmentation_summary")),

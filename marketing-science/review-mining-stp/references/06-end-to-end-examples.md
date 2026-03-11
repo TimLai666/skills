@@ -35,8 +35,8 @@
 The agent layer:
 
 1. reads each review one by one
-2. infers scored items from the full corpus
-3. scores each item on the `0-7` scale
+2. extracts a corpus-level attribute catalog with definitions, mention counts, and example quotes
+3. scores each attribute with paired `salience + valence`
 4. assigns dynamic theme names plus theory annotations
 5. preserves verbatim `review_text`
 
@@ -44,6 +44,7 @@ The agent layer:
 
 - `review_scoring_table.csv`
 - `review_foundation.json`
+- `attribute_catalog.csv`
 - `analysis_context.json`
 - `brands.json`
 - `ideal_point.json`
@@ -51,6 +52,7 @@ The agent layer:
 ### Expected Outcome
 
 - scripts emit `segmentation_variables.csv`, `targeting_dataset.csv`, and `positioning_scorecard.csv`
+- the final report prints the attribute-extraction summary and representative attributes in the main body
 - the final report names the statistical method and theory used in each major section
 - the final report prints the dynamically inferred themes in the main body
 - the final report prints theory families, subtheories, and `not_evidenced` subtheories in the main body
@@ -71,12 +73,14 @@ The agent layer:
 ### Runnable Artifacts
 
 - `review_scoring_table.csv`
-  - contains `review_id`, `unit_id`, `brand`, `review_text`
-  - contains custom scored columns such as `delivery_confidence`, `premium_finish`, `everyday_value`
+  - contains `review_id`, `unit_id`, `brand`, `product`, `review_text`
+  - contains paired columns such as `delivery_confidence_salience`, `delivery_confidence_valence`, `premium_finish_salience`, `premium_finish_valence`
 - `review_foundation.json`
   - maps those columns into `dimension_catalog`
-  - defines dynamic `theme_mapping`, `theory_annotations`, and `stat_roles`
+  - defines dynamic `theme_mapping`, `theory_annotations`, `attribute_extraction_summary`, and `stat_roles`
   - may include `scoring_rubric` as audit metadata, but scripts do not require it
+- `attribute_catalog.csv`
+  - records each attribute's definition, mention count, paired score columns, and verbatim example quote
 
 ### Expected Outcome
 
@@ -125,11 +129,13 @@ The agent layer:
 - `targeting_dataset.csv`
 - `segment_profiles.json`
 - `review_foundation.json`
+- `attribute_catalog.csv`
 - `analysis_context.json`
 
 ### Expected Outcome
 
 - targeting uses the updated comparison axes
+- the override base names expand into paired salience and valence columns
 - output includes `priority_segments`, `secondary_segments`, and `deprioritized_segments`
 - the report explains the tests in plain language
 
