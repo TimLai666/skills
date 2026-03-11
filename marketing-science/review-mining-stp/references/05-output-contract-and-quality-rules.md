@@ -2,24 +2,22 @@
 
 ## Default Output Shape
 
-以下段落永遠必填：
+所有 mode 都必須輸出：
 
 1. `Execution Scope Summary`
 2. `Risks / Bias / Confidence Notes`
+3. `Appendix (JSON)`
 
-依 mode 增列：
+依 stage 補充：
 
-3. `Segmentation Summary`
-4. `Targeting Summary`
-5. `Positioning Summary`
-6. `Integrated STP Actions`
-7. `Appendix (JSON)`
+4. `Segmentation Summary`
+5. `Targeting Summary`
+6. `Positioning Summary`
+7. `Integrated STP Actions`
 
 ## Required Section Specs
 
 ### Segmentation Summary
-
-至少包含：
 
 - `people_insights`
 - `product_triggers`
@@ -29,10 +27,9 @@
 - `segment_variable_table`
 - `cluster_share_table`
 - `segment_profiles`
+- `consumer_portrait_narrative`
 
 ### Targeting Summary
-
-至少包含：
 
 - `current_target_market`
 - `potential_target_market`
@@ -42,9 +39,14 @@
 - `target_selection_decision`
 - `target_selection_rationale`
 
-### Positioning Summary
+`target_selection_decision` 必須再包含：
 
-至少包含：
+- `priority_segments`
+- `secondary_segments`
+- `deprioritized_segments`
+- `comparison_axes_used`
+
+### Positioning Summary
 
 - `positioning_scorecard`
 - `dynamic_scorecard_summary`
@@ -58,14 +60,20 @@
 - `positioning_diagnostics`
 - `strategy_matrix`
 
-### Integrated STP Actions
+`dynamic_scorecard_summary` 至少要有：
 
-至少包含：
+- `highest_scoring_attributes`
+- `lowest_scoring_attributes`
+- `ideal_point_distance_summary`
+- `importance_performance_gap`
+- `reliability_analysis`
+- `validity_analysis`
 
-- `priority_segments`
-- `target_market_actions`
-- `positioning_actions`
-- `message_or_offer_implications`
+`positioning_diagnostics.competition_landscape` 每列至少要有：
+
+- `brand_a`
+- `brand_b`
+- `distance`
 
 ## Appendix (JSON) Minimum Schema
 
@@ -83,25 +91,39 @@
 }
 ```
 
+## Execution Scope Minimum Keys
+
+- `run_mode`
+- `requested_modules`
+- `modules_executed`
+- `auto_backfilled_modules`
+- `upstream_artifacts_used`
+- `emitted_intermediate_artifacts`
+- `comparison_axes`
+- `brands`
+- `positioning_method_used`
+- `cluster_threshold`
+- `reruns_performed`
+- `final_k`
+- `scope_limits`
+
 ## Quality Checklist
 
-- 是否先輸出 `Execution Scope Summary`
-- partial / custom run 是否揭露 prerequisite trace
-- segmentation 是否包含 `System 1 / System 2`
-- segmentation 是否列出 Maslow 五需求關鍵字
-- 分群是否遵守 `每群占比 > 5%`
-- targeting 是否分 current / potential 兩條路徑
-- targeting 是否明確做 target selection
-- targeting 是否輸出 `profile_significance_summary`
-- targeting 是否在 ANOVA 顯著時輸出 `pairwise_comparison_table`
-- positioning 是否有品牌欄與理想點
-- positioning 是否預設使用 `factor_analysis`
-- positioning 是否輸出真實散佈圖
-- positioning 是否保留品牌點
-- positioning 是否輸出由原點出發的屬性向量
-- positioning 是否附座標表與向量表
-- positioning 是否輸出 `projection_interpretation`
-- `Dynamic Scorecard Summary` 是否包含信度 / 效度分析
-- 是否有 `POD / POP`
-- 是否有訴求 / 改善 / 改變 / 放棄
-- 是否完成 `review-mining-improve.md` 最終對照
+- 不得把 agent request 與 script artifacts 混用
+- full mode 的 `upstream_artifacts_used` 必須列出 canonical scored input
+- full mode 的 `emitted_intermediate_artifacts` 必須列出三個 generated statistical artifacts
+- partial / custom run 必須保留 prerequisite trace
+- segmentation 必須有 `System 1 / System 2`
+- segmentation 必須有 Maslow 五需求關鍵字
+- segmentation 必須記錄 `cluster_threshold / reruns_performed / final_k`
+- targeting 必須同時有 current / potential 兩條分析路徑
+- targeting 必須有 `priority / secondary / deprioritized`
+- targeting 必須有 `profile_significance_summary`
+- 若有 `ANOVA p < 0.05`，必須有 `pairwise_comparison_table`
+- positioning 必須有理想點
+- positioning 預設 `factor_analysis`
+- positioning 的 `Dynamic Scorecard Summary` 必須有距離、落差、信度、效度
+- positioning 的 `competition_landscape` 必須是品牌 pairwise 距離
+- `MDS` 路徑不得偽造向量表
+- validator 不得把 14 項案例欄位寫死
+- 完成前必須對照 `review-mining-improve.md`

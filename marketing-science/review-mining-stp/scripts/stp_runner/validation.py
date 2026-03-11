@@ -28,6 +28,12 @@ def fail(message: str) -> None:
     raise SystemExit(1)
 
 
+def require_keys(container: dict[str, Any], keys: list[str], container_name: str) -> None:
+    for key in keys:
+        if key not in container:
+            fail(f"{container_name} is missing {key}.")
+
+
 def require_output_files(output_dir: Path, names: list[str]) -> None:
     missing = [name for name in names if not (output_dir / name).exists()]
     if missing:
@@ -66,7 +72,6 @@ def validate_positioning(output_dir: Path) -> None:
     else:
         if not vector_path.exists():
             fail("Factor-analysis perceptual map requires a vector table.")
-
         with vector_path.open(encoding="utf-8") as handle:
             vector_rows = list(csv.DictReader(handle))
         if not vector_rows:
@@ -161,6 +166,46 @@ def validate_appendix(output_dir: Path, run_mode: str) -> None:
     appendix = read_json(output_dir / "appendix.json")
     if "execution_scope" not in appendix:
         fail("Appendix is missing execution_scope.")
+    execution_scope = appendix["execution_scope"]
+    if not isinstance(execution_scope, dict):
+        fail("execution_scope must be an object.")
+    require_keys(
+        execution_scope,
+        [
+            "run_mode",
+            "requested_modules",
+            "modules_executed",
+            "auto_backfilled_modules",
+            "upstream_artifacts_used",
+            "emitted_intermediate_artifacts",
+            "comparison_axes",
+            "brands",
+            "positioning_method_used",
+            "cluster_threshold",
+            "reruns_performed",
+            "final_k",
+            "scope_limits",
+        ],
+        "execution_scope",
+    )
+    if run_mode == "full":
+        for artifact_name in [
+            "review_scoring_table.csv",
+            "review_foundation.json",
+            "analysis_context.json",
+            "brands.json",
+            "ideal_point.json",
+        ]:
+            if artifact_name not in execution_scope["upstream_artifacts_used"]:
+                fail(f"execution_scope.upstream_artifacts_used must include {artifact_name}.")
+        expected_emitted = {
+            "segmentation_variables.csv",
+            "targeting_dataset.csv",
+            "positioning_scorecard.csv",
+        }
+        if set(execution_scope.get("emitted_intermediate_artifacts", [])) != expected_emitted:
+            fail("Full run must record emitted_intermediate_artifacts for all three generated statistical artifacts.")
+
     if run_mode in {"full", "segmentation"} and not appendix.get("segmentation_summary"):
         fail("Appendix is missing segmentation_summary.")
     if run_mode in {"full", "targeting"} and not appendix.get("targeting_summary"):
@@ -168,17 +213,89 @@ def validate_appendix(output_dir: Path, run_mode: str) -> None:
     if run_mode in {"full", "positioning"} and not appendix.get("positioning_summary"):
         fail("Appendix is missing positioning_summary.")
 
+    segmentation_summary = appendix.get("segmentation_summary")
+    if isinstance(segmentation_summary, dict):
+        require_keys(
+            segmentation_summary,
+            [
+                "people_insights",
+                "product_triggers",
+                "context_scenarios",
+                "system1_system2_split",
+                "maslow_keywords",
+                "segment_variable_table",
+                "cluster_share_table",
+                "segment_profiles",
+                "consumer_portrait_narrative",
+            ],
+            "segmentation_summary",
+        )
+        cluster_selection = segmentation_summary.get("cluster_selection", {})
+        if isinstance(cluster_selection, dict):
+            require_keys(
+                cluster_selection,
+                ["cluster_threshold", "reruns_performed", "final_k"],
+                "segmentation_summary.cluster_selection",
+            )
+
     targeting_summary = appendix.get("targeting_summary")
     if isinstance(targeting_summary, dict):
-        if "profile_significance_summary" not in targeting_summary:
-            fail("targeting_summary is missing profile_significance_summary.")
-        if "pairwise_comparison_table" not in targeting_summary:
-            fail("targeting_summary is missing pairwise_comparison_table.")
+        require_keys(
+            targeting_summary,
+            [
+                "profile_significance_summary",
+                "pairwise_comparison_table",
+                "target_selection_decision",
+                "target_selection_rationale",
+            ],
+            "targeting_summary",
+        )
+        decision = targeting_summary.get("target_selection_decision", {})
+        if isinstance(decision, dict):
+            require_keys(
+                decision,
+                [
+                    "priority_segments",
+                    "secondary_segments",
+                    "deprioritized_segments",
+                    "comparison_axes_used",
+                ],
+                "targeting_summary.target_selection_decision",
+            )
 
     positioning_summary = appendix.get("positioning_summary")
     if isinstance(positioning_summary, dict):
-        if "projection_interpretation" not in positioning_summary:
-            fail("positioning_summary is missing projection_interpretation.")
+        require_keys(
+            positioning_summary,
+            [
+                "projection_interpretation",
+                "perceptual_map_figure",
+                "perceptual_map_coordinate_table",
+                "perceptual_map_vector_table",
+                "dynamic_scorecard_summary",
+            ],
+            "positioning_summary",
+        )
+        dynamic_summary = positioning_summary.get("dynamic_scorecard_summary", {})
+        if isinstance(dynamic_summary, dict):
+            require_keys(
+                dynamic_summary,
+                [
+                    "highest_scoring_attributes",
+                    "lowest_scoring_attributes",
+                    "ideal_point_distance_summary",
+                    "importance_performance_gap",
+                    "reliability_analysis",
+                    "validity_analysis",
+                ],
+                "positioning_summary.dynamic_scorecard_summary",
+            )
+        diagnostics = positioning_summary.get("positioning_diagnostics", {})
+        if isinstance(diagnostics, dict):
+            competition_landscape = diagnostics.get("competition_landscape", [])
+            for row in competition_landscape:
+                if not {"brand_a", "brand_b", "distance"}.issubset(row.keys()):
+                    fail("competition_landscape rows must include brand_a/brand_b/distance.")
 
     for optional_key in ["proactive_marketing_notes", "usp_translation_candidates"]:
         if optional_key in appendix and not isinstance(appendix[optional_key], list):
@@ -203,6 +320,9 @@ def main() -> None:
                 "segment_summary.md",
                 "targeting_results.json",
                 "target_selection_decision.json",
+                "segmentation_variables.csv",
+                "targeting_dataset.csv",
+                "positioning_scorecard.csv",
             ],
         )
         validate_targeting(output_dir)

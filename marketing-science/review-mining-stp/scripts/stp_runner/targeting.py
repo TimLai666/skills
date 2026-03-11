@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from typing import Any
 
-from .io import find_artifact, read_json
+from .io import derive_role_columns, find_artifact, read_json
 
 
 def load_targeting_inputs(
-    artifact_paths: list, generated_segmentation: dict[str, Any] | None
-) -> tuple[Any, dict[str, Any]] | None:
+    artifact_paths: list,
+    generated_segmentation: dict[str, Any] | None,
+) -> tuple[Any, dict[str, Any], dict[str, list[str]] | None] | None:
     import pandas as pd
 
     dataset_path = find_artifact(artifact_paths, "targeting_dataset.csv")
@@ -22,12 +23,23 @@ def load_targeting_inputs(
     else:
         segmentation = generated_segmentation
 
+    foundation: dict[str, Any] = {}
+    foundation_path = find_artifact(artifact_paths, "review_foundation.json")
+    if foundation_path is not None:
+        foundation = read_json(foundation_path)
+    elif isinstance(segmentation.get("review_foundation"), dict):
+        foundation = segmentation["review_foundation"]
+
     dataset = pd.read_csv(dataset_path)
-    return dataset, segmentation
+    role_columns = derive_role_columns(foundation) if foundation else None
+    return dataset, segmentation, role_columns
 
 
 def _safe_float(value: Any) -> float:
-    return float(value) if value is not None else 0.0
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0.0
 
 
 def _build_profile_significance_summary(dataset: Any) -> dict[str, Any]:
@@ -67,10 +79,7 @@ def _build_profile_significance_summary(dataset: Any) -> dict[str, Any]:
             "alpha": 0.05,
             "variables": [],
             "significant_variables": [],
-            "reason": (
-                "Profile columns were provided but lacked enough categorical variation "
-                "for chi-square significance tests."
-            ),
+            "reason": "Profile columns lacked enough categorical variation for chi-square testing.",
         }
 
     return {
@@ -88,10 +97,11 @@ def _build_pairwise_comparison_table(dataset: Any, columns: list[str]) -> list[d
     from statsmodels.stats.multicomp import pairwise_tukeyhsd
 
     results: list[dict[str, Any]] = []
-    tested_columns = list(dict.fromkeys(columns))
-    for column in tested_columns:
+    for column in list(dict.fromkeys(columns)):
+        if column not in dataset.columns:
+            continue
         sample = dataset[["cluster", column]].dropna()
-        if sample["cluster"].nunique() < 2:
+        if sample["cluster"].nunique() < 2 or sample[column].nunique() < 2:
             continue
         try:
             tukey = pairwise_tukeyhsd(endog=sample[column], groups=sample["cluster"], alpha=0.05)
@@ -102,10 +112,9 @@ def _build_pairwise_comparison_table(dataset: Any, columns: list[str]) -> list[d
         for row_values in table_data[1:]:
             row = dict(zip(headers, row_values))
             reject_value = row.get("reject", False)
-            if isinstance(reject_value, bool):
-                significant = reject_value
-            else:
-                significant = str(reject_value).strip().lower() == "true"
+            significant = (
+                reject_value if isinstance(reject_value, bool) else str(reject_value).lower() == "true"
+            )
             results.append(
                 {
                     "variable": column,
@@ -124,39 +133,126 @@ def _build_pairwise_comparison_table(dataset: Any, columns: list[str]) -> list[d
     return results
 
 
-def run_targeting(dataset: Any, segmentation: dict[str, Any]) -> dict[str, Any]:
+def _numeric_columns(dataset: Any) -> list[str]:
+    return [
+        column
+        for column in dataset.select_dtypes(include=["number"]).columns.tolist()
+        if column != "cluster"
+    ]
+
+
+def _split_binary_and_continuous(dataset: Any, columns: list[str]) -> tuple[list[str], list[str]]:
+    binary: list[str] = []
+    continuous: list[str] = []
+    for column in columns:
+        if column not in dataset.columns:
+            continue
+        series = dataset[column].dropna()
+        if series.empty:
+            continue
+        unique_values = {float(value) for value in series.tolist()}
+        if unique_values.issubset({0.0, 1.0}):
+            binary.append(column)
+        else:
+            continuous.append(column)
+    return binary, continuous
+
+
+def _resolve_target_columns(
+    dataset: Any,
+    role_columns: dict[str, list[str]] | None,
+) -> tuple[list[str], list[str], list[str]]:
+    numeric_columns = _numeric_columns(dataset)
+    if role_columns:
+        current_candidates = [
+            column for column in role_columns.get("current_target", []) if column in numeric_columns
+        ]
+        potential_candidates = [
+            column for column in role_columns.get("potential_target", []) if column in numeric_columns
+        ]
+        comparison_candidates = [
+            column for column in role_columns.get("comparison_axis", []) if column in numeric_columns
+        ]
+    else:
+        current_candidates = [
+            column
+            for column in ["current_value", "loyalty_score", "active_rate"]
+            if column in numeric_columns
+        ]
+        potential_candidates = [
+            column
+            for column in ["potential_conversion", "tried_before", "intent_score"]
+            if column in numeric_columns
+        ]
+        comparison_candidates = []
+
+    if not current_candidates:
+        current_candidates = numeric_columns[: max(1, min(3, len(numeric_columns)))]
+    if not potential_candidates:
+        potential_candidates = [
+            column for column in numeric_columns if column not in current_candidates
+        ]
+    return current_candidates, potential_candidates, comparison_candidates
+
+
+def _resolve_comparison_axes(
+    dataset: Any,
+    comparison_axes: list[str],
+    current_columns: list[str],
+    potential_columns: list[str],
+    role_comparison_columns: list[str],
+) -> list[str]:
+    requested = [column for column in comparison_axes if column in dataset.columns]
+    if requested:
+        return requested
+    if role_comparison_columns:
+        return role_comparison_columns
+    return list(dict.fromkeys(current_columns + potential_columns))
+
+
+def run_targeting(
+    dataset: Any,
+    segmentation: dict[str, Any],
+    comparison_axes: list[str],
+    role_columns: dict[str, list[str]] | None = None,
+) -> dict[str, Any]:
     import pandas as pd
     from scipy.stats import chi2_contingency, f_oneway
     from sklearn.linear_model import LogisticRegression
     from sklearn.preprocessing import StandardScaler
     import statsmodels.api as sm
 
-    cluster_profiles = {item["cluster"]: item for item in segmentation["segment_profiles"]}
-    continuous_columns = []
-    binary_columns = []
-    for column in dataset.columns:
-        if column == "cluster":
-            continue
-        series = dataset[column].dropna()
-        if series.nunique() <= 2 and set(series.unique()).issubset({0, 1}):
-            binary_columns.append(column)
-        else:
-            continuous_columns.append(column)
-
-    current_columns = [
-        column for column in ["current_value", "loyalty_score", "active_rate"] if column in continuous_columns
-    ] or continuous_columns
-    potential_binary = [
-        column for column in ["potential_conversion", "tried_before"] if column in binary_columns
-    ] or binary_columns
-    potential_continuous = [
-        column for column in ["intent_score"] if column in continuous_columns and column not in current_columns
-    ]
+    cluster_profiles = {
+        item["cluster"]: item for item in segmentation.get("segment_profiles", [])
+    }
+    current_candidates, potential_candidates, comparison_candidates = _resolve_target_columns(
+        dataset,
+        role_columns,
+    )
+    potential_binary, potential_continuous = _split_binary_and_continuous(dataset, potential_candidates)
+    _, current_continuous = _split_binary_and_continuous(dataset, current_candidates)
+    if not current_continuous:
+        current_continuous = [
+            column for column in _numeric_columns(dataset) if column not in potential_binary
+        ]
+    comparison_axes_used = _resolve_comparison_axes(
+        dataset,
+        comparison_axes,
+        current_continuous,
+        potential_binary + potential_continuous,
+        comparison_candidates,
+    )
 
     current_results = []
-    for column in current_columns:
+    for column in current_continuous:
         groups = [group[column].dropna().to_numpy() for _, group in dataset.groupby("cluster")]
-        f_stat, p_value = f_oneway(*groups)
+        groups = [group for group in groups if len(group) > 0]
+        if len(groups) < 2:
+            continue
+        try:
+            f_stat, p_value = f_oneway(*groups)
+        except Exception:
+            f_stat, p_value = 0.0, 1.0
         design = pd.get_dummies(dataset["cluster"], drop_first=True, dtype=float)
         model = sm.OLS(dataset[column], sm.add_constant(design)).fit()
         current_results.append(
@@ -171,6 +267,8 @@ def run_targeting(dataset: Any, segmentation: dict[str, Any]) -> dict[str, Any]:
     potential_results = []
     for column in potential_binary:
         table = pd.crosstab(dataset["cluster"], dataset[column])
+        if table.shape[0] < 2 or table.shape[1] < 2:
+            continue
         chi2, p_value, _, _ = chi2_contingency(table)
         design = pd.get_dummies(dataset["cluster"], drop_first=True, dtype=float)
         scaler = StandardScaler(with_mean=False)
@@ -190,7 +288,13 @@ def run_targeting(dataset: Any, segmentation: dict[str, Any]) -> dict[str, Any]:
         )
     for column in potential_continuous:
         groups = [group[column].dropna().to_numpy() for _, group in dataset.groupby("cluster")]
-        f_stat, p_value = f_oneway(*groups)
+        groups = [group for group in groups if len(group) > 0]
+        if len(groups) < 2:
+            continue
+        try:
+            f_stat, p_value = f_oneway(*groups)
+        except Exception:
+            f_stat, p_value = 0.0, 1.0
         potential_results.append(
             {
                 "variable": column,
@@ -199,17 +303,37 @@ def run_targeting(dataset: Any, segmentation: dict[str, Any]) -> dict[str, Any]:
             }
         )
 
-    cluster_scores = dataset.groupby("cluster")[current_columns + potential_binary + potential_continuous].mean()
+    numeric_axes = [column for column in comparison_axes_used if column in _numeric_columns(dataset)]
+    if not numeric_axes:
+        numeric_axes = current_continuous[:]
+    cluster_scores = dataset.groupby("cluster")[numeric_axes].mean(numeric_only=True)
     normalized = (cluster_scores - cluster_scores.min()) / (
         (cluster_scores.max() - cluster_scores.min()).replace(0, 1)
     )
     normalized["score"] = normalized.mean(axis=1)
+    normalized = normalized.sort_values("score", ascending=False)
     selected_cluster = str(normalized["score"].idxmax())
+
     profile_significance_summary = _build_profile_significance_summary(dataset)
     pairwise_comparison_table = _build_pairwise_comparison_table(
         dataset,
-        current_columns + potential_continuous,
+        current_continuous + potential_continuous,
     )
+
+    ranked_clusters = normalized.reset_index().rename(columns={"index": "cluster"}).to_dict("records")
+    for idx, record in enumerate(ranked_clusters, start=1):
+        record["rank"] = idx
+
+    priority_segments = [ranked_clusters[0]["cluster"]] if ranked_clusters else []
+    secondary_segments = [record["cluster"] for record in ranked_clusters[1:-1]]
+    deprioritized_segments = [ranked_clusters[-1]["cluster"]] if len(ranked_clusters) > 1 else []
+    target_selection_rationale = (
+        f"{selected_cluster} ranks highest across comparison axes: "
+        + ", ".join(numeric_axes)
+        + "."
+    )
+
+    persona = cluster_profiles.get(selected_cluster, {}).get("persona", "")
 
     return {
         "current_target_market": current_results,
@@ -218,17 +342,20 @@ def run_targeting(dataset: Any, segmentation: dict[str, Any]) -> dict[str, Any]:
             "continuous_response": "ANOVA / regression",
             "binary_response": "chi-square / logistic regression",
             "pairwise_post_hoc": "Tukey HSD (alpha=0.05)",
+            "comparison_axes_used": numeric_axes,
         },
         "profile_significance_summary": profile_significance_summary,
         "pairwise_comparison_table": pairwise_comparison_table,
         "target_selection_decision": {
             "selected_cluster": selected_cluster,
             "score": round(float(normalized.loc[selected_cluster, "score"]), 4),
-            "rationale": (
-                f"{selected_cluster} leads on a balanced mix of current value, loyalty, activity, "
-                "and future conversion indicators."
-            ),
-            "persona": cluster_profiles[selected_cluster]["persona"],
+            "priority_segments": priority_segments,
+            "secondary_segments": secondary_segments,
+            "deprioritized_segments": deprioritized_segments,
+            "comparison_axes_used": numeric_axes,
+            "rationale": target_selection_rationale,
+            "persona": persona,
         },
-        "cluster_score_table": normalized.reset_index().rename(columns={"index": "cluster"}).to_dict("records"),
+        "target_selection_rationale": target_selection_rationale,
+        "cluster_score_table": ranked_clusters,
     }

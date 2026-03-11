@@ -6,11 +6,31 @@ from pathlib import Path
 from typing import Any
 
 from .constants import ALLOWED_CUSTOM_MODULES, RUN_MODE_MODULES
-from .io import build_missing_prereq_output, write_json
+from .io import (
+    aggregate_review_scoring_table,
+    build_missing_prereq_output,
+    build_positioning_scorecard,
+    build_segmentation_variables,
+    build_targeting_dataset,
+    find_artifact,
+    load_analysis_context,
+    read_json,
+    validate_canonical_inputs,
+    write_json,
+)
 from .positioning import load_positioning_inputs, run_positioning
 from .reporting import write_execution_files
 from .segmentation import build_segment_summary, load_segmentation_inputs, run_segmentation
 from .targeting import load_targeting_inputs, run_targeting
+
+
+FULL_CANONICAL_REQUIRED = [
+    "review_scoring_table.csv",
+    "review_foundation.json",
+    "analysis_context.json",
+    "brands.json",
+    "ideal_point.json",
+]
 
 
 def parse_args() -> argparse.Namespace:
@@ -109,6 +129,34 @@ def build_recommended_extensions(
     return proactive_marketing_notes, usp_translation_candidates
 
 
+def _maybe_prepare_canonical_inputs(artifact_paths: list[Path]) -> dict[str, Any] | None:
+    import pandas as pd
+
+    score_path = find_artifact(artifact_paths, "review_scoring_table.csv")
+    foundation_path = find_artifact(artifact_paths, "review_foundation.json")
+    if score_path is None or foundation_path is None:
+        return None
+
+    score_table = pd.read_csv(score_path)
+    foundation = read_json(foundation_path)
+    contract = validate_canonical_inputs(score_table, foundation)
+    unit_table = aggregate_review_scoring_table(score_table, contract)
+    segmentation_frame = build_segmentation_variables(unit_table, contract)
+    positioning_scorecard = build_positioning_scorecard(score_table, contract)
+    return {
+        "score_table": score_table,
+        "foundation": foundation,
+        "contract": contract,
+        "unit_table": unit_table,
+        "segmentation_frame": segmentation_frame,
+        "positioning_scorecard": positioning_scorecard,
+    }
+
+
+def _write_frame(path: Path, frame: Any) -> None:
+    frame.to_csv(path, index=False, encoding="utf-8")
+
+
 def main() -> None:
     ensure_dependencies()
     args = parse_args()
@@ -120,11 +168,57 @@ def main() -> None:
         artifact_paths.append(Path(args.upstream_artifacts_dir))
 
     requested_modules = parse_requested_modules(args)
+    analysis_context = load_analysis_context(artifact_paths)
+    canonical_inputs = _maybe_prepare_canonical_inputs(artifact_paths)
+
+    if args.run_mode == "full":
+        missing = [name for name in FULL_CANONICAL_REQUIRED if find_artifact(artifact_paths, name) is None]
+        if missing:
+            build_missing_prereq_output(
+                output_dir,
+                args.run_mode,
+                requested_modules,
+                artifact_paths,
+                FULL_CANONICAL_REQUIRED,
+            )
+            return
+        if canonical_inputs is None:
+            raise SystemExit("Full run requires valid review_scoring_table.csv and review_foundation.json.")
+
+    upstream_artifacts_used: list[str] = []
+    modules_executed: list[str] = []
+    emitted_intermediate_artifacts: list[str] = []
+
+    brands: list[str] = []
+    brands_path = Path(args.brands_file) if args.brands_file else find_artifact(artifact_paths, "brands.json")
+    if brands_path and brands_path.exists():
+        brands = list(read_json(brands_path).get("brands", []))
+    ideal_path = Path(args.ideal_point_file) if args.ideal_point_file else find_artifact(artifact_paths, "ideal_point.json")
+
+    if args.run_mode == "full" and canonical_inputs:
+        _write_frame(output_dir / "review_scoring_table.csv", canonical_inputs["score_table"])
+        write_json(output_dir / "review_foundation.json", canonical_inputs["foundation"])
+        write_json(output_dir / "analysis_context.json", analysis_context)
+        if brands_path and brands_path.exists():
+            write_json(output_dir / "brands.json", read_json(brands_path))
+        if ideal_path and ideal_path.exists():
+            write_json(output_dir / "ideal_point.json", read_json(ideal_path))
 
     appendix: dict[str, Any] = {
         "execution_scope": {
             "run_mode": args.run_mode,
             "requested_modules": requested_modules,
+            "modules_executed": [],
+            "auto_backfilled_modules": [],
+            "upstream_artifacts_used": [],
+            "emitted_intermediate_artifacts": [],
+            "comparison_axes": list(analysis_context.get("comparison_axes", [])),
+            "brands": brands,
+            "positioning_method_used": args.positioning_method,
+            "cluster_threshold": 0.05,
+            "reruns_performed": 0,
+            "final_k": None,
+            "scope_limits": list(analysis_context.get("scope_limits", [])),
         },
         "segmentation_summary": None,
         "targeting_summary": None,
@@ -133,13 +227,14 @@ def main() -> None:
         "proactive_marketing_notes": [],
         "usp_translation_candidates": [],
         "risks_bias_confidence_notes": [
-            "Upstream artifacts are assumed to be generated by the agent layer.",
+            "Upstream scored artifacts are assumed to be generated by the agent layer.",
             "Statistical outputs are decision support, not causal proof.",
         ],
         "evidence": [],
     }
 
     generated_segmentation: dict[str, Any] | None = None
+    prepared_targeting_dataset = None
 
     segmentation_needed = any(
         module in requested_modules
@@ -154,16 +249,37 @@ def main() -> None:
         for module in ["positioning-scorecard", "perceptual-map", "positioning-diagnostics", "strategy-matrix"]
     ) or args.run_mode == "full"
 
+    if canonical_inputs and args.run_mode in {"full", "segmentation"} and segmentation_needed:
+        _write_frame(output_dir / "segmentation_variables.csv", canonical_inputs["segmentation_frame"])
+        emitted_intermediate_artifacts.append("segmentation_variables.csv")
+
+    if canonical_inputs and args.run_mode in {"full", "positioning"} and positioning_needed:
+        _write_frame(output_dir / "positioning_scorecard.csv", canonical_inputs["positioning_scorecard"])
+        emitted_intermediate_artifacts.append("positioning_scorecard.csv")
+
     if segmentation_needed:
-        segmentation_inputs = load_segmentation_inputs(artifact_paths)
+        segmentation_inputs = None
+        if canonical_inputs and args.run_mode in {"full", "segmentation"}:
+            segmentation_inputs = (
+                canonical_inputs["foundation"],
+                canonical_inputs["segmentation_frame"],
+            )
+            for artifact_name in ["review_scoring_table.csv", "review_foundation.json", "analysis_context.json"]:
+                if find_artifact(artifact_paths, artifact_name):
+                    upstream_artifacts_used.append(artifact_name)
+        else:
+            segmentation_inputs = load_segmentation_inputs(artifact_paths)
+
         if segmentation_inputs is None:
             build_missing_prereq_output(
                 output_dir,
                 args.run_mode,
                 requested_modules,
+                artifact_paths,
                 ["review_foundation.json", "segmentation_variables.csv"],
             )
             return
+
         generated_segmentation = run_segmentation(*segmentation_inputs)
         write_json(output_dir / "segment_profiles.json", generated_segmentation)
         (output_dir / "segment_summary.md").write_text(
@@ -171,18 +287,56 @@ def main() -> None:
             encoding="utf-8",
         )
         appendix["segmentation_summary"] = generated_segmentation
+        modules_executed.extend(
+            ["review-foundation", "segmentation-variables", "segment-clustering", "segment-profiles"]
+        )
+        if not canonical_inputs or args.run_mode not in {"full", "segmentation"}:
+            for artifact_name in ["review_foundation.json", "segmentation_variables.csv", "analysis_context.json"]:
+                if find_artifact(artifact_paths, artifact_name):
+                    upstream_artifacts_used.append(artifact_name)
 
     if targeting_needed:
-        targeting_inputs = load_targeting_inputs(artifact_paths, generated_segmentation)
+        targeting_inputs = None
+        role_columns = None
+        if args.run_mode == "full" and canonical_inputs and generated_segmentation:
+            import pandas as pd
+
+            prepared_targeting_dataset = build_targeting_dataset(
+                canonical_inputs["unit_table"],
+                pd.DataFrame(generated_segmentation.get("segment_assignments", [])),
+                canonical_inputs["contract"],
+                list(analysis_context.get("comparison_axes", [])),
+            )
+            _write_frame(output_dir / "targeting_dataset.csv", prepared_targeting_dataset)
+            emitted_intermediate_artifacts.append("targeting_dataset.csv")
+            targeting_inputs = (
+                prepared_targeting_dataset,
+                generated_segmentation,
+                canonical_inputs["contract"]["role_map"],
+            )
+            for artifact_name in ["review_scoring_table.csv", "review_foundation.json", "analysis_context.json"]:
+                if find_artifact(artifact_paths, artifact_name):
+                    upstream_artifacts_used.append(artifact_name)
+        else:
+            targeting_inputs = load_targeting_inputs(artifact_paths, generated_segmentation)
+
         if targeting_inputs is None:
             build_missing_prereq_output(
                 output_dir,
                 args.run_mode,
                 requested_modules,
+                artifact_paths,
                 ["segment_profiles.json", "targeting_dataset.csv"],
             )
             return
-        targeting = run_targeting(*targeting_inputs)
+
+        dataset, segmentation_payload, role_columns = targeting_inputs
+        targeting = run_targeting(
+            dataset,
+            segmentation_payload,
+            list(analysis_context.get("comparison_axes", [])),
+            role_columns,
+        )
         write_json(output_dir / "targeting_results.json", targeting)
         write_json(output_dir / "target_selection_decision.json", targeting["target_selection_decision"])
         appendix["targeting_summary"] = targeting
@@ -190,22 +344,55 @@ def main() -> None:
             {
                 "stage": "targeting",
                 "selected_cluster": targeting["target_selection_decision"]["selected_cluster"],
-                "rationale": targeting["target_selection_decision"]["rationale"],
+                "rationale": targeting["target_selection_rationale"],
             }
         )
+        modules_executed.extend(["current-target-market", "potential-target-market", "target-selection"])
+        if not (args.run_mode == "full" and canonical_inputs):
+            for artifact_name in ["targeting_dataset.csv", "segment_profiles.json", "analysis_context.json"]:
+                if find_artifact(artifact_paths, artifact_name):
+                    upstream_artifacts_used.append(artifact_name)
 
     if positioning_needed:
-        positioning_inputs = load_positioning_inputs(
-            artifact_paths, args.ideal_point_file, args.brands_file
-        )
+        positioning_inputs = None
+        if canonical_inputs and args.run_mode in {"full", "positioning"}:
+            brands_local_path = brands_path
+            if ideal_path is None or brands_local_path is None or not ideal_path.exists() or not brands_local_path.exists():
+                build_missing_prereq_output(
+                    output_dir,
+                    args.run_mode,
+                    requested_modules,
+                    artifact_paths,
+                    ["positioning_scorecard.csv", "brands.json", "ideal_point.json"],
+                )
+                return
+            positioning_inputs = (
+                canonical_inputs["positioning_scorecard"],
+                read_json(brands_local_path),
+                read_json(ideal_path),
+            )
+            for artifact_name in ["review_scoring_table.csv", "review_foundation.json", "brands.json", "ideal_point.json", "analysis_context.json"]:
+                if find_artifact(artifact_paths, artifact_name) or (
+                    artifact_name == "brands.json" and args.brands_file
+                ) or (artifact_name == "ideal_point.json" and args.ideal_point_file):
+                    upstream_artifacts_used.append(artifact_name)
+        else:
+            positioning_inputs = load_positioning_inputs(
+                artifact_paths,
+                args.ideal_point_file,
+                args.brands_file,
+            )
+
         if positioning_inputs is None:
             build_missing_prereq_output(
                 output_dir,
                 args.run_mode,
                 requested_modules,
+                artifact_paths,
                 ["positioning_scorecard.csv", "brands.json", "ideal_point.json"],
             )
             return
+
         positioning = run_positioning(*positioning_inputs, args.positioning_method, output_dir)
         write_json(output_dir / "positioning_diagnostics.json", positioning["positioning_diagnostics"])
         write_json(output_dir / "strategy_matrix.json", positioning["strategy_matrix"])
@@ -218,6 +405,16 @@ def main() -> None:
                 "pop": positioning["positioning_diagnostics"]["pod_pop"]["pop"],
             }
         )
+        modules_executed.extend(
+            ["positioning-scorecard", "perceptual-map", "positioning-diagnostics", "strategy-matrix"]
+        )
+        appendix["execution_scope"]["positioning_method_used"] = positioning["positioning_method_used"]
+        if not (canonical_inputs and args.run_mode in {"full", "positioning"}):
+            for artifact_name in ["positioning_scorecard.csv", "brands.json", "ideal_point.json", "analysis_context.json"]:
+                if find_artifact(artifact_paths, artifact_name) or (
+                    artifact_name == "brands.json" and args.brands_file
+                ) or (artifact_name == "ideal_point.json" and args.ideal_point_file):
+                    upstream_artifacts_used.append(artifact_name)
 
     proactive_marketing_notes, usp_translation_candidates = build_recommended_extensions(
         appendix.get("targeting_summary"),
@@ -225,5 +422,19 @@ def main() -> None:
     )
     appendix["proactive_marketing_notes"] = proactive_marketing_notes
     appendix["usp_translation_candidates"] = usp_translation_candidates
+
+    appendix["execution_scope"]["modules_executed"] = list(dict.fromkeys(modules_executed))
+    appendix["execution_scope"]["upstream_artifacts_used"] = list(dict.fromkeys(upstream_artifacts_used))
+    appendix["execution_scope"]["emitted_intermediate_artifacts"] = sorted(
+        set(emitted_intermediate_artifacts)
+    )
+    if generated_segmentation:
+        cluster_selection = generated_segmentation.get("cluster_selection", {})
+        appendix["execution_scope"]["reruns_performed"] = cluster_selection.get("reruns_performed", 0)
+        appendix["execution_scope"]["final_k"] = cluster_selection.get("final_k")
+        appendix["execution_scope"]["cluster_threshold"] = cluster_selection.get(
+            "cluster_threshold",
+            0.05,
+        )
 
     write_execution_files(output_dir, args.run_mode, requested_modules, appendix, args.positioning_method)

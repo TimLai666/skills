@@ -183,19 +183,47 @@ def run_positioning(
         brand_distance_table.append({"brand": label, "distance_to_ideal": round(distance, 4)})
     nearest = min(brand_distance_table, key=lambda item: item["distance_to_ideal"])
 
-    top_attributes = []
+    attribute_benchmarks = []
     for attribute in shared_columns:
         scores = pivot[attribute].sort_values(ascending=False)
         leader = scores.index[0]
+        leader_score = float(scores.iloc[0])
         gap = float(scores.iloc[0] - scores.iloc[1]) if len(scores) > 1 else float(scores.iloc[0])
-        top_attributes.append({"attribute": attribute, "leader": str(leader), "gap": round(gap, 4)})
+        attribute_benchmarks.append(
+            {
+                "attribute": attribute,
+                "leader": str(leader),
+                "leader_score": round(leader_score, 4),
+                "ideal_score": round(float(ideal_series[attribute]), 4),
+                "gap_to_next_brand": round(gap, 4),
+                "gap_to_ideal": round(float(ideal_series[attribute] - leader_score), 4),
+            }
+        )
 
-    pod = [item["attribute"] for item in top_attributes if item["gap"] >= 0.4]
+    pod = [item["attribute"] for item in attribute_benchmarks if item["gap_to_next_brand"] >= 0.4]
     pop = [
         attribute
         for attribute in shared_columns
         if float(pivot[attribute].min()) >= float(ideal_series[attribute] - 1.5)
     ]
+
+    competition_landscape = []
+    brand_labels = list(brand_matrix.index)
+    for idx, brand_a in enumerate(brand_labels):
+        row_a = coordinates_by_label[str(brand_a)]
+        for brand_b in brand_labels[idx + 1 :]:
+            row_b = coordinates_by_label[str(brand_b)]
+            competition_landscape.append(
+                {
+                    "brand_a": str(brand_a),
+                    "brand_b": str(brand_b),
+                    "distance": round(
+                        math.dist((row_a["x"], row_a["y"]), (row_b["x"], row_b["y"])),
+                        4,
+                    ),
+                }
+            )
+    competition_landscape.sort(key=lambda item: item["distance"])
 
     brand_name = nearest["brand"]
     strategy_matrix = {"appeal": [], "improve": [], "change": [], "abandon": []}
@@ -266,12 +294,69 @@ def run_positioning(
             "importance_interpretation": "",
         }
 
+    score_matrix = brand_matrix.to_numpy(dtype=float)
+    if score_matrix.shape[0] > 1 and score_matrix.shape[1] > 1:
+        item_variances = score_matrix.var(axis=0, ddof=1)
+        total_scores = score_matrix.sum(axis=1)
+        total_variance = total_scores.var(ddof=1)
+        if total_variance > 0:
+            cronbach_alpha = (
+                (score_matrix.shape[1] / (score_matrix.shape[1] - 1))
+                * (1 - (item_variances.sum() / total_variance))
+            )
+            reliability_analysis = {
+                "status": "defined",
+                "method": "cronbach_alpha",
+                "cronbach_alpha": round(float(cronbach_alpha), 4),
+                "note": "Interpret with caution because the scorecard uses aggregated artifact inputs.",
+            }
+        else:
+            reliability_analysis = {
+                "status": "not_available",
+                "method": "cronbach_alpha",
+                "cronbach_alpha": None,
+                "note": "Total score variance is zero, so reliability cannot be estimated.",
+            }
+    else:
+        reliability_analysis = {
+            "status": "not_available",
+            "method": "cronbach_alpha",
+            "cronbach_alpha": None,
+            "note": "At least two brands and two attributes are required for reliability estimation.",
+        }
+
+    mean_gap_to_ideal = round(
+        float(sum(item["gap_to_ideal"] for item in attribute_benchmarks) / len(attribute_benchmarks)),
+        4,
+    )
+    validity_analysis = {
+        "status": "defined",
+        "method": "ideal_point_alignment_proxy",
+        "average_gap_to_ideal": mean_gap_to_ideal,
+        "attribute_vector_status": "defined" if vector_rows else "not_defined",
+        "note": "Lower average gap suggests the scorecard captures attributes that align with the segment ideal.",
+    }
+
+    highest_scoring_attributes = sorted(
+        attribute_benchmarks,
+        key=lambda item: item["leader_score"],
+        reverse=True,
+    )
+    lowest_scoring_attributes = sorted(
+        attribute_benchmarks,
+        key=lambda item: item["leader_score"],
+    )
+
     diagnostics = {
         "attribute_vectors_not_defined": attribute_vectors_not_defined,
-        "key_factor_assessment": top_attributes,
-        "benchmark_analysis": {"closest_to_ideal": nearest["brand"], "distance_to_ideal": nearest["distance_to_ideal"]},
+        "key_factor_assessment": attribute_benchmarks,
+        "benchmark_analysis": {
+            "closest_to_ideal": nearest["brand"],
+            "distance_to_ideal": nearest["distance_to_ideal"],
+            "attribute_leaders": attribute_benchmarks,
+        },
         "ideal_point_analysis": brand_distance_table,
-        "competition_landscape": sorted(brand_distance_table, key=lambda item: item["distance_to_ideal"]),
+        "competition_landscape": competition_landscape,
         "pod_pop": {"pod": pod, "pop": pop},
         "strategy_matrix": strategy_matrix,
         "projection_interpretation": projection_interpretation,
@@ -282,15 +367,41 @@ def run_positioning(
         "projection along vectors indicates attribute performance."
     )
 
+    scorecard_rows = [
+        {
+            "brand": str(record["brand"]),
+            "attribute": str(record["attribute"]),
+            "score": float(record["score"]),
+            "point_type": "brand",
+        }
+        for record in scorecard.to_dict("records")
+    ]
+    scorecard_rows.extend(
+        {
+            "brand": str(ideal_point["label"]),
+            "attribute": str(attribute),
+            "score": float(score),
+            "point_type": "ideal",
+        }
+        for attribute, score in ideal_series.items()
+    )
+
     return {
-        "positioning_scorecard": scorecard.to_dict("records"),
+        "positioning_scorecard": scorecard_rows,
         "dynamic_scorecard_summary": {
             "brand_count": int(len(brand_matrix)),
             "attribute_count": int(len(shared_columns)),
-            "reliability_note": "Directional only. Uses artifact-derived score inputs.",
-            "validity_note": "Interpret scores together with review evidence and target selection.",
+            "highest_scoring_attributes": highest_scoring_attributes,
+            "lowest_scoring_attributes": lowest_scoring_attributes,
+            "ideal_point_distance_summary": brand_distance_table,
+            "importance_performance_gap": attribute_benchmarks,
+            "reliability_analysis": reliability_analysis,
+            "validity_analysis": validity_analysis,
         },
         "positioning_method_used": positioning_method_used,
+        "perceptual_map_figure": figure_path.name,
+        "perceptual_map_coordinate_table": coordinate_rows,
+        "perceptual_map_vector_table": vector_rows,
         "perceptual_map_method": perceptual_map_method,
         "perceptual_map_interpretation": interpretation,
         "projection_interpretation": projection_interpretation,
