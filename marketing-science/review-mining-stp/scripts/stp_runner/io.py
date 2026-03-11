@@ -20,22 +20,6 @@ REQUIRED_DIMENSION_KEYS = {
     "plain_language_definition",
 }
 
-SCORING_RUBRIC = {
-    "scale": {
-        "0": "評論中未出現與該題項相關的語意",
-        "1-3": "輕微或間接提及",
-        "4": "中立或模糊表達",
-        "5-6": "明確提及",
-        "7": "評論中強烈且完整表達該構面",
-    },
-    "process": [
-        "每則評論需逐條分析。",
-        "根據語意關聯程度對每個歸納題項進行 0–7 分評分。",
-        "將質性評論文本轉換為量化數據。",
-        "所得評分可用於後續統計分析與研究模型建立。",
-    ],
-}
-
 
 def read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -101,18 +85,6 @@ def _fail_contract(message: str) -> None:
     raise SystemExit(message)
 
 
-def _validate_scoring_rubric(foundation: dict[str, Any]) -> None:
-    rubric = foundation.get("scoring_rubric")
-    if not isinstance(rubric, dict):
-        _fail_contract("review_foundation.json must contain scoring_rubric.")
-    scale = rubric.get("scale")
-    process = rubric.get("process")
-    if scale != SCORING_RUBRIC["scale"]:
-        _fail_contract("review_foundation.json scoring_rubric.scale must match the required 0-7 rubric.")
-    if process != SCORING_RUBRIC["process"]:
-        _fail_contract("review_foundation.json scoring_rubric.process must match the required scoring steps.")
-
-
 def validate_canonical_inputs(score_table: Any, foundation: dict[str, Any]) -> dict[str, Any]:
     import pandas as pd
 
@@ -132,8 +104,6 @@ def validate_canonical_inputs(score_table: Any, foundation: dict[str, Any]) -> d
     if (review_text == "").any():
         _fail_contract("review_scoring_table.csv must contain non-empty review_text for every row.")
 
-    _validate_scoring_rubric(foundation)
-
     dimension_catalog = foundation.get("dimension_catalog")
     if not isinstance(dimension_catalog, list) or not dimension_catalog:
         _fail_contract("review_foundation.json must contain a non-empty dimension_catalog.")
@@ -141,6 +111,7 @@ def validate_canonical_inputs(score_table: Any, foundation: dict[str, Any]) -> d
     theme_mapping = foundation.get("theme_mapping")
     if not isinstance(theme_mapping, dict):
         _fail_contract("review_foundation.json must contain theme_mapping.")
+
     missing_themes = sorted(theme for theme in CORE_THEMES if theme not in theme_mapping)
     if missing_themes:
         _fail_contract("theme_mapping is missing required themes: " + ", ".join(missing_themes))
@@ -154,12 +125,15 @@ def validate_canonical_inputs(score_table: Any, foundation: dict[str, Any]) -> d
         missing_keys = sorted(REQUIRED_DIMENSION_KEYS - set(item.keys()))
         if missing_keys:
             _fail_contract("dimension_catalog entries are missing keys: " + ", ".join(missing_keys))
+
         column = str(item["column"])
         if column in catalog_by_column:
             _fail_contract(f"dimension_catalog contains duplicate column '{column}'.")
+
         theme = str(item["theme"])
         if theme not in CORE_THEMES:
             _fail_contract(f"dimension_catalog column '{column}' uses unsupported theme '{theme}'.")
+
         theory_tags = item.get("theory_tags")
         stat_roles = item.get("stat_roles")
         plain_language_definition = str(item.get("plain_language_definition", "")).strip()
@@ -169,6 +143,7 @@ def validate_canonical_inputs(score_table: Any, foundation: dict[str, Any]) -> d
             _fail_contract(f"dimension_catalog column '{column}' must define stat_roles.")
         if not plain_language_definition:
             _fail_contract(f"dimension_catalog column '{column}' must define plain_language_definition.")
+
         catalog_by_column[column] = item
         dimension_columns.append(column)
         for role in stat_roles:
@@ -196,7 +171,7 @@ def validate_canonical_inputs(score_table: Any, foundation: dict[str, Any]) -> d
             )
         if not ((numeric_values % 1) == 0).all():
             _fail_contract(
-                f"review_scoring_table.csv column '{column}' must use integer scores that follow the 0-7 rubric."
+                f"review_scoring_table.csv column '{column}' must use integer scores that follow the 0-7 scale."
             )
         score_table[column] = numeric_values.astype(int)
         numeric_dimension_columns.append(column)

@@ -52,9 +52,11 @@ Each quote object must include:
 
 When canonical review evidence is available:
 
-- each major section should contain 2–3 quotes
+- each major section should contain 2-3 quotes
 - `quote_text` must exactly match `review_scoring_table.csv.review_text`
 - `review_id` must exist in the canonical score table
+
+The report contract is a script-layer responsibility. The scoring process itself is not.
 
 ## Stage-Specific Fields
 
@@ -155,3 +157,4 @@ Must retain:
 - Reports must explain the method and theory used in language that non-specialists can understand.
 - Evidence quotes must be verbatim and traceable.
 - Validators must not hardcode a fixed item count.
+- Validators must not enforce the wording of the scoring workflow.

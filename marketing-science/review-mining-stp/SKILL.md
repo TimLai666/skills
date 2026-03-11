@@ -1,18 +1,18 @@
 ---
 name: review-mining-stp
-description: Use when customer reviews, support tickets, app store feedback, or other review-like text must be converted into STP analysis with AI-assisted scoring upstream and statistical scripts downstream.
+description: Use when customer reviews, support tickets, app store feedback, or other review-like text must be converted into STP analysis with agent-led scoring upstream and statistical scripts downstream.
 ---
 
 # Review Mining STP
 
 ## Overview
 
-This skill turns review text into `Segmentation -> Targeting -> Positioning -> Strategy` outputs through a strict two-layer contract.
+This skill converts review text into `Segmentation -> Targeting -> Positioning -> Strategy` outputs through a strict two-layer contract.
 
-- `agent layer`: reads raw reviews, infers scored items, applies theory tags, and preserves verbatim review text.
-- `script layer`: accepts scored artifacts only and runs the downstream statistics plus the final evidence-backed report.
+- `agent layer`: reads raw reviews, infers scored items, assigns theory tags, and preserves verbatim review text.
+- `script layer`: accepts scored artifacts only and performs statistical analysis plus report assembly.
 
-The scripts do not perform raw-review NLP. Their job is quantitative analysis and reporting after the agent has already converted text into structured scores.
+The scripts are tools, not the main workflow. They do not read raw reviews, decide how to score them, or define the scoring process.
 
 ## When To Use
 
@@ -21,7 +21,7 @@ Use this skill when:
 - you need STP outputs from reviews, comments, or feedback text
 - you need a repeatable scored-artifact contract before running statistics
 - you need segmentation, targeting, or positioning outputs with explicit methods and theory labels
-- you need report sections backed by verbatim review quotes, not unsupported interpretation
+- you need report sections backed by verbatim review quotes instead of unsupported interpretation
 
 Do not use this skill when:
 
@@ -33,38 +33,39 @@ Do not use this skill when:
 
 ### Agent Layer
 
-The agent layer is responsible for:
+The agent layer is the main process. It is responsible for:
 
 - reading every review one by one
 - inferring scored items from the full review set
-- assigning each item to one of the three themes:
+- assigning each item to one of the three core themes:
   - `service_experience`
   - `product_performance`
   - `value_perception`
 - attaching theory tags such as Product Positioning, Purchase Motivation, WOM Motivation, System 1 / System 2, and Maslow-related needs
 - preserving the original `review_text` so later report evidence can quote the real source text
 
-The agent layer must score every review against every inferred item using the fixed 0–7 rubric below:
+The agent layer must score every review against every inferred item using the fixed scale below:
 
-- `0`: 評論中未出現與該題項相關的語意
-- `1–3`: 輕微或間接提及
-- `4`: 中立或模糊表達
-- `5–6`: 明確提及
-- `7`: 評論中強烈且完整表達該構面
+- `0`: no relevant meaning appears in the review
+- `1-3`: the review mentions the item slightly or indirectly
+- `4`: the review is neutral or ambiguous on the item
+- `5-6`: the review clearly mentions the item
+- `7`: the review strongly and fully expresses the item
 
-Scoring process:
+Scoring workflow:
 
-1. 每則評論需逐條分析。
-2. 根據語意關聯程度對每個歸納題項進行 0–7 分評分。
-3. 將質性評論文本轉換為量化數據。
-4. 所得評分可用於後續統計分析與研究模型建立。
+1. Read each review one by one.
+2. Score each inferred item on the `0-7` scale.
+3. Convert qualitative review text into quantitative data.
+4. Use the scored output for downstream statistical analysis and research models.
 
 If upstream information is incomplete, the agent layer may produce `MissingDataOutput`.
 
 ### Script Layer
 
-The scripts start from scored artifacts and do the quantitative work:
+The scripts start only after scoring is already complete. Their responsibilities are:
 
+- schema and numeric sanity checks for scored artifacts
 - reliability checks
 - factor or theme reduction
 - clustering for segmentation
@@ -73,10 +74,13 @@ The scripts start from scored artifacts and do the quantitative work:
 - perceptual-map generation
 - ideal-point distance analysis
 - pairwise competition-distance analysis
+- report assembly with explicit methods, theory labels, and evidence quotes
 
 The scripts do not:
 
 - infer items from raw review text
+- define the scoring rubric
+- enforce the wording of the scoring process
 - rewrite review quotes
 - auto-backfill missing scored artifacts
 
@@ -97,7 +101,7 @@ All inferred item columns must:
 
 - appear as separate columns
 - use integer scores only
-- stay inside the `0–7` range
+- stay inside the `0-7` range
 
 Optional metadata columns may include:
 
@@ -109,9 +113,8 @@ The table is per-review. If no stable person-level identity exists, `unit_id` ma
 
 ### `review_foundation.json`
 
-Required keys:
+Required keys for the scripts:
 
-- `scoring_rubric`
 - `dimension_catalog`
 - `theme_mapping`
 - `people_insights`
@@ -119,6 +122,10 @@ Required keys:
 - `context_scenarios`
 - `system1_system2_split`
 - `maslow_keywords`
+
+Optional audit metadata:
+
+- `scoring_rubric`
 
 Each `dimension_catalog` item must include:
 
@@ -201,16 +208,16 @@ Evidence-quote rules:
 - each quote must include `review_id`
 - each quote must explain why it matters
 - each quote must link back to the scored items it supports
-- when canonical review evidence is available, each major section should include 2–3 quotes
+- when canonical review evidence is available, each major section should include 2-3 quotes
 
-The point is to make the report readable for non-specialists while keeping every key claim traceable to real review text.
+The goal is to make the report readable for non-specialists while keeping every key claim traceable to real review text.
 
 ## Hard Rules
 
 - Never blur agent-layer requests with script-layer artifacts.
 - Never let scripts consume raw reviews directly.
 - Never hardcode a fixed item count into the validator or statistical pipeline.
-- Always keep scored items on the fixed 0–7 rubric.
+- Always keep scored items on the fixed `0-7` scale.
 - Always preserve verbatim `review_text` for evidence quoting.
 - Always state the statistical method and theory used in each major report section.
 - Never fabricate evidence quotes or attribute vectors.

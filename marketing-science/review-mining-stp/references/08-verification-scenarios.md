@@ -36,15 +36,28 @@ Use these scenarios to verify both the layer boundary and the downstream statist
 
 - Input: canonical artifacts missing one of the required conditions
   - missing `review_text`
-  - missing `scoring_rubric`
   - missing `plain_language_definition`
   - incomplete `theme_mapping`
-  - score outside `0–7`
+  - score outside `0-7`
 - Expected:
   - router fails early with a contract error
   - scripts do not silently continue
 
-## Scenario 5: Segmentation Partial Rerun
+## Scenario 5: Scoring Rubric Metadata Is Optional
+
+- Input: canonical scored artifacts with no `scoring_rubric`
+- Expected:
+  - scripts still run
+  - scoring workflow remains documented in MD, not enforced by Python
+
+## Scenario 6: Custom Scoring Rubric Metadata
+
+- Input: canonical scored artifacts with a custom `scoring_rubric` note
+- Expected:
+  - scripts still run
+  - validator still focuses on output contracts, not rubric prose
+
+## Scenario 7: Segmentation Partial Rerun
 
 - Input:
   - `review_foundation.json`
@@ -53,7 +66,7 @@ Use these scenarios to verify both the layer boundary and the downstream statist
   - segmentation reruns independently
   - cluster guardrail metadata is retained
 
-## Scenario 6: Targeting Partial Rerun
+## Scenario 8: Targeting Partial Rerun
 
 - Input:
   - `targeting_dataset.csv`
@@ -63,30 +76,25 @@ Use these scenarios to verify both the layer boundary and the downstream statist
   - targeting reruns independently
   - `comparison_axes` override is preserved
 
-## Scenario 7: Factor-Analysis Positioning Path
+## Scenario 9: Positioning Paths
 
-- Input: positioning scorecard plus ideal-point artifacts
-- Expected:
+- Factor-analysis path:
   - `positioning_method_used = factor_analysis`
   - attribute vectors are present
   - projection interpretation is defined
-
-## Scenario 8: MDS Positioning Path
-
-- Input: `brands.json` with `similarity_matrix`
-- Expected:
+- MDS path:
   - `positioning_method_used = mds`
   - `attribute_vectors_not_defined = true`
   - `projection_interpretation.status = not_available`
 
-## Scenario 9: Evidence-Backed Report
+## Scenario 10: Evidence-Backed Report
 
 - Input: canonical full run with real `review_text`
 - Expected:
   - each major report section includes methods, theories, plain-language explanation, and evidence quotes
   - quotes trace back exactly to the canonical score table
 
-## Scenario 10: Validator Guardrails
+## Scenario 11: Validator Guardrails
 
 - Input: tampered output, such as:
   - missing execution-scope fields

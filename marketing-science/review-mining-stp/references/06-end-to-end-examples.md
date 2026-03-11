@@ -30,6 +30,16 @@
 }
 ```
 
+### Agent Workflow
+
+The agent layer:
+
+1. reads each review one by one
+2. infers scored items from the full corpus
+3. scores each item on the `0-7` scale
+4. assigns theory tags and three-theme mapping
+5. preserves verbatim `review_text`
+
 ### Runnable Artifacts
 
 - `review_scoring_table.csv`
@@ -64,6 +74,7 @@
 - `review_foundation.json`
   - maps those columns into `dimension_catalog`
   - defines `theme_mapping`, `theory_tags`, and `stat_roles`
+  - may include `scoring_rubric` as audit metadata, but scripts do not require it
 
 ### Expected Outcome
 

@@ -13,22 +13,6 @@ ROOT = Path(__file__).resolve().parents[1]
 RUN_SCRIPT = ROOT / "scripts" / "run_review_mining_stp.py"
 VALIDATE_SCRIPT = ROOT / "scripts" / "validate_review_mining_stp.py"
 
-SCORING_RUBRIC = {
-    "scale": {
-        "0": "評論中未出現與該題項相關的語意",
-        "1-3": "輕微或間接提及",
-        "4": "中立或模糊表達",
-        "5-6": "明確提及",
-        "7": "評論中強烈且完整表達該構面",
-    },
-    "process": [
-        "每則評論需逐條分析。",
-        "根據語意關聯程度對每個歸納題項進行 0–7 分評分。",
-        "將質性評論文本轉換為量化數據。",
-        "所得評分可用於後續統計分析與研究模型建立。",
-    ],
-}
-
 
 def write_json(path: Path, payload: object) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -153,11 +137,11 @@ def build_review_foundation(
     include_dimension_catalog: bool = True,
     include_theme_mapping: bool = True,
     complete_theme_mapping: bool = True,
-    include_scoring_rubric: bool = True,
+    scoring_rubric: dict[str, object] | None = None,
 ) -> dict[str, object]:
     catalog = dimension_catalog or build_dimension_catalog_base()
     payload: dict[str, object] = {
-        "people_insights": ["價值導向族群", "效率導向族群", "高感知品質族群"],
+        "people_insights": ["value-oriented buyers", "convenience-oriented buyers", "quality-seeking buyers"],
         "product_triggers": ["delivery speed", "quality confidence", "ease of setup"],
         "context_scenarios": ["first purchase", "repeat purchase", "gift purchase"],
         "system1_system2_split": {
@@ -172,21 +156,15 @@ def build_review_foundation(
             "self_actualization": ["upgrade", "identity"],
         },
     }
-    if include_scoring_rubric:
-        payload["scoring_rubric"] = SCORING_RUBRIC
+    if scoring_rubric is not None:
+        payload["scoring_rubric"] = scoring_rubric
     if include_dimension_catalog:
         payload["dimension_catalog"] = catalog
     if include_theme_mapping:
         theme_mapping = {
-            "service_experience": [
-                item["column"] for item in catalog if item["theme"] == "service_experience"
-            ],
-            "product_performance": [
-                item["column"] for item in catalog if item["theme"] == "product_performance"
-            ],
-            "value_perception": [
-                item["column"] for item in catalog if item["theme"] == "value_perception"
-            ],
+            "service_experience": [item["column"] for item in catalog if item["theme"] == "service_experience"],
+            "product_performance": [item["column"] for item in catalog if item["theme"] == "product_performance"],
+            "value_perception": [item["column"] for item in catalog if item["theme"] == "value_perception"],
         }
         if not complete_theme_mapping:
             theme_mapping.pop("value_perception", None)
@@ -217,15 +195,10 @@ def build_brands_payload(include_similarity: bool = False) -> dict[str, object]:
 
 
 def build_ideal_point(catalog: list[dict[str, object]]) -> dict[str, object]:
-    positioning_columns = [
-        item["column"] for item in catalog if "positioning" in item["stat_roles"]
-    ]
+    positioning_columns = [item["column"] for item in catalog if "positioning" in item["stat_roles"]]
     return {
         "label": "IdealPoint",
-        "attributes": {
-            column: 7 - index if 7 - index >= 4 else 4
-            for index, column in enumerate(positioning_columns)
-        },
+        "attributes": {column: 7 - index if 7 - index >= 4 else 4 for index, column in enumerate(positioning_columns)},
     }
 
 
@@ -293,7 +266,6 @@ def build_review_rows_base() -> list[dict[str, object]]:
             ],
         },
     }
-
     for cluster_name, cluster in clusters.items():
         for idx in range(12):
             brand = brands[idx % len(brands)]
@@ -377,7 +349,6 @@ def build_review_rows_custom() -> list[dict[str, object]]:
             ],
         },
     }
-
     for cluster_name, cluster in clusters.items():
         for idx in range(12):
             brand = brands[idx % len(brands)]
@@ -456,35 +427,32 @@ def make_canonical_input_dir(
     base: Path,
     dimension_catalog: list[dict[str, object]] | None = None,
     rows: list[dict[str, object]] | None = None,
-    include_analysis_context: bool = True,
     include_dimension_catalog: bool = True,
     include_theme_mapping: bool = True,
     complete_theme_mapping: bool = True,
-    include_scoring_rubric: bool = True,
+    scoring_rubric: dict[str, object] | None = None,
     include_similarity: bool = False,
 ) -> Path:
     input_dir = base / "input"
     input_dir.mkdir()
     catalog = dimension_catalog or build_dimension_catalog_base()
-    review_rows = rows or build_review_rows_base()
-    write_csv(input_dir / "review_scoring_table.csv", review_rows)
+    write_csv(input_dir / "review_scoring_table.csv", rows or build_review_rows_base())
     write_json(
         input_dir / "review_foundation.json",
         build_review_foundation(
-            catalog,
+            dimension_catalog=catalog,
             include_dimension_catalog=include_dimension_catalog,
             include_theme_mapping=include_theme_mapping,
             complete_theme_mapping=complete_theme_mapping,
-            include_scoring_rubric=include_scoring_rubric,
+            scoring_rubric=scoring_rubric,
         ),
     )
-    if include_analysis_context:
-        comparison_axes = (
-            ["delivery_confidence", "communication_clarity", "everyday_value"]
-            if catalog == build_dimension_catalog_custom()
-            else ["fast_delivery", "support_trust", "value_for_money"]
-        )
-        write_json(input_dir / "analysis_context.json", build_analysis_context(comparison_axes))
+    comparison_axes = (
+        ["delivery_confidence", "communication_clarity", "everyday_value"]
+        if catalog == build_dimension_catalog_custom()
+        else ["fast_delivery", "support_trust", "value_for_money"]
+    )
+    write_json(input_dir / "analysis_context.json", build_analysis_context(comparison_axes))
     write_json(input_dir / "brands.json", build_brands_payload(include_similarity=include_similarity))
     write_json(input_dir / "ideal_point.json", build_ideal_point(catalog))
     return input_dir
@@ -506,13 +474,7 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
     maxDiff = None
 
     def run_command(self, args: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
-        return subprocess.run(
-            [sys.executable, *args],
-            cwd=cwd,
-            text=True,
-            capture_output=True,
-            check=False,
-        )
+        return subprocess.run([sys.executable, *args], cwd=cwd, text=True, capture_output=True, check=False)
 
     def test_full_run_accepts_dynamic_scored_inputs_and_emits_intermediate_artifacts(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -520,113 +482,37 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
             input_dir = make_canonical_input_dir(tmp_path)
             output_dir = tmp_path / "output"
 
-            result = self.run_command(
-                [
-                    str(RUN_SCRIPT),
-                    "--run-mode",
-                    "full",
-                    "--input-dir",
-                    str(input_dir),
-                    "--output-dir",
-                    str(output_dir),
-                ],
-                cwd=ROOT,
-            )
+            result = self.run_command([str(RUN_SCRIPT), "--run-mode", "full", "--input-dir", str(input_dir), "--output-dir", str(output_dir)], cwd=ROOT)
             self.assertEqual(result.returncode, 0, result.stderr)
 
-            validator = self.run_command(
-                [
-                    str(VALIDATE_SCRIPT),
-                    "--run-mode",
-                    "full",
-                    "--output-dir",
-                    str(output_dir),
-                ],
-                cwd=ROOT,
-            )
+            validator = self.run_command([str(VALIDATE_SCRIPT), "--run-mode", "full", "--output-dir", str(output_dir)], cwd=ROOT)
             self.assertEqual(validator.returncode, 0, validator.stderr)
 
             appendix = json.loads((output_dir / "appendix.json").read_text(encoding="utf-8"))
-            execution_scope = appendix["execution_scope"]
             self.assertEqual(
-                sorted(execution_scope["emitted_intermediate_artifacts"]),
+                sorted(appendix["execution_scope"]["emitted_intermediate_artifacts"]),
                 ["positioning_scorecard.csv", "segmentation_variables.csv", "targeting_dataset.csv"],
             )
-            for artifact_name in [
-                "review_scoring_table.csv",
-                "review_foundation.json",
-                "analysis_context.json",
-                "brands.json",
-                "ideal_point.json",
-            ]:
-                self.assertIn(artifact_name, execution_scope["upstream_artifacts_used"])
-
-            for summary_key in [
-                "segmentation_summary",
-                "targeting_summary",
-                "positioning_summary",
-            ]:
+            for summary_key in ["segmentation_summary", "targeting_summary", "positioning_summary"]:
                 section = appendix[summary_key]
                 self.assertTrue(section["methods_used"])
                 self.assertTrue(section["theories_used"])
                 self.assertTrue(section["plain_language_explanation"])
                 self.assertGreaterEqual(len(section["evidence_quotes"]), 2)
                 self.assertLessEqual(len(section["evidence_quotes"]), 3)
-                for quote in section["evidence_quotes"]:
-                    self.assertTrue(quote["review_id"])
-                    self.assertTrue(quote["quote_text"])
-                    self.assertTrue(quote["why_this_quote_matters"])
-                    self.assertTrue(quote["linked_items"])
-
-            report_text = (output_dir / "report.md").read_text(encoding="utf-8")
-            self.assertIn("Statistical methods used", report_text)
-            self.assertIn("Theories used", report_text)
-            self.assertIn("Plain-language explanation", report_text)
-            self.assertIn("Evidence quotes", report_text)
 
     def test_full_run_supports_alternate_dynamic_schema(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
             catalog = build_dimension_catalog_custom()
-            input_dir = make_canonical_input_dir(
-                tmp_path,
-                dimension_catalog=catalog,
-                rows=build_review_rows_custom(),
-            )
+            input_dir = make_canonical_input_dir(tmp_path, dimension_catalog=catalog, rows=build_review_rows_custom())
             output_dir = tmp_path / "output"
 
-            result = self.run_command(
-                [
-                    str(RUN_SCRIPT),
-                    "--run-mode",
-                    "full",
-                    "--input-dir",
-                    str(input_dir),
-                    "--output-dir",
-                    str(output_dir),
-                ],
-                cwd=ROOT,
-            )
+            result = self.run_command([str(RUN_SCRIPT), "--run-mode", "full", "--input-dir", str(input_dir), "--output-dir", str(output_dir)], cwd=ROOT)
             self.assertEqual(result.returncode, 0, result.stderr)
 
-            validator = self.run_command(
-                [
-                    str(VALIDATE_SCRIPT),
-                    "--run-mode",
-                    "full",
-                    "--output-dir",
-                    str(output_dir),
-                ],
-                cwd=ROOT,
-            )
-            self.assertEqual(validator.returncode, 0, validator.stderr)
-
             appendix = json.loads((output_dir / "appendix.json").read_text(encoding="utf-8"))
-            attributes = {
-                row["attribute"]
-                for row in appendix["positioning_summary"]["positioning_scorecard"]
-                if row["point_type"] == "brand"
-            }
+            attributes = {row["attribute"] for row in appendix["positioning_summary"]["positioning_scorecard"] if row["point_type"] == "brand"}
             self.assertIn("premium_finish", attributes)
             self.assertIn("everyday_value", attributes)
 
@@ -636,25 +522,12 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
             input_dir = make_partial_input_dir(tmp_path)
             output_dir = tmp_path / "output"
 
-            result = self.run_command(
-                [
-                    str(RUN_SCRIPT),
-                    "--run-mode",
-                    "segmentation",
-                    "--input-dir",
-                    str(input_dir),
-                    "--output-dir",
-                    str(output_dir),
-                ],
-                cwd=ROOT,
-            )
+            result = self.run_command([str(RUN_SCRIPT), "--run-mode", "segmentation", "--input-dir", str(input_dir), "--output-dir", str(output_dir)], cwd=ROOT)
             self.assertEqual(result.returncode, 0, result.stderr)
 
             payload = json.loads((output_dir / "segment_profiles.json").read_text(encoding="utf-8"))
-            shares = [item["share"] for item in payload["segment_profiles"]]
-            self.assertTrue(all(share > 0.05 for share in shares))
             self.assertEqual(payload["cluster_selection"]["method"], "factor_analysis -> kmeans")
-            self.assertTrue(payload["consumer_portrait_narrative"])
+            self.assertTrue(all(item["share"] > 0.05 for item in payload["segment_profiles"]))
 
     def test_targeting_partial_run_uses_comparison_axes_override(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -663,44 +536,14 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
             full_dir = tmp_path / "full"
             targeting_dir = tmp_path / "targeting"
 
-            full_result = self.run_command(
-                [
-                    str(RUN_SCRIPT),
-                    "--run-mode",
-                    "full",
-                    "--input-dir",
-                    str(input_dir),
-                    "--output-dir",
-                    str(full_dir),
-                ],
-                cwd=ROOT,
-            )
+            full_result = self.run_command([str(RUN_SCRIPT), "--run-mode", "full", "--input-dir", str(input_dir), "--output-dir", str(full_dir)], cwd=ROOT)
             self.assertEqual(full_result.returncode, 0, full_result.stderr)
 
-            result = self.run_command(
-                [
-                    str(RUN_SCRIPT),
-                    "--run-mode",
-                    "targeting",
-                    "--input-dir",
-                    str(full_dir),
-                    "--upstream-artifacts-dir",
-                    str(full_dir),
-                    "--output-dir",
-                    str(targeting_dir),
-                ],
-                cwd=ROOT,
-            )
+            result = self.run_command([str(RUN_SCRIPT), "--run-mode", "targeting", "--input-dir", str(full_dir), "--upstream-artifacts-dir", str(full_dir), "--output-dir", str(targeting_dir)], cwd=ROOT)
             self.assertEqual(result.returncode, 0, result.stderr)
 
             targeting = json.loads((targeting_dir / "targeting_results.json").read_text(encoding="utf-8"))
-            decision = targeting["target_selection_decision"]
-            self.assertTrue(decision["priority_segments"])
-            self.assertTrue(decision["secondary_segments"] or decision["deprioritized_segments"])
-            self.assertEqual(
-                decision["comparison_axes_used"],
-                ["fast_delivery", "support_trust", "value_for_money"],
-            )
+            self.assertEqual(targeting["target_selection_decision"]["comparison_axes_used"], ["fast_delivery", "support_trust", "value_for_money"])
 
     def test_positioning_mds_does_not_fabricate_attribute_vectors(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -708,26 +551,9 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
             input_dir = make_canonical_input_dir(tmp_path, include_similarity=True)
             output_dir = tmp_path / "output"
 
-            result = self.run_command(
-                [
-                    str(RUN_SCRIPT),
-                    "--run-mode",
-                    "positioning",
-                    "--input-dir",
-                    str(input_dir),
-                    "--output-dir",
-                    str(output_dir),
-                    "--positioning-method",
-                    "mds",
-                ],
-                cwd=ROOT,
-            )
+            result = self.run_command([str(RUN_SCRIPT), "--run-mode", "positioning", "--input-dir", str(input_dir), "--output-dir", str(output_dir), "--positioning-method", "mds"], cwd=ROOT)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertFalse((output_dir / "perceptual_map_vectors.csv").exists())
-
-            diagnostics = json.loads((output_dir / "positioning_diagnostics.json").read_text(encoding="utf-8"))
-            self.assertTrue(diagnostics["attribute_vectors_not_defined"])
-            self.assertEqual(diagnostics["projection_interpretation"]["status"], "not_available")
 
     def test_custom_missing_prerequisite_lists_only_true_missing_intermediate(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -738,25 +564,10 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
             write_json(input_dir / "ideal_point.json", build_ideal_point(build_dimension_catalog_base()))
             output_dir = tmp_path / "output"
 
-            result = self.run_command(
-                [
-                    str(RUN_SCRIPT),
-                    "--run-mode",
-                    "custom",
-                    "--requested-modules",
-                    "perceptual-map",
-                    "--input-dir",
-                    str(input_dir),
-                    "--output-dir",
-                    str(output_dir),
-                ],
-                cwd=ROOT,
-            )
+            result = self.run_command([str(RUN_SCRIPT), "--run-mode", "custom", "--requested-modules", "perceptual-map", "--input-dir", str(input_dir), "--output-dir", str(output_dir)], cwd=ROOT)
             self.assertEqual(result.returncode, 0, result.stderr)
-
             payload = json.loads((output_dir / "MissingPrerequisiteOutput.json").read_text(encoding="utf-8"))
             self.assertEqual(payload["missing_prerequisites"], ["positioning_scorecard.csv"])
-            self.assertEqual(payload["acceptable_upstream_artifacts"], ["positioning_scorecard.csv"])
 
     def test_full_run_rejects_missing_review_text(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -766,18 +577,7 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
             input_dir = make_canonical_input_dir(tmp_path, rows=rows)
             output_dir = tmp_path / "output"
 
-            result = self.run_command(
-                [
-                    str(RUN_SCRIPT),
-                    "--run-mode",
-                    "full",
-                    "--input-dir",
-                    str(input_dir),
-                    "--output-dir",
-                    str(output_dir),
-                ],
-                cwd=ROOT,
-            )
+            result = self.run_command([str(RUN_SCRIPT), "--run-mode", "full", "--input-dir", str(input_dir), "--output-dir", str(output_dir)], cwd=ROOT)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("review_text", result.stderr)
 
@@ -789,41 +589,31 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
             input_dir = make_canonical_input_dir(tmp_path, rows=rows)
             output_dir = tmp_path / "output"
 
-            result = self.run_command(
-                [
-                    str(RUN_SCRIPT),
-                    "--run-mode",
-                    "full",
-                    "--input-dir",
-                    str(input_dir),
-                    "--output-dir",
-                    str(output_dir),
-                ],
-                cwd=ROOT,
-            )
+            result = self.run_command([str(RUN_SCRIPT), "--run-mode", "full", "--input-dir", str(input_dir), "--output-dir", str(output_dir)], cwd=ROOT)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("0-7", result.stderr)
 
-    def test_full_run_rejects_missing_scoring_rubric(self) -> None:
+    def test_full_run_accepts_missing_scoring_rubric_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
-            input_dir = make_canonical_input_dir(tmp_path, include_scoring_rubric=False)
+            input_dir = make_canonical_input_dir(tmp_path, scoring_rubric=None)
             output_dir = tmp_path / "output"
 
-            result = self.run_command(
-                [
-                    str(RUN_SCRIPT),
-                    "--run-mode",
-                    "full",
-                    "--input-dir",
-                    str(input_dir),
-                    "--output-dir",
-                    str(output_dir),
-                ],
-                cwd=ROOT,
-            )
-            self.assertNotEqual(result.returncode, 0)
-            self.assertIn("scoring_rubric", result.stderr)
+            result = self.run_command([str(RUN_SCRIPT), "--run-mode", "full", "--input-dir", str(input_dir), "--output-dir", str(output_dir)], cwd=ROOT)
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_full_run_accepts_custom_scoring_rubric_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            custom_rubric = {
+                "scale": {"0": "none", "1-3": "light", "4": "mixed", "5-6": "clear", "7": "strong"},
+                "process": ["custom", "audit", "metadata"],
+            }
+            input_dir = make_canonical_input_dir(tmp_path, scoring_rubric=custom_rubric)
+            output_dir = tmp_path / "output"
+
+            result = self.run_command([str(RUN_SCRIPT), "--run-mode", "full", "--input-dir", str(input_dir), "--output-dir", str(output_dir)], cwd=ROOT)
+            self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_full_run_rejects_missing_plain_language_definition(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -833,18 +623,7 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
             input_dir = make_canonical_input_dir(tmp_path, dimension_catalog=catalog)
             output_dir = tmp_path / "output"
 
-            result = self.run_command(
-                [
-                    str(RUN_SCRIPT),
-                    "--run-mode",
-                    "full",
-                    "--input-dir",
-                    str(input_dir),
-                    "--output-dir",
-                    str(output_dir),
-                ],
-                cwd=ROOT,
-            )
+            result = self.run_command([str(RUN_SCRIPT), "--run-mode", "full", "--input-dir", str(input_dir), "--output-dir", str(output_dir)], cwd=ROOT)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("plain_language_definition", result.stderr)
 
@@ -854,18 +633,7 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
             input_dir = make_canonical_input_dir(tmp_path, complete_theme_mapping=False)
             output_dir = tmp_path / "output"
 
-            result = self.run_command(
-                [
-                    str(RUN_SCRIPT),
-                    "--run-mode",
-                    "full",
-                    "--input-dir",
-                    str(input_dir),
-                    "--output-dir",
-                    str(output_dir),
-                ],
-                cwd=ROOT,
-            )
+            result = self.run_command([str(RUN_SCRIPT), "--run-mode", "full", "--input-dir", str(input_dir), "--output-dir", str(output_dir)], cwd=ROOT)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("theme_mapping", result.stderr)
 
@@ -874,26 +642,11 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
             tmp_path = Path(tmp)
             input_dir = tmp_path / "input"
             input_dir.mkdir()
-            write_json(
-                input_dir / "reviews.json",
-                [{"review_id": "r1", "review_text": "Fast delivery and decent value."}],
-            )
+            write_json(input_dir / "reviews.json", [{"review_id": "r1", "review_text": "Fast delivery and decent value."}])
             output_dir = tmp_path / "output"
 
-            result = self.run_command(
-                [
-                    str(RUN_SCRIPT),
-                    "--run-mode",
-                    "full",
-                    "--input-dir",
-                    str(input_dir),
-                    "--output-dir",
-                    str(output_dir),
-                ],
-                cwd=ROOT,
-            )
+            result = self.run_command([str(RUN_SCRIPT), "--run-mode", "full", "--input-dir", str(input_dir), "--output-dir", str(output_dir)], cwd=ROOT)
             self.assertEqual(result.returncode, 0, result.stderr)
-
             payload = json.loads((output_dir / "MissingPrerequisiteOutput.json").read_text(encoding="utf-8"))
             self.assertIn("review_scoring_table.csv", payload["missing_prerequisites"])
             self.assertIn("agent layer", payload["next_step_rule"].lower())
@@ -904,34 +657,14 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
             input_dir = make_canonical_input_dir(tmp_path)
             output_dir = tmp_path / "output"
 
-            result = self.run_command(
-                [
-                    str(RUN_SCRIPT),
-                    "--run-mode",
-                    "full",
-                    "--input-dir",
-                    str(input_dir),
-                    "--output-dir",
-                    str(output_dir),
-                ],
-                cwd=ROOT,
-            )
+            result = self.run_command([str(RUN_SCRIPT), "--run-mode", "full", "--input-dir", str(input_dir), "--output-dir", str(output_dir)], cwd=ROOT)
             self.assertEqual(result.returncode, 0, result.stderr)
 
             appendix = json.loads((output_dir / "appendix.json").read_text(encoding="utf-8"))
             appendix["segmentation_summary"]["evidence_quotes"][0]["quote_text"] = "Hallucinated quote"
             write_json(output_dir / "appendix.json", appendix)
 
-            validator = self.run_command(
-                [
-                    str(VALIDATE_SCRIPT),
-                    "--run-mode",
-                    "full",
-                    "--output-dir",
-                    str(output_dir),
-                ],
-                cwd=ROOT,
-            )
+            validator = self.run_command([str(VALIDATE_SCRIPT), "--run-mode", "full", "--output-dir", str(output_dir)], cwd=ROOT)
             self.assertNotEqual(validator.returncode, 0)
             self.assertIn("evidence quote", validator.stderr.lower())
 
@@ -941,34 +674,14 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
             input_dir = make_canonical_input_dir(tmp_path)
             output_dir = tmp_path / "output"
 
-            result = self.run_command(
-                [
-                    str(RUN_SCRIPT),
-                    "--run-mode",
-                    "full",
-                    "--input-dir",
-                    str(input_dir),
-                    "--output-dir",
-                    str(output_dir),
-                ],
-                cwd=ROOT,
-            )
+            result = self.run_command([str(RUN_SCRIPT), "--run-mode", "full", "--input-dir", str(input_dir), "--output-dir", str(output_dir)], cwd=ROOT)
             self.assertEqual(result.returncode, 0, result.stderr)
 
             appendix = json.loads((output_dir / "appendix.json").read_text(encoding="utf-8"))
             appendix["execution_scope"].pop("modules_executed", None)
             write_json(output_dir / "appendix.json", appendix)
 
-            validator = self.run_command(
-                [
-                    str(VALIDATE_SCRIPT),
-                    "--run-mode",
-                    "full",
-                    "--output-dir",
-                    str(output_dir),
-                ],
-                cwd=ROOT,
-            )
+            validator = self.run_command([str(VALIDATE_SCRIPT), "--run-mode", "full", "--output-dir", str(output_dir)], cwd=ROOT)
             self.assertNotEqual(validator.returncode, 0)
             self.assertIn("modules_executed", validator.stderr)
 

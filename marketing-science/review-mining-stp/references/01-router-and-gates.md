@@ -12,7 +12,7 @@ The agent layer handles:
 
 - raw `reviews` or `review_text`
 - inferring scored items from the full corpus
-- applying the fixed 0–7 rubric to every inferred item for every review
+- applying the `0-7` scoring scale to every inferred item for every review
 - assigning `theme`, `theory_tags`, and `stat_roles`
 - preserving verbatim review text for later evidence quoting
 
@@ -36,7 +36,7 @@ The scripts may emit:
 - `targeting_dataset.csv`
 - `positioning_scorecard.csv`
 
-They do not accept raw reviews and they do not auto-convert raw text into scored artifacts.
+They do not accept raw reviews and they do not define the scoring workflow.
 
 ## Canonical Input Rules
 
@@ -53,15 +53,18 @@ All scored item columns must:
 
 - exist in `dimension_catalog`
 - be numeric integers
-- stay in the `0–7` range
+- stay in the `0-7` range
 
 ### `review_foundation.json`
 
 Must include:
 
-- `scoring_rubric`
 - `dimension_catalog`
 - `theme_mapping`
+
+It may also include audit-only metadata such as:
+
+- `scoring_rubric`
 
 Each `dimension_catalog` item must include:
 
