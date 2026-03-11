@@ -504,6 +504,12 @@ def main() -> None:
             continue
         for quote in summary.get("evidence_quotes", []):
             evidence.append({"stage": stage_name, **quote})
+        for finding in summary.get("findings", []):
+            if not isinstance(finding, dict):
+                continue
+            finding_id = finding.get("finding_id", "")
+            for quote in finding.get("evidence_quotes", []):
+                evidence.append({"stage": stage_name, "finding_id": finding_id, **quote})
     appendix["evidence"] = evidence
 
     if canonical_inputs and canonical_inputs["contract"].get("unit_id_defaulted"):

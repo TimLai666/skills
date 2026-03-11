@@ -52,7 +52,7 @@ The agent layer:
 
 - scripts emit `segmentation_variables.csv`, `targeting_dataset.csv`, and `positioning_scorecard.csv`
 - the final report names the statistical method and theory used in each major section
-- the final report includes verbatim review quotes tied to `review_id`
+- each major section includes finding-level method, reproducibility steps, statistical results, and verbatim review quotes tied to `review_id`
 
 ## Example B: Full STP From A Different Dynamic Schema
 
@@ -81,6 +81,7 @@ The agent layer:
 - scripts and validators work without assuming a fixed item count
 - targeting variables come from `stat_roles`
 - positioning attributes come from `stat_roles` that include `positioning`
+- the report still emits the same finding-level reproducibility package even though the item names changed
 
 ## Example C: Segmentation-Only Rerun
 
@@ -152,6 +153,8 @@ The agent layer:
 - default path uses `factor_analysis`
 - `MDS` is allowed only when similarity input is explicitly available
 - output includes ideal-point distance and pairwise `competition_landscape`
+- public perceptual-map delivery is the coordinate table plus the Python-rendered figure
+- factor-analysis-only vectors may appear as optional diagnostics
 
 ## Example F: Raw Reviews Sent Directly To Scripts
 

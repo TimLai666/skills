@@ -17,6 +17,7 @@ The agent layer handles:
 - preserving verbatim review text for later evidence quoting
 
 The agent layer emits the scored artifacts that the scripts need.
+It is a workflow boundary, not a requirement to use a specific API.
 
 ### Script Layer
 
@@ -54,6 +55,8 @@ All scored item columns must:
 - exist in `dimension_catalog`
 - be numeric integers
 - stay in the `0-7` range
+
+The scored item count is dynamic. The contract never assumes a fixed item count.
 
 ### `review_foundation.json`
 
@@ -143,3 +146,24 @@ Every completed run must record:
 - `reruns_performed`
 - `final_k`
 - `scope_limits`
+
+## Reporting Gate
+
+Each stage summary must keep:
+
+- section-level `methods_used`, `theories_used`, `plain_language_explanation`, and `evidence_quotes`
+- a non-empty `findings` list
+
+Each finding must keep:
+
+- `finding_id`
+- `finding_statement`
+- `business_implication`
+- `methods_used`
+- `theories_used`
+- `reproducibility`
+- `statistical_results`
+- `plain_language_explanation`
+- `evidence_quotes`
+
+The scripts are responsible for assembling this reporting structure from scored artifacts. The agent layer is responsible for the upstream scoring workflow only.

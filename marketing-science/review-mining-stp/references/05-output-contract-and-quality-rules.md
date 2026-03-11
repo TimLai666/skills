@@ -26,6 +26,7 @@ Each major summary section must contain:
 - `evidence_quote_status`
 - `evidence_quote_reason`
 - `evidence_quotes`
+- `findings`
 
 ### `methods_used`
 
@@ -57,6 +58,48 @@ When canonical review evidence is available:
 - `review_id` must exist in the canonical score table
 
 The report contract is a script-layer responsibility. The scoring process itself is not.
+
+### `findings`
+
+Must be a non-empty list of objects.
+
+Each finding must include:
+
+- `finding_id`
+- `finding_statement`
+- `business_implication`
+- `methods_used`
+- `theories_used`
+- `reproducibility`
+- `statistical_results`
+- `plain_language_explanation`
+- `evidence_quotes`
+
+### `reproducibility`
+
+Each finding-level reproducibility package must include:
+
+- `input_artifacts`
+- `input_columns`
+- `filters`
+- `preprocessing`
+- `analysis_steps`
+- `decision_rule`
+
+### `statistical_results`
+
+Each finding-level statistical result package must include:
+
+- `method_family`
+- `test_or_model`
+- `sample_size`
+- `statistic`
+- `degrees_of_freedom`
+- `p_value`
+- `effect_size`
+- `coefficient`
+- `confidence_interval`
+- `result_direction`
 
 ## Stage-Specific Fields
 
@@ -108,12 +151,15 @@ Must retain:
 - `positioning_method_used`
 - `perceptual_map_figure`
 - `perceptual_map_coordinate_table`
-- `perceptual_map_vector_table`
 - `perceptual_map_method`
 - `perceptual_map_interpretation`
-- `projection_interpretation`
 - `positioning_diagnostics`
 - `strategy_matrix`
+
+Optional factor-analysis diagnostics may retain:
+
+- `perceptual_map_vector_table`
+- `projection_interpretation`
 
 `dynamic_scorecard_summary` must retain:
 
@@ -155,6 +201,7 @@ Must retain:
 - Targeting must keep current-market and potential-market outputs plus pairwise comparisons where required.
 - Positioning must keep ideal-point logic, pairwise competition distance, and no fabricated vectors in `MDS`.
 - Reports must explain the method and theory used in language that non-specialists can understand.
+- Reports must explain every major finding with a reproducibility package and a fixed-shape statistical-results package.
 - Evidence quotes must be verbatim and traceable.
 - Validators must not hardcode a fixed item count.
 - Validators must not enforce the wording of the scoring workflow.

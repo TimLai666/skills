@@ -12,6 +12,8 @@ This skill converts review text into `Segmentation -> Targeting -> Positioning -
 - `agent layer`: reads raw reviews, infers scored items, assigns theory tags, and preserves verbatim review text.
 - `script layer`: accepts scored artifacts only and performs statistical analysis plus report assembly.
 
+The `agent layer` is an upstream workflow boundary, not a requirement to use any specific API, service, or orchestration tool.
+
 The scripts are tools, not the main workflow. They do not read raw reviews, decide how to score them, or define the scoring process.
 
 ## When To Use
@@ -189,6 +191,9 @@ Generated intermediate artifacts in `full` mode:
 - default to `factor_analysis`
 - allow `MDS` when similarity-based input is explicitly requested
 - include ideal-point distance and pairwise competition distance
+- draw the perceptual map as a Python-generated figure from the coordinate table
+- treat `perceptual_map_figure + perceptual_map_coordinate_table + perceptual_map_method + perceptual_map_interpretation` as the public positioning-map contract
+- allow factor-analysis-only vector and projection diagnostics as optional internal outputs
 - never fabricate attribute vectors for `MDS`
 - emit `dynamic_scorecard_summary` with distance, gap, reliability, and validity sections
 
@@ -202,6 +207,42 @@ Each major report section must contain:
 - `Plain-language explanation`
 - `Evidence quotes`
 
+Each major report section must also contain a non-empty `findings` list.
+
+Each finding must contain:
+
+- `finding_id`
+- `finding_statement`
+- `business_implication`
+- `methods_used`
+- `theories_used`
+- `reproducibility`
+- `statistical_results`
+- `plain_language_explanation`
+- `evidence_quotes`
+
+Each `reproducibility` package must contain:
+
+- `input_artifacts`
+- `input_columns`
+- `filters`
+- `preprocessing`
+- `analysis_steps`
+- `decision_rule`
+
+Each `statistical_results` package must contain:
+
+- `method_family`
+- `test_or_model`
+- `sample_size`
+- `statistic`
+- `degrees_of_freedom`
+- `p_value`
+- `effect_size`
+- `coefficient`
+- `confidence_interval`
+- `result_direction`
+
 Evidence-quote rules:
 
 - quotes must come verbatim from `review_scoring_table.csv.review_text`
@@ -209,8 +250,9 @@ Evidence-quote rules:
 - each quote must explain why it matters
 - each quote must link back to the scored items it supports
 - when canonical review evidence is available, each major section should include 2-3 quotes
+- when canonical review evidence is available, each finding should include at least 1 quote
 
-The goal is to make the report readable for non-specialists while keeping every key claim traceable to real review text.
+The goal is to make the report readable for non-specialists while keeping every key claim traceable to real review text and reproducible from the emitted statistical artifacts.
 
 ## Hard Rules
 
@@ -220,6 +262,7 @@ The goal is to make the report readable for non-specialists while keeping every 
 - Always keep scored items on the fixed `0-7` scale.
 - Always preserve verbatim `review_text` for evidence quoting.
 - Always state the statistical method and theory used in each major report section.
+- Always attach reproducibility steps and statistical results to each finding.
 - Never fabricate evidence quotes or attribute vectors.
 
 ## References

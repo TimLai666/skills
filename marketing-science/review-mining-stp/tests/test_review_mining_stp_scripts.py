@@ -476,6 +476,72 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
     def run_command(self, args: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
         return subprocess.run([sys.executable, *args], cwd=cwd, text=True, capture_output=True, check=False)
 
+    def assert_finding_contract(self, finding: dict[str, object], review_lookup: dict[str, str]) -> None:
+        required_keys = {
+            "finding_id",
+            "finding_statement",
+            "business_implication",
+            "methods_used",
+            "theories_used",
+            "reproducibility",
+            "statistical_results",
+            "plain_language_explanation",
+            "evidence_quotes",
+        }
+        self.assertTrue(required_keys.issubset(finding.keys()))
+        self.assertTrue(finding["finding_id"])
+        self.assertTrue(finding["finding_statement"])
+        self.assertTrue(finding["business_implication"])
+        self.assertTrue(finding["methods_used"])
+        self.assertTrue(finding["theories_used"])
+        self.assertTrue(finding["plain_language_explanation"])
+
+        reproducibility = finding["reproducibility"]
+        self.assertEqual(
+            set(reproducibility.keys()),
+            {
+                "input_artifacts",
+                "input_columns",
+                "filters",
+                "preprocessing",
+                "analysis_steps",
+                "decision_rule",
+            },
+        )
+        self.assertTrue(reproducibility["input_artifacts"])
+        self.assertTrue(reproducibility["input_columns"])
+        self.assertTrue(reproducibility["analysis_steps"])
+        self.assertTrue(reproducibility["decision_rule"])
+
+        statistical_results = finding["statistical_results"]
+        self.assertEqual(
+            set(statistical_results.keys()),
+            {
+                "method_family",
+                "test_or_model",
+                "sample_size",
+                "statistic",
+                "degrees_of_freedom",
+                "p_value",
+                "effect_size",
+                "coefficient",
+                "confidence_interval",
+                "result_direction",
+            },
+        )
+        self.assertTrue(statistical_results["method_family"])
+        self.assertTrue(statistical_results["test_or_model"])
+        self.assertIsNotNone(statistical_results["sample_size"])
+        self.assertTrue(statistical_results["result_direction"])
+
+        quotes = finding["evidence_quotes"]
+        self.assertGreaterEqual(len(quotes), 1)
+        for quote in quotes:
+            self.assertTrue({"review_id", "quote_text", "why_this_quote_matters", "linked_items"}.issubset(quote.keys()))
+            self.assertIn(quote["review_id"], review_lookup)
+            self.assertEqual(quote["quote_text"], review_lookup[quote["review_id"]])
+            self.assertTrue(quote["linked_items"])
+
     def test_full_run_accepts_dynamic_scored_inputs_and_emits_intermediate_artifacts(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
@@ -489,6 +555,11 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
             self.assertEqual(validator.returncode, 0, validator.stderr)
 
             appendix = json.loads((output_dir / "appendix.json").read_text(encoding="utf-8"))
+            with (output_dir / "review_scoring_table.csv").open(encoding="utf-8", newline="") as handle:
+                review_lookup = {
+                    row["review_id"]: row["review_text"]
+                    for row in csv.DictReader(handle)
+                }
             self.assertEqual(
                 sorted(appendix["execution_scope"]["emitted_intermediate_artifacts"]),
                 ["positioning_scorecard.csv", "segmentation_variables.csv", "targeting_dataset.csv"],
@@ -500,6 +571,14 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
                 self.assertTrue(section["plain_language_explanation"])
                 self.assertGreaterEqual(len(section["evidence_quotes"]), 2)
                 self.assertLessEqual(len(section["evidence_quotes"]), 3)
+                self.assertTrue(section["findings"])
+                for finding in section["findings"]:
+                    self.assert_finding_contract(finding, review_lookup)
+
+            report_text = (output_dir / "report.md").read_text(encoding="utf-8")
+            self.assertIn("### Finding", report_text)
+            self.assertIn("Reproducibility", report_text)
+            self.assertIn("Statistical results", report_text)
 
     def test_full_run_supports_alternate_dynamic_schema(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -667,6 +746,57 @@ class ReviewMiningStpScriptsTest(unittest.TestCase):
             validator = self.run_command([str(VALIDATE_SCRIPT), "--run-mode", "full", "--output-dir", str(output_dir)], cwd=ROOT)
             self.assertNotEqual(validator.returncode, 0)
             self.assertIn("evidence quote", validator.stderr.lower())
+
+    def test_validator_rejects_missing_finding_reproducibility_package(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            input_dir = make_canonical_input_dir(tmp_path)
+            output_dir = tmp_path / "output"
+
+            result = self.run_command([str(RUN_SCRIPT), "--run-mode", "full", "--input-dir", str(input_dir), "--output-dir", str(output_dir)], cwd=ROOT)
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+            appendix = json.loads((output_dir / "appendix.json").read_text(encoding="utf-8"))
+            appendix["targeting_summary"]["findings"][0].pop("reproducibility", None)
+            write_json(output_dir / "appendix.json", appendix)
+
+            validator = self.run_command([str(VALIDATE_SCRIPT), "--run-mode", "full", "--output-dir", str(output_dir)], cwd=ROOT)
+            self.assertNotEqual(validator.returncode, 0)
+            self.assertIn("reproducibility", validator.stderr.lower())
+
+    def test_validator_rejects_missing_finding_statistical_result_keys(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            input_dir = make_canonical_input_dir(tmp_path)
+            output_dir = tmp_path / "output"
+
+            result = self.run_command([str(RUN_SCRIPT), "--run-mode", "full", "--input-dir", str(input_dir), "--output-dir", str(output_dir)], cwd=ROOT)
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+            appendix = json.loads((output_dir / "appendix.json").read_text(encoding="utf-8"))
+            appendix["positioning_summary"]["findings"][0]["statistical_results"].pop("result_direction", None)
+            write_json(output_dir / "appendix.json", appendix)
+
+            validator = self.run_command([str(VALIDATE_SCRIPT), "--run-mode", "full", "--output-dir", str(output_dir)], cwd=ROOT)
+            self.assertNotEqual(validator.returncode, 0)
+            self.assertIn("statistical_results", validator.stderr.lower())
+
+    def test_validator_accepts_positioning_summary_without_public_vector_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            input_dir = make_canonical_input_dir(tmp_path)
+            output_dir = tmp_path / "output"
+
+            result = self.run_command([str(RUN_SCRIPT), "--run-mode", "full", "--input-dir", str(input_dir), "--output-dir", str(output_dir)], cwd=ROOT)
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+            appendix = json.loads((output_dir / "appendix.json").read_text(encoding="utf-8"))
+            appendix["positioning_summary"].pop("perceptual_map_vector_table", None)
+            appendix["positioning_summary"].pop("projection_interpretation", None)
+            write_json(output_dir / "appendix.json", appendix)
+
+            validator = self.run_command([str(VALIDATE_SCRIPT), "--run-mode", "full", "--output-dir", str(output_dir)], cwd=ROOT)
+            self.assertEqual(validator.returncode, 0, validator.stderr)
 
     def test_validator_rejects_missing_execution_scope_fields(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

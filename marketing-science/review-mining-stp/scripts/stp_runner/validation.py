@@ -70,15 +70,14 @@ def validate_positioning(output_dir: Path) -> None:
         if vector_path.exists():
             fail("MDS output must not fabricate attribute vectors.")
     else:
-        if not vector_path.exists():
-            fail("Factor-analysis perceptual map requires a vector table.")
-        with vector_path.open(encoding="utf-8") as handle:
-            vector_rows = list(csv.DictReader(handle))
-        if not vector_rows:
-            fail("Vector table is empty.")
-        for row in vector_rows:
-            if float(row["x_start"]) != 0.0 or float(row["y_start"]) != 0.0:
-                fail("Attribute vectors must start at the origin.")
+        if vector_path.exists():
+            with vector_path.open(encoding="utf-8") as handle:
+                vector_rows = list(csv.DictReader(handle))
+            if not vector_rows:
+                fail("Vector table is empty.")
+            for row in vector_rows:
+                if float(row["x_start"]) != 0.0 or float(row["y_start"]) != 0.0:
+                    fail("Attribute vectors must start at the origin.")
 
     pod_pop = diagnostics.get("pod_pop", {})
     if "pod" not in pod_pop or "pop" not in pod_pop:
@@ -195,6 +194,9 @@ def _validate_evidence_quotes(
     summary: dict[str, Any],
     summary_name: str,
     review_lookup: dict[str, str],
+    *,
+    min_count_when_available: int,
+    max_count_when_available: int | None = None,
 ) -> None:
     if "evidence_quotes" not in summary:
         fail(f"{summary_name} is missing evidence_quotes.")
@@ -203,8 +205,14 @@ def _validate_evidence_quotes(
         fail(f"{summary_name}.evidence_quotes must be a list.")
     status = summary.get("evidence_quote_status", "")
     if review_lookup:
-        if len(quotes) < 2 or len(quotes) > 3:
-            fail(f"{summary_name}.evidence_quotes must contain 2-3 traceable quotes when review evidence is available.")
+        if len(quotes) < min_count_when_available:
+            fail(
+                f"{summary_name}.evidence_quotes must contain at least {min_count_when_available} traceable quotes when review evidence is available."
+            )
+        if max_count_when_available is not None and len(quotes) > max_count_when_available:
+            fail(
+                f"{summary_name}.evidence_quotes must contain no more than {max_count_when_available} traceable quotes when review evidence is available."
+            )
     for quote in quotes:
         if not isinstance(quote, dict):
             fail(f"{summary_name}.evidence_quotes entries must be objects.")
@@ -228,6 +236,114 @@ def _validate_evidence_quotes(
         fail(f"{summary_name}.evidence_quotes must be empty when review evidence is not available.")
 
 
+def _validate_reproducibility_package(package: Any, container_name: str) -> None:
+    required_keys = {
+        "input_artifacts",
+        "input_columns",
+        "filters",
+        "preprocessing",
+        "analysis_steps",
+        "decision_rule",
+    }
+    if not isinstance(package, dict):
+        fail(f"{container_name} must be an object.")
+    if set(package.keys()) != required_keys:
+        fail(f"{container_name} must contain exactly: " + ", ".join(sorted(required_keys)))
+    if not isinstance(package["input_artifacts"], list) or not package["input_artifacts"]:
+        fail(f"{container_name}.input_artifacts must be a non-empty list.")
+    if not isinstance(package["input_columns"], list) or not package["input_columns"]:
+        fail(f"{container_name}.input_columns must be a non-empty list.")
+    for key in ["filters", "preprocessing", "analysis_steps"]:
+        if not isinstance(package[key], list):
+            fail(f"{container_name}.{key} must be a list.")
+    if not package["analysis_steps"]:
+        fail(f"{container_name}.analysis_steps must be non-empty.")
+    if not str(package["decision_rule"]).strip():
+        fail(f"{container_name}.decision_rule must be non-empty.")
+
+
+def _validate_statistical_results(package: Any, container_name: str) -> None:
+    required_keys = {
+        "method_family",
+        "test_or_model",
+        "sample_size",
+        "statistic",
+        "degrees_of_freedom",
+        "p_value",
+        "effect_size",
+        "coefficient",
+        "confidence_interval",
+        "result_direction",
+    }
+    if not isinstance(package, dict):
+        fail(f"{container_name} must be an object.")
+    if set(package.keys()) != required_keys:
+        fail(f"{container_name} must contain exactly: " + ", ".join(sorted(required_keys)))
+    if not str(package["method_family"]).strip():
+        fail(f"{container_name}.method_family must be non-empty.")
+    if not str(package["test_or_model"]).strip():
+        fail(f"{container_name}.test_or_model must be non-empty.")
+    if package["sample_size"] is None:
+        fail(f"{container_name}.sample_size must not be null.")
+    if not str(package["result_direction"]).strip():
+        fail(f"{container_name}.result_direction must be non-empty.")
+
+
+def _validate_findings(
+    findings: Any,
+    container_name: str,
+    review_lookup: dict[str, str],
+) -> None:
+    required_keys = {
+        "finding_id",
+        "finding_statement",
+        "business_implication",
+        "methods_used",
+        "theories_used",
+        "reproducibility",
+        "statistical_results",
+        "plain_language_explanation",
+        "evidence_quotes",
+    }
+    if not isinstance(findings, list) or not findings:
+        fail(f"{container_name} must be a non-empty list.")
+    for index, finding in enumerate(findings):
+        if not isinstance(finding, dict):
+            fail(f"{container_name}[{index}] must be an object.")
+        if not required_keys.issubset(finding.keys()):
+            fail(
+                f"{container_name}[{index}] is missing keys: "
+                + ", ".join(sorted(required_keys - set(finding.keys())))
+            )
+        for text_key in ["finding_id", "finding_statement", "business_implication", "plain_language_explanation"]:
+            if not str(finding[text_key]).strip():
+                fail(f"{container_name}[{index}].{text_key} must be non-empty.")
+        _validate_described_items(
+            finding.get("methods_used"),
+            f"{container_name}[{index}].methods_used",
+            {"name", "description"},
+        )
+        _validate_described_items(
+            finding.get("theories_used"),
+            f"{container_name}[{index}].theories_used",
+            {"name", "description"},
+        )
+        _validate_reproducibility_package(
+            finding.get("reproducibility"),
+            f"{container_name}[{index}].reproducibility",
+        )
+        _validate_statistical_results(
+            finding.get("statistical_results"),
+            f"{container_name}[{index}].statistical_results",
+        )
+        _validate_evidence_quotes(
+            {"evidence_quotes": finding.get("evidence_quotes"), "evidence_quote_status": "available" if review_lookup else "not_available"},
+            f"{container_name}[{index}]",
+            review_lookup,
+            min_count_when_available=1,
+        )
+
+
 def _validate_stage_report_contract(
     summary: dict[str, Any],
     summary_name: str,
@@ -243,6 +359,7 @@ def _validate_stage_report_contract(
             "evidence_quote_status",
             "evidence_quote_reason",
             "evidence_quotes",
+            "findings",
         ],
         summary_name,
     )
@@ -252,7 +369,8 @@ def _validate_stage_report_contract(
         fail(f"{summary_name}.plain_language_explanation must be non-empty.")
     _validate_described_items(summary.get("methods_used"), f"{summary_name}.methods_used", {"name", "description"})
     _validate_described_items(summary.get("theories_used"), f"{summary_name}.theories_used", {"name", "description"})
-    _validate_evidence_quotes(summary, summary_name, review_lookup)
+    _validate_evidence_quotes(summary, summary_name, review_lookup, min_count_when_available=2, max_count_when_available=3)
+    _validate_findings(summary.get("findings"), f"{summary_name}.findings", review_lookup)
 
 
 def validate_appendix(output_dir: Path, run_mode: str) -> None:
@@ -366,10 +484,10 @@ def validate_appendix(output_dir: Path, run_mode: str) -> None:
         require_keys(
             positioning_summary,
             [
-                "projection_interpretation",
                 "perceptual_map_figure",
                 "perceptual_map_coordinate_table",
-                "perceptual_map_vector_table",
+                "perceptual_map_method",
+                "perceptual_map_interpretation",
                 "dynamic_scorecard_summary",
             ],
             "positioning_summary",

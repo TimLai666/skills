@@ -80,18 +80,20 @@ Use these scenarios to verify both the layer boundary and the downstream statist
 
 - Factor-analysis path:
   - `positioning_method_used = factor_analysis`
-  - attribute vectors are present
-  - projection interpretation is defined
+  - `perceptual_map_coordinates.csv` and `perceptual_map.png` are present
+  - optional vectors may be present as internal diagnostics
 - MDS path:
   - `positioning_method_used = mds`
   - `attribute_vectors_not_defined = true`
-  - `projection_interpretation.status = not_available`
+  - `perceptual_map_coordinates.csv` and `perceptual_map.png` are present
+  - no fabricated attribute-vector file is emitted
 
 ## Scenario 10: Evidence-Backed Report
 
 - Input: canonical full run with real `review_text`
 - Expected:
   - each major report section includes methods, theories, plain-language explanation, and evidence quotes
+  - each finding includes methods, theories, reproducibility steps, statistical results, and evidence quotes
   - quotes trace back exactly to the canonical score table
 
 ## Scenario 11: Validator Guardrails
@@ -99,6 +101,8 @@ Use these scenarios to verify both the layer boundary and the downstream statist
 - Input: tampered output, such as:
   - missing execution-scope fields
   - altered quote text
+  - missing finding reproducibility package
+  - missing finding statistical-result keys
 - Expected:
   - validator fails
   - failure message points to the broken contract
