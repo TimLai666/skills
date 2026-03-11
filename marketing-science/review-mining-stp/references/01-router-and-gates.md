@@ -2,36 +2,27 @@
 
 ## Purpose
 
-本文件定義 `review-mining-stp` 的兩層入口、canonical input、run mode、依賴條件與 gate 回應格式。
+This reference defines what belongs to the agent layer, what belongs to the script layer, and which artifacts each run mode requires.
 
-## Two-Layer Contract
+## Layer Boundary
 
 ### Agent Layer
 
-可接輸入：
+The agent layer handles:
 
-- `reviews`
-- `review_text`
-- 已存在的 `upstream_artifacts`
+- raw `reviews` or `review_text`
+- inferring scored items from the full corpus
+- applying the fixed 0–7 rubric to every inferred item for every review
+- assigning `theme`, `theory_tags`, and `stat_roles`
+- preserving verbatim review text for later evidence quoting
 
-agent layer 的責任：
-
-- 從原始評論自動抽取可量化 dimensions
-- 為每個 dimension 補齊 `theme`、`theory_tags`、`stat_roles`
-- 產出 `review_scoring_table.csv` 與 `review_foundation.json`
-
-上游抽取規格在這一層的定位：
-
-- 14 項評分只是 example schema，不是固定欄位
-- 三大主題與理論對應是抽取規格的一部分
-
-若必要欄位缺失，agent layer 回 `MissingDataOutput`。
+The agent layer emits the scored artifacts that the scripts need.
 
 ### Script Layer
 
-scripts 只讀 scored artifacts，不接 raw reviews。
+The scripts accept scored artifacts only.
 
-canonical quantitative input：
+Canonical input:
 
 - `review_scoring_table.csv`
 - `review_foundation.json`
@@ -39,68 +30,79 @@ canonical quantitative input：
 - `brands.json`
 - `ideal_point.json`
 
-`full` mode 會從 canonical input 自動產出：
+The scripts may emit:
 
 - `segmentation_variables.csv`
 - `targeting_dataset.csv`
 - `positioning_scorecard.csv`
 
-partial / custom rerun 可直接使用：
+They do not accept raw reviews and they do not auto-convert raw text into scored artifacts.
 
-- `segmentation_variables.csv`
-- `targeting_dataset.csv`
-- `segment_profiles.json`
-- `positioning_scorecard.csv`
+## Canonical Input Rules
 
-若缺件，script layer 回 `MissingPrerequisiteOutput`。
+### `review_scoring_table.csv`
+
+Must be per-review and must include:
+
+- `review_id`
+- `unit_id`
+- `brand`
+- `review_text`
+
+All scored item columns must:
+
+- exist in `dimension_catalog`
+- be numeric integers
+- stay in the `0–7` range
+
+### `review_foundation.json`
+
+Must include:
+
+- `scoring_rubric`
+- `dimension_catalog`
+- `theme_mapping`
+
+Each `dimension_catalog` item must include:
+
+- `column`
+- `label`
+- `theme`
+- `theory_tags`
+- `stat_roles`
+- `plain_language_definition`
+
+`theme_mapping` must cover:
+
+- `service_experience`
+- `product_performance`
+- `value_perception`
 
 ## Run Modes
 
 - `full`
+  - starts from canonical scored input
+  - emits all three statistical intermediates
 - `segmentation`
+  - requires `review_foundation.json + segmentation_variables.csv`
 - `targeting`
+  - requires `targeting_dataset.csv + segment_profiles.json`
 - `positioning`
+  - requires `positioning_scorecard.csv + brands.json + ideal_point.json`
 - `custom`
+  - runs only requested downstream modules
 
-## Custom Modules
+## Missing Outputs
 
-- `review-foundation`
-- `segmentation-variables`
-- `segment-clustering`
-- `segment-profiles`
-- `current-target-market`
-- `potential-target-market`
-- `target-selection`
-- `positioning-scorecard`
-- `perceptual-map`
-- `positioning-diagnostics`
-- `strategy-matrix`
+### `MissingDataOutput`
 
-## Dependency Rules
+Agent-layer artifact used when the user has not provided enough upstream context to build scored artifacts.
 
-- `full` 需要 canonical scored input 五件套
-- `segmentation` 需要 `review_foundation.json` 與 `segmentation_variables.csv`
-- `targeting` 需要 `targeting_dataset.csv` 與可用的 `segment_profiles.json`
-- `positioning` 需要 `positioning_scorecard.csv`、`brands.json`、`ideal_point.json`
-- `analysis_context.json` 若存在，必須寫入 `execution_scope`
+### `MissingPrerequisiteOutput`
 
-## MissingDataOutput
+Script-layer artifact used when required scored artifacts or intermediate statistical artifacts are missing.
 
-只屬於 agent layer：
-
-```json
-{
-  "missing_fields": [],
-  "why_needed": {},
-  "questions_to_user": [],
-  "temporary_assumptions": [],
-  "next_step_rule": "補齊必要欄位後再進入 STP 分析。"
-}
-```
-
-## MissingPrerequisiteOutput
-
-只屬於 script layer：
+Expected shape:
 
 ```json
 {
@@ -114,23 +116,16 @@ partial / custom rerun 可直接使用：
 }
 ```
 
-規則：
+Rules:
 
-- `missing_prerequisites` 只列真正缺少的檔案
-- `acceptable_upstream_artifacts` 預設等於 `missing_prerequisites`
-- `auto_backfill_allowed` 固定為 `false`
-- 若缺的是 canonical scored artifacts，`next_step_rule` 必須明確把責任指回 agent layer preprocessing
+- `missing_prerequisites` must list only truly missing files
+- `acceptable_upstream_artifacts` should mirror the missing files
+- `auto_backfill_allowed` must stay `false`
+- when canonical scored input is missing, `next_step_rule` must point back to agent-layer preprocessing
 
-## Backfill Policy
+## Execution Scope Summary
 
-- raw reviews -> scored artifacts 只在 agent layer 處理
-- script layer 不做 raw review NLP
-- script layer 允許從 canonical scored input 推導中間統計 artifacts
-- partial / custom run 若缺少必要中間檔，一律停止並回 `MissingPrerequisiteOutput`
-
-## Required Output: Execution Scope Summary
-
-每次輸出都必須交代：
+Every completed run must record:
 
 - `run_mode`
 - `requested_modules`

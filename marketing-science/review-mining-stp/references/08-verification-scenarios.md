@@ -2,73 +2,95 @@
 
 ## Purpose
 
-本文件提供 skill-level 驗證情境，確認 agent-layer 抽取與 script-layer 統計不再混淆。
+Use these scenarios to verify both the layer boundary and the downstream statistical/reporting contract.
 
-## Scenario 1: Raw Reviews, Full STP
+## Scenario 1: Raw Reviews, Full STP Request
 
-- Input: 使用者只提供 `reviews`
-- Expected: agent 先抽取 `review_scoring_table.csv` 與 `review_foundation.json`，再呼叫 scripts
-- Must not do: 直接把 raw reviews 丟給 `run_review_mining_stp.py`
+- Input: only raw `reviews`
+- Expected:
+  - the agent layer builds scored artifacts first
+  - scripts do not run directly on raw review text
+  - missing-prerequisite guidance points back to agent-layer preprocessing
 
 ## Scenario 2: Full Run From Canonical Scored Input
 
-- Input: `review_scoring_table.csv + review_foundation.json + analysis_context.json + brands.json + ideal_point.json`
+- Input:
+  - `review_scoring_table.csv`
+  - `review_foundation.json`
+  - `analysis_context.json`
+  - `brands.json`
+  - `ideal_point.json`
 - Expected:
-  - full mode 可直接完成 STP
-  - 同步輸出 `segmentation_variables.csv`, `targeting_dataset.csv`, `positioning_scorecard.csv`
-  - `execution_scope` 要記錄 canonical inputs 與 emitted intermediates
+  - full STP completes
+  - three intermediate statistical artifacts are emitted
+  - `execution_scope` records both canonical inputs and emitted intermediates
 
-## Scenario 3: 14 項案例 Schema
+## Scenario 3: Dynamic Item Schema
 
-- Input: 使用既有 14 個 score columns
+- Input: a legal `dimension_catalog` with a different set of scored item names
 - Expected:
-  - scripts 正常跑通
-  - validator 不把 14 項欄名寫死
-- Must not do: 因為欄位不是固定清單就拒絕
+  - scripts run without assuming a fixed item count
+  - targeting and positioning still derive their variables from `stat_roles`
 
-## Scenario 4: Flexible Custom Schema
+## Scenario 4: Input Contract Failure
 
-- Input: 不沿用 14 項案例，而是自定義 score columns，且 `dimension_catalog` 合法
+- Input: canonical artifacts missing one of the required conditions
+  - missing `review_text`
+  - missing `scoring_rubric`
+  - missing `plain_language_definition`
+  - incomplete `theme_mapping`
+  - score outside `0–7`
 - Expected:
-  - scripts 仍可跑 segmentation / targeting / positioning
-  - targeting 仍可依 `stat_roles` 判定 current / potential 路徑
+  - router fails early with a contract error
+  - scripts do not silently continue
 
-## Scenario 5: Targeting Partial Run With Upstream Segment Profiles
+## Scenario 5: Segmentation Partial Rerun
 
-- Input: `targeting_dataset.csv` + `segment_profiles.json`
-- Expected: script 直接產出 targeting 結果
-- Must not do: 因為沒有 raw reviews 就拒絕執行
+- Input:
+  - `review_foundation.json`
+  - `segmentation_variables.csv`
+- Expected:
+  - segmentation reruns independently
+  - cluster guardrail metadata is retained
 
-## Scenario 6: Custom Run Missing Scorecard
+## Scenario 6: Targeting Partial Rerun
 
-- Input: `brands.json` + `ideal_point.json`，要求 `perceptual-map`
-- Expected: 回 `MissingPrerequisiteOutput`，只列真正缺少的 `positioning_scorecard.csv`
-- Must not do: 回報其實已提供的檔案為缺件
+- Input:
+  - `targeting_dataset.csv`
+  - `segment_profiles.json`
+  - `analysis_context.json`
+- Expected:
+  - targeting reruns independently
+  - `comparison_axes` override is preserved
 
-## Scenario 7: Factor Analysis Path
+## Scenario 7: Factor-Analysis Positioning Path
 
-- Input: 屬性型 `positioning_scorecard.csv`
+- Input: positioning scorecard plus ideal-point artifacts
 - Expected:
   - `positioning_method_used = factor_analysis`
-  - 有向量表
-  - 有 `projection_interpretation`
+  - attribute vectors are present
+  - projection interpretation is defined
 
-## Scenario 8: MDS Path
+## Scenario 8: MDS Positioning Path
 
-- Input: `brands.json` 含 `similarity_matrix`
+- Input: `brands.json` with `similarity_matrix`
 - Expected:
   - `positioning_method_used = mds`
   - `attribute_vectors_not_defined = true`
   - `projection_interpretation.status = not_available`
 
-## Scenario 9: Input Contract Failure
+## Scenario 9: Evidence-Backed Report
 
-- Input: canonical scored input 存在，但 `dimension_catalog` 缺失、`theme_mapping` 不完整，或可用數值欄位少於 3 個
-- Expected: router 直接失敗，明確指出哪個 contract 錯誤
-- Must not do: 靜默 fallback 到舊版 stage-first input
+- Input: canonical full run with real `review_text`
+- Expected:
+  - each major report section includes methods, theories, plain-language explanation, and evidence quotes
+  - quotes trace back exactly to the canonical score table
 
-## Scenario 10: Validator Guardrail
+## Scenario 10: Validator Guardrails
 
-- Input: 刻意刪掉 `appendix.execution_scope.modules_executed`
-- Expected: validator 失敗
-- Must not do: 因為 summary 存在就放行
+- Input: tampered output, such as:
+  - missing execution-scope fields
+  - altered quote text
+- Expected:
+  - validator fails
+  - failure message points to the broken contract

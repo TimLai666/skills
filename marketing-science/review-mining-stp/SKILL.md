@@ -1,91 +1,117 @@
 ---
 name: review-mining-stp
-description: Use when customer reviews, survey comments, support tickets, app store feedback, or social replies need to be converted into STP analysis. Supports review-to-strategy workflows where AI extracts structured dimensions first and scripts run the downstream statistics.
+description: Use when customer reviews, support tickets, app store feedback, or other review-like text must be converted into STP analysis with AI-assisted scoring upstream and statistical scripts downstream.
 ---
 
 # Review Mining STP
 
 ## Overview
 
-本技能把評論資料轉成可稽核的 `Segmentation -> Targeting -> Positioning -> Strategy` 分析，並明確拆成兩層：
+This skill turns review text into `Segmentation -> Targeting -> Positioning -> Strategy` outputs through a strict two-layer contract.
 
-- `agent layer`: 讀原始 `reviews` / `review_text`，自動抽取可量化維度、三大主題、理論標籤
-- `script layer`: 只吃已評分 / 已標註 artifacts，負責 `score-to-STP` 統計，不做 raw review 語意抽取
+- `agent layer`: reads raw reviews, infers scored items, applies theory tags, and preserves verbatim review text.
+- `script layer`: accepts scored artifacts only and runs the downstream statistics plus the final evidence-backed report.
 
-對齊原則：
+The scripts do not perform raw-review NLP. Their job is quantitative analysis and reporting after the agent has already converted text into structured scores.
 
-- 上游由 agent layer 負責理論、評分、主題、標註抽取
-- `review-mining-improve.md` 提供下游的統計方法、STP guardrails、輸出契約
-- `full` mode 以 canonical scored artifact 起跑
-- `segmentation / targeting / positioning / custom` 仍保留直接吃中間 artifacts 的能力，供 partial rerun / audit 使用
+## When To Use
 
-## Trigger Conditions
+Use this skill when:
 
-適用：
+- you need STP outputs from reviews, comments, or feedback text
+- you need a repeatable scored-artifact contract before running statistics
+- you need segmentation, targeting, or positioning outputs with explicit methods and theory labels
+- you need report sections backed by verbatim review quotes, not unsupported interpretation
 
-- 需要把評論資料轉成 STP 結論與策略
-- 需要從評論建立 segmentation、targeting、positioning 或知覺圖
-- 需要把 Product Positioning / Purchase Motivation / Maslow / WOM Motivation 落成可分析輸出
-- 需要從評論衍生 scorecard、cluster、pairwise tests、ideal point、competition landscape
+Do not use this skill when:
 
-不適用：
+- the task is only qualitative summarization with no scoring and no downstream statistics
+- the user only wants raw review tagging with no STP analysis
+- the user expects the CLI to ingest raw reviews directly
 
-- 只有情緒分類需求
-- 核心任務是因果推論、投放優化、A/B test 設計
-- 只要文案成稿，不需要分析框架
+## Two-Layer Contract
 
-## Contract Layers
+### Agent Layer
 
-### Agent-Layer Request
+The agent layer is responsible for:
 
-必要欄位：
+- reading every review one by one
+- inferring scored items from the full review set
+- assigning each item to one of the three themes:
+  - `service_experience`
+  - `product_performance`
+  - `value_perception`
+- attaching theory tags such as Product Positioning, Purchase Motivation, WOM Motivation, System 1 / System 2, and Maslow-related needs
+- preserving the original `review_text` so later report evidence can quote the real source text
 
-- `run_mode`: `full | segmentation | targeting | positioning | custom`
-- `analysis_goal`
-- `reviews` 或 `review_text`
+The agent layer must score every review against every inferred item using the fixed 0–7 rubric below:
 
-常用補充欄位：
+- `0`: 評論中未出現與該題項相關的語意
+- `1–3`: 輕微或間接提及
+- `4`: 中立或模糊表達
+- `5–6`: 明確提及
+- `7`: 評論中強烈且完整表達該構面
 
-- `requested_modules`
-- `upstream_artifacts`
-- `comparison_axes`
-- `brands`
-- `ideal_point_definition`
-- `positioning_method`
+Scoring process:
 
-agent layer 的責任：
+1. 每則評論需逐條分析。
+2. 根據語意關聯程度對每個歸納題項進行 0–7 分評分。
+3. 將質性評論文本轉換為量化數據。
+4. 所得評分可用於後續統計分析與研究模型建立。
 
-- 從所有評論自動抽取 dimensions、themes、theory tags
-- 把 14 項案例評分視為 example schema，不是固定欄位
-- 至少覆蓋三大主題：`service_experience`, `product_performance`, `value_perception`
-- 把 Product Positioning / Purchase Motivation / Maslow / WOM Motivation 寫入結構化 artifacts
+If upstream information is incomplete, the agent layer may produce `MissingDataOutput`.
 
-若缺少必要資訊，agent layer 回 `MissingDataOutput`。
+### Script Layer
 
-### Script-Layer Artifacts
+The scripts start from scored artifacts and do the quantitative work:
 
-`python scripts/run_review_mining_stp.py` 不直接吃 raw reviews。canonical quantitative input 為：
+- reliability checks
+- factor or theme reduction
+- clustering for segmentation
+- ANOVA / regression for continuous targeting outcomes
+- chi-square / logistic regression for binary targeting outcomes
+- perceptual-map generation
+- ideal-point distance analysis
+- pairwise competition-distance analysis
 
-- `review_scoring_table.csv`
-- `review_foundation.json`
-- `analysis_context.json`
-- `brands.json`
-- `ideal_point.json`
+The scripts do not:
 
-`review_scoring_table.csv` 必填欄位：
+- infer items from raw review text
+- rewrite review quotes
+- auto-backfill missing scored artifacts
+
+If prerequisites are missing, the scripts return `MissingPrerequisiteOutput`.
+
+## Canonical Input Artifacts
+
+### `review_scoring_table.csv`
+
+Required columns:
 
 - `review_id`
 - `unit_id`
 - `brand`
+- `review_text`
 
-其餘數值欄位由 AI 自動從評論抽取，不固定 14 項；可帶入：
+All inferred item columns must:
+
+- appear as separate columns
+- use integer scores only
+- stay inside the `0–7` range
+
+Optional metadata columns may include:
 
 - `profile_*`
 - `channel`
 - `rating`
 
-`review_foundation.json` 必須同時扮演語意與統計橋接層，至少包含：
+The table is per-review. If no stable person-level identity exists, `unit_id` may default to `review_id`.
 
+### `review_foundation.json`
+
+Required keys:
+
+- `scoring_rubric`
 - `dimension_catalog`
 - `theme_mapping`
 - `people_insights`
@@ -94,130 +120,100 @@ agent layer 的責任：
 - `system1_system2_split`
 - `maslow_keywords`
 
-`dimension_catalog` 的每個 dimension 至少包含：
+Each `dimension_catalog` item must include:
 
 - `column`
 - `label`
 - `theme`
 - `theory_tags`
 - `stat_roles`
+- `plain_language_definition`
 
-`theme_mapping` 必須涵蓋：
+`theme_mapping` must cover:
 
 - `service_experience`
 - `product_performance`
 - `value_perception`
 
-scripts 會在 `full` mode 自動產出三個中間統計 artifacts：
+### Auto-Discovered Context Files
+
+- `analysis_context.json`
+  - `analysis_goal`
+  - `comparison_axes`
+  - `scope_limits`
+- `brands.json`
+- `ideal_point.json`
+
+## Run Modes
+
+- `full`: starts from canonical scored artifacts and emits the three statistical intermediates
+- `segmentation`: uses `review_foundation.json + segmentation_variables.csv`
+- `targeting`: uses `segment_profiles.json + targeting_dataset.csv`
+- `positioning`: uses `positioning_scorecard.csv + brands.json + ideal_point.json`
+- `custom`: runs only requested downstream modules
+
+Generated intermediate artifacts in `full` mode:
 
 - `segmentation_variables.csv`
 - `targeting_dataset.csv`
 - `positioning_scorecard.csv`
 
-partial / custom rerun 仍可直接把這三個檔案當輸入。
-
-若缺件，script layer 只回 `MissingPrerequisiteOutput`，且：
-
-- `missing_prerequisites` 只列真正缺少的 artifacts
-- `auto_backfill_allowed` 固定為 `false`
-- script layer 不負責 raw reviews -> artifacts
-
-## Execution Router
-
-- `full`: 讀 canonical scored artifacts，跑完整統計流程並輸出三個 intermediates
-- `segmentation`: 使用 `review_foundation.json + segmentation_variables.csv`
-- `targeting`: 使用 `segment_profiles.json + targeting_dataset.csv`
-- `positioning`: 使用 `positioning_scorecard.csv + brands.json + ideal_point.json`
-- `custom`: 只執行 `requested_modules`
-
-`custom` 白名單：
-
-- `review-foundation`
-- `segmentation-variables`
-- `segment-clustering`
-- `segment-profiles`
-- `current-target-market`
-- `potential-target-market`
-- `target-selection`
-- `positioning-scorecard`
-- `perceptual-map`
-- `positioning-diagnostics`
-- `strategy-matrix`
-
-## Stage Rules
+## Statistical Rules
 
 ### Segmentation
 
-- 分析主軸固定為人／貨／場
-- `貨` 類訊號必須標記 `System 1 / System 2`
-- 必須列出 Maslow 五需求關鍵字
-- 區隔變數 taxonomy 必須覆蓋地理 / 人口 / 心理 / 行為
-- clustering 路徑為 `factor_analysis -> K-means`
-- 若任一群 `< 5%`，降低 `k` 重跑並記錄 rerun
-- 每群必須有 cluster share、persona、consumer portrait narrative
+- use `factor_analysis -> K-means`
+- rerun when any cluster falls below the `>5%` guardrail
+- record `cluster_threshold`, `reruns_performed`, and `final_k`
+- retain `System 1 / System 2`, Maslow, cluster share, and consumer-portrait outputs
 
 ### Targeting
 
-- 優先從 `dimension_catalog.stat_roles` 取 `current_target` / `potential_target`
-- `analysis_context.comparison_axes` 可覆蓋預設 targeting 軸
-- 連續反應變數：`ANOVA / regression`
-- 二元反應變數：`chi-square / logistic regression`
-- `ANOVA p < 0.05` 必須輸出 `pairwise_comparison_table`
-- 若有 `profile_*` 欄位，必須輸出 `profile_significance_summary`
-- 最終選擇必須輸出：
-  - `priority_segments`
-  - `secondary_segments`
-  - `deprioritized_segments`
-  - `target_selection_rationale`
+- resolve current and potential targeting variables from `dimension_catalog.stat_roles`
+- allow `analysis_context.comparison_axes` to override the default comparison axes
+- use `ANOVA / regression` for continuous outcomes
+- use `chi-square / logistic regression` for binary outcomes
+- emit `pairwise_comparison_table` when ANOVA significance justifies post-hoc comparison
+- emit `priority_segments`, `secondary_segments`, and `deprioritized_segments`
 
 ### Positioning
 
-- `positioning_scorecard` 由 `stat_roles` 含 `positioning` 的維度建立
-- `positioning_scorecard` 必須納入理想點
-- 預設方法為 `factor_analysis`
-- 僅在品牌相似性 / similarity input 下使用 `MDS`
-- `factor_analysis` 路徑必須輸出：
-  - 品牌點 / 理想點
-  - 由原點出發的 attribute vectors
-  - `projection_interpretation`
-- `MDS` 路徑若無向量，必須回 `projection_interpretation.status=not_available`
-- `Dynamic Scorecard Summary` 至少要有：
-  - 高低分定位基礎
-  - 理想點距離摘要
-  - 重要性 / 表現落差
-  - `reliability_analysis`
-  - `validity_analysis`
-- `competition_landscape` 必須是品牌 pairwise 距離，不可用距理想點距離替代
+- build the scorecard from `stat_roles` containing `positioning`
+- default to `factor_analysis`
+- allow `MDS` when similarity-based input is explicitly requested
+- include ideal-point distance and pairwise competition distance
+- never fabricate attribute vectors for `MDS`
+- emit `dynamic_scorecard_summary` with distance, gap, reliability, and validity sections
 
-## Output Contract
+## Report Contract
 
-所有 mode 都要有：
+Each major report section must contain:
 
-- `Execution Scope Summary`
-- `Risks / Bias / Confidence Notes`
-- `Appendix (JSON)`
+- `What this section is doing`
+- `Statistical methods used`
+- `Theories used`
+- `Plain-language explanation`
+- `Evidence quotes`
 
-依 stage 輸出：
+Evidence-quote rules:
 
-- `Segmentation Summary`
-- `Targeting Summary`
-- `Positioning Summary`
-- `Integrated STP Actions`
+- quotes must come verbatim from `review_scoring_table.csv.review_text`
+- each quote must include `review_id`
+- each quote must explain why it matters
+- each quote must link back to the scored items it supports
+- when canonical review evidence is available, each major section should include 2–3 quotes
 
-推薦補充：
-
-- `proactive_marketing_notes`
-- `usp_translation_candidates`
+The point is to make the report readable for non-specialists while keeping every key claim traceable to real review text.
 
 ## Hard Rules
 
-- 不得把 raw review request 和 script artifact input 混為一談
-- 不得宣稱 scripts 會做 raw review extraction 或 auto-backfill
-- 不得把 14 項案例欄位寫死為 validator 契約
-- 不得跳過 `System 1 / System 2`、Maslow、cluster `>5%` guardrail
-- 不得省略 `profile_significance_summary`
-- 不得在 `MDS` 路徑偽造 attribute vectors
-- 完成前必須對照 `review-mining-improve.md`
+- Never blur agent-layer requests with script-layer artifacts.
+- Never let scripts consume raw reviews directly.
+- Never hardcode a fixed item count into the validator or statistical pipeline.
+- Always keep scored items on the fixed 0–7 rubric.
+- Always preserve verbatim `review_text` for evidence quoting.
+- Always state the statistical method and theory used in each major report section.
+- Never fabricate evidence quotes or attribute vectors.
 
 ## References
 
@@ -227,14 +223,12 @@ partial / custom rerun 仍可直接把這三個檔案當輸入。
 - [references/04-positioning.md](./references/04-positioning.md)
 - [references/05-output-contract-and-quality-rules.md](./references/05-output-contract-and-quality-rules.md)
 - [references/06-end-to-end-examples.md](./references/06-end-to-end-examples.md)
-- [references/07-review-mining-improve-traceability.md](./references/07-review-mining-improve-traceability.md)
+- [references/07-traceability-evidence-matrix.md](./references/07-traceability-evidence-matrix.md)
 - [references/08-verification-scenarios.md](./references/08-verification-scenarios.md)
 
 ## Scripts
 
 - Install dependencies: `python -m pip install -r requirements.txt`
 - Run analysis: `python scripts/run_review_mining_stp.py --run-mode <mode> --input-dir <artifacts> --output-dir <output>`
-- Partial modes: `segmentation | targeting | positioning | custom`
-- Custom modules: `--requested-modules`
 - Validate outputs: `python scripts/validate_review_mining_stp.py --run-mode <mode> --output-dir <output>`
-- Script boundary is statistical only; raw review ingestion belongs to the agent layer
+- Script boundary: statistical analysis only; raw review intake belongs to the agent layer

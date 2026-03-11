@@ -19,7 +19,7 @@ from .io import (
     write_json,
 )
 from .positioning import load_positioning_inputs, run_positioning
-from .reporting import write_execution_files
+from .reporting import build_stage_report_contract, write_execution_files
 from .segmentation import build_segment_summary, load_segmentation_inputs, run_segmentation
 from .targeting import load_targeting_inputs, run_targeting
 
@@ -155,6 +155,44 @@ def _maybe_prepare_canonical_inputs(artifact_paths: list[Path]) -> dict[str, Any
 
 def _write_frame(path: Path, frame: Any) -> None:
     frame.to_csv(path, index=False, encoding="utf-8")
+
+
+def _load_reporting_foundation(
+    artifact_paths: list[Path],
+    canonical_inputs: dict[str, Any] | None,
+    generated_segmentation: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if canonical_inputs:
+        return canonical_inputs["foundation"]
+    foundation_path = find_artifact(artifact_paths, "review_foundation.json")
+    if foundation_path is not None:
+        return read_json(foundation_path)
+    if generated_segmentation and isinstance(generated_segmentation.get("review_foundation"), dict):
+        return generated_segmentation["review_foundation"]
+    return None
+
+
+def _build_unit_cluster_map(generated_segmentation: dict[str, Any] | None) -> dict[str, str]:
+    if not generated_segmentation:
+        return {}
+    mappings: dict[str, str] = {}
+    for item in generated_segmentation.get("segment_assignments", []):
+        if not isinstance(item, dict):
+            continue
+        cluster = item.get("cluster")
+        if not cluster:
+            continue
+        identifier = None
+        if "unit_id" in item:
+            identifier = item["unit_id"]
+        else:
+            for key, value in item.items():
+                if key != "cluster" and key.endswith("_id"):
+                    identifier = value
+                    break
+        if identifier is not None:
+            mappings[str(identifier)] = str(cluster)
+    return mappings
 
 
 def main() -> None:
@@ -422,6 +460,56 @@ def main() -> None:
     )
     appendix["proactive_marketing_notes"] = proactive_marketing_notes
     appendix["usp_translation_candidates"] = usp_translation_candidates
+
+    reporting_foundation = _load_reporting_foundation(
+        artifact_paths,
+        canonical_inputs,
+        generated_segmentation,
+    )
+    score_table_for_reporting = canonical_inputs["score_table"] if canonical_inputs else None
+    unit_cluster_map = _build_unit_cluster_map(generated_segmentation)
+    appendix["segmentation_summary"] = build_stage_report_contract(
+        "segmentation",
+        appendix.get("segmentation_summary"),
+        reporting_foundation,
+        score_table_for_reporting,
+        positioning_method=args.positioning_method,
+        unit_cluster_map=unit_cluster_map,
+    )
+    appendix["targeting_summary"] = build_stage_report_contract(
+        "targeting",
+        appendix.get("targeting_summary"),
+        reporting_foundation,
+        score_table_for_reporting,
+        positioning_method=args.positioning_method,
+        unit_cluster_map=unit_cluster_map,
+    )
+    appendix["positioning_summary"] = build_stage_report_contract(
+        "positioning",
+        appendix.get("positioning_summary"),
+        reporting_foundation,
+        score_table_for_reporting,
+        positioning_method=args.positioning_method,
+        unit_cluster_map=unit_cluster_map,
+    )
+
+    evidence: list[dict[str, Any]] = []
+    for stage_name, summary_key in [
+        ("segmentation", "segmentation_summary"),
+        ("targeting", "targeting_summary"),
+        ("positioning", "positioning_summary"),
+    ]:
+        summary = appendix.get(summary_key)
+        if not isinstance(summary, dict):
+            continue
+        for quote in summary.get("evidence_quotes", []):
+            evidence.append({"stage": stage_name, **quote})
+    appendix["evidence"] = evidence
+
+    if canonical_inputs and canonical_inputs["contract"].get("unit_id_defaulted"):
+        appendix["risks_bias_confidence_notes"].append(
+            "unit_id was defaulted from review_id, so aggregation stayed at per-review granularity."
+        )
 
     appendix["execution_scope"]["modules_executed"] = list(dict.fromkeys(modules_executed))
     appendix["execution_scope"]["upstream_artifacts_used"] = list(dict.fromkeys(upstream_artifacts_used))

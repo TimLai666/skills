@@ -2,22 +2,65 @@
 
 ## Default Output Shape
 
-所有 mode 都必須輸出：
+Every completed run should produce:
 
 1. `Execution Scope Summary`
 2. `Risks / Bias / Confidence Notes`
 3. `Appendix (JSON)`
 
-依 stage 補充：
+When the corresponding stage runs, also produce:
 
 4. `Segmentation Summary`
 5. `Targeting Summary`
 6. `Positioning Summary`
 7. `Integrated STP Actions`
 
-## Required Section Specs
+## Stage-Level Report Contract
+
+Each major summary section must contain:
+
+- `what_this_section_is_doing`
+- `methods_used`
+- `theories_used`
+- `plain_language_explanation`
+- `evidence_quote_status`
+- `evidence_quote_reason`
+- `evidence_quotes`
+
+### `methods_used`
+
+Must be a non-empty list of objects with:
+
+- `name`
+- `description`
+
+### `theories_used`
+
+Must be a non-empty list of objects with:
+
+- `name`
+- `description`
+
+### `evidence_quotes`
+
+Each quote object must include:
+
+- `review_id`
+- `quote_text`
+- `why_this_quote_matters`
+- `linked_items`
+
+When canonical review evidence is available:
+
+- each major section should contain 2–3 quotes
+- `quote_text` must exactly match `review_scoring_table.csv.review_text`
+- `review_id` must exist in the canonical score table
+
+## Stage-Specific Fields
 
 ### Segmentation Summary
+
+Must retain:
 
 - `people_insights`
 - `product_triggers`
@@ -29,7 +72,15 @@
 - `segment_profiles`
 - `consumer_portrait_narrative`
 
+`cluster_selection` must retain:
+
+- `cluster_threshold`
+- `reruns_performed`
+- `final_k`
+
 ### Targeting Summary
+
+Must retain:
 
 - `current_target_market`
 - `potential_target_market`
@@ -39,7 +90,7 @@
 - `target_selection_decision`
 - `target_selection_rationale`
 
-`target_selection_decision` 必須再包含：
+`target_selection_decision` must retain:
 
 - `priority_segments`
 - `secondary_segments`
@@ -47,6 +98,8 @@
 - `comparison_axes_used`
 
 ### Positioning Summary
+
+Must retain:
 
 - `positioning_scorecard`
 - `dynamic_scorecard_summary`
@@ -60,7 +113,7 @@
 - `positioning_diagnostics`
 - `strategy_matrix`
 
-`dynamic_scorecard_summary` 至少要有：
+`dynamic_scorecard_summary` must retain:
 
 - `highest_scoring_attributes`
 - `lowest_scoring_attributes`
@@ -69,13 +122,13 @@
 - `reliability_analysis`
 - `validity_analysis`
 
-`positioning_diagnostics.competition_landscape` 每列至少要有：
+`positioning_diagnostics.competition_landscape` rows must include:
 
 - `brand_a`
 - `brand_b`
 - `distance`
 
-## Appendix (JSON) Minimum Schema
+## Appendix Minimum Schema
 
 ```json
 {
@@ -91,39 +144,14 @@
 }
 ```
 
-## Execution Scope Minimum Keys
-
-- `run_mode`
-- `requested_modules`
-- `modules_executed`
-- `auto_backfilled_modules`
-- `upstream_artifacts_used`
-- `emitted_intermediate_artifacts`
-- `comparison_axes`
-- `brands`
-- `positioning_method_used`
-- `cluster_threshold`
-- `reruns_performed`
-- `final_k`
-- `scope_limits`
-
 ## Quality Checklist
 
-- 不得把 agent request 與 script artifacts 混用
-- full mode 的 `upstream_artifacts_used` 必須列出 canonical scored input
-- full mode 的 `emitted_intermediate_artifacts` 必須列出三個 generated statistical artifacts
-- partial / custom run 必須保留 prerequisite trace
-- segmentation 必須有 `System 1 / System 2`
-- segmentation 必須有 Maslow 五需求關鍵字
-- segmentation 必須記錄 `cluster_threshold / reruns_performed / final_k`
-- targeting 必須同時有 current / potential 兩條分析路徑
-- targeting 必須有 `priority / secondary / deprioritized`
-- targeting 必須有 `profile_significance_summary`
-- 若有 `ANOVA p < 0.05`，必須有 `pairwise_comparison_table`
-- positioning 必須有理想點
-- positioning 預設 `factor_analysis`
-- positioning 的 `Dynamic Scorecard Summary` 必須有距離、落差、信度、效度
-- positioning 的 `competition_landscape` 必須是品牌 pairwise 距離
-- `MDS` 路徑不得偽造向量表
-- validator 不得把 14 項案例欄位寫死
-- 完成前必須對照 `review-mining-improve.md`
+- Full runs must list canonical input files in `execution_scope.upstream_artifacts_used`.
+- Full runs must list all three emitted statistical intermediates in `execution_scope.emitted_intermediate_artifacts`.
+- Partial and custom runs must retain accurate prerequisite traces.
+- Segmentation must keep `System 1 / System 2`, Maslow, and the `>5%` cluster guardrail metadata.
+- Targeting must keep current-market and potential-market outputs plus pairwise comparisons where required.
+- Positioning must keep ideal-point logic, pairwise competition distance, and no fabricated vectors in `MDS`.
+- Reports must explain the method and theory used in language that non-specialists can understand.
+- Evidence quotes must be verbatim and traceable.
+- Validators must not hardcode a fixed item count.

@@ -161,9 +161,104 @@ def validate_targeting(output_dir: Path) -> None:
         )
 
 
+def _load_review_lookup(output_dir: Path) -> dict[str, str]:
+    score_table_path = output_dir / "review_scoring_table.csv"
+    if not score_table_path.exists():
+        return {}
+    with score_table_path.open(encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        return {
+            str(row["review_id"]): str(row["review_text"])
+            for row in reader
+            if row.get("review_id")
+        }
+
+
+def _validate_described_items(
+    items: Any,
+    container_name: str,
+    required_keys: set[str],
+) -> None:
+    if not isinstance(items, list) or not items:
+        fail(f"{container_name} must be a non-empty list.")
+    for item in items:
+        if not isinstance(item, dict):
+            fail(f"{container_name} entries must be objects.")
+        if not required_keys.issubset(item.keys()):
+            fail(
+                f"{container_name} entries must include: "
+                + ", ".join(sorted(required_keys))
+            )
+
+
+def _validate_evidence_quotes(
+    summary: dict[str, Any],
+    summary_name: str,
+    review_lookup: dict[str, str],
+) -> None:
+    if "evidence_quotes" not in summary:
+        fail(f"{summary_name} is missing evidence_quotes.")
+    quotes = summary.get("evidence_quotes")
+    if not isinstance(quotes, list):
+        fail(f"{summary_name}.evidence_quotes must be a list.")
+    status = summary.get("evidence_quote_status", "")
+    if review_lookup:
+        if len(quotes) < 2 or len(quotes) > 3:
+            fail(f"{summary_name}.evidence_quotes must contain 2-3 traceable quotes when review evidence is available.")
+    for quote in quotes:
+        if not isinstance(quote, dict):
+            fail(f"{summary_name}.evidence_quotes entries must be objects.")
+        required_keys = {"review_id", "quote_text", "why_this_quote_matters", "linked_items"}
+        if not required_keys.issubset(quote.keys()):
+            fail(
+                f"{summary_name}.evidence_quotes entries must include: "
+                + ", ".join(sorted(required_keys))
+            )
+        if not isinstance(quote.get("linked_items"), list) or not quote["linked_items"]:
+            fail(f"{summary_name}.evidence_quotes.linked_items must be a non-empty list.")
+        if review_lookup:
+            review_id = str(quote["review_id"])
+            if review_id not in review_lookup:
+                fail(f"{summary_name} evidence quote review_id '{review_id}' does not exist in review_scoring_table.csv.")
+            if str(quote["quote_text"]) != review_lookup[review_id]:
+                fail(f"{summary_name} evidence quote text for review_id '{review_id}' does not match review_scoring_table.csv.")
+    if review_lookup and status != "available":
+        fail(f"{summary_name}.evidence_quote_status must be available when review evidence exists.")
+    if not review_lookup and quotes:
+        fail(f"{summary_name}.evidence_quotes must be empty when review evidence is not available.")
+
+
+def _validate_stage_report_contract(
+    summary: dict[str, Any],
+    summary_name: str,
+    review_lookup: dict[str, str],
+) -> None:
+    require_keys(
+        summary,
+        [
+            "what_this_section_is_doing",
+            "methods_used",
+            "theories_used",
+            "plain_language_explanation",
+            "evidence_quote_status",
+            "evidence_quote_reason",
+            "evidence_quotes",
+        ],
+        summary_name,
+    )
+    if not summary.get("what_this_section_is_doing"):
+        fail(f"{summary_name}.what_this_section_is_doing must be non-empty.")
+    if not summary.get("plain_language_explanation"):
+        fail(f"{summary_name}.plain_language_explanation must be non-empty.")
+    _validate_described_items(summary.get("methods_used"), f"{summary_name}.methods_used", {"name", "description"})
+    _validate_described_items(summary.get("theories_used"), f"{summary_name}.theories_used", {"name", "description"})
+    _validate_evidence_quotes(summary, summary_name, review_lookup)
+
+
 def validate_appendix(output_dir: Path, run_mode: str) -> None:
     require_output_files(output_dir, ["appendix.json", "report.md", "run_metadata.json"])
     appendix = read_json(output_dir / "appendix.json")
+    review_lookup = _load_review_lookup(output_dir)
     if "execution_scope" not in appendix:
         fail("Appendix is missing execution_scope.")
     execution_scope = appendix["execution_scope"]
@@ -215,6 +310,7 @@ def validate_appendix(output_dir: Path, run_mode: str) -> None:
 
     segmentation_summary = appendix.get("segmentation_summary")
     if isinstance(segmentation_summary, dict):
+        _validate_stage_report_contract(segmentation_summary, "segmentation_summary", review_lookup)
         require_keys(
             segmentation_summary,
             [
@@ -240,6 +336,7 @@ def validate_appendix(output_dir: Path, run_mode: str) -> None:
 
     targeting_summary = appendix.get("targeting_summary")
     if isinstance(targeting_summary, dict):
+        _validate_stage_report_contract(targeting_summary, "targeting_summary", review_lookup)
         require_keys(
             targeting_summary,
             [
@@ -265,6 +362,7 @@ def validate_appendix(output_dir: Path, run_mode: str) -> None:
 
     positioning_summary = appendix.get("positioning_summary")
     if isinstance(positioning_summary, dict):
+        _validate_stage_report_contract(positioning_summary, "positioning_summary", review_lookup)
         require_keys(
             positioning_summary,
             [
@@ -300,6 +398,8 @@ def validate_appendix(output_dir: Path, run_mode: str) -> None:
     for optional_key in ["proactive_marketing_notes", "usp_translation_candidates"]:
         if optional_key in appendix and not isinstance(appendix[optional_key], list):
             fail(f"{optional_key} must be a list when present.")
+    if "evidence" in appendix and not isinstance(appendix["evidence"], list):
+        fail("evidence must be a list when present.")
 
 
 def main() -> None:
@@ -316,6 +416,11 @@ def main() -> None:
         require_output_files(
             output_dir,
             [
+                "review_scoring_table.csv",
+                "review_foundation.json",
+                "analysis_context.json",
+                "brands.json",
+                "ideal_point.json",
                 "segment_profiles.json",
                 "segment_summary.md",
                 "targeting_results.json",

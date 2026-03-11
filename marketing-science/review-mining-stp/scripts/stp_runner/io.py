@@ -11,7 +11,30 @@ CORE_THEMES = {
     "value_perception",
 }
 
-REQUIRED_DIMENSION_KEYS = {"column", "label", "theme", "theory_tags", "stat_roles"}
+REQUIRED_DIMENSION_KEYS = {
+    "column",
+    "label",
+    "theme",
+    "theory_tags",
+    "stat_roles",
+    "plain_language_definition",
+}
+
+SCORING_RUBRIC = {
+    "scale": {
+        "0": "評論中未出現與該題項相關的語意",
+        "1-3": "輕微或間接提及",
+        "4": "中立或模糊表達",
+        "5-6": "明確提及",
+        "7": "評論中強烈且完整表達該構面",
+    },
+    "process": [
+        "每則評論需逐條分析。",
+        "根據語意關聯程度對每個歸納題項進行 0–7 分評分。",
+        "將質性評論文本轉換為量化數據。",
+        "所得評分可用於後續統計分析與研究模型建立。",
+    ],
+}
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -30,7 +53,10 @@ def find_artifact(paths: list[Path], name: str) -> Path | None:
     return None
 
 
-def resolve_required_files(artifact_paths: list[Path], files: list[str]) -> tuple[dict[str, Path], list[str]]:
+def resolve_required_files(
+    artifact_paths: list[Path],
+    files: list[str],
+) -> tuple[dict[str, Path], list[str]]:
     located: dict[str, Path] = {}
     missing: list[str] = []
     for filename in files:
@@ -75,20 +101,38 @@ def _fail_contract(message: str) -> None:
     raise SystemExit(message)
 
 
-def _is_binary_numeric(series: Any) -> bool:
-    unique_values = {float(value) for value in series.dropna().tolist()}
-    return bool(unique_values) and unique_values.issubset({0.0, 1.0})
+def _validate_scoring_rubric(foundation: dict[str, Any]) -> None:
+    rubric = foundation.get("scoring_rubric")
+    if not isinstance(rubric, dict):
+        _fail_contract("review_foundation.json must contain scoring_rubric.")
+    scale = rubric.get("scale")
+    process = rubric.get("process")
+    if scale != SCORING_RUBRIC["scale"]:
+        _fail_contract("review_foundation.json scoring_rubric.scale must match the required 0-7 rubric.")
+    if process != SCORING_RUBRIC["process"]:
+        _fail_contract("review_foundation.json scoring_rubric.process must match the required scoring steps.")
 
 
 def validate_canonical_inputs(score_table: Any, foundation: dict[str, Any]) -> dict[str, Any]:
     import pandas as pd
 
-    required_columns = {"review_id", "unit_id", "brand"}
+    unit_id_defaulted = False
+    if "unit_id" not in score_table.columns and "review_id" in score_table.columns:
+        score_table["unit_id"] = score_table["review_id"]
+        unit_id_defaulted = True
+
+    required_columns = {"review_id", "unit_id", "brand", "review_text"}
     missing_columns = sorted(required_columns - set(score_table.columns))
     if missing_columns:
         _fail_contract(
             "review_scoring_table.csv is missing required columns: " + ", ".join(missing_columns)
         )
+
+    review_text = score_table["review_text"].fillna("").astype(str).str.strip()
+    if (review_text == "").any():
+        _fail_contract("review_scoring_table.csv must contain non-empty review_text for every row.")
+
+    _validate_scoring_rubric(foundation)
 
     dimension_catalog = foundation.get("dimension_catalog")
     if not isinstance(dimension_catalog, list) or not dimension_catalog:
@@ -109,40 +153,54 @@ def validate_canonical_inputs(score_table: Any, foundation: dict[str, Any]) -> d
             _fail_contract("dimension_catalog entries must be objects.")
         missing_keys = sorted(REQUIRED_DIMENSION_KEYS - set(item.keys()))
         if missing_keys:
-            _fail_contract(
-                "dimension_catalog entries are missing keys: " + ", ".join(missing_keys)
-            )
+            _fail_contract("dimension_catalog entries are missing keys: " + ", ".join(missing_keys))
         column = str(item["column"])
         if column in catalog_by_column:
             _fail_contract(f"dimension_catalog contains duplicate column '{column}'.")
         theme = str(item["theme"])
         if theme not in CORE_THEMES:
-            _fail_contract(
-                f"dimension_catalog column '{column}' uses unsupported theme '{theme}'."
-            )
+            _fail_contract(f"dimension_catalog column '{column}' uses unsupported theme '{theme}'.")
         theory_tags = item.get("theory_tags")
         stat_roles = item.get("stat_roles")
+        plain_language_definition = str(item.get("plain_language_definition", "")).strip()
         if not isinstance(theory_tags, list) or not theory_tags:
             _fail_contract(f"dimension_catalog column '{column}' must define theory_tags.")
         if not isinstance(stat_roles, list) or not stat_roles:
             _fail_contract(f"dimension_catalog column '{column}' must define stat_roles.")
+        if not plain_language_definition:
+            _fail_contract(f"dimension_catalog column '{column}' must define plain_language_definition.")
         catalog_by_column[column] = item
         dimension_columns.append(column)
         for role in stat_roles:
             role_map.setdefault(str(role), []).append(column)
 
-    missing_dimension_columns = sorted(column for column in dimension_columns if column not in score_table.columns)
+    missing_dimension_columns = sorted(
+        column for column in dimension_columns if column not in score_table.columns
+    )
     if missing_dimension_columns:
         _fail_contract(
             "review_scoring_table.csv is missing dimension columns declared in dimension_catalog: "
             + ", ".join(missing_dimension_columns)
         )
 
-    numeric_dimension_columns = [
-        column
-        for column in dimension_columns
-        if pd.api.types.is_numeric_dtype(score_table[column])
-    ]
+    numeric_dimension_columns: list[str] = []
+    for column in dimension_columns:
+        numeric_values = pd.to_numeric(score_table[column], errors="coerce")
+        if numeric_values.isna().any():
+            _fail_contract(
+                f"review_scoring_table.csv column '{column}' must contain numeric scores for every review."
+            )
+        if ((numeric_values < 0) | (numeric_values > 7)).any():
+            _fail_contract(
+                f"review_scoring_table.csv column '{column}' must keep every score inside the 0-7 range."
+            )
+        if not ((numeric_values % 1) == 0).all():
+            _fail_contract(
+                f"review_scoring_table.csv column '{column}' must use integer scores that follow the 0-7 rubric."
+            )
+        score_table[column] = numeric_values.astype(int)
+        numeric_dimension_columns.append(column)
+
     if len(numeric_dimension_columns) < 3:
         _fail_contract(
             "review_scoring_table.csv must provide at least 3 numeric score columns from dimension_catalog."
@@ -167,6 +225,7 @@ def validate_canonical_inputs(score_table: Any, foundation: dict[str, Any]) -> d
         "numeric_dimension_columns": numeric_dimension_columns,
         "role_map": {role: list(dict.fromkeys(columns)) for role, columns in role_map.items()},
         "theme_mapping": theme_mapping,
+        "unit_id_defaulted": unit_id_defaulted,
     }
 
 
@@ -177,7 +236,7 @@ def aggregate_review_scoring_table(score_table: Any, contract: dict[str, Any]) -
     metadata_columns = [
         column
         for column in score_table.columns
-        if column not in {"review_id"} | set(dimension_columns)
+        if column not in {"review_id", "review_text"} | set(dimension_columns)
     ]
     rows: list[dict[str, Any]] = []
     for unit_id, group in score_table.groupby("unit_id", sort=False):
@@ -185,14 +244,7 @@ def aggregate_review_scoring_table(score_table: Any, contract: dict[str, Any]) -
         row["brand"] = str(group["brand"].mode().iloc[0])
         row["review_count"] = int(len(group))
         for column in dimension_columns:
-            series = pd.to_numeric(group[column], errors="coerce").dropna()
-            if series.empty:
-                row[column] = None
-            elif _is_binary_numeric(series):
-                mode = series.mode()
-                row[column] = int(mode.iloc[0] if not mode.empty else round(float(series.mean())))
-            else:
-                row[column] = round(float(series.mean()), 4)
+            row[column] = round(float(pd.to_numeric(group[column]).mean()), 4)
         for column in metadata_columns:
             if column in {"unit_id", "brand"}:
                 continue
@@ -203,7 +255,7 @@ def aggregate_review_scoring_table(score_table: Any, contract: dict[str, Any]) -
                 row[column] = round(float(pd.to_numeric(series).mean()), 4)
             else:
                 mode = series.mode()
-                row[column] = str(mode.iloc[0] if not mode.empty else series.iloc[0])
+                row[column] = str(mode.iloc[0]) if not mode.empty else str(series.iloc[0])
         rows.append(row)
     return pd.DataFrame(rows)
 
@@ -223,7 +275,7 @@ def build_segmentation_variables(unit_table: Any, contract: dict[str, Any]) -> A
     profile_columns = [column for column in unit_table.columns if column.startswith("profile_")]
     passthrough_columns = [
         column
-        for column in ["unit_id", *profile_columns, "rating"]
+        for column in ["unit_id", *profile_columns, "rating", "brand"]
         if column in unit_table.columns
     ]
     selected_columns = list(dict.fromkeys(passthrough_columns + segmentation_columns))
@@ -236,8 +288,6 @@ def build_targeting_dataset(
     contract: dict[str, Any],
     comparison_axes: list[str],
 ) -> Any:
-    import pandas as pd
-
     role_map = contract["role_map"]
     targeting_columns = [
         column
@@ -245,9 +295,7 @@ def build_targeting_dataset(
         if column in unit_table.columns
     ]
     if comparison_axes:
-        targeting_columns.extend(
-            column for column in comparison_axes if column in unit_table.columns
-        )
+        targeting_columns.extend(column for column in comparison_axes if column in unit_table.columns)
     if not targeting_columns:
         targeting_columns.extend(contract["numeric_dimension_columns"])
     profile_columns = [column for column in unit_table.columns if column.startswith("profile_")]
@@ -275,7 +323,9 @@ def build_positioning_scorecard(score_table: Any, contract: dict[str, Any]) -> A
     ]
     if len(positioning_columns) < 2:
         positioning_columns = [
-            column for column in contract["numeric_dimension_columns"] if column in score_table.columns
+            column
+            for column in contract["numeric_dimension_columns"]
+            if column in score_table.columns
         ]
     rows: list[dict[str, Any]] = []
     brand_means = score_table.groupby("brand")[positioning_columns].mean(numeric_only=True)
