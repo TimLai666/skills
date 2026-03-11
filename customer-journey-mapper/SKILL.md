@@ -9,6 +9,7 @@ description: Use when the final customer journey map, CJM, or touchpoint-based j
 
 Create the final customer journey map in Traditional Chinese from the customer's point of view.
 This skill is downstream of persona definition and journey-framing work.
+If no completed persona is available yet, stop and use `customer-persona-framer` first.
 
 Default output is one Markdown table in transposed vertical form:
 `項目 | 認知 | 考慮/研究 | 決策/購買 | 使用 | 關係建立`
@@ -40,6 +41,7 @@ Do not use this skill when:
 
 - the task is only a persona profile, 人物誌, 顧客輪廓, or target audience definition with no final journey map
 - the task is only 5W1H, touchpoint discovery, or journey pre-analysis; use `customer-persona-framer`
+- no completed persona is provided yet; use `customer-persona-framer` first, then return with the persona or `handoff_to_customer_journey_mapper`
 - the task is only a funnel KPI dashboard with no customer narrative
 - the user wants a service blueprint with backstage operations; this skill is customer-facing only
 
@@ -73,6 +75,8 @@ Default assumptions:
 ## Data Sufficiency Gate
 
 If both required inputs are clear enough, generate the table directly.
+If no completed persona is available, do not draft the final map yet.
+Route the work to `customer-persona-framer` first.
 
 If a `handoff_to_customer_journey_mapper` block contains at least `顧客輪廓` and `產品或服務`, generate directly from the handoff.
 
