@@ -39,9 +39,14 @@
 | --- | --- | --- |
 | `project-convergence` | 專案開始發散、handoff 混亂、agent 協作失焦，想先把流程收斂。 | `project-convergence` |
 
+### 資料分析與建模
+
+| Skill | 適合什麼需求 | Install Path |
+| --- | --- | --- |
+| `data-analysis-workflow` | 想把資料分析從資料檢查、清理、EDA、建模、評估一路做成標準化流程並產出分析報告。 | `data-analysis-workflow` |
+
 ## Notes
 
 - 根目錄的草稿、zip、筆記不是 install path。
 - 真正要安裝的是各 skill 資料夾。
 - 如果你要確認某個 skill 的細節，再進去看該資料夾內的 `SKILL.md`。
-
