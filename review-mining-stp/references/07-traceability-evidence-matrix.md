@@ -8,9 +8,9 @@ This matrix ties the public skill contract to documentation, script outputs, and
 
 | Requirement | Upstream Workflow Evidence | Script / Output Evidence | Test Coverage |
 | --- | --- | --- | --- |
-| Raw reviews are handled by the agent layer, not the scripts | `SKILL.md`, `references/01-router-and-gates.md`, `references/06-end-to-end-examples.md` | `MissingPrerequisiteOutput.next_step_rule` | `test_raw_reviews_are_rejected_until_agent_layer_creates_scored_artifacts` |
-| Agent layer is a workflow boundary, not an API requirement | `SKILL.md`, `references/01-router-and-gates.md` | script contract never names an API | manual doc verification |
-| Scoring is an agent workflow, not a Python-owned process | `SKILL.md`, `references/06-end-to-end-examples.md` | scripts validate only scored artifacts | `test_full_run_accepts_optional_scoring_rubric_metadata` |
+| Raw reviews are handled by the review scoring workflow, not the scripts | `SKILL.md`, `references/01-router-and-gates.md`, `references/06-end-to-end-examples.md` | `MissingPrerequisiteOutput.next_step_rule` | `test_raw_reviews_are_rejected_until_review_scoring_workflow_creates_scored_artifacts` |
+| Review scoring workflow is a workflow boundary, not an API requirement | `SKILL.md`, `references/01-router-and-gates.md` | script contract never names an API | manual doc verification |
+| Scoring belongs to the review scoring workflow, not a Python-owned process | `SKILL.md`, `references/06-end-to-end-examples.md` | scripts validate only scored artifacts | `test_full_run_accepts_optional_scoring_rubric_metadata` |
 | Scripts only require canonical scored artifacts plus statistical metadata | `SKILL.md`, `references/01-router-and-gates.md` | `execution_scope.upstream_artifacts_used` | `test_full_run_accepts_dual_axis_inputs_and_emits_intermediate_artifacts` |
 | Each review keeps verbatim `review_text` for later evidence quoting | `SKILL.md`, `references/05-output-contract-and-quality-rules.md` | `report.md`, `appendix.json` evidence quote sections | `test_full_run_accepts_dual_axis_inputs_and_emits_intermediate_artifacts`, `test_validator_rejects_quote_and_axis_contract_breaks` |
 | The scored table must keep dual-axis numeric inputs plus the `product` field | `SKILL.md`, `references/01-router-and-gates.md`, `references/06-end-to-end-examples.md` | canonical input validation | `test_full_run_rejects_missing_product_and_missing_pair`, `test_full_run_rejects_invalid_axis_values` |
@@ -33,4 +33,4 @@ This matrix ties the public skill contract to documentation, script outputs, and
 ## Audit Note
 
 - The matrix separates upstream scoring workflow evidence from downstream statistical-output evidence.
-- The goal is not only statistical correctness, but also a clean boundary between agent work and script work.
+- The goal is not only statistical correctness, but also a clean boundary between review scoring work and script work.

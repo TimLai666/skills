@@ -712,7 +712,7 @@ def build_missing_prereq_output(
         "attribute_catalog.csv",
     } & set(missing):
         next_step_rule = (
-            "Scripts accept scored artifacts only; use the agent layer to convert raw reviews "
+            "Scripts accept scored artifacts only; run the review scoring workflow to convert raw reviews "
             "into review_scoring_table.csv, review_foundation.json, and attribute_catalog.csv before rerunning."
         )
     payload = {

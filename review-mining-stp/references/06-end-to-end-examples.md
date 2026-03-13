@@ -2,12 +2,12 @@
 
 ## How To Read These Examples
 
-- `Agent Request`: what the agent layer receives from the user
-- `Runnable Artifacts`: what the scripts need after the agent has finished scoring and structuring
+- `評分流程輸入`: what the review scoring workflow receives from the user
+- `Runnable Artifacts`: what the scripts need after the review scoring workflow has finished scoring and structuring
 
 ## Example A: Full STP From Raw Reviews
 
-### Agent Request
+### 評分流程輸入
 
 ```json
 {
@@ -30,9 +30,9 @@
 }
 ```
 
-### Agent Workflow
+### 評分流程步驟
 
-The agent layer:
+The review scoring workflow:
 
 1. reads each review one by one
 2. extracts a corpus-level attribute catalog with definitions, mention counts, and example quotes
@@ -61,7 +61,7 @@ The agent layer:
 
 ## Example B: Full STP From A Different Dynamic Schema
 
-### Agent Request
+### 評分流程輸入
 
 ```json
 {
@@ -93,7 +93,7 @@ The agent layer:
 
 ## Example C: Segmentation-Only Rerun
 
-### Agent Request
+### 評分流程輸入
 
 ```json
 {
@@ -115,7 +115,7 @@ The agent layer:
 
 ## Example D: Targeting Partial Run
 
-### Agent Request
+### 評分流程輸入
 
 ```json
 {
@@ -142,7 +142,7 @@ The agent layer:
 
 ## Example E: Positioning-Only Run
 
-### Agent Request
+### 評分流程輸入
 
 ```json
 {
@@ -176,4 +176,4 @@ The agent layer:
 
 - scripts do not run STP directly from raw reviews
 - `MissingPrerequisiteOutput` points back to `review_scoring_table.csv` and `review_foundation.json`
-- `next_step_rule` explicitly says agent-layer preprocessing is required
+- `next_step_rule` explicitly says the review scoring workflow is required first

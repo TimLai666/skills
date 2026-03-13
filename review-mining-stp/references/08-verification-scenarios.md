@@ -2,15 +2,15 @@
 
 ## Purpose
 
-Use these scenarios to verify both the layer boundary and the downstream statistical/reporting contract.
+Use these scenarios to verify both the workflow boundary and the downstream statistical/reporting contract.
 
 ## Scenario 1: Raw Reviews, Full STP Request
 
 - Input: only raw `reviews`
 - Expected:
-  - the agent layer builds scored artifacts first
+  - the review scoring workflow builds scored artifacts first
   - scripts do not run directly on raw review text
-  - missing-prerequisite guidance points back to agent-layer preprocessing
+  - missing-prerequisite guidance points back to the review scoring workflow
 
 ## Scenario 2: Full Run From Canonical Scored Input
 

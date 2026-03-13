@@ -2,13 +2,13 @@
 
 ## Purpose
 
-This reference defines what belongs to the agent layer, what belongs to the script layer, and which artifacts each run mode requires.
+This reference defines what belongs to the review scoring workflow, what belongs to the scripts, and which artifacts each run mode requires.
 
-## Layer Boundary
+## Workflow Boundary
 
-### Agent Layer
+### Review Scoring Workflow
 
-The agent layer handles:
+The review scoring workflow handles:
 
 - raw `reviews` or `review_text`
 - extracting or curating the corpus-level attribute catalog
@@ -19,10 +19,10 @@ The agent layer handles:
 - assigning `theory_annotations` and `stat_roles`
 - preserving verbatim review text for later evidence quoting
 
-The agent layer emits the scored artifacts that the scripts need.
+The review scoring workflow emits the scored artifacts that the scripts need.
 It is a workflow boundary, not a requirement to use a specific API.
 
-### Script Layer
+### Scripts
 
 The scripts accept scored artifacts only.
 
@@ -143,11 +143,11 @@ Rules:
 
 ### `MissingDataOutput`
 
-Agent-layer artifact used when the user has not provided enough upstream context to build scored artifacts.
+Review-scoring-workflow artifact used when the user has not provided enough upstream context to build scored artifacts.
 
 ### `MissingPrerequisiteOutput`
 
-Script-layer artifact used when required scored artifacts or intermediate statistical artifacts are missing.
+Script artifact used when required scored artifacts or intermediate statistical artifacts are missing.
 
 Expected shape:
 
@@ -159,7 +159,7 @@ Expected shape:
   "acceptable_upstream_artifacts": [],
   "available_artifacts": [],
   "auto_backfill_allowed": false,
-  "next_step_rule": "Scripts accept scored artifacts only; use the agent layer to build the missing files before rerunning."
+  "next_step_rule": "Scripts accept scored artifacts only; run the review scoring workflow to build the missing files before rerunning."
 }
 ```
 
@@ -168,7 +168,7 @@ Rules:
 - `missing_prerequisites` must list only truly missing files
 - `acceptable_upstream_artifacts` should mirror the missing files
 - `auto_backfill_allowed` must stay `false`
-- when canonical scored input is missing, `next_step_rule` must point back to agent-layer preprocessing
+- when canonical scored input is missing, `next_step_rule` must point back to the review scoring workflow
 
 ## Execution Scope Summary
 
@@ -212,4 +212,4 @@ Each finding must keep:
 - `plain_language_explanation`
 - `evidence_quotes`
 
-The scripts are responsible for assembling this reporting structure from scored artifacts. The agent layer is responsible for the upstream scoring workflow only.
+The scripts are responsible for assembling this reporting structure from scored artifacts. The review scoring workflow is responsible for the upstream scoring work only.

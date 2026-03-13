@@ -1,18 +1,18 @@
 ---
 name: review-mining-stp
-description: Use when customer reviews, support tickets, app store feedback, or other review-like text must be converted into STP analysis with agent-led scoring upstream and statistical scripts downstream.
+description: Use when customer reviews, support tickets, app store feedback, or other review-like text must be converted into STP analysis through a review scoring workflow upstream and statistical scripts downstream.
 ---
 
 # Review Mining STP
 
 ## Overview
 
-This skill converts review text into `Segmentation -> Targeting -> Positioning -> Strategy` outputs through a strict two-layer contract.
+This skill converts review text into `Segmentation -> Targeting -> Positioning -> Strategy` outputs through a strict workflow contract.
 
-- `agent layer`: reads raw reviews, infers scored items, assigns theory tags, and preserves verbatim review text.
-- `script layer`: accepts scored artifacts only and performs statistical analysis plus report assembly.
+- `review scoring workflow`: reads raw reviews, infers scored items, assigns theory tags, and preserves verbatim review text.
+- `scripts`: accept scored artifacts only and perform statistical analysis plus report assembly.
 
-The `agent layer` is an upstream workflow boundary, not a requirement to use any specific API, service, or orchestration tool.
+The review scoring workflow is an upstream workflow boundary, not a requirement to use any specific API, service, or orchestration tool.
 
 The scripts are tools, not the main workflow. They do not read raw reviews, decide how to score them, or define the scoring process.
 
@@ -31,11 +31,11 @@ Do not use this skill when:
 - the user only wants raw review tagging with no STP analysis
 - the user expects the CLI to ingest raw reviews directly
 
-## Two-Layer Contract
+## Workflow Contract
 
-### Agent Layer
+### Review Scoring Workflow
 
-The agent layer is the main process. It is responsible for:
+The review scoring workflow is the main process. It is responsible for:
 
 - reading every review one by one
 - extracting at least 30 important attributes from the full review set whenever the corpus supports it
@@ -48,7 +48,7 @@ The agent layer is the main process. It is responsible for:
 
 Theme names and theme count are not fixed. They come from the corpus, not from a hardcoded taxonomy.
 
-The agent layer must score every review against every inferred attribute on two axes:
+The review scoring workflow must score every review against every inferred attribute on two axes:
 
 - `Salience (0-7)`
   - `0`: no relevant meaning appears in the review
@@ -73,9 +73,9 @@ Scoring workflow:
 5. Convert qualitative review text into quantitative data.
 6. Use the scored output for downstream statistical analysis and research models.
 
-If upstream information is incomplete, the agent layer may produce `MissingDataOutput`.
+If upstream information is incomplete, the review scoring workflow may produce `MissingDataOutput`.
 
-### Script Layer
+### Scripts
 
 The scripts start only after scoring is already complete. Their responsibilities are:
 
@@ -350,7 +350,7 @@ The final report should visibly show:
 
 ## Hard Rules
 
-- Never blur agent-layer requests with script-layer artifacts.
+- Never blur review-scoring inputs with script-ready artifacts.
 - Never let scripts consume raw reviews directly.
 - Never hardcode a fixed item count into the validator or statistical pipeline.
 - Always use `product` as the product field name.
@@ -379,4 +379,4 @@ The final report should visibly show:
 - Install dependencies: `python -m pip install -r requirements.txt`
 - Run analysis: `python scripts/run_review_mining_stp.py --run-mode <mode> --input-dir <artifacts> --output-dir <output>`
 - Validate outputs: `python scripts/validate_review_mining_stp.py --run-mode <mode> --output-dir <output>`
-- Script boundary: statistical analysis only; raw review intake belongs to the agent layer
+- Script boundary: statistical analysis only; raw reviews must first be converted into scored artifacts during the review scoring workflow
