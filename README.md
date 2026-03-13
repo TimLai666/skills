@@ -45,6 +45,12 @@
 | --- | --- | --- |
 | `data-analysis-workflow` | 想把資料分析從資料檢查、清理、EDA、建模、評估一路做成標準化流程並產出分析報告。 | `data-analysis-workflow` |
 
+### 投資研究與金融分析
+
+| Skill | 適合什麼需求 | Install Path |
+| --- | --- | --- |
+| `investment-research-prompts` | 想快速套用股票篩選、投資組合風險、股息策略、財報前瞻、DCF、技術分析或趨勢識別等投資研究模板。 | `investment-research-prompts` |
+
 ## Notes
 
 - 根目錄的草稿、zip、筆記不是 install path。

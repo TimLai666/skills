@@ -1,6 +1,6 @@
 # Trigger Playbook
 
-這份 playbook 把 [draft.md](C:/Users/tingzhen/Documents/GitHub/skills/draft.md) 的原始概念整理成可直接套用的心理觸發模組。使用時不要全文搬運，應依目標、受眾與證據量選擇最合適的 2-4 個 trigger。
+這份 playbook 把原始概念整理成可直接套用的心理觸發模組。使用時不要全文搬運，應依目標、受眾與證據量選擇最合適的 2-4 個 trigger。
 
 ## 1. 嚇唬 / 失落驅動
 

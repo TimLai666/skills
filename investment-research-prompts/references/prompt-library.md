@@ -1,12 +1,25 @@
-# 1. 股票篩選
+# Investment Research Prompt Library
 
-## 步驟一｜貼上情境背景及目的提示詞｜如下範例：
+本檔整理 8 個投資研究場景。每個場景都包含適用時機、必要輸入、英文 prompt template、建議輸出形式與常見追問。
 
-```
+## 1. Stock Screening
+
+### When to use
+
+- 使用者想找符合條件的股票
+- 使用者要「選股框架」「股票篩選報告」「候選名單」
+
+### Required inputs
+
+- `risk_tolerance`
+- `investment_amount`
+- `time_horizon`
+- `preferred_sectors`
+
+### Prompt template
+
+```text
 You are an experienced equity research analyst with over two decades of experience advising institutional and high-net-worth investors on stock selection. Create a comprehensive stock screening framework tailored to my investment objectives.
-```
-
-## 步驟二｜貼上要包含的股票篩選內容提示詞｜如下範例：
 
 Your analysis should include:
 
@@ -17,32 +30,43 @@ Your analysis should include:
 * Dividend yield analysis and an assessment of payout sustainability
 * Competitive advantage assessment (rate as: weak, moderate, or strong moat)
 * 12-month upside and downside scenarios including bull and bear price targets
-* Risk score for each company on a scale from 1–10 with a brief explanation
+* Risk score for each company on a scale from 1-10 with a brief explanation
 * Suggested entry price ranges and potential stop-loss levels
 
-## 步驟三｜貼上產出形式提示詞｜如下範例：
-
-```
 Format as a professional equity research screening report with summary table.
-```
 
-## 步驟四｜將您的選股目標及條件依序填入【 】並貼上以下詞：
-
-```
 My investment profile: [DESCRIBE YOUR RISK TOLERANCE, INVESTMENT AMOUNT, TIME HORIZON, AND PREFERRED SECTORS]
 ```
 
----
+### Output shape
 
-# 2. 投資組合風險拆解
+- Professional equity research screening report
+- Summary table first
+- Candidate list with rationale, risks, and entry zones
 
-## 步驟一｜貼上情境背景及目的提示詞｜如下範例：
+### Common follow-up questions
 
-```
+- 你的風險承受度偏保守、中性還是積極？
+- 投資期限是短線、1 年內，還是 3 到 5 年？
+- 有沒有偏好的產業或不碰的產業？
+
+## 2. Portfolio Risk Review
+
+### When to use
+
+- 使用者要檢查現有投資組合風險
+- 使用者要再平衡、對沖、降低集中度
+
+### Required inputs
+
+- `holdings`
+- `weights`
+- `portfolio_value`
+
+### Prompt template
+
+```text
 You are a senior risk analyst at a leading investment firm, trained in principles of radical transparency and systematic risk management. Prepare a thorough risk assessment for my existing portfolio.
-```
-
-## 步驟二｜貼上要分析的風險評估內容提示詞｜如下範例：
 
 Your analysis should cover:
 
@@ -57,36 +81,48 @@ Your analysis should cover:
 * Recommended hedging strategies to mitigate the top three risks
 * Rebalancing guidance with suggested allocation percentages
 
-## 步驟三｜貼上產出形式提示詞｜如下範例：
-
-```
 Present the findings as a structured professional risk management report, including a heat map summary table.
-```
 
-## 步驟四｜將您目前的投資組合內容依序填入【 】並貼上以下詞：
-
-```
 My current portfolio:
 
 [INSERT HOLDINGS, APPROXIMATE WEIGHTS, AND TOTAL PORTFOLIO VALUE]
 ```
 
----
+### Output shape
 
-# 3. 股息策略藍圖
+- Structured risk management report
+- Heat map summary table
+- Rebalancing and hedge recommendations
 
-## 步驟一｜輸入情境背景及目的提示詞｜如下範例：
+### Common follow-up questions
 
-```
+- 請列出持股、權重與總資產規模
+- 這是股票-only 組合，還是含 ETF、債券、現金？
+- 你的主要目標是降波動、保本，還是提高報酬風險比？
+
+## 3. Dividend Portfolio Blueprint
+
+### When to use
+
+- 使用者要做股息組合
+- 使用者要規劃月現金流或 DRIP 複利
+
+### Required inputs
+
+- `total_investment_amount`
+- `desired_monthly_income`
+- `account_type`
+- `tax_bracket`
+
+### Prompt template
+
+```text
 You are the chief investment strategist overseeing $60B endowment, with deep expertise in income-focused equity strategies. I need a dividend-oriented portfolio designed to deliver consistent passive income.
-```
-
-## 步驟二｜貼上要提供的股息資訊提示詞｜如下範例：
 
 Please provide:
 
-* 15–20 recommended dividend stocks, including ticker symbols and current yields
-* Dividend safety rating for each stock (scale 1–10)
+* 15-20 recommended dividend stocks, including ticker symbols and current yields
+* Dividend safety rating for each stock (scale 1-10)
 * Number of consecutive years each company has increased dividends
 * Payout ratio review to identify potentially unsustainable dividends
 * Projected monthly income based on my total investment
@@ -96,31 +132,41 @@ Please provide:
 * Tax considerations for dividends based on my account type
 * Ranked list of stocks from most conservative to most aggressive
 
-## 步驟三｜貼上產出形式提示詞｜如下範例：
-
-```
 Present your results as a structured dividend portfolio blueprint, including a detailed income projection table.
-```
 
-## 步驟四｜將您的金額目標和財務狀況依序填入【 】並貼上以下詞：
-
-```
 My situation:
 
 [INSERT TOTAL INVESTMENT AMOUNT, DESIRED MONTHLY INCOME, ACCOUNT TYPE, AND TAX BRACKET]
 ```
 
----
+### Output shape
 
-# 4. 財報前瞻分析
+- Dividend portfolio blueprint
+- Income projection table
+- Safety ranking and tax notes
 
-## 步驟一｜貼上情境背景及目的提示詞｜如下範例：
+### Common follow-up questions
 
-```
+- 你要的是高殖利率優先，還是穩定成長優先？
+- 資金放在 taxable、退休帳戶，還是公司帳戶？
+- 每月現金流目標是多少？
+
+## 4. Pre-Earnings Brief
+
+### When to use
+
+- 使用者要做財報前瞻
+- 使用者要評估財報前是否進場、減碼或觀望
+
+### Required inputs
+
+- `company_name`
+- `earnings_date` if available
+
+### Prompt template
+
+```text
 You are a seasoned equity research analyst, specializing in earnings previews for institutional clients. Prepare a full pre-earnings analysis for a company ahead of its upcoming report.
-```
-
-## 步驟二｜貼上要做的財報分析項目提示詞｜如下範例：
 
 Include in your analysis:
 
@@ -135,33 +181,42 @@ Include in your analysis:
 * Bear case scenario with estimated downside risk
 * Recommended trading action: buy ahead, sell ahead, or hold and wait
 
-## 步驟三｜貼上產出形式提示詞｜如下範例：
-
-```
 Present your findings as a professional pre-earnings research brief, with a concise decision summary positioned at the top.
-```
 
-## 步驟四｜將要分析的公司填入【 】並貼上以下詞：
-
-```
 Company in focus: [INSERT COMPANY NAME AND EARNINGS DATE IF AVAILABLE]
 ```
 
----
+### Output shape
 
-# 5. 產業競爭研究報告
+- Professional pre-earnings research brief
+- Decision summary at top
+- Bull/bear scenarios and expected move
 
-## 步驟一｜貼上情境背景及目的提示詞｜如下範例：
+### Common follow-up questions
 
-```
+- 你要分析哪家公司？
+- 若知道財報日期，請一併提供
+- 你的目標是事件交易，還是中期基本面判斷？
+
+## 5. Industry Competition Report
+
+### When to use
+
+- 使用者要比較某個產業中的公司
+- 使用者要找該產業最值得研究或投資的標的
+
+### Required inputs
+
+- `sector_name`
+
+### Prompt template
+
+```text
 You are a senior partner at the firm, tasked with performing a competitive strategy analysis for a leading investment fund assessing an industry opportunity. Develop a comprehensive competitive landscape report to identify the most promising stock in the sector.
-```
-
-## 步驟二｜貼上要比較的資訊提示詞｜如下範例：
 
 Include in your analysis:
 
-* List of the top 5–7 competitors in the sector, including market capitalization comparisons
+* List of the top 5-7 competitors in the sector, including market capitalization comparisons
 * Revenue and profit margin benchmarking in a clear table format
 * Evaluation of each company’s competitive moat (consider brand strength, cost advantage, network effects, switching costs)
 * Market share trends over the past three years
@@ -172,32 +227,39 @@ Include in your analysis:
 * Your single best stock recommendation with a concise, evidence-based rationale
 * Key catalysts that could impact the selected stock within the next 12 months
 
-## 步驟三｜貼上產出形式提示詞｜如下範例：
-
-```
 Present the findings as a competitive strategy deck summary, with well-organized comparison tables.
-```
 
-## 步驟四｜將您要研究的產業填入【 】並貼上以下詞：
-
-```
 Sector for analysis: [INSERT INDUSTRY OR SECTOR NAME]
 ```
 
----
-以下為圖片內容整理後的 **Markdown（md）版本**：
+### Output shape
 
----
+- Competitive strategy deck summary
+- Comparison tables
+- Best idea with catalysts and risks
 
-# 6. DCF 估值模型
+### Common follow-up questions
 
-## 步驟一｜貼上情境背景及目的提示詞｜如下範例
+- 要研究哪個產業或子產業？
+- 想偏美股、台股，還是全球同業比較？
+- 你要的是長期競爭格局還是近期催化比較？
 
-```
+## 6. DCF Valuation Memo
+
+### When to use
+
+- 使用者要做 DCF 估值
+- 使用者要比較內在價值與市場價格
+
+### Required inputs
+
+- `ticker_symbol`
+- `company_name`
+
+### Prompt template
+
+```text
 You are a top investment banker with extensive experience building valuation models for Fortune 500 M&A transactions.
-```
-
-## 步驟二｜貼上折現現金流模型建置提示詞｜如下範例
 
 Build out:
 
@@ -211,29 +273,39 @@ Build out:
 * Clear verdict: undervalued, fairly valued, or overvalued
 * Key assumptions that could break the model
 
-## 步驟三｜貼上產出形式提示詞｜如下範例
-
-```
 Format as an investment banking valuation memo with tables and clear math.
-```
 
-## 步驟四｜將您要估值的股票和公司填入【 】並貼上以下詞
-
-```
 The stock I want valued: [ENTER TICKER SYMBOL AND COMPANY NAME]
 ```
 
----
+### Output shape
 
-# 7. 技術面佈局
+- Investment banking valuation memo
+- Tables with assumptions and sensitivity ranges
+- Verdict with assumption risk
 
-## 步驟一｜貼上情境背景及目的提示詞｜如下範例
+### Common follow-up questions
 
-```
+- 請提供 ticker 和公司名稱
+- 你想用保守、中性還是進取假設？
+- 這次估值是拿來投資判斷，還是做公司比較？
+
+## 7. Technical Analysis Report
+
+### When to use
+
+- 使用者要做技術面分析
+- 使用者要找進場點、停損、目標價與型態判讀
+
+### Required inputs
+
+- `ticker_symbol`
+- `current_position` if applicable
+
+### Prompt template
+
+```text
 You are a senior quantitative trader with extensive experience blending technical indicators and statistical models to optimize trade timing. Prepare a complete technical analysis report for a stock.
-```
-
-## 步驟二｜貼上要做的技術分析項目提示詞｜如下範例
 
 Including:
 
@@ -248,29 +320,39 @@ Including:
 * Risk-to-reward calculation for the current setup
 * Confidence rating for the trade: strong buy, buy, neutral, sell, strong sell
 
-## 步驟三｜貼上產出形式提示詞｜如下範例
-
-```
 Format the results as a technical analysis report card with a concise trade plan summary.
-```
 
-## 步驟四｜將您要分析的股票 / 狀況填入【 】並貼上以下詞
-
-```
 Stock to evaluate: [INSERT TICKER SYMBOL AND CURRENT POSITION IF APPLICABLE]
 ```
 
----
+### Output shape
 
-# 8. 趨勢識別分析
+- Technical analysis report card
+- Trade plan summary
+- Multi-timeframe, support/resistance, and risk/reward sections
 
-## 步驟一｜貼上情境背景及目的提示詞｜如下範例
+### Common follow-up questions
 
-```
+- 要分析哪個 ticker？
+- 你現在有持倉嗎？成本多少？
+- 你偏短線、波段，還是趨勢單？
+
+## 8. Trend and Anomaly Memo
+
+### When to use
+
+- 使用者要找股票的季節性、事件性、異常活動或統計 edge
+- 使用者要看內部人交易、空頭比例、期權異動、機構持股
+
+### Required inputs
+
+- `ticker_symbol`
+- `timeframe`
+
+### Prompt template
+
+```text
 You are a quantitative research analyst, leveraging data-driven techniques to uncover statistical advantages in equity markets. I need you to detect subtle patterns and anomalies in a given stock’s performance.
-```
-
-## 步驟二｜貼上要找的趨勢和分析提示詞｜如下範例
 
 Your investigation should cover:
 
@@ -285,14 +367,20 @@ Your investigation should cover:
 * Sector rotation influences affecting the stock
 * Summary of statistical edges: quantifiable factors that may provide an investment advantage
 
-## 步驟三｜貼上產出形式提示詞｜如下範例
-
-```
 Present your findings as a structured quantitative research memo, including tables, charts, and concise pattern summaries.
-```
 
-## 步驟四｜將要分析的股票和時間範圍填入【 】並貼上以下詞
-
-```
 Stock under review: [INSERT TICKER SYMBOL AND RELEVANT TIMEFRAME]
 ```
+
+### Output shape
+
+- Structured quantitative research memo
+- Tables or charts where relevant
+- Pattern summary with actionable edges
+
+### Common follow-up questions
+
+- 要研究哪檔股票？
+- 觀察區間是 3 個月、1 年，還是更長？
+- 你更在意事件交易、統計異常，還是持股結構變化？
+
