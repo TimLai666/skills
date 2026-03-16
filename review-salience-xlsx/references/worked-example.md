@@ -1,8 +1,8 @@
-# Worked Example — Safety Eyewear (923 reviews, 30 attributes)
+# Worked Example — Safety Eyewear (923 reviews, 30 attributes, 4 clusters)
 
-Use this file to calibrate scoring intuition. The scores here are from a
-semantic reading pass (Claude as scorer) on Amazon safety-eyewear reviews
-spanning English, French, Spanish, Italian, and German.
+Use this file to calibrate scoring intuition and verify PCA / K-means outputs.
+All results are from a full semantic reading pass + downstream analysis on
+Amazon safety-eyewear reviews spanning English, French, Spanish, Italian, German.
 
 ---
 
@@ -113,3 +113,77 @@ than detailed sport-use reviews (Impactable pickleball corpus).
 
 Treat all languages identically. Do not assign lower confidence to non-English
 reviews when scoring.
+
+---
+
+## PCA results
+
+- **n_components chosen:** 11 (Kaiser criterion, eigenvalue > 1)
+- **Cumulative variance explained:** 53.78%
+- **Matrix shape:** 923 reviews × 30 attributes → 923 × 11 PC scores
+
+### PC names (from dominant loadings |≥ 0.30|)
+
+| PC | Name | Key positive attrs | Key negative attrs |
+|----|------|-------------------|-------------------|
+| PC01 | 整體使用價值感 | 長時間佩戴穩定性(+0.54), 全天佩戴舒適度(+0.49), 抗衝擊彈道防護(+0.48) | — |
+| PC02 | 戰術品牌信任感 | 品牌聲望感知(+0.48), 鏡片互換配件擴充(+0.37) | 貼臉密封性(−0.42), 視野廣度(−0.40) |
+| PC03 | 場景創新適應力 | 創新解決痛點(+0.71), 與耳罩相容性(+0.55), 防霧性能(+0.50) | 鏡框耐用性(−0.34) |
+| PC04 | CP值vs社群認同 | CP值(+0.53), 相對競品價值感(+0.41) | 職業社群認同感(−0.36), 回購忠誠度(−0.34) |
+| PC05 | 鏡片耐久性 | 鏡片耐刮性(+0.60), 鏡片透明度持久性(+0.51) | — |
+| PC06 | 誠信與配件完整性 | 包裝完整性(+0.45), 鏡片互換配件擴充(+0.41), 廣告描述誠信度(+0.36) | — |
+| PC07 | 廣告誠信vs霧化 | 廣告描述誠信度(+0.44), 防霧性能(+0.40) | 鏡片透明度持久性(−0.36), 全天佩戴舒適度(−0.35) |
+| PC08 | 客服與推薦動機 | 客服售後支援(+0.50), 口碑推薦意願(+0.31) | — |
+| PC09 | 密封vs輕量衝突 | 貼臉密封性(+0.33) | 輕量化(−0.31) |
+| PC10 | 客服vs社交場合 | 客服售後支援(+0.46), 鼻墊可靠性(+0.32) | 同事共用適性(−0.35) |
+| PC11 | 零件可靠性綜合 | 鼻墊可靠性(+0.41), 包裝完整性(+0.34), 客服售後支援(+0.34) | — |
+
+---
+
+## K-means results
+
+### Scan K=2–9
+
+| K | Inertia | Silhouette |
+|---|---------|-----------|
+| 2 | 13244.4 | **0.3700** ← highest |
+| 3 | 12268.5 | 0.3229 |
+| 4 | 11473.7 | 0.1845 |
+| 5 | 10575.5 | 0.2052 ← starting K chosen |
+| 6 | 9855.6 | 0.2125 |
+| 7 | 9381.8 | 0.1933 |
+
+K=2 wins silhouette but is too coarse. K=5 chosen as starting point for interpretability.
+
+### Iterative pruning history
+
+| Iter | K | Active | Silhouette | Cluster sizes | Action |
+|------|---|--------|-----------|--------------|--------|
+| 1 | 5 | 923 | 0.2052 | {0:52, 1:**45**, 2:564, 3:132, 4:130} | C1=45<47 (4.9%) → remove, K→4 |
+| 2 | 4 | 878 | 0.2199 | {0:114, 1:52, 2:601, 3:111} | ✓ all ≥ 47 → converged |
+
+### Re-assign all 923 reviews (`km.predict(PC_all)`)
+
+The 45 pruned reviews are re-assigned to nearest centroid:
+- 20 → Cluster 0 (体驗達人)
+- 23 → Cluster 2 (沉默大眾)
+- 1 → Cluster 1 (場景創新派)
+- 1 → Cluster 3 (耐刮耐用派)
+
+**Final cluster sizes (all 923 reviews):**
+
+| Cluster | Name | n | % | PC centroid highlights |
+|---------|------|---|---|----------------------|
+| C0 | 體驗達人 | 134 | 14.5% | PC01=+2.71, PC02=−1.18 |
+| C1 | 場景創新派 | 53 | 5.7% | PC03=+3.80, PC09=+0.87, PC06=+0.93 |
+| C2 | 沉默大眾 | 624 | 67.6% | PC01=−0.46 (near zero on all PCs) |
+| C3 | 耐刮耐用派 | 112 | 12.1% | PC05=+2.04, PC07=−0.85 |
+
+Final silhouette (all 923): **0.1923** (slightly lower than 0.2199 due to re-assigned borderline reviews — expected)
+
+### Cluster interpretation notes
+
+- **C0 體驗達人:** Extremely high PC1 = overall satisfaction. Strong negative PC2 = not brand-driven. Top attrs: 活動場景適應廣度(3.29), 全天佩戴舒適度(2.95). Products: evenly spread; B08GKPC599 and B0B15BXZ94 slightly over-represented.
+- **C1 場景創新派:** PC3 dominant (+3.80). Top attrs: 創新解決痛點(4.25), 防霧性能(3.60). B00080FKIO and B016KZ2APQ each ≈31% of this cluster (military/pickleball scenario language).
+- **C2 沉默大眾:** All PCs near zero. Short, content-sparse reviews. Top attr by mean is 防霧性能(1.29) — even in the silent majority, fog is the #1 topic. B016KZ2APQ alone = 31% of this cluster.
+- **C3 耐刮耐用派:** PC5=+2.04 dominant. Top attrs: 鏡片耐刮性(4.63), 鏡片透明度持久性(1.63). Negative PC7 = disappointed by anti-fog claims. This is the primary negative-signal cluster for product quality. B07GB8Y11G (36 reviews) and B016KZ2APQ (27) most frequent.
