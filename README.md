@@ -17,6 +17,8 @@
 | `customer-persona-framer` | 想先把目標客群整理成清楚的 persona。 | `customer-persona-framer` |
 | `customer-journey-mapper` | 已經有 persona，想進一步做 customer journey map 或 touchpoint journey table。 | `customer-journey-mapper` |
 | `review-mining-stp` | 想把評論、客服紀錄、回饋文字整理成 STP 分析。 | `review-mining-stp` |
+| `review-scoring-docx` | 想把評論資料抽取屬性並做產品評分，輸出為 Word（.docx）報告。 | `review-scoring-docx` |
+| `review-salience-xlsx` | 想把評論做顯著度評分、PCA、K-means 分群並輸出 Excel（.xlsx）。 | `review-salience-xlsx` |
 
 ### 行銷策略與訊息設計
 
