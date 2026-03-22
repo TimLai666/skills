@@ -61,3 +61,24 @@
 - 根目錄的草稿、zip、筆記不是 install path。
 - 真正要安裝的是各 skill 資料夾。
 - 如果你要確認某個 skill 的細節，再進去看該資料夾內的 `SKILL.md`。
+
+## 子資料夾壓縮腳本用法
+
+- 腳本位置：`zip_subfolders.py`（repo 根目錄）
+- 在 repo 根目錄執行：
+
+```powershell
+python zip_subfolders.py
+```
+
+- 腳本會做的事：
+  - 只掃描 repo 根目錄第一層子資料夾。
+  - 將每個子資料夾壓縮成 `output/<folder_name>.zip`。
+  - 若同名 zip 已存在，會覆蓋重建。
+  - 排除 `output/`、`.git`、以及名稱以 `.` 開頭的隱藏資料夾。
+
+- 退出行為：
+  - 全部成功時回傳 `0`。
+  - 任一資料夾失敗時回傳非 `0`。
+  - 終端會輸出每個資料夾的 `OK/SKIP/FAIL` 與最後 `Summary`。
+
