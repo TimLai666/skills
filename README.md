@@ -17,6 +17,9 @@
 | `customer-persona-framer` | 想先把目標客群整理成清楚的 persona。 | `customer-persona-framer` |
 | `customer-journey-mapper` | 已經有 persona，想進一步做 customer journey map 或 touchpoint journey table。 | `customer-journey-mapper` |
 | `review-mining-stp` | 想把評論、客服紀錄、回饋文字整理成 STP 分析。 | `review-mining-stp` |
+| `theory-analysis-product-positioning` | 想用產品定位理論分析跨來源證據（訪談摘要、工單、貼文、研究筆記、觀察紀錄），拆解產品屬性、功能、利益與使用/服務情境。 | `theory-analysis-product-positioning` |
+| `theory-analysis-purchase-motivation` | 想用購買動機理論辨識跨來源證據中的功能性、保障性、關係性驅動因素。 | `theory-analysis-purchase-motivation` |
+| `theory-analysis-wom-motivation` | 想用口碑動機理論解析跨來源證據中的利他、社交認同、專業展現與情緒表達動機。 | `theory-analysis-wom-motivation` |
 | `review-scoring-docx` | 想把評論資料抽取屬性並做產品評分，輸出為 Word（.docx）報告。 | `review-scoring-docx` |
 | `review-salience-xlsx` | 想把評論做顯著度評分、PCA、K-means 分群並輸出 Excel（.xlsx）。 | `review-salience-xlsx` |
 

@@ -2,6 +2,14 @@
 
 以 IQ 228 顧問標準輸出：策略必須可驗證、可執行、可衡量。
 
+## Theory Link
+
+完整理論概念與五層需求定義請先讀：
+
+- `references/00-theory-foundation.md`
+
+本文件聚焦在 operational playbook（分層策略、執行與判斷規則）。
+
 ## Layer Playbook
 
 | 層級 | 需求焦點 | 核心訊息方向 | 典型行動 | 核心 KPI |
