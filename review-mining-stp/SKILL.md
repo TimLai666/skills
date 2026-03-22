@@ -31,6 +31,116 @@ Do not use this skill when:
 - the user only wants raw review tagging with no STP analysis
 - the user expects the CLI to ingest raw reviews directly
 
+## Theory Framework
+
+Attribute extraction and theory annotation should draw from these four theory families. Additional families may be added when the corpus clearly warrants it, but every attribute must map to at least one family.
+
+### 1. Product Positioning Theory (`product_positioning`)
+
+Subtheories:
+- `attributes` — physical or verifiable product properties (e.g. ANSI certification, lens material, weight)
+- `functions` — what the product does in use (e.g. anti-fog, side coverage, UV blocking)
+- `benefits` — perceived value or outcome the customer gains (e.g. confidence, style, value for money)
+- `usage_context_service_experience` — context of use, service touchpoints, post-purchase experience
+
+### 2. Maslow's Hierarchy of Needs (`maslow`)
+
+Subtheories:
+- `physiological` — sensory comfort, physical ease, visual clarity during use
+- `safety` — protection from harm, certification compliance, structural durability
+- `belongingness` — fitting into a community, sports group, or professional identity
+- `esteem` — status signalling, brand prestige, professional image display
+- `self_actualization` — enabling personal performance goals, empowerment, achievement
+
+### 3. Purchase Motivation Theory (`purchase_motivation`)
+
+Subtheories:
+- `functional` — driven by performance, fit, ergonomics, multi-scenario utility
+- `security` — driven by safety standards, brand trust, durability assurance, after-sales protection
+- `relational` — driven by customer service quality, gifting intent, repeat purchase loyalty
+
+### 4. Word-of-Mouth Motivation Theory (`wom_motivation`)
+
+Subtheories:
+- `altruistic` — sharing to genuinely help other buyers (tips, warnings, balanced reviews)
+- `social_identity` — sharing to signal group membership (sports community, professional role)
+- `self_enhancement` — sharing to display expertise or superior knowledge
+- `emotional_expression` — sharing driven by strong positive or negative emotion
+
+## Attribute Extraction Rules
+
+When extracting attributes from the full corpus:
+
+- Extract at least 30 attributes whenever the corpus supports it.
+- Every attribute must be mappable to at least one of the four theory families above.
+- Each attribute must carry `theory_annotations` listing all applicable family + subtheory pairs.
+- Attribute themes are dynamically inferred from the corpus — do not hardcode theme names.
+- Freeze the attribute catalog before formal scoring begins.
+- Attributes must cover all four theory families. If any family has zero coverage, flag it in `attribute_extraction_summary.theory_gap`.
+
+## Attribute Discovery Pass — How To Execute
+
+The discovery pass is a dedicated read-through of the full corpus before any scoring begins. Its sole output is the frozen attribute catalog. Execute it in four stages:
+
+### Stage 1 — Read all reviews and collect raw signals
+
+Read every review in the corpus. For each review, note any concern, praise, complaint, or observation the reviewer expresses about the product or their experience. Do not score yet. Collect these as raw signals in a working list. Signals can be short phrases or paraphrases — they do not need to be final attribute names yet.
+
+Examples of raw signals:
+- "fogged up immediately with mask on"
+- "arms hooked in my hair every time I removed them"
+- "military-grade, Z87 certified"
+- "bought three pairs over two years"
+- "bought these as a gift for my son"
+
+### Stage 2 — Cluster signals into candidate attributes
+
+Group raw signals that represent the same underlying customer concern or product dimension. Each cluster becomes one candidate attribute. Apply these rules:
+
+- One attribute per distinct construct. Do not merge two different concerns just because they co-occur (e.g. "fogging" and "scratching" are separate attributes even if one reviewer mentions both).
+- Split an attribute if reviewers clearly treat it as two separate things (e.g. "nose pad comfort" and "nose pad staying in place" may warrant two attributes if complaints differ).
+- Name each attribute with a short noun phrase that a non-specialist can understand. Use the language reviewers actually use, not academic terminology.
+- Count how many reviews contributed signals to each cluster — this becomes `mention_count`.
+
+### Stage 3 — Map every attribute to the four theory frameworks
+
+For each candidate attribute, assign `theory_annotations` by working through all four theory families in order:
+
+**product_positioning** — ask: does this attribute describe a physical property (`attributes`), a functional capability (`functions`), a perceived benefit or outcome (`benefits`), or a usage context / service touchpoint (`usage_context_service_experience`)? Assign all that apply.
+
+**maslow** — ask: which need does concern about this attribute reflect?
+- `physiological`: physical sensation, visual comfort, weight, pressure on face
+- `safety`: protection level, certification, structural durability, after-sales security
+- `belongingness`: fitting into a community, professional group, sport team
+- `esteem`: brand status, professional image, visible identity
+- `self_actualization`: enabling personal goals, performance achievement, empowerment
+
+**purchase_motivation** — ask: what drives someone to care about this at the point of purchase?
+- `functional`: performance, fit, ergonomics, multi-use utility
+- `security`: standards compliance, brand trust, warranty, durability assurance
+- `relational`: customer service, gifting intent, loyalty and repeat purchase
+
+**wom_motivation** — ask: why would a reviewer write about this attribute?
+- `altruistic`: to warn or help other buyers
+- `social_identity`: to signal membership in a group (sport, profession, military)
+- `self_enhancement`: to display expertise or superior product knowledge
+- `emotional_expression`: because strong feeling (delight or frustration) compels them to write
+
+An attribute may carry multiple families and multiple subtheories. There is no maximum. However, every attribute must carry at least one family, and the full catalog must cover all four families.
+
+### Stage 4 — Freeze and validate the catalog
+
+Before scoring begins:
+
+1. Confirm the attribute count meets the `target_minimum` (at least 30 when corpus supports it).
+2. Confirm all four theory families appear at least once across the catalog. If any family is absent, revisit Stage 2 — missing coverage usually means signals were merged incorrectly or a whole class of reviewer concerns was overlooked.
+3. Assign a stable `attribute_key` to each attribute (snake_case, e.g. `anti_fog_performance`, `hinge_durability`). Keys must not change after freezing.
+4. Write the `plain_language_definition` for each attribute — one sentence describing what the attribute measures and what a high vs low signal looks like in a review.
+5. Select one `example_review_id` and `example_quote` per attribute from the raw corpus. The quote must be verbatim.
+6. Record the frozen catalog in `attribute_catalog.csv` and `review_foundation.json -> dimension_catalog` before any scoring row is written.
+
+No attribute may be added, removed, or renamed after the catalog is frozen. If a gap is found during scoring, record it in `attribute_extraction_summary.shortfall_reason` and complete scoring with the frozen catalog as-is.
+
 ## Workflow Contract
 
 ### Review Scoring Workflow
@@ -42,36 +152,55 @@ The review scoring workflow is the main process. It is responsible for:
 - freezing the attribute catalog before formal scoring begins
 - inferring scored items from the full review set
 - assigning each item to dynamic themes inferred from the full review set
-- attaching theory metadata at both family and subtheory level
-- keeping a paired salience and valence scoring plan for every inferred attribute
+- attaching theory metadata at both family and subtheory level — exclusively from the four permitted families
+- keeping a paired salience and product-quality scoring plan for every inferred attribute
 - preserving the original `review_text` so later report evidence can quote the real source text
 
 Theme names and theme count are not fixed. They come from the corpus, not from a hardcoded taxonomy.
 
-The review scoring workflow must score every review against every inferred attribute on two axes:
+### Two Scoring Axes
 
-- `Salience (0-7)`
-  - `0`: no relevant meaning appears in the review
-  - `1-3`: the review mentions the attribute slightly or indirectly
-  - `4`: the review is neutral or ambiguous on how much the attribute matters
-  - `5-6`: the review clearly mentions the attribute
-  - `7`: the review strongly and fully emphasizes the attribute
-- `Valence (0-10)`
-  - `0`: strongly negative evaluation
-  - `5`: mixed, neutral, or unclear evaluation
-  - `10`: strongly positive evaluation
-- dependency rule
-  - when `salience = 0`, `valence` must stay empty
-  - when `salience >= 1`, `valence` must be present
+This skill uses two distinct scoring axes applied to different units of analysis:
 
-Scoring workflow:
+#### Axis A — Customer × Attribute: Salience (0–7)
+
+Applied per review (or per customer). Measures how prominently the attribute features in a given review.
+
+- `0`: the attribute is absent from the review — no relevant content at all
+- `1–3`: the attribute is mentioned slightly or indirectly
+- `4`: the review is neutral, ambiguous, or tangential on this attribute
+- `5–6`: the review clearly and explicitly addresses this attribute
+- `7`: the review strongly emphasises this attribute as a central concern
+
+Dependency rule: when `salience = 0`, the attribute is treated as absent for this review and must not be included in any per-review analysis. Only reviews with `salience ≥ 1` are counted as mentioning the attribute.
+
+#### Axis B — Product × Attribute: Quality Score (0–10)
+
+Applied per product (aggregated across all reviews for that product). Measures the overall quality or performance of the product on this attribute as judged by its reviewers.
+
+- `0`: extremely poor — near-universal negative evaluation
+- `1–3`: below average — more negative than positive mentions
+- `4`: below average leaning negative — complaints outweigh praise
+- `5`: mixed or neutral — roughly equal positive and negative signals
+- `6–7`: above average — more positive than negative, with some complaints
+- `8–9`: strong — predominantly positive, only minor issues noted
+- `10`: exceptional — near-universal praise with no notable complaints
+
+This score is a product-level aggregate, not a per-review score. It is computed or estimated after all reviews for a product have been read, and represents the overall quality positioning of the product on that attribute.
+
+Column naming:
+- Per-review salience: `<attribute_key>_salience`
+- Product-level quality: `<attribute_key>_quality`
+
+### Scoring Workflow Steps
 
 1. Read each review one by one.
 2. Run an attribute-discovery pass across the full corpus.
-3. Freeze the attribute catalog with definitions, theory annotations, and paired score-column names.
-4. Score every review against the frozen attribute catalog with paired `salience + valence`.
-5. Convert qualitative review text into quantitative data.
-6. Use the scored output for downstream statistical analysis and research models.
+3. Freeze the attribute catalog with definitions, theory annotations (from the four permitted families only), and paired score-column names.
+4. Score every review against the frozen attribute catalog using Axis A (salience 0–7).
+5. After reading all reviews per product, compute Axis B (quality 0–10) per product per attribute.
+6. Convert qualitative review text into quantitative data on both axes.
+7. Use the scored output for downstream statistical analysis and research models.
 
 If upstream information is incomplete, the review scoring workflow may produce `MissingDataOutput`.
 
@@ -113,17 +242,14 @@ Required columns:
 - `product`
 - `review_text`
 
-All inferred attributes must appear as paired columns:
+All inferred attributes must appear as salience columns (Axis A, per review):
 
 - `<attribute_key>_salience`
-- `<attribute_key>_valence`
 
-Each pair must follow these rules:
+Each salience column must follow these rules:
 
-- `*_salience` uses integer scores only and stays inside the `0-7` range
-- `*_valence` uses integer scores only and stays inside the `0-10` range
-- when `*_salience = 0`, `*_valence` must be empty
-- when `*_salience >= 1`, `*_valence` must be present
+- integer scores only, range `0–7`
+- `0` means the attribute is absent from this review
 
 Optional metadata columns may include:
 
@@ -132,6 +258,17 @@ Optional metadata columns may include:
 - `rating`
 
 The table is per-review. If no stable person-level identity exists, `unit_id` may default to `review_id`.
+
+### `product_quality_scorecard.csv`
+
+New artifact replacing the per-review valence axis. Required columns:
+
+- `product`
+- `brand`
+- `n_reviews` — number of reviews used to compute the scores
+- One `<attribute_key>_quality` column per attribute (Axis B, 0–10)
+
+This is the product × attribute quality matrix. Each cell is the product-level quality score for that attribute, estimated from all reviews of that product.
 
 ### `review_foundation.json`
 
@@ -157,7 +294,7 @@ Each `dimension_catalog` item must include:
 - `theme`
 - `attribute_group`
 - `salience_column`
-- `valence_column`
+- `quality_column`
 - `stat_roles`
 - `plain_language_definition`
 - `theory_annotations`
@@ -169,29 +306,21 @@ Each `dimension_catalog` item must include:
 - `brand_personality`
 - `brand_image`
 
-Legacy compatibility is allowed through:
+`theory_annotations` must map each scored item to at least one theory family plus subtheory. The four default families for this skill are:
 
-- `theory_tags`
+- `product_positioning` (subtheories: `attributes`, `functions`, `benefits`, `usage_context_service_experience`)
+- `maslow` (subtheories: `physiological`, `safety`, `belongingness`, `esteem`, `self_actualization`)
+- `purchase_motivation` (subtheories: `functional`, `security`, `relational`)
+- `wom_motivation` (subtheories: `altruistic`, `social_identity`, `self_enhancement`, `emotional_expression`)
 
-`theme_mapping` must cover:
-
-- every `dimension_catalog` column exactly once
-- only valid `dimension_catalog` columns
-- the same theme name recorded in each item's `theme`
-
-`theory_annotations` should map each scored item to theory family plus subtheory, for example:
-
-- `product_positioning`
-- `purchase_motivation`
-- `wom_motivation`
-- `dual_process`
-- `maslow`
+Additional theory families may be used when the corpus clearly calls for them. Any added family must be documented in `review_foundation.json` with its name, rationale, and subtheory list.
 
 `attribute_extraction_summary` must record:
 
 - `target_minimum`
 - `actual_count`
 - `shortfall_reason`
+- `theory_gap` — list any of the four theory families with zero attribute coverage
 
 ### `attribute_catalog.csv`
 
@@ -205,9 +334,11 @@ Required columns:
 - `source_type`
 - `mention_count`
 - `salience_column`
-- `valence_column`
+- `quality_column`
 - `example_review_id`
 - `example_quote`
+- `theory_families` — comma-separated list of applicable theory families from the four permitted
+- `theory_subtheories` — comma-separated list of applicable subtheories
 
 The catalog is the script-facing bridge from upstream attribute extraction into downstream statistics and report evidence.
 
@@ -223,7 +354,7 @@ The catalog is the script-facing bridge from upstream attribute extraction into 
 ## Run Modes
 
 - `full`: starts from canonical scored artifacts and emits the three statistical intermediates
-- `full` canonical input requires `review_scoring_table.csv + review_foundation.json + attribute_catalog.csv + analysis_context.json + brands.json + ideal_point.json`
+- `full` canonical input requires `review_scoring_table.csv + product_quality_scorecard.csv + review_foundation.json + attribute_catalog.csv + analysis_context.json + brands.json + ideal_point.json`
 - `segmentation`: uses `review_foundation.json + segmentation_variables.csv`
 - `targeting`: uses `segment_profiles.json + targeting_dataset.csv`
 - `positioning`: uses `positioning_scorecard.csv + brands.json + ideal_point.json`
@@ -239,7 +370,7 @@ Generated intermediate artifacts in `full` mode:
 
 ### Segmentation
 
-- standardize `salience` and `valence` columns separately, then model them together
+- standardize `salience` columns (Axis A) across reviews to identify customer concern patterns
 - use `factor_analysis -> K-means`
 - rerun when any cluster falls below the `>5%` guardrail
 - record `cluster_threshold`, `reruns_performed`, and `final_k`
@@ -249,7 +380,8 @@ Generated intermediate artifacts in `full` mode:
 
 - resolve current and potential targeting variables from `dimension_catalog.stat_roles`
 - allow `analysis_context.comparison_axes` to override the default comparison axes
-- model both `salience` and `valence` columns as candidate drivers
+- model `salience` columns (Axis A) as customer-side drivers
+- model `quality` columns (Axis B) as product-side performance indicators
 - use `ANOVA / regression` for continuous outcomes
 - use `chi-square / logistic regression` for binary outcomes
 - emit `pairwise_comparison_table` when ANOVA significance justifies post-hoc comparison
@@ -258,7 +390,8 @@ Generated intermediate artifacts in `full` mode:
 ### Positioning
 
 - build the scorecard from `stat_roles` containing `positioning`
-- combine paired `salience` and `valence` features into the perceptual-map feature matrix
+- use `quality` columns (Axis B) from `product_quality_scorecard.csv` as the primary product positioning features
+- cross-reference with `salience` columns (Axis A) to weight attributes by customer concern level
 - default to `factor_analysis`
 - allow `MDS` when similarity-based input is explicitly requested
 - include ideal-point distance and pairwise competition distance
@@ -275,16 +408,18 @@ The final report must contain an `Attribute Extraction Summary` that shows:
 - `target_minimum`
 - `actual_count`
 - `shortfall_reason`
+- `theory_gap` — any of the four theory families with zero coverage
 - discovered themes
 - attribute-group counts
+- theory family and subtheory coverage breakdown
 - representative attributes with real example quotes
 
 Each major report section must contain:
 
 - `What this section is doing`
-- `Axis modeling summary`
+- `Axis modeling summary` — specify whether Axis A (salience), Axis B (quality), or both are used
 - `Statistical methods used`
-- `Theories used`
+- `Theories used` — must name specific families and subtheories from the four permitted
 - `Theme coverage summary`
 - `Theory coverage summary`
 - `Plain-language explanation`
@@ -297,7 +432,7 @@ Each finding must contain:
 - `finding_id`
 - `finding_statement`
 - `business_implication`
-- `axes_used`
+- `axes_used` — `salience`, `quality`, or both
 - `methods_used`
 - `theories_used`
 - `themes_used`
@@ -345,7 +480,7 @@ The final report should visibly show:
 
 - the dynamically inferred themes for this corpus
 - which findings use which themes
-- theory families plus subtheories
+- theory families plus subtheories — drawn exclusively from the four permitted families
 - which subtheories are `not_evidenced` in the current dataset
 
 ## Hard Rules
@@ -354,14 +489,18 @@ The final report should visibly show:
 - Never let scripts consume raw reviews directly.
 - Never hardcode a fixed item count into the validator or statistical pipeline.
 - Always use `product` as the product field name.
-- Always keep scoring on the paired `salience 0-7` and `valence 0-10` scales.
+- Axis A scoring (customer × attribute): always use `salience 0–7`.
+- Axis B scoring (product × attribute): always use `quality 0–10`.
+- Never use `valence` as a column name — it is replaced by `quality` in this skill.
 - Always preserve verbatim `review_text` for evidence quoting.
 - Always state the statistical method and theory used in each major report section.
-- Always show how `salience` and `valence` were modeled in each major report section.
+- Always show how Axis A and Axis B were modeled in each major report section.
 - Always show dynamic theme coverage and theory coverage in the report body.
 - Always show the attribute-extraction summary and representative attributes in the report body.
 - Always attach reproducibility steps and statistical results to each finding.
 - Never fabricate evidence quotes or attribute vectors.
+- Theory annotations default to the four built-in families: `product_positioning`, `maslow`, `purchase_motivation`, `wom_motivation`. Additional families may be introduced when the corpus clearly warrants it, provided they are documented with name, rationale, and subtheory list in `review_foundation.json`.
+- Every attribute must be covered by at least one theory family. Attributes with no theory mapping must be flagged and reconsidered.
 
 ## References
 
@@ -377,6 +516,6 @@ The final report should visibly show:
 ## Scripts
 
 - Install dependencies: `python -m pip install -r requirements.txt`
-- Run analysis: `python scripts/run_review_mining_stp.py --run-mode <mode> --input-dir <artifacts> --output-dir <output>`
-- Validate outputs: `python scripts/validate_review_mining_stp.py --run-mode <mode> --output-dir <output>`
+- Run analysis: `python scripts/run_review_mining_stp.py --run-mode <mode> --input-dir <artifacts> --output-dir <o>`
+- Validate outputs: `python scripts/validate_review_mining_stp.py --run-mode <mode> --output-dir <o>`
 - Script boundary: statistical analysis only; raw reviews must first be converted into scored artifacts during the review scoring workflow
