@@ -31,6 +31,14 @@
 | `psychological-trigger-marketing` | 想產出更有轉換力的行銷角度、CTA、campaign hooks、促發點。 | `psychological-trigger-marketing` |
 | `maslow-five-needs-marketing` | 想用 Maslow needs 分層整理受眾動機、情緒訴求與訊息方向。 | `maslow-five-needs-marketing` |
 
+### 服務設計與創新
+
+| Skill | 適合什麼需求 | Install Path |
+| --- | --- | --- |
+| `ecosystem-map-and-blueprint` | 想用生態系地圖拆解服務參與者與價值交換，或用服務藍圖展示前台後台運作流程。 | `ecosystem-map-and-blueprint` |
+| `service-design-workshop` | 想把服務設計題目轉成可執行的工作坊輸出，包含問題框架、利害關係人、服務架構、接觸點與驗證步驟。 | `service-design-workshop` |
+| `service-innovation-workshop` | 想把服務創新機會轉成多個概念選項、原型測試與風險檢查。 | `service-innovation-workshop` |
+
 ### 提案與頁面產出
 
 | Skill | 適合什麼需求 | Install Path |
