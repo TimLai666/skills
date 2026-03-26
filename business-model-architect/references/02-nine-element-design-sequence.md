@@ -61,3 +61,22 @@
 - 通路成本與收益流是否可閉環？
 - 關鍵資源與活動是否足以支持承諾價值？
 - 合作夥伴依賴是否形成單點風險？
+
+## Four-Dimension Mapping
+
+九要素完成後，必須同步映射到四構面:
+- `supply`: key_resources / key_activities / key_partners
+- `value`: value_proposition
+- `demand`: target_customers / channels / customer_relationships
+- `finance`: revenue_streams / cost_structure
+
+每一構面都要輸出:
+- `current_design`: 目前設計如何運作
+- `gap`: 與目標狀態的差距
+- `action`: 30 天內的調整動作
+
+## Cross-Check Rules
+
+- 四構面映射必須可追溯到九要素原始內容，不可另起爐灶。
+- `finance` 的 `action` 必須對應 `revenue_streams` 或 `cost_structure` 的具體調整。
+- `supply` 的 `action` 必須對應 `control_levers_context`，避免提出無法調動的方案。

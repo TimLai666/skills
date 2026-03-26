@@ -5,6 +5,9 @@
 - 目標市場：
 - 目標 KPI：
 - 主要限制條件：
+- 服務範疇與不做範圍（scope_boundary）：
+- 現況弱勢與威脅（current_wt_state）：
+- 可調動控制槓桿（control_levers_context）：
 
 ## 1. What
 ### 1) 價值主張
@@ -72,3 +75,53 @@
 - Now（0-30 天）：
 - Next（31-90 天）：
 - Later（90 天以上）：
+
+## 8. 商模基礎結構（business_model_foundation）
+### positioning_scope
+- 市場定位：
+- 提供範疇：
+- 不做範疇：
+
+### profit_logic
+- 收益來源：
+- 成本結構：
+- 利潤形成路徑：
+
+### strategy_control
+- 內部資源配置：
+- 能力建構與流程控制：
+- 外部合作控制點：
+
+## 9. 四構面對齊矩陣（dimension_alignment_matrix）
+### supply
+- current_design：
+- gap：
+- action：
+
+### value
+- current_design：
+- gap：
+- action：
+
+### demand
+- current_design：
+- gap：
+- action：
+
+### finance
+- current_design：
+- gap：
+- action：
+
+## 10. 營運核心模組（operating_model_core）
+- value_model：
+- revenue_model：
+- profit_model：
+- tension_points：
+- adjustment_levers：
+
+## 11. WT 轉 SO 路徑（wt_to_so_transition）
+- wt_diagnosis：
+- business_model_adjustments：
+- so_target_state：
+- signal_milestones：

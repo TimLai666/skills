@@ -3,6 +3,18 @@
 ## Objective
 
 在填九要素前先建立差異化路徑，避免產出「可行但平庸」的商業模式。
+此外需把 `current_wt_state` 轉成可執行的 `wt_to_so_transition`，確保策略升維可驗證。
+
+## Internal Lens: Seven Faces
+
+用七種角色視角檢查策略盲點（僅內部推演，不輸出成獨立章節）:
+- 資深高階主管：產業重構與資源重配
+- 內部創業家：新技術與新商模結合
+- 創業家：未被滿足需求的切入設計
+- 投資者：商模競爭力與資本效率
+- 顧問：質疑既有假設與重構路徑
+- 設計師：產品創新與商模一致性
+- 社企創業家：社會與經濟價值並進
 
 ## Engine Modules
 
@@ -42,6 +54,18 @@
 - 取代路徑
 - 轉換障礙
 - 轉換誘因
+
+### Module D: WT-to-SO Transition
+
+把弱勢與威脅轉為強勢與機會:
+- `wt_diagnosis`: 明確列出 1-3 個關鍵 WT 壓力點
+- `business_model_adjustments`: 對應九要素與四構面的調整
+- `so_target_state`: 轉換後的目標優勢與機會位置
+- `signal_milestones`: 30/60/90 天訊號里程碑
+
+輸出限制:
+- 每個 WT 壓力點必須至少對應 1 個商模調整動作。
+- 每個調整動作必須至少對應 1 個驗證指標。
 
 ## Differentiation Strategy Output (Minimum 3)
 
