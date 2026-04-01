@@ -38,6 +38,7 @@
 | `ecosystem-map-and-blueprint` | 想用生態系地圖拆解服務參與者與價值交換，或用服務藍圖展示前台後台運作流程。 | `ecosystem-map-and-blueprint` |
 | `service-design-workshop` | 想把服務設計題目轉成可執行的工作坊輸出，包含問題框架、利害關係人、服務架構、接觸點與驗證步驟。 | `service-design-workshop` |
 | `service-innovation-workshop` | 想把服務創新機會轉成多個概念選項、原型測試與風險檢查。 | `service-innovation-workshop` |
+| `scamper` | 想對現有產品、服務、流程或商業模式套用 SCAMPER 奔馳法，從七個思維維度系統化產出創新構想與優先方案。 | `scamper` |
 
 ### 提案與頁面產出
 
