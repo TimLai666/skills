@@ -39,6 +39,7 @@ Use this file as a cleanup checklist after drafting or rewriting.
 
 - Em dash abuse
   - Fix: use commas or periods unless the interruption genuinely matters.
+  - In Chinese, do not lean on long or repeated 破折號 just to fake tone or emphasis.
 
 - Symmetry artifacts
   - Examples: every sentence same length, every paragraph same arc, repeated "not just X, but Y"

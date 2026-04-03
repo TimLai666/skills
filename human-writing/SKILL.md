@@ -32,7 +32,7 @@ If another skill owns the structure or domain logic, let that skill drive the co
    - Make it varied rather than templated.
    - Make it voiced when useful and restrained when needed.
 6. Run a cleanup pass.
-   - Remove AI-writing artifacts, empty intensifiers, filler transitions, fake profundity, and over-symmetry.
+   - Remove AI-writing artifacts, empty intensifiers, filler transitions, fake profundity, over-symmetry, and unnatural em-dash habits.
    - Keep the meaning, facts, and intent intact.
 
 ## Mode guide
@@ -85,6 +85,7 @@ Before finalizing, check that the text:
 - sounds like it was written for someone, not for a benchmark
 - does not rely on vague authorities or inflated importance
 - does not march in identical sentence lengths
+- does not lean on unnatural em dashes to simulate voice
 - does not hide weak thinking behind smooth phrasing
 - matches the user's language and implied social context
 
