@@ -55,6 +55,18 @@
 | `project-convergence` | 專案開始發散、handoff 混亂、agent 協作失焦，想先把流程收斂。 | `project-convergence` |
 | `folder-organizer` | 想整理檔案與資料夾結構，快速把專案內容分類成可上傳或分享的格式。 | `folder-organizer` |
 
+### 開發流程與工程支援
+
+| Skill | 適合什麼需求 | Install Path |
+| --- | --- | --- |
+| `investigate` | 想先調查根因、驗證假設、再修復，不要先修再問。 | `investigate` |
+| `stacksmith-ops` | 想用 checkpoint/learn/health/retro 等模式管理專案狀態與記錄。 | `stacksmith-ops` |
+| `stacksmith-plan` | 想用 ideate/ceo/eng/design/auto 模式進行計畫、策略與架構定位。 | `stacksmith-plan` |
+| `stacksmith-qa` | 想做統一 QA 流程：測試、回報、修正、驗證。 | `stacksmith-qa` |
+| `stacksmith-review` | 想進行程式碼、設計或安全審查。 | `stacksmith-review` |
+| `stacksmith-release` | 想用統一發佈流程準備、上線與文件同步。 | `stacksmith-release` |
+| `stacksmith-safety` | 想開啟安全模式、凍結編輯範圍、或暫停風險操作。 | `stacksmith-safety` |
+
 ### 資料分析與建模
 
 | Skill | 適合什麼需求 | Install Path |
