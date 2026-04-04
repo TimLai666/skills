@@ -2,7 +2,7 @@
 
 請你分析這些內容，並整理出：
 1. 常見主題與選題方向
-2. 前 5 秒 Hook 的設計方式
+2. 前 5 秒 Hook 的設計方式(可參考psychological-trigger-marketing, scamper, human-writing)
 3. 內容節奏與段落結構
 4. 語氣與風格
 5. 觀眾持續觀看的原因
