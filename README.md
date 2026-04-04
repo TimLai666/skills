@@ -46,12 +46,14 @@
 | --- | --- | --- |
 | `commercial-proposal-writing` | 想寫或改提案、合作方案、募資 deck、商業計畫。 | `commercial-proposal-writing` |
 | `landing-page-studio` | 想產出偏高轉換導向的 landing page、hero section、行銷頁面。 | `landing-page-studio` |
+| `human-writing` | 想要產出文案、文章、內容重寫或其他寫作支援。 | `human-writing` |
 
 ### 專案治理與協作
 
 | Skill | 適合什麼需求 | Install Path |
 | --- | --- | --- |
 | `project-convergence` | 專案開始發散、handoff 混亂、agent 協作失焦，想先把流程收斂。 | `project-convergence` |
+| `folder-organizer` | 想整理檔案與資料夾結構，快速把專案內容分類成可上傳或分享的格式。 | `folder-organizer` |
 
 ### 資料分析與建模
 
