@@ -1,7 +1,7 @@
 ---
 name: stacksmith-plan
 version: 1.0.0
-description: "Unified planning gauntlet for mystack. Modes: ideate, ceo, eng, design, and auto."
+description: "Unified planning gauntlet for mystack. Modes: ideate, ceo, eng, design, and auto. Convergence artifact setup (delivery-plan.md, AGENTS.md, CLAUDE.md, OpenSpec proposals) is a mandatory final step of eng and auto — works for new projects and existing ones alike."
 allowed-tools:
   - Bash
   - Read
@@ -528,7 +528,110 @@ _[date] - /stacksmith-plan eng - [repo]:[branch]_
 - [ ] Docs updated
 ```
 
-Tell the user: "ENG.md written. Ready to build. Run `/stacksmith-review code` when you have a diff, or `/stacksmith-qa` after deploying to staging."
+Tell the user: "ENG.md written. Establishing convergence artifacts now."
+
+### Step 9 - Establish convergence artifacts (mandatory)
+
+This step runs every time `eng` completes, whether it is a new project or an existing one.
+
+Check for existing artifacts first:
+
+```bash
+[ -f delivery-plan.md ] && echo "DELIVERY_PLAN: exists" || echo "DELIVERY_PLAN: missing"
+[ -f AGENTS.md ] && echo "AGENTS_MD: exists" || echo "AGENTS_MD: missing"
+[ -f CLAUDE.md ] && echo "CLAUDE_MD: exists" || echo "CLAUDE_MD: missing"
+cat delivery-plan.md 2>/dev/null | head -40
+cat AGENTS.md 2>/dev/null | head -20
+```
+
+#### 9a - Create or update `delivery-plan.md`
+
+Read [references/delivery-plan-guidelines.md](./references/delivery-plan-guidelines.md) before writing.
+
+Use the phase, milestones, and implementation order from ENG.md to fill these required sections:
+
+```md
+# Delivery Plan
+
+## Current Phase
+## Stage Objective
+## Active Workstreams
+## Milestones
+## Current Blockers
+## Next Verifiable Output
+## Next OpenSpec Change
+## Decision Log
+## Source Links
+## Handoff Notes
+```
+
+Rules:
+- State current phase in one line
+- Keep it short enough that a new agent can scan it first and act second
+- Must not become roadmap copy, launch copy, or a changelog dump
+
+#### 9b - Create OpenSpec proposals for the active phase
+
+Read [references/openspec-breakdown-guidelines.md](./references/openspec-breakdown-guidelines.md).
+
+At phase kickoff: create the full proposal inventory before execution starts. Treat missing proposal coverage as non-convergent state.
+
+Break implementation order items into small proposals — one verifiable result per proposal. Map each proposal to one milestone id. Name the first proposal directly in `delivery-plan.md` under `Next OpenSpec Change`.
+
+**REQUIRED SUB-SKILL:** Use `openspec` for CLI commands, delta syntax, validation, and archive flow.
+
+#### 9c - Create or update `AGENTS.md` and `CLAUDE.md`
+
+Read [references/agent-context-files.md](./references/agent-context-files.md) first.
+
+`AGENTS.md` must contain:
+- required artifacts
+- handoff expectations
+- planning discipline
+- update rules
+- project-specific constraints
+
+`CLAUDE.md` must contain only:
+
+```md
+Read `AGENTS.md` before doing any project work. Treat it as the project operating contract.
+```
+
+Do not duplicate the full contract in `CLAUDE.md`.
+
+#### Convergence artifact contract
+
+| Artifact | Must contain | Must not become |
+|---|---|---|
+| `delivery-plan.md` | phase, blockers, next output, next change | roadmap copy or changelog dump |
+| OpenSpec proposals | fine-grained changes with one verifiable result each | one giant phase-level proposal |
+| `AGENTS.md` | shared operating rules any agent can follow | a personal note file |
+| `CLAUDE.md` | pointer to `AGENTS.md` | a second full operating manual |
+
+#### Re-sync cadence
+
+Re-run this step (or update the artifacts manually) after:
+- phase changes
+- milestone status changes
+- blocker appears or clears
+- handoff to another agent
+
+Read [references/handoff-and-feedback-loop.md](./references/handoff-and-feedback-loop.md) for the expected loop.
+
+#### Handoff checklist
+
+Before handing off to another agent:
+- [ ] State current phase
+- [ ] State blocker or explicitly say none
+- [ ] State next verifiable output
+- [ ] State next OpenSpec change
+- [ ] State decision delta since previous handoff
+- [ ] Include source links for critical context
+- [ ] Confirm `delivery-plan.md` was updated
+- [ ] Confirm `AGENTS.md` is current
+- [ ] Confirm `CLAUDE.md` points to `AGENTS.md`
+
+Tell the user: "Convergence artifacts ready. Run `/stacksmith-review code` when you have a diff, or `/stacksmith-qa` after deploying to staging."
 
 ### Log
 
