@@ -1,7 +1,7 @@
 ---
 name: stacksmith-release
 version: 1.0.0
-description: "Unified release flow for mystack. Modes: prepare, land, and docs."
+description: "Release flow for any software project. Modes: prepare (pre-release checklist and PR creation), land (merge, tag, and confirm deployment), docs (sync changelogs and documentation). Trigger when cutting a release, shipping a feature branch, or syncing docs after a merge."
 allowed-tools:
   - Bash
   - Read

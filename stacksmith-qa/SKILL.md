@@ -1,7 +1,7 @@
 ---
 name: stacksmith-qa
 version: 1.0.0
-description: "Unified QA flow for mystack. Default mode is the full test-fix-verify loop, with report-only and quick variants."
+description: "QA flow for any software project. Default mode runs the full test-fix-verify loop; report-only and quick variants available. Trigger when running tests, verifying a bug fix, auditing test coverage, or doing a QA pass before a release."
 allowed-tools:
   - Bash
   - Read

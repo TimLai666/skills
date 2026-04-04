@@ -1,7 +1,7 @@
 ---
 name: stacksmith-plan
 version: 1.0.0
-description: "Unified planning gauntlet for mystack. Modes: ideate, ceo, eng, design, and auto. Convergence artifact setup (delivery-plan.md, AGENTS.md, CLAUDE.md, OpenSpec proposals) is a mandatory final step of eng and auto — works for new projects and existing ones alike."
+description: "Planning gauntlet for any software project. Modes: ideate (define problem or vision), ceo (scope challenge), eng (architecture + convergence artifacts), design (UI quality review), auto (full run). Convergence artifacts — delivery-plan.md, AGENTS.md, CLAUDE.md, OpenSpec proposals — are built automatically at the end of eng. Trigger when planning a feature, starting a project, locking architecture, or reviewing scope before implementation."
 allowed-tools:
   - Bash
   - Read

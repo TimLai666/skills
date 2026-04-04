@@ -1,7 +1,7 @@
 ---
 name: stacksmith-safety
 version: 1.0.0
-description: "Unified safety controls for mystack. Subcommands: careful on, freeze, guard, and off."
+description: "Safety controls for any software project. Subcommands: careful on (enable confirmation gates before risky actions), freeze (lock file or scope boundaries), guard (validate preconditions before destructive ops), off (disable active guards). Trigger before bulk edits, migrations, destructive operations, or any change where accidental scope creep would be costly."
 ---
 
 ## Command routing

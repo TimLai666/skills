@@ -1,7 +1,7 @@
 ---
 name: stacksmith-review
 version: 1.0.0
-description: "Unified review suite for mystack. Modes: code, design, and security."
+description: "Review suite for any software project. Modes: code (diff and logic review), design (UI/UX quality audit), security (vulnerability and threat surface scan). Trigger when reviewing a PR or diff, auditing UI quality, or checking for security issues before merging or shipping."
 allowed-tools:
   - Bash
   - Read

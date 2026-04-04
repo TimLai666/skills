@@ -52,20 +52,21 @@
 
 | Skill | 適合什麼需求 | Install Path |
 | --- | --- | --- |
-| `project-convergence` | 專案開始發散、handoff 混亂、agent 協作失焦，想先把流程收斂。 | `project-convergence` |
 | `folder-organizer` | 想整理檔案與資料夾結構，快速把專案內容分類成可上傳或分享的格式。 | `folder-organizer` |
 
 ### 開發流程與工程支援
 
+> **Stacksmith 系列** 是一套完整的軟體開發流程工具組，從規劃到上線都有對應的 skill，可單獨使用也可串接。
+
 | Skill | 適合什麼需求 | Install Path |
 | --- | --- | --- |
 | `investigate` | 想先調查根因、驗證假設、再修復，不要先修再問。 | `investigate` |
-| `stacksmith-ops` | 想用 checkpoint/learn/health/retro 等模式管理專案狀態與記錄。 | `stacksmith-ops` |
-| `stacksmith-plan` | 想用 ideate/ceo/eng/design/auto 模式進行計畫、策略與架構定位。 | `stacksmith-plan` |
-| `stacksmith-qa` | 想做統一 QA 流程：測試、回報、修正、驗證。 | `stacksmith-qa` |
-| `stacksmith-review` | 想進行程式碼、設計或安全審查。 | `stacksmith-review` |
-| `stacksmith-release` | 想用統一發佈流程準備、上線與文件同步。 | `stacksmith-release` |
-| `stacksmith-safety` | 想開啟安全模式、凍結編輯範圍、或暫停風險操作。 | `stacksmith-safety` |
+| `stacksmith-plan` | 想規劃功能、挑戰 scope、鎖定架構；eng 模式結束後自動建立 delivery-plan.md、AGENTS.md、CLAUDE.md 等協作 artifact，新舊專案皆適用。 | `stacksmith-plan` |
+| `stacksmith-review` | 想審查 PR diff、UI 品質或掃描安全漏洞。 | `stacksmith-review` |
+| `stacksmith-qa` | 想跑測試、修復後驗證、或在上線前做 QA 稽核。 | `stacksmith-qa` |
+| `stacksmith-release` | 想準備 PR、合併上線、或在發佈後同步 changelog 與文件。 | `stacksmith-release` |
+| `stacksmith-ops` | 想存一個專案 checkpoint、記錄教訓、查健康狀態、或跑回顧。 | `stacksmith-ops` |
+| `stacksmith-safety` | 想在大範圍編輯、migration 或高風險操作前開啟確認閘道或鎖定範圍。 | `stacksmith-safety` |
 
 ### 資料分析與建模
 

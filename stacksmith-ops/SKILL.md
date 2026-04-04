@@ -1,7 +1,7 @@
 ---
 name: stacksmith-ops
 version: 1.0.0
-description: "Unified ops and memory layer for mystack. Modes: checkpoint, learn, health, and retro."
+description: "Ops and project memory layer for any software project. Modes: checkpoint (save project state and context), learn (capture lessons and patterns), health (audit project health and drift), retro (run a retrospective). Trigger when saving progress before a handoff, reviewing project status, or running an end-of-sprint retrospective."
 allowed-tools:
   - Bash
   - Read
