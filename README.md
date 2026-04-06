@@ -47,6 +47,7 @@
 | --- | --- | --- |
 | `commercial-proposal-writing` | 想寫或改提案、合作方案、募資 deck、商業計畫。 | `commercial-proposal-writing` |
 | `landing-page-studio` | 想產出偏高轉換導向的 landing page、hero section、行銷頁面。 | `landing-page-studio` |
+| `cinematic-ui` | 想做電影感網站設計或導演式、電影風格的簡報 / PPTX。 | `cinematic-ui` |
 | `human-writing` | 想要產出文案、文章、內容重寫或其他寫作支援。 | `human-writing` |
 
 ### 專案治理與協作
