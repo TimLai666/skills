@@ -40,6 +40,7 @@
 | `service-design-workshop` | 想把服務設計題目轉成可執行的工作坊輸出，包含問題框架、利害關係人、服務架構、接觸點與驗證步驟。 | `service-design-workshop` |
 | `service-innovation-workshop` | 想把服務創新機會轉成多個概念選項、原型測試與風險檢查。 | `service-innovation-workshop` |
 | `scamper` | 想對現有產品、服務、流程或商業模式套用 SCAMPER 奔馳法，從七個思維維度系統化產出創新構想與優先方案。 | `scamper` |
+| `subtraction-thinking` | 想在提案、報告、流程、產品或服務設計前後強制做減法審查，移除冗餘與簡化複雜度。 | `subtraction-thinking` |
 
 ### 提案與頁面產出
 
