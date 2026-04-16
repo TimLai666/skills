@@ -7,6 +7,7 @@
 | --- | --- | --- |
 | `business-model-architect` | 想拆解或設計商業模式，整理價值主張、客群、通路、收入、成本與關鍵資源。 | `business-model-architect` |
 | `bcg-growth-share-matrix` | 想用 BCG growth-share matrix 分析產品、品牌、事業組合的投資優先順序。 | `bcg-growth-share-matrix` |
+| `pestel-analysis` | 想做嚴謹的 PESTEL / 外部環境掃描，作為 SWOT 或策略規劃前置分析。 | `pestel-analysis` |
 | `decision-bias-quality-control` | 想在高風險決策、提案審查、go/no-go 判斷前做偏誤檢查。 | `decision-bias-quality-control` |
 | `swot-analysis` | 想做完整 SWOT 策略分析、外部環境掃描與 SO/ST/WO/WT 策略碰撞。 | `swot-analysis` |
 
