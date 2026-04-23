@@ -33,6 +33,7 @@
 | `psychological-trigger-marketing` | 想產出更有轉換力的行銷角度、CTA、campaign hooks、促發點。 | `psychological-trigger-marketing` |
 | `maslow-five-needs-marketing` | 想用 Maslow needs 分層整理受眾動機、情緒訴求與訊息方向。 | `maslow-five-needs-marketing` |
 | `content-growth-studio` | 想製作成長導向內容、標題、腳本、社群包裝，或設計內容生產與複製流程。 | `content-growth-studio` |
+| `experiential-guerrilla-marketing` | 想規劃體驗行銷與游擊行銷整合策略、快閃活動、低預算高創意行銷與 KPI 評估。 | `experiential-guerrilla-marketing` |
 
 ### 服務設計與創新
 
