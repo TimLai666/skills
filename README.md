@@ -79,6 +79,7 @@
 | Skill | 適合什麼需求 | Install Path |
 | --- | --- | --- |
 | `data-analysis-workflow` | 想把資料分析從資料檢查、清理、EDA、建模、評估一路做成標準化流程並產出分析報告。 | `data-analysis-workflow` |
+| `product-conjoint-analysis` | 想做商品屬性偏好分析、估算屬性重要性與願付價格（WTP），找出最佳商品組合與定價/成本效益方向。 | `product-conjoint-analysis` |
 
 ### 投資研究與金融分析
 
