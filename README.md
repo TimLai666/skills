@@ -55,6 +55,12 @@
 | `cinematic-ui` | 想做電影感網站設計或導演式、電影風格的簡報 / PPTX。 | `cinematic-ui` |
 | `human-writing` | 想要產出文案、文章、內容重寫或其他寫作支援。 | `human-writing` |
 
+### 法務與合約審閱
+
+| Skill | 適合什麼需求 | Install Path |
+| --- | --- | --- |
+| `red-flag-contract-scanner` | 想對合約、租約、服務條款、聘僱契約等進行「紅旗條款」與不利條件掃描，並轉化為白話建議。 | `red-flag-contract-scanner` |
+
 ### 專案治理與協作
 
 | Skill | 適合什麼需求 | Install Path |
