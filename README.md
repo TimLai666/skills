@@ -66,6 +66,7 @@
 | Skill | 適合什麼需求 | Install Path |
 | --- | --- | --- |
 | `folder-organizer` | 想整理檔案與資料夾結構，快速把專案內容分類成可上傳或分享的格式。 | `folder-organizer` |
+| `dev-task-loop` | 想用已知 backlog / ticket /設計參考，一次處理一系列開發任務，從實作到驗證再到追蹤。 | `dev-task-loop` |
 
 ### 開發流程與工程支援
 
