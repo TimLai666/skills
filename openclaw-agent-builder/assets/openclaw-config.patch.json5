@@ -1,0 +1,73 @@
+// ─────────────────────────────────────────────────────────────────────────
+// openclaw.json config patch 骨架
+//
+// 這不是完整 config，是要「併進」現有 ~/.openclaw/openclaw.json 的片段。
+// 用法：把對應區塊合併到現有 config 的同名 key 底下（agents.list / bindings /
+// session / channels 都是要 *附加 / 合併*，不是整個取代）。
+//
+// 〔方括號〕= 依訪談答案替換。所有鍵名以 host 上 `openclaw config schema` 為準。
+// 套用前務必：1) 備份 config  2) 驗證 JSON5 可解析  3) 重啟 gateway
+// ─────────────────────────────────────────────────────────────────────────
+{
+  agents: {
+    list: [
+      // ↓↓↓ 把這一筆「附加」到現有 agents.list 陣列
+      {
+        id: "〔agentId，短、小寫、無空白〕",
+        name: "〔顯示名稱〕",
+        workspace: "~/.openclaw/workspace-〔agentId〕",
+        agentDir: "~/.openclaw/agents/〔agentId〕/agent",
+        model: "〔provider/model，例如 anthropic/claude-sonnet-4-6〕",
+
+        // 工具權限：預設收到最緊，純問答型只留 read。
+        // 要動工具的 agent 才逐項放行，放寬要極保守。
+        tools: {
+          allow: ["read"],
+          deny: ["exec", "write", "edit", "browser", "canvas", "nodes", "cron", "gateway"],
+        },
+
+        // 服務型 / 不可信來源建議開 sandbox
+        sandbox: {
+          mode: "non-main",   // 私人單人助理可視情況用 "off"
+        },
+
+        // 選配：identity.name（與 IDENTITY.md 一致）
+        // identity: { name: "〔agent 名字〕" },
+      },
+    ],
+  },
+
+  // ↓↓↓ 把這一筆「附加」到現有 bindings 陣列。最具體者勝、config 順序在前者勝。
+  bindings: [
+    {
+      agentId: "〔agentId〕",
+      match: {
+        channel: "〔line | whatsapp | telegram | discord | slack | …〕",
+        accountId: "default",
+        // 可選 peer：peer: { kind: "direct" | "group" | "channel", id: "〔id〕" },
+      },
+    },
+  ],
+
+  // 服務型（多使用者）agent 必須設 —— 讓每位顧客各自獨立 session。
+  // 私人單人助理可省略此區塊（預設 main 即可）。
+  session: {
+    dmScope: "per-channel-peer",
+  },
+
+  // channel 帳號設定。鍵名因 channel 而異，務必先查文件 / --help。
+  channels: {
+    "〔channel 名〕": {
+      // dmPolicy：pairing（私人）/ allowlist（半開放）/ open（對公眾，需理解風險）
+      dmPolicy: "〔pairing | allowlist | open〕",
+
+      // allowlist / pairing 時放已驗證識別碼；open 對公眾則放 ["*"]
+      allowFrom: ["〔已驗證識別碼，例如 +886912345678〕"],
+
+      // accounts：各 channel 鍵名不同（Discord: token / Telegram: botToken / …）
+      // accounts: {
+      //   default: { /* 〔該 channel 的 token / secret —— 查文件後填〕 */ },
+      // },
+    },
+  },
+}

@@ -75,6 +75,7 @@
 | Skill | 適合什麼需求 | Install Path |
 | --- | --- | --- |
 | `investigate` | 想先調查根因、驗證假設、再修復，不要先修再問。 | `investigate` |
+| `openclaw-agent-builder` | 想建立、配置或改造 OpenClaw agent，包括 workspace、channel、bindings、RAG 知識庫與安全設定。 | `openclaw-agent-builder` |
 | `stacksmith-plan` | 想規劃功能、挑戰 scope、鎖定架構；eng 模式結束後自動建立 delivery-plan.md、AGENTS.md、CLAUDE.md 等協作 artifact，新舊專案皆適用。 | `stacksmith-plan` |
 | `stacksmith-review` | 想審查 PR diff、UI 品質或掃描安全漏洞。 | `stacksmith-review` |
 | `stacksmith-qa` | 想跑測試、修復後驗證、或在上線前做 QA 稽核。 | `stacksmith-qa` |
