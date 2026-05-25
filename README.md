@@ -83,6 +83,7 @@
 | `stacksmith-release` | 想準備 PR、合併上線、或在發佈後同步 changelog 與文件。 | `stacksmith-release` |
 | `stacksmith-ops` | 想存一個專案 checkpoint、記錄教訓、查健康狀態、或跑回顧。 | `stacksmith-ops` |
 | `stacksmith-safety` | 想在大範圍編輯、migration 或高風險操作前開啟確認閘道或鎖定範圍。 | `stacksmith-safety` |
+| `zeabur-deployment` | 想為專案設定 Zeabur 部署規範，建立 CLAUDE.md 部署約束（Zeabur 只支援 Dockerfile、不支援 docker-compose）。 | `zeabur-deployment` |
 
 ### 資料分析與建模
 
