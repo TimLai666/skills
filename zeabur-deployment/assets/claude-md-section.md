@@ -15,3 +15,16 @@
 - 保持 `docker-compose.yml` 與線上設定等價：compose 裡的環境變數、port、啟動指令，要能對應到 Zeabur 服務設定或 Dockerfile，避免兩邊漂移。
 - 新增服務或依賴前先自問：「這個只靠 Dockerfile 在 Zeabur 上跑得起來嗎？」答案要是「可以」。
 - 部署文件與指令以 Dockerfile / Zeabur 服務設定為主，不要用 `docker compose up` 當作部署步驟。
+
+**每個 Dockerfile 開頭必須註解該服務在 Zeabur 上要設定的環境變數**
+
+Zeabur 的環境變數是在每個 service 的 UI 個別填，沒有清單就要翻原始碼才知道要設什麼、設在哪。為了讓部署的人（包含未來的自己）一目了然，每個 Dockerfile 開頭都要有一段「Zeabur 環境變數設定」註解，內容至少包含：
+
+- **必填 vs 選填**：哪些不設會直接壞掉、哪些可以省略，並附一行說明各自的用途與典型值。
+- **dev / prod 對應值**：例如 Supabase URL 在兩個環境是不同 project，要明確寫出來，避免設錯環境。
+- **Runtime vs Build-time** — 這是 Zeabur 上最容易踩的坑，務必清楚標示：
+  - **Runtime 變數**（後端 / 長駐進程啟動時讀）→ 在 Zeabur 設 **Variables**，重啟即生效。
+  - **Build-time 變數**（Vite 等靜態建置工具在 build 階段就寫死進 bundle）→ 在 Zeabur 設 **Build-time Variables / Build Args**，**改值後必須重新 build 才會生效**。Dockerfile 裡要對應地用 `ARG` 宣告。
+- **安全邊界警告**：所有會被打包進前端 bundle 的變數（例如 Vite 的 `VITE_*`）在瀏覽器端公開可見，嚴禁放 service_role key、後端 API token 等敏感值。
+
+改 Dockerfile 或新增 / 移除環境變數時，要同步更新這段註解，避免註解與實際讀取的變數漂移。
