@@ -68,6 +68,12 @@
 | `folder-organizer` | 想整理檔案與資料夾結構，快速把專案內容分類成可上傳或分享的格式。 | `folder-organizer` |
 | `dev-task-loop` | 想用已知 backlog / ticket /設計參考，一次處理一系列開發任務，從實作到驗證再到追蹤。 | `dev-task-loop` |
 
+### 後端與基礎設施
+
+| Skill | 適合什麼需求 | Install Path |
+| --- | --- | --- |
+| `supabase-service-builder` | 想建立或開發以 Supabase 為後端的服務，涵蓋環境分離、migration、RLS、Auth、稽核 log、軟刪除等規範。 | `supabase-service-builder` |
+
 ### 開發流程與工程支援
 
 > **Stacksmith 系列** 是一套完整的軟體開發流程工具組，從規劃到上線都有對應的 skill，可單獨使用也可串接。

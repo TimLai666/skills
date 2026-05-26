@@ -1,0 +1,15 @@
+# --- 加進專案 .gitignore 的項目 ---
+
+# 環境變數：真實金鑰絕不進 git，只保留範本
+.env
+.env.*
+!.env.example
+
+# Supabase CLI 本機暫存
+supabase/.temp
+supabase/.branches
+
+# 注意：以下「要」進 git，不要忽略：
+#   supabase/config.toml
+#   supabase/migrations/
+#   supabase/seed.sql
