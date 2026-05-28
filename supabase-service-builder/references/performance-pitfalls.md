@@ -320,9 +320,70 @@ try {
 }
 ```
 
-`supabase.auth.getSession()` 也要套 timeout（5 秒就夠）——它在背景 refresh token 時可能掛住。
-
 **設計時規則**：所有對外的 fetch 都要有 timeout；UI 的 loading flag 一律在 `finally` 釋放，不靠 try 內的成功路徑。
+
+---
+
+## 8d. 每個 request 都打 `supabase.auth.getSession()` — refresh 鎖把全部呼叫卡住
+
+**症狀**：操作偶爾跳 `getSession timeout`；F5 之後就好；多分頁同時開更容易發生。
+
+**原因**：Supabase JS client 的 `getSession()` 內部有把 lock（避免多個並發呼叫同時 refresh token）。一旦背景的 token refresh 因網路抖動、auth endpoint 慢、其他分頁正在 refresh 而卡住，所有後續 `getSession()` 都會排隊等鎖直到 timeout。每個 API request 都打一次 `getSession()` 就是把這個風險放大 N 倍。
+
+**錯**：
+
+```js
+async function authHeader() {
+  const { data: { session } } = await supabase.auth.getSession()  // 每次 request 都呼叫
+  return { Authorization: 'Bearer ' + session.access_token }
+}
+```
+
+**對**：在 module scope 快取 session，只有快取過期或缺 token 時才真的呼叫；用 `onAuthStateChange` 同步背景 refresh 結果：
+
+```js
+let cachedSession = null
+let initPromise = null
+
+supabase.auth.onAuthStateChange((_event, session) => {
+  cachedSession = session                       // Supabase 自動 refresh 完會推進來
+})
+
+function ensureInit() {
+  if (!initPromise) {
+    initPromise = withTimeout(supabase.auth.getSession(), 10_000, 'getSession')
+      .then(({ data }) => { cachedSession = data?.session || null })
+      .catch((err) => { initPromise = null; throw err })
+  }
+  return initPromise
+}
+
+function isTokenFresh(s) {
+  return s?.access_token && Date.now() + 60_000 < s.expires_at * 1000  // 60s buffer
+}
+
+async function authHeader() {
+  if (!isTokenFresh(cachedSession)) {
+    await ensureInit()
+    if (!isTokenFresh(cachedSession)) {
+      const { data } = await withTimeout(
+        supabase.auth.refreshSession(), 10_000, 'refreshSession',
+      )
+      cachedSession = data?.session || null
+    }
+  }
+  if (!cachedSession?.access_token) throw new Error('未登入')
+  return { Authorization: 'Bearer ' + cachedSession.access_token }
+}
+```
+
+關鍵點：
+- **快取在 module scope**：所有 request 共用，cache hit 時連 `getSession()` 都不呼叫。
+- **`onAuthStateChange` 是同步管道**：Supabase 背景 refresh 完會推 `TOKEN_REFRESHED` 事件，快取自動更新，不用主動拉。
+- **expires_at 60s buffer**：避免拿到「還有 5 秒就過期」的 token 去打 request，伺服器收到時已經過期。
+- **fallback timeout 拉到 10s**：真的走到 `getSession()` 是 fallback 路徑，給多點時間覆蓋 token refresh。
+
+**設計時規則**：前端對 Supabase 的 session 管理一律走「快取 + onAuthStateChange」模式，**永遠不要**在 request 熱路徑上直接呼叫 `getSession()`。
 
 ---
 
@@ -391,7 +452,8 @@ migration 內若有 `insert ... select ...` 灌大量資料，後面接一條 `a
 - [ ] 沒有「`for ... { db.X() }`」這類迴圈內 DB 呼叫——改成 `id=in.(...)` 批次抓。
 - [ ] 集合操作（建多筆 / 更新多筆 / upsert 多筆）一律用 array body 一支 request 灌完。
 - [ ] 後端對 Supabase 共用一個 long-lived HTTP client，調好 `MaxIdleConnsPerHost`、設 `Timeout`。
-- [ ] 前端所有 fetch 都套 `AbortController` timeout；`supabase.auth.getSession()` 也要套。
+- [ ] 前端所有 fetch 都套 `AbortController` timeout。
+- [ ] 前端 session 走「module-scope 快取 + `onAuthStateChange` 同步」模式，不在 request 熱路徑直接呼叫 `getSession()`。
 - [ ] 後端驗 JWT 用 JWKS 本地驗章，沒在請求路徑上打 `/auth/v1/user`。
 
 ### 驗證
