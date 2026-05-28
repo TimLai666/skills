@@ -216,7 +216,19 @@ create index orders_created_at_desc_idx
 
 ---
 
-## 9. 冷啟動（免費方案 / 閒置 project）
+## 9. 後端每個請求都打 `/auth/v1/user` 驗 JWT
+
+**症狀**：admin 介面 / dashboard 切 tab 慢。後端日誌看每支 API 多 100-500ms 但 DB query 很快。
+
+**原因**：常見模式是 middleware 在每個請求都呼叫 Supabase `/auth/v1/user` 來驗使用者身分——這是跨網路 HTTP 往返，比本地驗章慢三個數量級，還會被 Supabase rate limit。
+
+**對**：用 JWKS 本地驗章。新版 Supabase 的 signing keys 公鑰透過 `<SUPABASE_URL>/auth/v1/.well-known/jwks.json` 公開，後端 cache 一次後本地驗 ES256 / RS256；完整做法見 `auth.md` 的「後端驗 JWT」段。
+
+**設計時規則**：後端拿到 JWT 一律本地驗章，**永遠不要**在請求路徑上打 `/auth/v1/user`。
+
+---
+
+## 11. 冷啟動（免費方案 / 閒置 project）
 
 **症狀**：偶爾第一個請求要 5-15 秒，之後就正常。
 
@@ -230,7 +242,7 @@ create index orders_created_at_desc_idx
 
 ---
 
-## 10. 大量寫入後沒 ANALYZE — query plan 用錯統計
+## 12. 大量寫入後沒 ANALYZE — query plan 用錯統計
 
 **症狀**：批次匯入幾萬列後，查詢突然變慢。
 
@@ -255,4 +267,5 @@ migration 內若有 `insert ... select ...` 灌大量資料，後面接一條 `a
 - [ ] `security definer` function 都有 `set search_path = ''` 與 `stable`/`immutable` 標籤。
 - [ ] 最常見的 filter／order 欄位有索引；軟刪表用部分索引 `where deleted_at is null`。
 - [ ] 分頁 API 預設用 cursor + `count=estimated`，不用 `count=exact`。
+- [ ] 後端驗 JWT 用 JWKS 本地驗章，沒在請求路徑上打 `/auth/v1/user`。
 - [ ] migration 寫完後跑 `get_advisors(type=performance)`，沒有新的 WARN。

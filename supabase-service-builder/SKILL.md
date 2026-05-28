@@ -1,6 +1,6 @@
 ---
 name: supabase-service-builder
-description: 建立或開發以 Supabase 為後端的服務時使用。涵蓋開發／正式環境分離（兩個獨立 Supabase 專案、預設連開發環境）、強制 migration 並納入 git 追蹤、強制啟用 RLS、優先使用 Supabase 內建 Auth、全操作稽核 log 與自動清理保留策略、軟刪除、created_at/updated_at/deleted_at 標準欄位慣例，以及設計期就要避開的效能地雷（RLS auth.uid() 包 select、FK 一律建索引、policy 寫 to role、避開 multiple permissive、cursor 分頁等）。觸發時機：使用者說「用 Supabase 做一個服務／後端」、要新增資料表或設計 schema、要寫 migration、設定 RLS、處理 Supabase Auth、規劃環境分離、要把改動推到正式環境，或在既有 Supabase 專案上做任何結構或資料變更時。任何碰到正式環境資料庫的動作都必須先取得使用者明確同意。
+description: 建立或開發以 Supabase 為後端的服務時使用。涵蓋 dev/prod 環境分離、migration 紀律、RLS、Supabase Auth（含後端 JWKS 本地驗 JWT）、稽核 log、軟刪除、標準欄位慣例，以及設計期就要避開的效能地雷。觸發：用 Supabase 做後端、設計 schema、寫 migration、設 RLS、處理 Auth、推 production。動 prod 必須先取得使用者明確同意。
 ---
 
 # Supabase Service Builder
@@ -90,7 +90,7 @@ project/
 - `references/environments.md` — 雙環境分離：Supabase CLI、`.env` 檔規劃、APP_ENV 載入器（JS／Python）、啟動指令。
 - `references/migrations.md` — migration 紀律：何時寫、怎麼寫、不可變原則、補抓漂移、常見錯誤。
 - `references/rls.md` — RLS 規範與常見 policy 樣板（擁有者制、公開讀、軟刪感知、service_role）。
-- `references/auth.md` — Supabase Auth 用法、`profiles` 擴充表樣式、註冊時自動建 profile。
+- `references/auth.md` — Supabase Auth 用法、`profiles` 擴充表樣式、註冊時自動建 profile、後端 JWKS 本地驗 JWT（不要打 `/auth/v1/user`）。
 - `references/logging-retention.md` — `audit_log` 表設計、通用稽核 trigger、`pg_cron` 自動清理保留策略。
 - `references/data-conventions.md` — 標準欄位、`updated_at` trigger、軟刪除實作與查詢樣式。
 - `references/performance-pitfalls.md` — 設計期就要避開的效能地雷（RLS auth.uid() initplan、FK 未建索引、multiple permissive policies、`to <role>` 省略、cursor 分頁等）。新建表或寫 policy 前必讀。

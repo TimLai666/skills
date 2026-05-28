@@ -28,12 +28,14 @@ alter table public.profiles enable row level security;
 
 create policy "profiles_select_own"
   on public.profiles for select
-  using (auth.uid() = id);
+  to authenticated
+  using ((select auth.uid()) = id);
 
 create policy "profiles_update_own"
   on public.profiles for update
-  using (auth.uid() = id)
-  with check (auth.uid() = id);
+  to authenticated
+  using ((select auth.uid()) = id)
+  with check ((select auth.uid()) = id);
 
 create trigger set_updated_at
   before update on public.profiles
@@ -84,6 +86,70 @@ create trigger on_auth_user_created
 | 自己開 `users` 表存 email + password | ❌ 禁止 |
 | 自己實作 JWT 簽發／密碼雜湊 | ❌ 禁止 |
 | 直接改 `auth.users` 的結構 | ❌ 禁止 |
+
+## 後端驗 JWT：用 JWKS 本地驗章，不要打 `/auth/v1/user`
+
+當後端（Go／Node／Python…）收到帶 Supabase JWT 的請求要驗身分時，**不要**每次都呼叫 Supabase 的 `/auth/v1/user` 來驗——那是一趟跨網路 HTTP 往返，單支 API 會多 100-500ms（看你的服務跟 Supabase 機房的距離），admin 介面或 dashboard 切 tab 時感受最明顯。
+
+### 用 JWKS 本地驗章
+
+新版 Supabase 用**非對稱 signing keys**（ES256/RS256），公鑰透過 JWKS 端點公開：
+
+```
+<SUPABASE_URL>/auth/v1/.well-known/jwks.json
+```
+
+公鑰本來就公開、**不需要設任何 secret env**。後端啟動時抓一次 JWKS、cache 在記憶體，之後每個請求都本地驗章（微秒級），完全不打 Supabase。
+
+### Go 範例（golang-jwt + keyfunc）
+
+```go
+import (
+    "github.com/MicahParks/keyfunc/v3"
+    "github.com/golang-jwt/jwt/v5"
+)
+
+var kf, _ = keyfunc.NewDefault([]string{
+    supabaseURL + "/auth/v1/.well-known/jwks.json",
+})
+
+func VerifyJWT(token string) (userID string, err error) {
+    parsed, err := jwt.Parse(token, kf.Keyfunc,
+        jwt.WithValidMethods([]string{"ES256", "RS256"}))
+    if err != nil {
+        return "", err
+    }
+    claims := parsed.Claims.(jwt.MapClaims)
+    return claims["sub"].(string), nil
+}
+```
+
+`keyfunc/v3` 會自動 cache JWKS、定期 refresh，且遇到不認得的 `kid` 時主動 refetch——所以 Supabase 輪換 signing keys 時**後端不必重啟**。
+
+### 其他語言
+
+| 語言 | 套件 |
+|---|---|
+| Node | `jose`（`createRemoteJWKSet` + `jwtVerify`）|
+| Python | `PyJWT` + `PyJWKClient`（`jwt.decode(..., algorithms=["ES256","RS256"])`）|
+| Rust | `jsonwebtoken` + JWKS fetch |
+
+### Legacy JWT Secret（HS256）
+
+舊版 Supabase project（或手動切回 legacy 的）用 HS256 + 共享 JWT Secret 簽。判斷方式：打 JWKS 端點，若沒回 keys 或回的是 HS 相關內容，就是 legacy。這時要：
+
+- 在 Supabase Dashboard → Settings → API → JWT Settings 拿 JWT Secret
+- 設成後端 env（**敏感**，等同 service_role 風險級別——洩了能偽造任意使用者）
+- 用 HS256 + secret 本地驗
+
+新專案優先用 signing keys，可零設定、可線上輪換、洩風險低（只洩公鑰）。
+
+### 不要做的事
+
+- ❌ 每個請求都打 `/auth/v1/user`：跨網路、慢、會被 Supabase rate limit。
+- ❌ 把 JWT Secret 暴露給前端：等同把 service_role 給人。
+- ❌ 跳過簽章驗證只解 base64 讀 claims：完全沒安全可言，誰都能偽造 JWT。
+- ❌ 自己手刻 HS/ES 驗章：用成熟套件，別自製密碼學程式碼。
 
 ## 認證事件的稽核
 
