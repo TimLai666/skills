@@ -1,6 +1,6 @@
 ---
 name: supabase-service-builder
-description: 建立或開發以 Supabase 為後端的服務時使用。涵蓋開發／正式環境分離（兩個獨立 Supabase 專案、預設連開發環境）、強制 migration 並納入 git 追蹤、強制啟用 RLS、優先使用 Supabase 內建 Auth、全操作稽核 log 與自動清理保留策略、軟刪除、以及 created_at/updated_at/deleted_at 標準欄位慣例。觸發時機：使用者說「用 Supabase 做一個服務／後端」、要新增資料表或設計 schema、要寫 migration、設定 RLS、處理 Supabase Auth、規劃環境分離、要把改動推到正式環境，或在既有 Supabase 專案上做任何結構或資料變更時。任何碰到正式環境資料庫的動作都必須先取得使用者明確同意。
+description: 建立或開發以 Supabase 為後端的服務時使用。涵蓋開發／正式環境分離（兩個獨立 Supabase 專案、預設連開發環境）、強制 migration 並納入 git 追蹤、強制啟用 RLS、優先使用 Supabase 內建 Auth、全操作稽核 log 與自動清理保留策略、軟刪除、created_at/updated_at/deleted_at 標準欄位慣例，以及設計期就要避開的效能地雷（RLS auth.uid() 包 select、FK 一律建索引、policy 寫 to role、避開 multiple permissive、cursor 分頁等）。觸發時機：使用者說「用 Supabase 做一個服務／後端」、要新增資料表或設計 schema、要寫 migration、設定 RLS、處理 Supabase Auth、規劃環境分離、要把改動推到正式環境，或在既有 Supabase 專案上做任何結構或資料變更時。任何碰到正式環境資料庫的動作都必須先取得使用者明確同意。
 ---
 
 # Supabase Service Builder
@@ -19,6 +19,7 @@ description: 建立或開發以 Supabase 為後端的服務時使用。涵蓋開
 6. **全操作留稽核 log** — 系統的重要操作都要寫進 `audit_log`。log 表必須搭配自動清理（保留策略），用 `pg_cron` 定期刪除過期紀錄。
 7. **優先軟刪除** — 刪除預設用軟刪（`deleted_at` 設時間戳），不做硬刪。硬刪只保留給法遵抹除、測試垃圾資料等明確情境。
 8. **正式環境神聖不可侵犯** — 開發完全基於 development 資料庫。production 資料庫不能亂改、亂刪、亂動，任何碰它的動作（推 migration、改資料、跑 SQL、把 CLI link 過去）都必須先取得使用者明確同意。
+9. **效能在設計期就決定** — Supabase 慢九成不是平台問題、是 schema/RLS 沒踩好。建表與寫 policy 時就要避開地雷：每個 FK 欄位都建索引（PostgREST embed 不會自動走索引）、policy 內 `auth.uid()` 一律包成 `(select auth.uid())` 避免 per-row 重算、每條 policy 都寫 `to <role>` 不要靠預設 `public`、同一 (role, action) 不要疊多條 permissive policy、`security definer` function 一定要 `set search_path = ''` 且標 `stable`。詳見 `references/performance-pitfalls.md`；migration 寫完跑一次 `get_advisors(type=performance)` 確認沒新 warning。
 
 ## 欄位命名慣例
 
@@ -92,6 +93,7 @@ project/
 - `references/auth.md` — Supabase Auth 用法、`profiles` 擴充表樣式、註冊時自動建 profile。
 - `references/logging-retention.md` — `audit_log` 表設計、通用稽核 trigger、`pg_cron` 自動清理保留策略。
 - `references/data-conventions.md` — 標準欄位、`updated_at` trigger、軟刪除實作與查詢樣式。
+- `references/performance-pitfalls.md` — 設計期就要避開的效能地雷（RLS auth.uid() initplan、FK 未建索引、multiple permissive policies、`to <role>` 省略、cursor 分頁等）。新建表或寫 policy 前必讀。
 - `references/production-safety.md` — 正式環境護欄與上線檢查清單。
 
 ## 起手式素材（assets/）
@@ -113,4 +115,6 @@ project/
 - [ ] 重要操作會寫進 `audit_log`，且有 `pg_cron` 清理排程。
 - [ ] 刪除走軟刪（`deleted_at`）；硬刪只在明確且必要時使用。
 - [ ] 欄位用 `created_at/updated_at/deleted_at` 標準名稱。
+- [ ] 每個 FK 欄位都有覆蓋索引；policy 內 auth 函式都包成 `(select ...)`；每條 policy 都寫 `to <role>`。
+- [ ] 跑過 `get_advisors(type=performance)`，沒有新的 WARN（initplan / unindexed FK / multiple permissive 等）。
 - [ ] 沒有未經使用者同意就對 production 做任何變更。

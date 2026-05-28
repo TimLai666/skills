@@ -8,6 +8,10 @@ RLS 是這類專案的資安底線，不是選項。Supabase 的 anon / authenti
 - 啟用 RLS 後，沒有 policy = 預設全部拒絕（對 anon／authenticated）。所以啟用後要補上明確 policy 來「開放」需要的存取。
 - 連那些「只有後端會碰」的表也要 `enable row level security`：service_role 本來就繞過 RLS，但啟用它能確保萬一前端拿到表名也讀不到——這是縱深防禦。
 - policy 按操作分開寫（select／insert／update／delete），語意清楚也好稽核。
+- **效能鐵則**（細節見 `performance-pitfalls.md`）：
+  - 每條 policy 都寫 `to <role>`，不要靠預設 `public`（會連 service_role 都檢查）。
+  - policy 內出現 `auth.uid()` / `auth.jwt()` / `current_setting(...)` 一律包成 `(select ...)`，否則 Postgres 會 per-row 重算，列數一多就爆。
+  - 同一 (role, action) 不要疊多條 permissive policy；合併條件或改用 restrictive。
 
 ## 啟用 RLS
 
@@ -24,19 +28,28 @@ alter table public.<table> enable row level security;
 ```sql
 create policy "select_own"
   on public.notes for select
-  using (auth.uid() = owner_id and deleted_at is null);
+  to authenticated
+  using ((select auth.uid()) = owner_id and deleted_at is null);
 
 create policy "insert_own"
   on public.notes for insert
-  with check (auth.uid() = owner_id);
+  to authenticated
+  with check ((select auth.uid()) = owner_id);
 
 create policy "update_own"
   on public.notes for update
-  using (auth.uid() = owner_id and deleted_at is null)
-  with check (auth.uid() = owner_id);
+  to authenticated
+  using ((select auth.uid()) = owner_id and deleted_at is null)
+  with check ((select auth.uid()) = owner_id);
 ```
 
 `using` 控制「能看到／能動哪些既有列」，`with check` 控制「寫入後的列是否合法」。insert 用 `with check`，update 兩者都要。
+
+注意三個寫法細節（少一個都會踩坑，見 `performance-pitfalls.md`）：
+
+- `to authenticated`：明確指定目標 role，避免預設 `public` 連 service_role 都檢查。
+- `(select auth.uid())`：把 auth function 包成子查詢，Postgres 才會當 initplan 算一次而不是 per-row。
+- `auth.uid() = owner_id`：`owner_id` 是 FK，記得在表上另外 `create index ... (owner_id)`。
 
 ### 2. 公開讀、限定寫
 
@@ -45,12 +58,14 @@ create policy "update_own"
 ```sql
 create policy "public_read"
   on public.products for select
+  to anon, authenticated
   using (deleted_at is null);
 
 create policy "owner_write"
   on public.products for update
-  using (auth.uid() = owner_id)
-  with check (auth.uid() = owner_id);
+  to authenticated
+  using ((select auth.uid()) = owner_id)
+  with check ((select auth.uid()) = owner_id);
 ```
 
 ### 3. 軟刪感知
@@ -75,14 +90,17 @@ stable
 as $$
   select exists (
     select 1 from public.team_members
-    where team_id = p_team_id and user_id = auth.uid()
+    where team_id = p_team_id and user_id = (select auth.uid())
   );
 $$;
 
 create policy "members_can_read"
   on public.team_documents for select
+  to authenticated
   using (public.is_team_member(team_id) and deleted_at is null);
 ```
+
+`security definer` + `set search_path = ''` + `stable` 三個標籤一個都不能少：`search_path` 是資安要求（不固定的話呼叫端可塞 schema 提權），`stable` 讓 RLS 引擎能把結果快取到 query 結束，否則每列重算就退化成 N+1。
 
 ## service_role 與 anon 的分工
 
@@ -95,5 +113,8 @@ create policy "members_can_read"
 - [ ] 每張新表的 migration 內都有 `enable row level security`。
 - [ ] 每張表都有對應其用途的 policy（不是只 enable 卻沒 policy，也不是 enable 了卻忘記補）。
 - [ ] policy 按 select／insert／update／delete 分開。
+- [ ] 每條 policy 都寫 `to <role>`，沒用預設 `public`。
+- [ ] policy 內 `auth.uid()` / `auth.jwt()` / `current_setting(...)` 都包成 `(select ...)`。
+- [ ] 同一 (role, action) 沒有疊多條 permissive policy（advisor 跑一下 `multiple_permissive_policies`）。
 - [ ] 要軟刪的表，policy 的 `using` 含 `deleted_at is null`，且**不給** authenticated 角色 delete policy。
 - [ ] service_role key 沒有出現在前端程式碼。

@@ -17,16 +17,21 @@ create table public.profiles (
 -- 一律啟用 RLS
 alter table public.profiles enable row level security;
 
+-- policy 寫法細節（見 references/performance-pitfalls.md）：
+--   to authenticated + (select auth.uid()) 兩個都要，避免 per-row 重算 & 預設 public
+
 -- 使用者只能讀自己的 profile
 create policy "profiles_select_own"
   on public.profiles for select
-  using (auth.uid() = id and deleted_at is null);
+  to authenticated
+  using ((select auth.uid()) = id and deleted_at is null);
 
 -- 使用者只能改自己的 profile
 create policy "profiles_update_own"
   on public.profiles for update
-  using (auth.uid() = id and deleted_at is null)
-  with check (auth.uid() = id);
+  to authenticated
+  using ((select auth.uid()) = id and deleted_at is null)
+  with check ((select auth.uid()) = id);
 -- 刻意不給 insert / delete policy：
 --   insert 由下方註冊 trigger 負責；delete 走軟刪（更新 deleted_at）。
 

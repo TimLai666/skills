@@ -18,21 +18,29 @@ create table public.notes (
 -- ---- 一律啟用 RLS ----
 alter table public.notes enable row level security;
 
+-- 三個寫法細節（少一個都會踩坑，見 references/performance-pitfalls.md）：
+--   1. to authenticated：明確指定 role，避免預設 public 連 service_role 都檢查
+--   2. (select auth.uid())：包成子查詢避免 per-row 重算
+--   3. owner_id 是 FK：下方有對應索引
+
 -- 擁有者才能讀自己的、且未軟刪的資料
 create policy "notes_select_own"
   on public.notes for select
-  using (auth.uid() = owner_id and deleted_at is null);
+  to authenticated
+  using ((select auth.uid()) = owner_id and deleted_at is null);
 
 -- 只能新增屬於自己的資料
 create policy "notes_insert_own"
   on public.notes for insert
-  with check (auth.uid() = owner_id);
+  to authenticated
+  with check ((select auth.uid()) = owner_id);
 
 -- 只能更新自己的、未軟刪的資料
 create policy "notes_update_own"
   on public.notes for update
-  using (auth.uid() = owner_id and deleted_at is null)
-  with check (auth.uid() = owner_id);
+  to authenticated
+  using ((select auth.uid()) = owner_id and deleted_at is null)
+  with check ((select auth.uid()) = owner_id);
 
 -- 刻意「不」給 delete policy：
 -- 硬刪一律被擋，刪除只能透過 UPDATE 設 deleted_at（軟刪）。
@@ -47,7 +55,9 @@ create trigger audit_notes
   after insert or update or delete on public.notes
   for each row execute function public.record_audit();
 
--- ---- 索引（針對未軟刪資料的部分索引）----
+-- ---- 索引 ----
+-- FK 欄位一律建索引；用部分索引避開軟刪列、更省空間
+-- （Postgres 不會自動幫 FK 建索引，沒索引時 PostgREST embed 會走 seq scan）
 create index notes_owner_active_idx
   on public.notes (owner_id)
   where deleted_at is null;
