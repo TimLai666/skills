@@ -28,6 +28,7 @@ description: 建立或開發以 Supabase 為後端的服務時使用。涵蓋 de
 10. **完整性在設計期就守住** — 效能問題會慢、**完整性問題會丟資料且修不回來**。完整審查面向見 `references/db-integrity-checklist.md`，最低底線：
     - **CASCADE 風險**：每條 FK 明確標 `on delete`。軟刪表的 children 預設用 `RESTRICT`，避免從 Dashboard 隨手刪 parent 把歷史 children 一起吃掉；只有 derived data（segments、cache、stats）才用 CASCADE，並在 migration 加註解說明。
     - **稽核覆蓋**：每張 `public` 表的 migration 必須同時掛 `audit_<table>` trigger（除 audit_log 本身）；漏掉的話該表所有變更會成黑洞。應用層的「呼叫外部服務」操作（推播、寄信、金流）也要有對應紀錄表，不能在記憶體跑完就忘。
+    - **Snapshot vs Reference**：業務子表（訂單／合約／出貨…）對父表的關聯欄位要判斷「業務當下的值要不要凍住」。壽命超過 audit_log 保留期 + 要熱路徑顯示 → snapshot 成子表欄位（如 `order_items.product_name`、`orders.contact_phone`），**不要靠 audit_log 還原**——它會清、查詢也貴。
     - **過時設計**：新欄位要有寫入路徑、新表要有查詢路徑；定期跑 schema 盤點 SQL 找 orphan，刪除前先 deprecate 一個版本。
     - **驗證**：每次改 DB 結構跑 `get_advisors(type=security)` + `get_advisors(type=performance)`；改完跑檢查清單 SQL 確認所有 public 表都有 audit trigger。
 
@@ -134,6 +135,7 @@ project/
 - [ ] 後端對 Supabase 共用 long-lived HTTP client（調 `MaxIdleConnsPerHost`、設 `Timeout`）；前端 fetch 都套 `AbortController` timeout。
 - [ ] 每條 FK 都明確標 `on delete`；軟刪表的 children 用 `RESTRICT`，CASCADE 只給 derived data 並加註解。
 - [ ] 每張新表都掛 `audit_<table>` trigger；外部服務呼叫有對應紀錄表。
+- [ ] 業務子表對父表的關聯欄位（產品名／價格／聯絡資訊／地址…）過 snapshot 判斷：壽命超過 audit 保留期 + 要熱路徑顯示就 snapshot 在子表，不靠 audit_log 還原。
 - [ ] 新欄位 / 新表有寫入與查詢路徑；不留 orphan。
 - [ ] 跑過 `get_advisors(type=performance)` 與 `get_advisors(type=security)`，沒有新的 WARN。
 - [ ] 沒有未經使用者同意就對 production 做任何變更。

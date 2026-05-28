@@ -163,7 +163,61 @@ from pg_policies where schemaname='public';
 
 ---
 
-## D. 每次改 DB 相關內容的 SOP
+## D. Snapshot vs Reference（業務歷史的兩種保存方式）
+
+設計子表（訂單、合約、出貨單…）時，最常見的誤判是「父表欄位之後變了，子表要不要凍住當下的值」。例如 `orders.customer_id` 是 FK 到 `customers`，**那客人之後改名／改電話，去看歷史訂單該顯示哪個？**
+
+新手會想：「不是有 `audit_log` 嗎？任何變更都被 `to_jsonb` 凍進去了，從那邊還原就好。」對一半。
+
+### audit_log 能做的、不能做的
+
+`audit_log` 用 trigger + `to_jsonb(old/new)` 自動凍住變更，**追「誰改了什麼、什麼時候改的」完全勝任**。但它有兩個硬限制：
+
+1. **有保留期**：通常 90 天 cron 清掉。業務子表（訂單、合約、發票）的壽命遠超過——對帳、稅務、客訴常常 1-7 年都還在翻。超過保留期，audit_log 早就沒了。
+2. **讀取成本高**：要從 audit_log 拼出「訂單 X 建立當下客人 Y 的電話」要跑時間範圍 + jsonb path 查詢。每張訂單顯示都跑一次 → 列表頁直接爆。audit_log 是**事後調查**用，不是**頁面顯示**用。
+
+### 判斷規則
+
+對子表的每個關聯欄位問兩個問題：
+
+1. **這個值的「下單／簽約／出貨當下」狀態，業務需要存超過 audit 保留期嗎？**（對帳、客訴、稅務時還會翻嗎？）
+2. **頁面顯示要每次都查嗎？**（訂單列表、發票、出貨單）
+
+兩個都「是」 → **snapshot 到子表欄位**
+兩個都「否」 → audit_log 就夠
+
+### 對照表
+
+| 場景 | 處理 | 為什麼 |
+|---|---|---|
+| `order_items.product_name` / `unit_price` | ✅ snapshot 在子表 | 對帳 1-3 年都看；產品改價／改名不能影響歷史訂單金額 |
+| `orders.contact_name` / `contact_phone` | ✅ snapshot 在子表 | 訂單還在處理時客人改電話，畫面要顯示當時留的才能聯絡；訂單壽命 > 90 天 |
+| `orders.pickup_address` | ✅ snapshot 在子表 | 出貨憑證、退貨追溯 |
+| `customers.display_name` 改名歷史 | audit_log | 同一個人，不影響業務追溯；要查只是稽核 |
+| `profiles.role` 變更歷史 | audit_log | 管理員權限稽核，90 天足夠 |
+| `products.unit_price` 漲跌歷史 | audit_log + order_items.unit_price 雙保險 | 訂單金額凍在 order_items；產品本身的價格變化由 audit_log 追 |
+| 顧客 `notes`、`address` 等隨時改的個資 | audit_log + 子表 snapshot（出貨時凍 address）| 個資追溯走 audit；業務憑證走 snapshot |
+
+### 設計時規則
+
+- 建立子表時，**所有「業務當下要凍住」的父表欄位都複製成子表欄位**：產品名、價格、地址、聯絡方式、適用稅率…
+- **不要靠 join 顯示業務歷史值**，那會被父表後續變更污染。
+- audit_log 是稽核用，**不要拿來當「業務歷史 snapshot 的唯一來源」**——保留期、查詢成本兩個坑。
+- 用 `comment on column` 標清楚哪些欄位是 snapshot：
+  ```sql
+  comment on column public.orders.contact_phone
+    is '下單當下的聯絡電話快照；之後 customers.phone 變了也不影響歷史訂單';
+  ```
+
+### 應用層搭配
+
+- 顯示時**優先讀 snapshot 欄位**，fallback 才走父表 join。
+- 提供 drift 提示：snapshot 與父表現值不同時，UI 提醒商家「這是當時留的，不是現在」。
+- snapshot 欄位**也要可手動編輯**：例如 LIFF 客人留錯電話，admin 在訂單編輯介面要能改快照（改父表沒用，舊訂單還是顯示錯的）。
+
+---
+
+## E. 每次改 DB 相關內容的 SOP
 
 不管是寫 migration、改 repo function、改 handler 內的 DB 呼叫、加 trigger……都過一次：
 
@@ -182,6 +236,8 @@ from pg_policies where schemaname='public';
 - [ ] 新表掛了 `audit_<table>` trigger。
 - [ ] 涉及外部服務的操作有對應 log 表或寫進 `audit_log.metadata`。
 - [ ] schema 變更不留 orphan：刪欄位前確認 app code 沒在用；新欄位有寫入路徑。
+- [ ] **業務子表（訂單／合約／出貨…）對父表的關聯欄位過 D 段判斷**：壽命超過 audit 保留期 + 要熱路徑顯示 → snapshot 成子表欄位；不靠 audit_log 還原。
+- [ ] snapshot 欄位有 `comment on column` 標註目的；應用層讀取時優先讀 snapshot、有 drift 偵測。
 - [ ] `get_advisors(type=security)` 沒新 WARN。
 
 兩份清單缺一不可。效能問題會慢，完整性問題會丟資料——後者修不回來。
