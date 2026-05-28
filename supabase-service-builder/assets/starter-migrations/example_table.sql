@@ -7,6 +7,9 @@
 
 create table public.notes (
   id         uuid primary key default gen_random_uuid(),
+  -- CASCADE：notes 屬於 user 的個人資料，user 被硬刪（如 GDPR 抹除）時連帶清掉合理。
+  -- 但若 children 是「業務歷史不可丟」（如成交明細、稽核），改用 RESTRICT。
+  -- 詳見 references/db-integrity-checklist.md 的 A 段。
   owner_id   uuid not null references auth.users(id) on delete cascade,
   title      text not null,
   body       text,

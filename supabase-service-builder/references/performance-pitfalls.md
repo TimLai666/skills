@@ -149,6 +149,64 @@ GET /rest/v1/orders?select=id,total,customer_id,order_items(id,qty,product_id)
 - 一次拿齊：用 `select=*,related(...)` embed，不要做 N+1。
 - embed 用到的關聯，FK 一定要有索引（見第 2 條）。
 
+特別注意：**「同一個查詢有時要 embed、有時不要」就分兩支 repo function**。例如訂單列表頁要 embed customer + items，但跑 RFM 分析只要 customer_id / total_amount / created_at 幾個欄位——別用同一個 `ListOrders()` 含 embed，會把 RFM 場景拖慢一個數量級。多寫一支 `ListOrdersLean()` 比共用一支 fat function 划算太多。
+
+---
+
+## 5b. 後端應用層的 N+1（迴圈內呼叫 DB）
+
+**症狀**：建單／批次處理慢，且時間隨 item 數量線性放大。
+
+**原因**：後端程式裡常見的反模式：
+
+```go
+for _, it := range items {
+    p, _ := db.GetProduct(it.ProductID)   // 每個 item 一支 HTTP！
+    total += p.UnitPrice * it.Quantity
+}
+```
+
+雖然每支 query 本身可能很快（DB 端 1-2ms），但 backend → Supabase 是跨網路 HTTP，**每次 100-500ms**。10 個 item 就 1-5 秒。
+
+**對**：先收集 id，一次用 `id=in.(...)` 批次抓：
+
+```go
+ids := collectIDs(items)
+products, _ := db.GetProductsByIDs(ids)   // 1 支查詢拿全部
+for _, it := range items {
+    p := products[it.ProductID]
+    total += p.UnitPrice * it.Quantity
+}
+```
+
+**設計時規則**：寫程式時看到「`for ... { db.Xxx(...) }`」這種 pattern 警鈴就要響起。要嘛改成批次 `in.(...)`、要嘛把運算下推 SQL（用 view／RPC）。
+
+---
+
+## 5c. 迴圈內逐筆寫入 — PostgREST 接受 array body
+
+**症狀**：刷新分群、批次匯入、批次更新動輒幾十秒。
+
+**原因**：
+
+```go
+for cid, payload := range computed {
+    db.UpsertCustomerSegment(payload)   // N 支 HTTP request！
+}
+```
+
+100 筆顧客就是 100 趟跨網路 round-trip，加上 100 次 RLS／trigger 評估。
+
+**對**：PostgREST insert / upsert 端點直接吃 JSON array，一支 request 灌全部：
+
+```go
+db.UpsertCustomerSegments(allPayloads)   // 1 支
+```
+
+實作上就是 `POST /rest/v1/<table>` 的 body 從 object 改成 array，加 `Prefer: resolution=merge-duplicates` 與 `on_conflict=<pk>` 就是 bulk upsert。資料量很大時記得分批（PostgREST 預設 body 上限 1MB），通常每批 500-1000 筆夠用。
+
+**設計時規則**：任何「對一個集合做相同操作」的場景，repo 層都要提供批次版本，handler 寫起來才不會踩進迴圈陷阱。
+
 ---
 
 ## 6. `count=exact` 在大表上很貴
@@ -216,6 +274,58 @@ create index orders_created_at_desc_idx
 
 ---
 
+## 8b. 後端 HTTP client 預設值不適合服務間通訊
+
+**症狀**：backend 對 Supabase 發請求慢、CPU 沒事卻 throughput 上不去；流量稍微多就掛住整個 service。
+
+**原因**：Go / Node / Python 的 HTTP client 預設值是給「偶爾打單一網址」設計的：
+
+- **Go `http.Client{}`**：用 `DefaultTransport`，`MaxIdleConnsPerHost = 2`、`Timeout = 0`（永不超時）。對 Supabase 這種「同一個 host 高並發」場景，第 3 條並發就要重新 TCP+TLS handshake，跨網路非常貴；單一掛掉的請求會把 goroutine 永久占住。
+- **Node `fetch` / `axios`**：預設沒 timeout，沒 keep-alive agent；要自己包 `AbortController` 與 `http.Agent({ keepAlive: true })`。
+- **Python `requests`**：每個 `requests.get()` 都新開 connection；要改用 `Session()` 才有 keep-alive。
+
+**對**（Go 範例）：
+
+```go
+t := http.DefaultTransport.(*http.Transport).Clone()
+t.MaxIdleConns = 100
+t.MaxIdleConnsPerHost = 20             // 預設只 2
+t.IdleConnTimeout = 90 * time.Second
+
+client := &http.Client{
+    Transport: t,
+    Timeout:   30 * time.Second,         // 整個請求硬上限
+}
+```
+
+**設計時規則**：後端啟動時建一個 long-lived HTTP client 共用、調好 connection pool 與 timeout；別用 `http.DefaultClient` / `&http.Client{}`，那會把預設值的兩個坑都帶上。
+
+---
+
+## 8c. 前端 fetch 沒有 timeout — UI 永遠卡在 loading
+
+**症狀**：API 偶爾「卡住」永遠不回，loading spinner 一直轉、按鈕按不動。F5 重新整理就好。
+
+**原因**：`fetch()` 本身沒有 timeout；如果 backend 冷啟動、TLS handshake 卡住、token 自動 refresh 死循環，request 就會永遠 pending。Loading flag 不釋放，UI 卡死。
+
+**對**：用 `AbortController` 套 timeout：
+
+```js
+const ctl = new AbortController()
+const timer = setTimeout(() => ctl.abort(), 20_000)
+try {
+  const res = await fetch(url, { signal: ctl.signal, ... })
+} finally {
+  clearTimeout(timer)
+}
+```
+
+`supabase.auth.getSession()` 也要套 timeout（5 秒就夠）——它在背景 refresh token 時可能掛住。
+
+**設計時規則**：所有對外的 fetch 都要有 timeout；UI 的 loading flag 一律在 `finally` 釋放，不靠 try 內的成功路徑。
+
+---
+
 ## 9. 後端每個請求都打 `/auth/v1/user` 驗 JWT
 
 **症狀**：admin 介面 / dashboard 切 tab 慢。後端日誌看每支 API 多 100-500ms 但 DB query 很快。
@@ -258,14 +368,33 @@ migration 內若有 `insert ... select ...` 灌大量資料，後面接一條 `a
 
 ---
 
-## 設計時自我檢查（每張新表都過一次）
+## 設計時自我檢查
 
+### Schema / 索引
 - [ ] 每個 FK 欄位都有索引（或被其他索引的最左前綴覆蓋）。
-- [ ] 每條 RLS policy 都寫 `to <role>`，沒用預設 `public`。
+- [ ] 最常見的 filter／order 欄位有索引；軟刪表用部分索引 `where deleted_at is null`。
+- [ ] 大量寫入後跑 `analyze <table>`。
+
+### RLS / Policy
+- [ ] 每條 policy 都寫 `to <role>`，沒用預設 `public`。
 - [ ] policy 裡 `auth.uid()` / `auth.jwt()` / `current_setting()` 都包了 `(select ...)`。
 - [ ] 同一 (role, action) 沒有多條 permissive policy。
 - [ ] `security definer` function 都有 `set search_path = ''` 與 `stable`/`immutable` 標籤。
-- [ ] 最常見的 filter／order 欄位有索引；軟刪表用部分索引 `where deleted_at is null`。
-- [ ] 分頁 API 預設用 cursor + `count=estimated`，不用 `count=exact`。
+
+### PostgREST 查詢
+- [ ] `select=` 明列欄位，不用 `*`（特別是含 jsonb / text 大欄位的表）。
+- [ ] 列表頁要 embed 的，FK 都已建索引。
+- [ ] 不同用途有不同 repo function（fat 版含 embed，lean 版只抓計算需要欄位）。
+- [ ] 分頁預設 cursor + `count=estimated`，不用 `count=exact`。
+
+### 應用層
+- [ ] 沒有「`for ... { db.X() }`」這類迴圈內 DB 呼叫——改成 `id=in.(...)` 批次抓。
+- [ ] 集合操作（建多筆 / 更新多筆 / upsert 多筆）一律用 array body 一支 request 灌完。
+- [ ] 後端對 Supabase 共用一個 long-lived HTTP client，調好 `MaxIdleConnsPerHost`、設 `Timeout`。
+- [ ] 前端所有 fetch 都套 `AbortController` timeout；`supabase.auth.getSession()` 也要套。
 - [ ] 後端驗 JWT 用 JWKS 本地驗章，沒在請求路徑上打 `/auth/v1/user`。
+
+### 驗證
 - [ ] migration 寫完後跑 `get_advisors(type=performance)`，沒有新的 WARN。
+- [ ] 慢的 query 用 `EXPLAIN (ANALYZE, BUFFERS)` 看計畫——seq scan 大表就要補索引。
+- [ ] 重要的 list endpoint 在 100x 資料量下試一次，看是否還在可接受範圍。

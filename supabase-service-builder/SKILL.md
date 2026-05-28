@@ -1,15 +1,15 @@
 ---
 name: supabase-service-builder
-description: 建立或開發以 Supabase 為後端的服務時使用。涵蓋 dev/prod 環境分離、migration 紀律、RLS、Supabase Auth（含後端 JWKS 本地驗 JWT）、稽核 log、軟刪除、標準欄位慣例，以及設計期就要避開的效能地雷。觸發：用 Supabase 做後端、設計 schema、寫 migration、設 RLS、處理 Auth、推 production。動 prod 必須先取得使用者明確同意。
+description: 建立或開發以 Supabase 為後端的服務時使用。涵蓋 dev/prod 環境分離、migration 紀律、RLS、Supabase Auth（含後端 JWKS 本地驗 JWT）、稽核 log、軟刪除、標準欄位慣例、效能地雷、CASCADE 與資料完整性審查。觸發：用 Supabase 做後端、設計 schema、寫 migration、設 RLS、處理 Auth、推 production，**或任何改到 DB 相關程式碼／結構的時候**。動 prod 必須先取得使用者明確同意。
 ---
 
 # Supabase Service Builder
 
 開發以 Supabase 為後端的服務時的標準作業流程。這份 skill 把專案的安全與可維護性鐵則固化下來，套用到「初始化新專案」「日常 schema 變更」「上正式環境」三種情境。
 
-開始任何 Supabase 相關工作前，先確認自己理解下面八條鐵則。它們不是建議，是這類專案的硬性規範。
+開始任何 Supabase 相關工作前，先確認自己理解下面十條鐵則。它們不是建議，是這類專案的硬性規範。
 
-## 八條鐵則（不可妥協）
+## 十條鐵則（不可妥協）
 
 1. **雙環境、雙資料庫** — 一定有 `development` 與 `production` 兩套，各自連到**不同的 Supabase 專案**。兩者的資料、金鑰、URL 完全隔離。
 2. **預設開發環境** — 任何啟動服務的指令、任何資料庫連線，預設一律連 development。連 production 必須是明確、刻意、有額外確認的動作。
@@ -19,7 +19,19 @@ description: 建立或開發以 Supabase 為後端的服務時使用。涵蓋 de
 6. **全操作留稽核 log** — 系統的重要操作都要寫進 `audit_log`。log 表必須搭配自動清理（保留策略），用 `pg_cron` 定期刪除過期紀錄。
 7. **優先軟刪除** — 刪除預設用軟刪（`deleted_at` 設時間戳），不做硬刪。硬刪只保留給法遵抹除、測試垃圾資料等明確情境。
 8. **正式環境神聖不可侵犯** — 開發完全基於 development 資料庫。production 資料庫不能亂改、亂刪、亂動，任何碰它的動作（推 migration、改資料、跑 SQL、把 CLI link 過去）都必須先取得使用者明確同意。
-9. **效能在設計期就決定** — Supabase 慢九成不是平台問題、是 schema/RLS 沒踩好。建表與寫 policy 時就要避開地雷：每個 FK 欄位都建索引（PostgREST embed 不會自動走索引）、policy 內 `auth.uid()` 一律包成 `(select auth.uid())` 避免 per-row 重算、每條 policy 都寫 `to <role>` 不要靠預設 `public`、同一 (role, action) 不要疊多條 permissive policy、`security definer` function 一定要 `set search_path = ''` 且標 `stable`。詳見 `references/performance-pitfalls.md`；migration 寫完跑一次 `get_advisors(type=performance)` 確認沒新 warning。
+9. **效能在設計期就決定** — Supabase 慢九成不是平台問題、是 schema / RLS / 程式寫法沒踩好。建表、寫 policy、寫 repo function 時就要避開地雷。完整清單與 anti-pattern 對照見 `references/performance-pitfalls.md`，最低底線：
+    - **Schema**：每個 FK 欄位都建索引（PostgREST embed 不會自動走索引）；常用 filter／order 欄位也補上，軟刪表用 partial index。
+    - **RLS**：policy 內 `auth.uid()` 一律包成 `(select auth.uid())`；每條 policy 寫 `to <role>`；同一 (role, action) 不要疊多條 permissive；`security definer` function 要 `set search_path = ''` 並標 `stable`。
+    - **PostgREST 查詢**：`select=` 明列欄位不用 `*`；同一張表「列表用」「計算用」「embed 用」拆不同 repo function，別共用一支胖查詢。
+    - **應用層**：絕不在 `for` 迴圈內呼叫 DB（用 `id=in.(...)` 批次抓）；多筆寫入用 array body 一支 request 灌完；後端對 Supabase 共用 long-lived HTTP client、調好 connection pool、設 timeout；前端 fetch 與 `getSession()` 都要套 `AbortController` timeout。
+    - **驗證**：migration 寫完跑一次 `get_advisors(type=performance)` 確認沒新 warning；慢的 query 用 `EXPLAIN (ANALYZE, BUFFERS)` 看計畫。
+10. **完整性在設計期就守住** — 效能問題會慢、**完整性問題會丟資料且修不回來**。完整審查面向見 `references/db-integrity-checklist.md`，最低底線：
+    - **CASCADE 風險**：每條 FK 明確標 `on delete`。軟刪表的 children 預設用 `RESTRICT`，避免從 Dashboard 隨手刪 parent 把歷史 children 一起吃掉；只有 derived data（segments、cache、stats）才用 CASCADE，並在 migration 加註解說明。
+    - **稽核覆蓋**：每張 `public` 表的 migration 必須同時掛 `audit_<table>` trigger（除 audit_log 本身）；漏掉的話該表所有變更會成黑洞。應用層的「呼叫外部服務」操作（推播、寄信、金流）也要有對應紀錄表，不能在記憶體跑完就忘。
+    - **過時設計**：新欄位要有寫入路徑、新表要有查詢路徑；定期跑 schema 盤點 SQL 找 orphan，刪除前先 deprecate 一個版本。
+    - **驗證**：每次改 DB 結構跑 `get_advisors(type=security)` + `get_advisors(type=performance)`；改完跑檢查清單 SQL 確認所有 public 表都有 audit trigger。
+
+**任何時候改了與 DB 相關的程式碼或結構**（新 migration、改 repo function、加 trigger、改 RLS、調 PostgREST 查詢…）**都要走 `performance-pitfalls.md` 與 `db-integrity-checklist.md` 兩份清單**。兩份是並列的，缺一不可——效能讓人罵，完整性讓人吃官司。
 
 ## 欄位命名慣例
 
@@ -93,7 +105,8 @@ project/
 - `references/auth.md` — Supabase Auth 用法、`profiles` 擴充表樣式、註冊時自動建 profile、後端 JWKS 本地驗 JWT（不要打 `/auth/v1/user`）。
 - `references/logging-retention.md` — `audit_log` 表設計、通用稽核 trigger、`pg_cron` 自動清理保留策略。
 - `references/data-conventions.md` — 標準欄位、`updated_at` trigger、軟刪除實作與查詢樣式。
-- `references/performance-pitfalls.md` — 設計期就要避開的效能地雷（RLS auth.uid() initplan、FK 未建索引、multiple permissive policies、`to <role>` 省略、cursor 分頁等）。新建表或寫 policy 前必讀。
+- `references/performance-pitfalls.md` — 設計期就要避開的效能地雷（RLS auth.uid() initplan、FK 未建索引、multiple permissive policies、`to <role>` 省略、cursor 分頁、N+1、HTTP client 設定…）。新建表或寫 policy 前必讀。
+- `references/db-integrity-checklist.md` — 資料完整性審查：CASCADE 風險判斷、稽核覆蓋、過時設計清理，以及「每次改 DB 相關內容必跑」的 SOP。
 - `references/production-safety.md` — 正式環境護欄與上線檢查清單。
 
 ## 起手式素材（assets/）
@@ -116,5 +129,11 @@ project/
 - [ ] 刪除走軟刪（`deleted_at`）；硬刪只在明確且必要時使用。
 - [ ] 欄位用 `created_at/updated_at/deleted_at` 標準名稱。
 - [ ] 每個 FK 欄位都有覆蓋索引；policy 內 auth 函式都包成 `(select ...)`；每條 policy 都寫 `to <role>`。
-- [ ] 跑過 `get_advisors(type=performance)`，沒有新的 WARN（initplan / unindexed FK / multiple permissive 等）。
+- [ ] PostgREST 查詢 `select=` 明列欄位、不用 `*`；不同用途有不同 repo function（lean vs embed）。
+- [ ] 沒有「`for ... { db.X() }`」迴圈內 DB 呼叫；批次寫入用 array body 灌完。
+- [ ] 後端對 Supabase 共用 long-lived HTTP client（調 `MaxIdleConnsPerHost`、設 `Timeout`）；前端 fetch 都套 `AbortController` timeout。
+- [ ] 每條 FK 都明確標 `on delete`；軟刪表的 children 用 `RESTRICT`，CASCADE 只給 derived data 並加註解。
+- [ ] 每張新表都掛 `audit_<table>` trigger；外部服務呼叫有對應紀錄表。
+- [ ] 新欄位 / 新表有寫入與查詢路徑；不留 orphan。
+- [ ] 跑過 `get_advisors(type=performance)` 與 `get_advisors(type=security)`，沒有新的 WARN。
 - [ ] 沒有未經使用者同意就對 production 做任何變更。
