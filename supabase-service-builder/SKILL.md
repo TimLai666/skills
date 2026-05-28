@@ -16,7 +16,7 @@ description: 建立或開發以 Supabase 為後端的服務時使用。涵蓋 de
 3. **改動只走 migration，並納入 git** — 凡是能寫成 migration 的結構改動（建表、改欄位、加索引、policy、function、trigger…）一律寫成 migration 檔放進 `supabase/migrations/` 並 commit。**絕對禁止**直接在 Dashboard SQL Editor 或 psql 改了資料庫結構卻沒留下 migration 檔。
 4. **一律啟用 RLS** — `public` schema 下每一張新表，建立時就 `enable row level security`，並補上明確 policy。該用 RLS 的地方就要用，沒有例外、不是選項。
 5. **Auth 用 Supabase 內建** — 認證一律走 `auth.users`，不要自己另開一張 users 表來做帳密。要存額外的使用者資料時，才開一張 `profiles` 之類的擴充表，以 `auth.users.id` 為外鍵。
-6. **全操作留稽核 log** — 系統的重要操作都要寫進 `audit_log`。log 表必須搭配自動清理（保留策略），用 `pg_cron` 定期刪除過期紀錄。
+6. **全操作留稽核 log,分四層做齊** — 業界 logging 分四層:**Tier 1** DB-layer audit(trigger 寫 `audit_log`,抓狀態變更)、**Tier 2** Application/Request audit(middleware 寫 `request_log`,抓 IP/UA/path/status/actor/request_id)、**Tier 3** Security/SIEM(認證事件 + 異常告警,部分靠 Supabase auth log)、**Tier 4** Compliance archive(冷儲存依法規)。小商家 / 早期 MVP 至少做 1+2,缺 Tier 2 等於失明(DB trigger 抓不到 IP/UA)。**保留期照法規分流**:業務憑證類(orders/customers/products…)台灣商業會計法要求**至少 5 年**、稅務 7 年;運算 cache 類(customer_segments)90 天即可;request_log 30-90 天。同一張 `audit_log` 用 `entity_type` 在 cron 內分流。**failed auth 也要走 request_log**,不能靜默 401/403。完整 4 層分工、5W1H、法規保留期見 `references/logging-architecture.md`;trigger 與 pg_cron 實作見 `references/logging-retention.md`。
 7. **優先軟刪除** — 刪除預設用軟刪（`deleted_at` 設時間戳），不做硬刪。硬刪只保留給法遵抹除、測試垃圾資料等明確情境。
 8. **正式環境神聖不可侵犯** — 開發完全基於 development 資料庫。production 資料庫不能亂改、亂刪、亂動，任何碰它的動作（推 migration、改資料、跑 SQL、把 CLI link 過去）都必須先取得使用者明確同意。
 9. **效能在設計期就決定** — Supabase 慢九成不是平台問題、是 schema / RLS / 程式寫法沒踩好。建表、寫 policy、寫 repo function 時就要避開地雷。完整清單與 anti-pattern 對照見 `references/performance-pitfalls.md`，最低底線：
@@ -28,6 +28,7 @@ description: 建立或開發以 Supabase 為後端的服務時使用。涵蓋 de
 10. **完整性在設計期就守住** — 效能問題會慢、**完整性問題會丟資料且修不回來**。完整審查面向見 `references/db-integrity-checklist.md`，最低底線：
     - **CASCADE 風險**：每條 FK 明確標 `on delete`。軟刪表的 children 預設用 `RESTRICT`，避免從 Dashboard 隨手刪 parent 把歷史 children 一起吃掉；只有 derived data（segments、cache、stats）才用 CASCADE，並在 migration 加註解說明。
     - **稽核覆蓋**：每張 `public` 表的 migration 必須同時掛 `audit_<table>` trigger（除 audit_log 本身）；漏掉的話該表所有變更會成黑洞。應用層的「呼叫外部服務」操作（推播、寄信、金流）也要有對應紀錄表，不能在記憶體跑完就忘。
+    - **Log 顯示用欄位要 snapshot**：`audit_log` / `push_log` 等 log 表的 FK（actor_id、sent_by…）顯示時需要的 email / 姓名要在寫入當下 snapshot 成欄位，**不要靠 join 父表抓**——父表改 email 或被刪，log 顯示就跟著變或遺失追溯。`to_jsonb(new/old)` 抓的「實體狀態」OK 不用動。
     - **Snapshot vs Reference**：業務子表（訂單／合約／出貨…）對父表的關聯欄位要判斷「業務當下的值要不要凍住」。壽命超過 audit_log 保留期 + 要熱路徑顯示 → snapshot 成子表欄位（如 `order_items.product_name`、`orders.contact_phone`），**不要靠 audit_log 還原**——它會清、查詢也貴。
     - **過時設計**：新欄位要有寫入路徑、新表要有查詢路徑；定期跑 schema 盤點 SQL 找 orphan，刪除前先 deprecate 一個版本。
     - **驗證**：每次改 DB 結構跑 `get_advisors(type=security)` + `get_advisors(type=performance)`；改完跑檢查清單 SQL 確認所有 public 表都有 audit trigger。
@@ -68,7 +69,14 @@ project/
 
 1. 讀 `references/environments.md`，建立雙環境設定：開兩個 Supabase 專案（dev／prod），寫好 `.env.example`、`.env.development`、`.env.production`、`.gitignore` 與啟動指令（預設 development）。
 2. `supabase init` 建立 `supabase/` 目錄；本機開發用 `supabase start` 跑本地 stack，或 link 到 dev 專案。
-3. 把 `assets/starter-migrations/` 的起手式 migration 複製進 `supabase/migrations/`（依需要調整檔名時間戳）：擴充套件與共用 function、`profiles` 擴充表、`audit_log` 與保留策略。讀 `references/auth.md` 與 `references/logging-retention.md` 確認內容。
+3. 把 `assets/starter-migrations/` **全部**複製進 `supabase/migrations/`（依需要調整檔名時間戳）。順序就是檔名前綴:
+   - `0001_init_extensions.sql` — 擴充套件、moddatetime
+   - `0002_profiles.sql` — `auth.users` 擴充表 + 註冊自動建 profile trigger
+   - `0003_audit_log.sql` — **Tier 1**:`audit_log` + `record_audit()` + `lookup_user_email()` + actor_email snapshot + 保留策略
+   - `0004_request_log.sql` — **Tier 2**:`request_log` 表 + 保留策略(對應 backend 要寫 RequestLog middleware,範例見 `references/logging-architecture.md`)
+   - `example_table.sql` — 業務表起手範本(複製進 migrations/ 後改名,做為新表的模板)
+
+   讀 `references/auth.md`、`references/logging-architecture.md`、`references/logging-retention.md` 確認內容。**不要只複製 0001-0003 跳過 0004**——缺 Tier 2 等於失明,業界小商家及格線會直接掛。
 4. `supabase db reset` 在本機套用所有 migration，確認乾淨。
 5. `git add supabase/ .env.example .gitignore` 並 commit。
 
@@ -104,7 +112,8 @@ project/
 - `references/migrations.md` — migration 紀律：何時寫、怎麼寫、不可變原則、補抓漂移、常見錯誤。
 - `references/rls.md` — RLS 規範與常見 policy 樣板（擁有者制、公開讀、軟刪感知、service_role）。
 - `references/auth.md` — Supabase Auth 用法、`profiles` 擴充表樣式、註冊時自動建 profile、後端 JWKS 本地驗 JWT（不要打 `/auth/v1/user`）。
-- `references/logging-retention.md` — `audit_log` 表設計、通用稽核 trigger、`pg_cron` 自動清理保留策略。
+- `references/logging-architecture.md` — Logging 業界四層分工(Tier 1-4)、5W1H 該記什麼、法規保留期(台灣會計法 5 年 / 稅務 7 年…)、依專案規模選哪些層、`request_log` 設計範例。**規劃 log 體質前必讀**。
+- `references/logging-retention.md` — `audit_log` 表設計、通用稽核 trigger、`pg_cron` 自動清理保留策略(Tier 1 技術細節)。
 - `references/data-conventions.md` — 標準欄位、`updated_at` trigger、軟刪除實作與查詢樣式。
 - `references/performance-pitfalls.md` — 設計期就要避開的效能地雷（RLS auth.uid() initplan、FK 未建索引、multiple permissive policies、`to <role>` 省略、cursor 分頁、N+1、HTTP client 設定…）。新建表或寫 policy 前必讀。
 - `references/db-integrity-checklist.md` — 資料完整性審查：CASCADE 風險判斷、稽核覆蓋、過時設計清理，以及「每次改 DB 相關內容必跑」的 SOP。
@@ -114,7 +123,7 @@ project/
 
 - `assets/env.example` — `.env.example` 範本。
 - `assets/gitignore.snippet` — 該忽略的項目。
-- `assets/starter-migrations/` — 可直接複製進 `supabase/migrations/` 的起手 migration：擴充套件與共用 function、`profiles`、`audit_log` 與保留策略、以及一張示範表（完整套用全部鐵則）。
+- `assets/starter-migrations/` — 可直接複製進 `supabase/migrations/` 的起手 migration:`0001` 擴充套件、`0002` profiles + 註冊自動建檔、`0003` audit_log + actor_email snapshot + record_audit trigger(Tier 1)、`0004` request_log(Tier 2)、`example_table.sql` 業務表範本(完整套用全部鐵則)。**四個編號全要複製,缺 `0004` 等於缺 Tier 2**。
 
 ## 收尾自我檢查
 
@@ -126,7 +135,10 @@ project/
 - [ ] 沒有任何「改了資料庫但沒留 migration」的情況。
 - [ ] 每一張 `public` 表都已 `enable row level security` 且有明確 policy。
 - [ ] 認證走 `auth.users`；沒有自製帳密 users 表（擴充表 `profiles` 例外且合理）。
-- [ ] 重要操作會寫進 `audit_log`，且有 `pg_cron` 清理排程。
+- [ ] **Tier 1 + Tier 2 logging 都有**:`audit_log`(trigger 寫,DB 狀態變更)與 `request_log`(middleware 寫,API 呼叫脈絡含 IP/UA/path/status/actor/request_id)。
+- [ ] request_log 的 IP 走 `realClientIP()` helper(CF-Connecting-IP → X-Forwarded-For 最左 → X-Real-IP → fallback),**不是**框架預設的 `c.ClientIP()` / `req.ip`,否則 production 整批變 Cloudflare 邊緣 IP。CF-Ray / 平台 trace id 放進 metadata。
+- [ ] 保留期照法規分流:業務憑證(orders/customers/products…)5 年起、運算 cache(segments)90 天、request_log 30-90 天;同表用 `entity_type` 分流 cron。
+- [ ] failed auth(401/403)也走 request_log,不靜默。
 - [ ] 刪除走軟刪（`deleted_at`）；硬刪只在明確且必要時使用。
 - [ ] 欄位用 `created_at/updated_at/deleted_at` 標準名稱。
 - [ ] 每個 FK 欄位都有覆蓋索引；policy 內 auth 函式都包成 `(select ...)`；每條 policy 都寫 `to <role>`。
@@ -135,6 +147,7 @@ project/
 - [ ] 後端對 Supabase 共用 long-lived HTTP client（調 `MaxIdleConnsPerHost`、設 `Timeout`）；前端 fetch 都套 `AbortController` timeout。
 - [ ] 每條 FK 都明確標 `on delete`；軟刪表的 children 用 `RESTRICT`，CASCADE 只給 derived data 並加註解。
 - [ ] 每張新表都掛 `audit_<table>` trigger；外部服務呼叫有對應紀錄表。
+- [ ] log 表的 FK 顯示用欄位（actor_email、sender_name…）有 snapshot，不靠 join 父表顯示。
 - [ ] 業務子表對父表的關聯欄位（產品名／價格／聯絡資訊／地址…）過 snapshot 判斷：壽命超過 audit 保留期 + 要熱路徑顯示就 snapshot 在子表，不靠 audit_log 還原。
 - [ ] 新欄位 / 新表有寫入與查詢路徑；不留 orphan。
 - [ ] 跑過 `get_advisors(type=performance)` 與 `get_advisors(type=security)`，沒有新的 WARN。

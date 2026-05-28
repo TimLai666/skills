@@ -106,6 +106,107 @@ create trigger audit_<table_name>
 
 ---
 
+## B2. Log 表的 reference 風險（最容易忽略）
+
+`audit_log` / `push_log` / 任何 `*_log` 表的精神是**immutable 歷史紀錄**——記下「在時間 T 發生了什麼」。但如果 log 表用 FK 指向會變的父表（`auth.users`、`customers`、`products`…），**顯示時 join 父表抓 email / 姓名/ 商品名**，父表一改，log 顯示就跟著變。等於 log 對「誰做的」「對誰做的」「做了什麼東西」失去追溯。
+
+### 常見錯法
+
+```sql
+-- audit_log 只記 actor_id（uuid）
+create table public.audit_log (
+  id        bigint primary key,
+  actor_id  uuid references auth.users(id) on delete set null,  -- ⚠ 刪 user → 直接遺失 actor
+  action    text,
+  ...
+);
+
+-- UI 顯示要做 actor「誰」就走 join：
+select a.*, u.email as actor_email
+from audit_log a
+left join auth.users u on u.id = a.actor_id;
+-- ⚠ user 改 email → log 顯示就跟著變
+-- ⚠ user 被刪 → email = NULL，「誰做的」完全消失
+```
+
+### 對的做法：log 寫入時就 snapshot 顯示用欄位
+
+```sql
+alter table public.audit_log add column actor_email text;
+
+-- trigger 內查一次寫進去
+create or replace function public.record_audit()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_actor uuid := auth.uid();
+  v_email text;
+begin
+  if v_actor is not null then
+    select email into v_email from auth.users where id = v_actor;
+  end if;
+
+  insert into public.audit_log (actor_id, actor_email, action, entity_type, entity_id, metadata)
+  values (v_actor, v_email, tg_op, tg_table_name, coalesce(new.id::text, old.id::text), ...);
+  return coalesce(new, old);
+end;
+$$;
+```
+
+之後 user 改 email、被刪都不影響 — log 永遠顯示「當時是 alice@example.com 做的」。
+
+### 應用層 log 同理
+
+後端寫 `push_log` 時，順便把 sender 的 email / display_name 也寫進去：
+
+```go
+db.CreatePushLog(map[string]any{
+    "sent_by":         actorID,
+    "sent_by_email":   actorEmail,     // ← snapshot
+    "message":         msg,
+    ...
+})
+```
+
+### 判斷規則
+
+對 log 表的每個 FK 欄位問：
+
+1. **這個 FK 指向的父表，欄位會變嗎？或父列會被刪嗎？**（auth.users 改 email、customers 改名、products 改名都會）
+2. **log 顯示時要把父表的值秀出來嗎？**（actor 是誰、推給誰、對哪個商品做的）
+
+兩個都「是」 → 必須在 log 表 snapshot 顯示用欄位（email、display_name、product_name…）。FK 還是保留（追溯關聯用），但顯示**不靠 join**。
+
+### 為什麼 audit_log.metadata 沒事
+
+`to_jsonb(new/old)` 是**值的複製**，存的是 INSERT/UPDATE 當下父列的完整 JSON 快照——之後父列改了不影響。所以「實體狀態」追溯沒問題，**只有 actor 是 FK 沒 snapshot**才是漏洞。
+
+### 檢查 SQL
+
+```sql
+-- 列出所有 *_log / *_history 類表的 FK，人工確認對應的 snapshot 欄位是否存在
+select
+  tc.table_name,
+  kcu.column_name as fk_column,
+  ccu.table_schema || '.' || ccu.table_name as references_table
+from information_schema.table_constraints tc
+join information_schema.key_column_usage kcu
+  on kcu.constraint_name = tc.constraint_name
+join information_schema.constraint_column_usage ccu
+  on ccu.constraint_name = tc.constraint_name
+where tc.constraint_type = 'FOREIGN KEY'
+  and tc.table_schema = 'public'
+  and (tc.table_name like '%_log' or tc.table_name like '%_history' or tc.table_name = 'audit_log')
+order by tc.table_name;
+```
+
+每一條 FK 對照看：log 表有沒有對應的 `<entity>_email` / `<entity>_name` snapshot 欄位？沒有就補。
+
+---
+
 ## C. 過時／沒在用的設計
 
 長期累積會出現「沒人記得幹嘛用的」schema 物件：dead columns、dead indexes、dead functions、過時 policy。它們本身不直接造成 bug，但帶來：
@@ -234,6 +335,7 @@ from pg_policies where schemaname='public';
 
 - [ ] 新／改的 FK 明確標 `on delete`，CASCADE 過 A 段三個問題、加註解。
 - [ ] 新表掛了 `audit_<table>` trigger。
+- [ ] **log / 稽核類表的 FK 顯示用欄位有 snapshot**：actor_email、sender_name、product_name…寫入時凍住，不靠 join 父表顯示（B2 段）。
 - [ ] 涉及外部服務的操作有對應 log 表或寫進 `audit_log.metadata`。
 - [ ] schema 變更不留 orphan：刪欄位前確認 app code 沒在用；新欄位有寫入路徑。
 - [ ] **業務子表（訂單／合約／出貨…）對父表的關聯欄位過 D 段判斷**：壽命超過 audit 保留期 + 要熱路徑顯示 → snapshot 成子表欄位；不靠 audit_log 還原。
