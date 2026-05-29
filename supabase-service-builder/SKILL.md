@@ -35,6 +35,19 @@ description: 建立或開發以 Supabase 為後端的服務時使用。涵蓋 de
 
 **任何時候改了與 DB 相關的程式碼或結構**（新 migration、改 repo function、加 trigger、改 RLS、調 PostgREST 查詢…）**都要走 `performance-pitfalls.md` 與 `db-integrity-checklist.md` 兩份清單**。兩份是並列的，缺一不可——效能讓人罵，完整性讓人吃官司。
 
+## 自架 Supabase（如 Zeabur）的補充規範
+
+如果這個專案的 Supabase 不是 Cloud 版而是自架（Zeabur、Render、Hetzner VM、自己 docker-compose…），上面十條鐵則仍適用，但**幾個關鍵地方有差異**：
+
+- **Auth 簽章機制**：自架 GoTrue 預設用對稱 HS256 + 共享 `JWT_SECRET`，後端驗章用 `SUPABASE_JWT_SECRET` env var 對稱驗。**不能直接套 Cloud 版的 JWKS path**（後端 `client.go` 若用 `keyfunc` + `ES256/RS256`，搬到自架要改回 HS256）。未來如果自架 GoTrue 啟用 asymmetric signing keys，再切回 JWKS。
+- **ANON_KEY / SERVICE_ROLE_KEY 是「自己簽出來」的固定 JWT**，用 JWT_SECRET 對稱簽。Secret rotation 要自己做（產新 secret → 重簽兩把 JWT → 改 stack 所有服務 env → cascade redeploy），Cloud 版的「Dashboard 點按鈕輪換」不存在。
+- **整套 stack 12 個服務**：Kong / Auth / REST / Storage / Realtime / Studio / Meta / Functions / Imgproxy / MinIO / Supavisor / Postgres。每個各吃一份 env vars，secret 變動牽動多個服務。
+- **沒有 Supabase Cloud MCP**：`list_migrations`、`get_advisors`、`generate_typescript_types`、`get_logs` 都沒了。改用 psql 直連 / curl PostgREST / Zeabur MCP 的 `execute-command` 自己做。
+
+**任何時候第一次接手一個自架 Supabase**（dev / prod、自己的、別人的、剛建好的、別人交接過來的），開工前**先跑 `references/self-hosted-on-zeabur.md` 的全面 checklist** —— 尤其要排查「Zeabur 殘留的 stale shared variables / DNS entry」，這是自架 Supabase 最容易**錯連其他 project**、debug 時找不到根因的根源。
+
+別跳這個 checklist —— 第一次接手就跑過一輪，比之後追怪 502 / Connection refused 省時間。
+
 ## 欄位命名慣例
 
 用生態系標準名稱，讓 `moddatetime` 等內建工具與 Supabase Dashboard 能直接認得，不要自創名稱：
@@ -118,6 +131,7 @@ project/
 - `references/performance-pitfalls.md` — 設計期就要避開的效能地雷（RLS auth.uid() initplan、FK 未建索引、multiple permissive policies、`to <role>` 省略、cursor 分頁、N+1、HTTP client 設定…）。新建表或寫 policy 前必讀。
 - `references/db-integrity-checklist.md` — 資料完整性審查：CASCADE 風險判斷、稽核覆蓋、過時設計清理，以及「每次改 DB 相關內容必跑」的 SOP。
 - `references/production-safety.md` — 正式環境護欄與上線檢查清單。
+- `references/self-hosted-on-zeabur.md` — **自架 Supabase on Zeabur 專用**：與 Cloud 版的差異、第一次接手的全面 checklist、JWT/ANON/SERVICE_ROLE 替換流程、stale shared variables / DNS entry 排查、kong.yml read-only mount 的 envsubst 機制、cascade redeploy 清單。**第一次接觸某個 Zeabur Supabase stack 必讀**。
 
 ## 起手式素材（assets/）
 

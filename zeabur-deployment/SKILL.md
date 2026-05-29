@@ -19,6 +19,67 @@ Zeabur 是 PaaS 平台，部署機制如下：
 
 但 — `docker-compose.yml` 不需要刪掉。它在「本地開發與測試」這個用途上仍然有價值（一次起 app + DB + cache 很方便），這是允許且鼓勵的。重點是把它的定位講清楚：**compose 是本地開發/測試環境，不是線上部署設定。**
 
+## Zeabur MCP（用 Claude 直接操作 Zeabur）
+
+Zeabur 有官方 MCP server，安裝後可用 Claude 直接讀 / 改 Zeabur 上的專案、服務、環境變數、log、在容器內跑指令。
+
+**安裝**（user scope，所有專案共用一份設定）：
+
+```json
+{
+  "mcpServers": {
+    "zeabur": {
+      "command": "npx",
+      "args": ["@zeabur/mcp-server"],
+      "env": {
+        "ZEABUR_TOKEN": "sk-xxxxxx"
+      }
+    }
+  }
+}
+```
+
+或用 CLI 一行加上去：
+
+```
+claude mcp add zeabur --scope user -e ZEABUR_TOKEN=sk-xxxxxx -- npx @zeabur/mcp-server
+```
+
+`ZEABUR_TOKEN` 從 Zeabur Dashboard → Account Settings → API Tokens 產生。**這把 token 等於 Zeabur 帳號操作權限**，視同密碼：不要寫進 git、不要貼在公開對話、不要寫進 README。協助使用者裝完之後若 token 已暴露在當前對話，要主動提醒去 Dashboard revoke 重發。
+
+裝完要重啟 Claude Code 或開新 session 才會載入工具，工具會以 `mcp__zeabur__*` 名稱出現。
+
+**MCP 暴露的工具大致**：list/get/create services、create-environment-variable / update-environment-variable / delete-environment-variable、add-domain、update-service-ports、deploy-from-specification、get-build-logs / get-runtime-logs / get-deployments、execute-command（在 prebuilt service 容器內跑指令）、file-dir-read / read-file / list-files（read-only file 操作）。
+
+**已知缺漏**：
+- **沒有單純的「redeploy / restart service」工具**。改 env var 後得從 Zeabur Dashboard 手動點 Redeploy。協助操作時要明確告訴使用者「請去 Dashboard 點某 N 個 service 的 Redeploy」，不要假設改了就生效。
+- **沒有「write-file」工具**。容器內想改檔案只能透過 `execute-command`，但 PREBUILT_V2 template 通常把配置檔以 read-only bind mount 注入（見下節），寫不進去。
+- **無法操作 project-level shared variables 的編輯介面**（雖然能透過某個 service 的 update-environment-variable 間接改 shared）。
+
+## 環境變數的 envsubst 與 redeploy 機制（最容易踩的坑）
+
+Zeabur 對環境變數有四個關鍵行為，跟「改 env 就立刻生效」的直覺不一樣。協助使用者操作 Zeabur 時務必先想到這些：
+
+**1. 改 env var 不會自動 redeploy**
+
+不論透過 Dashboard 或 MCP 更新 env var，運行中的容器**不會自動重啟**。新值要生效，必須在 Zeabur Dashboard 對該 service 手動點「Redeploy」。容器內 `kill 1` 也沒用 — 重啟的是同一個 pod、同一份 baked artifact，env 是來自 Kubernetes pod spec（其實也會更新成新 env），但對「需要重新渲染檔案的服務」沒效（見第 2 點）。
+
+**2. envsubst 是 deploy 事件做的，不是容器啟動時做的**
+
+PREBUILT_V2 template（例如 Supabase template 的 Kong service）會在 deploy 階段把 env var 渲染進配置檔（例如把 `${ANON_KEY}` 寫進 `/home/kong/kong.yml`），然後渲染好的檔案以 **read-only bind mount** 進容器。意思是：
+
+- 容器內 `sed -i` / `cat >` 改不到（檔案 read-only），症狀是「Resource busy」或「Read-only file system」
+- 即使在容器內 `kill 1` 觸發 pod restart，新 pod 也是 mount 同一份已渲染好的檔，**內容完全不變**
+- 改 env var 後想讓配置檔重新渲染，**只能走 Zeabur 平台層 Redeploy**
+
+**3. project-shared variables 跨 service 引用，但不會 cascade redeploy**
+
+Zeabur 的 `${...}` 是 project-level shared reference。Service A 設 `JWT_SECRET=xxx`，Service B 的 `GOTRUE_JWT_SECRET=${JWT_SECRET}` 會解析到 A 的 xxx。但改了 source service 的 raw 值之後，**所有引用該變數的 service 都要各自分別 Redeploy** — Zeabur 不會自動 cascade。批次改完一輪 secret 後，要列出受影響的 service 清單給使用者。
+
+**4. 殘留 stale shared variables**
+
+刪 project 後在另一個 project 重建同名 service，shared variable pool 可能殘留**舊 service 的 ID 值**（例如 `POSTGRESQL_HOST` 還指向已不存在的 service ID）。診斷症狀：service runtime log 顯示連線到 `service-XXX (port Y)` 但 X 跟你新 service 的真實 ID 不一樣，且 `Connection refused`。修法：把該 env var 從 `${STALE_HOST}` 改成直接寫死內部 hostname（例如 `postgresql`、`auth`），或顯式 update 成正確的 service ID。Zeabur 內部 DNS 用「service 創建時的名字」做 hostname，rename service 不會改 DNS — 寫死 hostname 比依賴 shared var 穩。
+
 ## 觸發此 skill 時要做的事
 
 ### 步驟 1：找到專案根目錄的 CLAUDE.md
@@ -55,6 +116,7 @@ Zeabur 是 PaaS 平台，部署機制如下：
      - Vite 等靜態建置工具是 **build-time arg**（Zeabur Build-time Variables / Build Args，**改值後必須重新 build**），Dockerfile 裡要對應地用 `ARG` 宣告再 `ENV` 轉成 build 環境變數。
    - **安全邊界警告**：所有 Vite `VITE_*` 之類會打包進前端 bundle 的變數都公開可見，嚴禁放 service_role key、後端 API token 等敏感值。
    新增 / 移除環境變數時要同步改註解，避免與實際讀取的變數漂移。若使用者已有 Dockerfile 但缺這段註解，可主動建議補上。
+7. **改任何 Zeabur runtime env var 後，要明確提醒使用者去 Dashboard 對該 service 點 Redeploy**（Zeabur 不會自動重啟容器）。如果改的是 project-shared 變數，所有引用該變數的 service 都要分別 Redeploy；列清單給使用者，不要假設一個 Redeploy 會 cascade。對 PREBUILT_V2 template（配置檔靠 envsubst 渲染的服務，例如 Supabase Kong），更要強調必須走 Redeploy 才會重新生成檔案 — `kill 1` 不會。詳見上面「環境變數的 envsubst 與 redeploy 機制」。
 
 ## 邊界情況
 
