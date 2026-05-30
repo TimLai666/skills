@@ -1,17 +1,27 @@
 ---
-name: supabase-service-builder
-description: 建立或開發以 Supabase 為後端的服務時使用。涵蓋 dev/prod 環境分離、migration 紀律、RLS、Supabase Auth（含後端 JWKS 本地驗 JWT）、稽核 log、軟刪除、標準欄位慣例、效能地雷、CASCADE 與資料完整性審查。觸發：用 Supabase 做後端、設計 schema、寫 migration、設 RLS、處理 Auth、推 production，**或任何改到 DB 相關程式碼／結構的時候**。動 prod 必須先取得使用者明確同意。
+name: postgrest-baas-builder
+description: 建立或開發以 PostgREST-compatible BaaS（Supabase Cloud / 自架 Supabase / InsForge 自架 等）為後端的服務時使用。涵蓋 dev/prod 環境分離、migration 紀律、RLS、Auth（HS256 對稱 / JWKS 非對稱）、稽核 log、軟刪除、標準欄位慣例、效能地雷、CASCADE 與資料完整性審查。觸發：用 Supabase / InsForge 做後端、設計 schema、寫 migration、設 RLS、處理 Auth、推 production，**或任何改到 DB 相關程式碼／結構的時候**。動 prod 必須先取得使用者明確同意。
 ---
 
-# Supabase Service Builder
+# Supabase / InsForge Service Builder
 
-開發以 Supabase 為後端的服務時的標準作業流程。這份 skill 把專案的安全與可維護性鐵則固化下來，套用到「初始化新專案」「日常 schema 變更」「上正式環境」三種情境。
+開發以 **PostgREST-compatible BaaS**（Supabase Cloud / 自架 Supabase / InsForge 自架）為後端的服務時的標準作業流程。這份 skill 把專案的安全與可維護性鐵則固化下來，套用到「初始化新專案」「日常 schema 變更」「上正式環境」三種情境。
 
-開始任何 Supabase 相關工作前，先確認自己理解下面十條鐵則。它們不是建議，是這類專案的硬性規範。
+skill 名稱保留 `supabase-` 字首是歷史包袱；實際上規則對 InsForge 同樣適用（兩者底層都是 Postgres + PostgREST + 對稱 JWT auth，只差 URL 路徑跟 admin token 命名）。
+
+開始任何 BaaS 相關工作前，先確認自己理解下面十條鐵則。它們不是建議，是這類專案的硬性規範。
 
 ## 十條鐵則（不可妥協）
 
-1. **雙環境、雙資料庫** — 一定有 `development` 與 `production` 兩套，各自連到**不同的 Supabase 專案**。兩者的資料、金鑰、URL 完全隔離。
+1. **雙環境、雙資料庫** — 一定有 `development` 與 `production` 兩套，各自連到**不同的 BaaS 實例**。兩者的資料、金鑰、URL 完全隔離。具體形式依平台不同：
+   - **Supabase Cloud**：同帳號下兩個 Supabase project（dev + prod），各自有 project ID + URL + service_role。
+   - **自架 Supabase**：兩個獨立的部署（如兩個 Zeabur project，各跑一套 12 容器 stack）。
+   - **InsForge 自架**：兩個獨立的部署（如兩個 Zeabur project，各跑一份 InsForge template = 4 容器 stack）。
+   - **InsForge Cloud**：兩個獨立的 InsForge project。
+
+   **絕不可用「同一個實例 + dev/prod 用不同 schema」或「同一個 Postgres + 多個 database」這種偷懶分法**。auth.users 共用會在 dev 測試帳號污染 prod，service_role / API key 共用會讓 dev 漏 key 等於 prod 漏 key，違反鐵則 1 的本質。
+
+   自架平台上「一個 BaaS 實例 ＝ 一份完整 stack ＝ 一個獨立資料庫」。要 dev/prod 雙環境，就要部署兩份完整 stack。
 2. **預設開發環境** — 任何啟動服務的指令、任何資料庫連線，預設一律連 development。連 production 必須是明確、刻意、有額外確認的動作。
 3. **改動只走 migration，並納入 git** — 凡是能寫成 migration 的結構改動（建表、改欄位、加索引、policy、function、trigger…）一律寫成 migration 檔放進 `supabase/migrations/` 並 commit。**絕對禁止**直接在 Dashboard SQL Editor 或 psql 改了資料庫結構卻沒留下 migration 檔。
 4. **一律啟用 RLS** — `public` schema 下每一張新表，建立時就 `enable row level security`，並補上明確 policy。該用 RLS 的地方就要用，沒有例外、不是選項。
@@ -47,6 +57,44 @@ description: 建立或開發以 Supabase 為後端的服務時使用。涵蓋 de
 **任何時候第一次接手一個自架 Supabase**（dev / prod、自己的、別人的、剛建好的、別人交接過來的），開工前**先跑 `references/self-hosted-on-zeabur.md` 的全面 checklist** —— 尤其要排查「Zeabur 殘留的 stale shared variables / DNS entry」，這是自架 Supabase 最容易**錯連其他 project**、debug 時找不到根因的根源。
 
 別跳這個 checklist —— 第一次接手就跑過一輪，比之後追怪 502 / Connection refused 省時間。
+
+## InsForge（自架或 Cloud）的補充規範
+
+InsForge 是 PostgREST-compatible BaaS，跟 Supabase 形狀近 1:1。上面十條鐵則都適用，差異整理在 `references/insforge.md`（必讀），這裡只列「最常踩到的」三點：
+
+- **URL 路徑不同**：`/rest/v1/*` → `/api/database/records/*`；`/auth/v1/admin/users` → `/api/auth/users`；`/storage/v1/object/*` → `/api/storage/buckets/<bucket>/objects/*`；新增 `/api/database/advance/rawsql`（admin only，繞 RLS 跑 raw SQL）。**Header 只用 `Authorization: Bearer`，不需 `apikey:`**。
+- **Service role 等同物**：InsForge 用 **admin API key**（`ik_` 前綴）取代 Supabase `service_role`。後端持有，繞 RLS 用。
+- **平台限制 → 適配清單**：`moddatetime` extension 不能裝（用 plpgsql polyfill）；`raw_user_meta_data` 欄位不存在（改 `profile`/`metadata` jsonb）；`grant ... to service_role` 要拿掉（沒這個 role）；`cron.schedule` 不能寫（改用 `schedules.jobs` + edge function）；storage RLS policy 不適用（用內建 `public`/`private` flag + `storage.buckets.public`）。
+
+第一次接手任何 InsForge 實例（不論 Cloud / 自架），開工前先跑 `references/insforge.md` 的「第一次接手 checklist」。
+
+## MCP 設定規則（BaaS 跟 IaaS 不一樣）
+
+不同 MCP 的「一把 token 管多少實例」設計差很大，scope 要對應：
+
+| MCP | scope | 為什麼 |
+|---|---|---|
+| **Supabase Cloud（claude.ai）** | OAuth 自動 | 一個 Anthropic 帳號連 Supabase OAuth，跨 project 用工具參數 `project_id` 切換，user scope 合理 |
+| **InsForge（Cloud 或自架）** | **project scope（`.mcp.json`）** | 一把 API key 綁一個 instance。多 project / 多 instance 必須各自一份 `.mcp.json`；放 user scope 會跨 project 撈錯庫 |
+| **Zeabur** | user scope | 一把 token 管所有 Zeabur project，靠工具參數切換 project_id |
+
+InsForge MCP 的 project scope 設定：
+
+```bash
+# 在專案根目錄
+claude mcp add insforge --scope project \
+  -e API_KEY=ik_xxx \
+  -e API_BASE_URL=https://<instance>.<host> \
+  -- npx -y @insforge/mcp@latest
+```
+
+寫進 `.mcp.json` 後**一定要把 `.mcp.json` 加 `.gitignore`**（含 API key 不該進 git）。同時建 `.mcp.json.example` 進 git 當範本，用 placeholder 標明 `API_KEY` 跟 `API_BASE_URL` 要填什麼。
+
+dev / prod 兩個 instance 的話，兩種做法擇一：
+1. **`.mcp.json` 只列 dev**（最常用），prod 操作走 Zeabur MCP 或直接 curl + 從 password manager 取 prod key
+2. **`.mcp.json` 同時列 dev + prod**，但 entry 名稱明顯區分（如 `insforge-dev` / `insforge-prod`），避免操作時搞錯目標
+
+不論哪種，**操作 prod InsForge 前都要走鐵則 8（明確同意）**，不是改 MCP 設定就放行。
 
 ## 欄位命名慣例
 
@@ -132,6 +180,7 @@ project/
 - `references/db-integrity-checklist.md` — 資料完整性審查：CASCADE 風險判斷、稽核覆蓋、過時設計清理，以及「每次改 DB 相關內容必跑」的 SOP。
 - `references/production-safety.md` — 正式環境護欄與上線檢查清單。
 - `references/self-hosted-on-zeabur.md` — **自架 Supabase on Zeabur 專用**：與 Cloud 版的差異、第一次接手的全面 checklist、JWT/ANON/SERVICE_ROLE 替換流程、stale shared variables / DNS entry 排查、kong.yml read-only mount 的 envsubst 機制、cascade redeploy 清單。**第一次接觸某個 Zeabur Supabase stack 必讀**。
+- `references/insforge.md` — **InsForge 專用**（Cloud 或自架）：API endpoint mapping、admin API key 模型、適配清單（moddatetime / raw_user_meta_data / cron.schedule / storage RLS / service_role grant）、第一次接手 checklist、JWT_SECRET 取得方式（含自架 template 預設值警告）、MCP per-project 設定 SOP、dev/prod 雙實例部署原則。**第一次接觸某個 InsForge 實例必讀**。
 
 ## 起手式素材（assets/）
 

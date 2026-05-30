@@ -72,7 +72,7 @@
 
 | Skill | 適合什麼需求 | Install Path |
 | --- | --- | --- |
-| `supabase-service-builder` | 想建立或開發以 Supabase 為後端的服務，涵蓋環境分離、migration、RLS、Auth、稽核 log、軟刪除等規範。 | `supabase-service-builder` |
+| `postgrest-baas-builder` | 想建立或開發以 PostgREST-compatible BaaS 為後端的服務，涵蓋環境分離、migration、RLS、Auth、稽核 log、軟刪除等規範。 | `postgrest-baas-builder` |
 
 ### 開發流程與工程支援
 
