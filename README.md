@@ -75,6 +75,12 @@
 | --- | --- | --- |
 | `postgrest-baas-builder` | 想建立或開發以 PostgREST-compatible BaaS 為後端的服務，涵蓋環境分離、migration、RLS、Auth、稽核 log、軟刪除等規範。 | `postgrest-baas-builder` |
 
+### 系統救援與維修
+
+| Skill | 適合什麼需求 | Install Path |
+| --- | --- | --- |
+| `windows-rescue-from-linux` | 想用 Linux Live USB 救援無法開機或受損的 Windows 電腦，修復 BCD/UEFI、NTFS、BitLocker、資料救援與密碼重設。 | `windows-rescue-from-linux` |
+
 ### 開發流程與工程支援
 
 > **Stacksmith 系列** 是一套完整的軟體開發流程工具組，從規劃到上線都有對應的 skill，可單獨使用也可串接。
