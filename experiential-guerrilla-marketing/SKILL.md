@@ -1,13 +1,10 @@
 ---
 name: experiential-guerrilla-marketing
 description: >
-  使用此 skill 進行體驗行銷（Experiential Marketing）與游擊行銷（Guerrilla Marketing）的策略規劃、創意發想與成效評估。適用場景：品牌活動企劃、低預算高創意行銷方案、快閃活動設計、體驗 × 游擊整合矩陣設計、行銷 KPI 規劃、消費者參與機制設計。
-  
-  觸發關鍵詞：體驗行銷、游擊行銷、快閃活動、SCHMITT 五模組、5E 心法、Sense/Feel/Think/Act/Relate、S-O-R 模式、品牌體驗、沉浸式體驗、低預算行銷、病毒式傳播、埋伏行銷、Ambient Marketing、漏斗分工、行銷 KPI 矩陣、體驗 × 游擊矩陣設計。
-  
-  也在以下情況主動觸發：使用者想設計「讓人拍照分享」的活動、想規劃「低預算但高效果」的行銷、想把品牌做成有溫度的故事、想評估體驗活動的成效指標，或要把體驗設計與游擊手法結合在一起。
-  
-  可與其他 skill 搭配使用：sor-marketing-strategy（深化 S-O-R 心理分析）、customer-persona-framer（精準受眾定位）、customer-journey-mapper（體驗觸點串聯）、maslow-five-needs-marketing（情感訴求設計）、scamper（游擊創意激盪）、service-design-workshop（線下體驗服務化）、psychological-trigger-marketing（心理觸發加強版）。
+  用於體驗行銷與游擊行銷的策略規劃、創意發想與成效評估。觸發於體驗行銷、
+  游擊行銷、快閃活動、品牌體驗、沉浸式體驗、低預算行銷、Ambient Marketing、
+  行銷 KPI、體驗 × 游擊矩陣設計等需求,或使用者想做讓人拍照分享、低預算高效果、
+  可評估成效的品牌活動。
 ---
 
 # 體驗 × 游擊行銷矩陣設計 Skill
