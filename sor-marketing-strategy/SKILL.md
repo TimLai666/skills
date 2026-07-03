@@ -25,9 +25,9 @@ Do not use：
 - 任務只是在規劃單一 A/B test，而沒有先做 S-O-R 策略假設。
 
 Handoff：
-- 若使用者要完整頁面文案或 headline/CTA 成稿，先輸出 `message_strategy_brief`，再建議轉交 `$copywriting`。
-- 若使用者要正式的實驗設計、樣本量、檢定與 test plan，先輸出 `experiment_plan` 骨架，再建議轉交 `$ab-test-setup`。
-- 若使用者要事件命名、GA4/GTM、conversion setup、UTM 或 tracking plan，先定義 `kpi_ladder` 與事件需求，再建議轉交 `$analytics-tracking`。
+- 若使用者要完整頁面文案或 headline/CTA 成稿，先輸出 `message_strategy_brief`，再建議轉交 `$human-writing`（landing page 整頁則轉 `$landing-page-studio`）。
+- 若使用者要正式的實驗設計、樣本量、檢定與 test plan，先輸出 `experiment_plan` 骨架，再建議轉交 `$ab-experiment-design`。
+- 若使用者要事件命名、GA4/GTM、conversion setup、UTM 或 tracking plan，先定義 `kpi_ladder` 與事件需求清單交付（此類 tracking 實作無對應 skill，直接列需求給使用者）。
 
 ## Input Contract
 

@@ -45,7 +45,7 @@
 - `service_design_brief` 要讓讀者 30 秒內知道題目、對象、場域與目標。
 - `problem_and_context` 不只寫顧客痛點，也要寫情境限制。
 - `stakeholders_and_needs` 至少包含顧客與第一線；若題目明顯有後台單位，也要列。
-- `frontstage_backstage_touchpoints` 至少寫出一個後台支援與一個服務實證，否則容易退化成旅程圖。
+- `frontstage_backstage_touchpoints` 每個階段至少一個後台支援、全表至少三個可被拍照驗證的服務實證（交付門檻以 SKILL.md 的 Output Quality Checklist 為準），否則容易退化成旅程圖。
 - `prototype_and_validation_next_steps` 要可執行，不要只寫「持續優化」。
 
 ## 可直接套用的驗證問題

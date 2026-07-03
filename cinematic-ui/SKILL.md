@@ -23,9 +23,6 @@ Additional compatibility files:
 
 - [`GEMINI.md`](GEMINI.md) — Gemini / Antigravity-style workflows
 - [`AGENTS.md`](AGENTS.md) — shared cross-tool reference
-- [`.github/copilot-instructions.md`](.github/copilot-instructions.md) — GitHub Copilot
-- [`.cursor/rules/cinematic-ui.mdc`](.cursor/rules/cinematic-ui.mdc) — Cursor (auto-loaded on clone)
-- [`.windsurf/rules/cinematic-ui.md`](.windsurf/rules/cinematic-ui.md) — Windsurf (auto-loaded on clone)
 
 ---
 

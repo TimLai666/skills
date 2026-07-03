@@ -1,6 +1,6 @@
 ---
 name: product-conjoint-analysis
-description: Run a product-analysis focused revealed-preference logistic conjoint workflow (product specs + reviews/transactions, stacked binary choice, logistic estimation) — from attribute design through business insights (importance, willingness-to-pay, optimal product configuration, pricing and cost-benefit). Use this skill when the goal is to analyze products and infer multi-attribute preferences from observed market behavior, not a generic survey-only conjoint setup.
+description: Run a product-analysis focused revealed-preference logistic conjoint workflow (product specs + reviews/transactions, stacked binary choice, logistic estimation), with a rating-based OLS variant for survey data — from attribute design through business insights (importance, willingness-to-pay, optimal product configuration, pricing and cost-benefit). Use this skill when the goal is to analyze products and infer multi-attribute preferences from observed market behavior or rated conjoint cards, not a generic survey-only conjoint setup.
 ---
 
 # Product Conjoint Analysis

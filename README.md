@@ -1,6 +1,14 @@
 # Agent Skills
 
 ## 目錄
+### 職場溝通與個人效能
+
+| Skill | 適合什麼需求 | Install Path |
+| --- | --- | --- |
+| `minto-pyramid-communication` | 想用金字塔原理寫向上匯報、工作報告、商務 email、簡報大綱，結論先行、SCQA 開場、MECE 分組。 | `minto-pyramid-communication` |
+| `negotiation-strategy` | 想準備薪資、供應商、B2B 合作或跨部門談判，用七要素、BATNA、MESO、讓步節奏與戰術反制。 | `negotiation-strategy` |
+| `knowledge-work-os` | 想建立個人生產力系統：GTD、時間箱、深度工作時段、每週回顧、承諾預算與超載急救。 | `knowledge-work-os` |
+
 ### 商業策略與評估
 
 | Skill | 適合什麼需求 | Install Path |
@@ -16,6 +24,7 @@
 | Skill | 適合什麼需求 | Install Path |
 | --- | --- | --- |
 | `orchestrating-mixed-methods` | 不確定研究該做質化、量化、還是 mixed methods，想先決定方法。 | `orchestrating-mixed-methods` |
+| `customer-discovery-interview` | 想設計與執行顧客訪談（Mom Test、JTBD、laddering），分析逐字稿並交棒給 persona 或 CJM。 | `customer-discovery-interview` |
 | `customer-persona-framer` | 想先把目標客群整理成清楚的 persona。 | `customer-persona-framer` |
 | `customer-journey-mapper` | 已經有 persona，想進一步做 customer journey map 或 touchpoint journey table。 | `customer-journey-mapper` |
 | `review-mining-stp` | 想把評論、客服紀錄、回饋文字整理成 STP 分析。 | `review-mining-stp` |
@@ -25,10 +34,11 @@
 | `review-scoring-docx` | 想把評論資料抽取屬性並做產品評分，輸出為 Word（.docx）報告。 | `review-scoring-docx` |
 | `review-salience-xlsx` | 想把評論做顯著度評分、PCA、K-means 分群並輸出 Excel（.xlsx）。 | `review-salience-xlsx` |
 
-### 行銷策略與訊息設計
+### 品牌與行銷策略
 
 | Skill | 適合什麼需求 | Install Path |
 | --- | --- | --- |
+| `brand-strategy-system` | 想做品牌定位、品牌資產健檢（CBBE）、品牌原型與聲音憲章、危機溝通（SCCT）。 | `brand-strategy-system` |
 | `sor-marketing-strategy` | 想用 S-O-R 模型把刺激、心理反應、行為回應整理成行銷策略。 | `sor-marketing-strategy` |
 | `psychological-trigger-marketing` | 想產出更有轉換力的行銷角度、CTA、campaign hooks、促發點。 | `psychological-trigger-marketing` |
 | `maslow-five-needs-marketing` | 想用 Maslow needs 分層整理受眾動機、情緒訴求與訊息方向。 | `maslow-five-needs-marketing` |
@@ -103,6 +113,7 @@
 | Skill | 適合什麼需求 | Install Path |
 | --- | --- | --- |
 | `data-analysis-workflow` | 想把資料分析從資料檢查、清理、EDA、建模、評估一路做成標準化流程並產出分析報告。 | `data-analysis-workflow` |
+| `ab-experiment-design` | 想設計 A/B 測試與對照實驗：假設卡、樣本數計算、防 peeking、SRM 檢查與結果判讀。 | `ab-experiment-design` |
 | `product-conjoint-analysis` | 想做商品屬性偏好分析、估算屬性重要性與願付價格（WTP），找出最佳商品組合與定價/成本效益方向。 | `product-conjoint-analysis` |
 
 ### 投資研究與金融分析
@@ -113,7 +124,7 @@
 
 ## Notes
 
-- 根目錄的草稿、zip、筆記不是 install path。
+- 草稿與筆記集中在 `_drafts/`，不是 install path。
 - 真正要安裝的是各 skill 資料夾。
 - 如果你要確認某個 skill 的細節，再進去看該資料夾內的 `SKILL.md`。
 
