@@ -12,8 +12,6 @@ description: Use when coding cross-source evidence with Product Positioning Theo
 本 skill 含完整理論章節，可在分析前先校準理論概念與構面判準。
 此 skill 可獨立使用，也可選擇把 `theory_annotations` 與 `stp_mapping` 交給 `review-mining-stp`。
 
-三個 theory-analysis skills 的分工：本 skill 分析產品屬性、功能、利益與使用情境；`theory-analysis-purchase-motivation` 辨識功能性、保障性、關係性購買驅動；`theory-analysis-wom-motivation` 解析口碑分享動機。只回答「產品在顧客眼中是什麼」用本 skill 即可；需要全面理論分析時，三個可各自執行，再把各自的 `theory_annotations` 一併交給 `review-mining-stp` 整合。
-
 ## Input Contract
 
 至少提供：

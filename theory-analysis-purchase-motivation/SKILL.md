@@ -12,8 +12,6 @@ description: Use when coding cross-source evidence with Purchase Motivation Theo
 本 skill 含完整理論章節，可在分析前先校準動機理論與判準邊界。
 此 skill 可獨立使用，也可選擇將輸出銜接 `review-mining-stp`。
 
-三個 theory-analysis skills 的分工：本 skill 辨識功能性、保障性、關係性購買驅動；`theory-analysis-product-positioning` 分析產品屬性、功能、利益與使用情境；`theory-analysis-wom-motivation` 解析口碑分享動機。只回答「顧客為什麼買」用本 skill 即可；需要全面理論分析時，三個可各自執行，再把各自的 `theory_annotations` 一併交給 `review-mining-stp` 整合。
-
 ## Input Contract
 
 至少提供：

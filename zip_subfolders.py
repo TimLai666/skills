@@ -11,7 +11,7 @@ EXCLUDED_DIR_NAMES = {"output", ".git"}
 
 def is_excluded_directory(path: Path) -> bool:
     name = path.name
-    return name in EXCLUDED_DIR_NAMES or name.startswith(".") or name.startswith("_")
+    return name in EXCLUDED_DIR_NAMES or name.startswith(".")
 
 
 def create_zip_with_top_level(folder: Path, zip_path: Path) -> None:
