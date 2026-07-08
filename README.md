@@ -111,6 +111,20 @@
 | --- | --- | --- |
 | `investment-research-prompts` | 想快速套用股票篩選、投資組合風險、股息策略、財報前瞻、DCF、技術分析或趨勢識別等投資研究模板。 | `investment-research-prompts` |
 
+### 學術研究與文獻
+
+| Skill | 適合什麼需求 | Install Path |
+| --- | --- | --- |
+| `arxiv` | 想搜尋 arXiv 論文、查 Semantic Scholar 引用數據、產生 BibTeX、做學術文獻回顧。 | `arxiv` |
+
+### 知識管理與學習
+
+| Skill | 適合什麼需求 | Install Path |
+| --- | --- | --- |
+| `llm-wiki` | 想把來源資料（文章、論文、筆記）整理成結構化 Obsidian 知識庫，含 entity/concept 頁面、交叉引用與版本追蹤。 | `llm-wiki` |
+| `tutor-setup` | 想建立 Obsidian StudyVault，從既有 wiki 或文件匯入學習素材，設定 quiz 規則與進度追蹤。 | `tutor-setup` |
+| `tutor` | 想用互動式 quiz 學習 StudyVault 裡的概念，追蹤已知/未知、生成練習題與解釋。 | `tutor` |
+
 ## Notes
 
 - 根目錄的草稿、zip、筆記不是 install path。

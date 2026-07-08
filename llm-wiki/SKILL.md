@@ -166,6 +166,7 @@ Adapt to the user's domain. The schema constrains agent behavior and ensures con
 
 ## Conventions
 - **Markdown formatting:** Wiki pages use Obsidian Flavored Markdown. For wikilinks, embeds, callouts, frontmatter properties, and other Obsidian-specific syntax, refer to the `obsidian-markdown` skill.
+- **Academic sources:** For arXiv paper search, Semantic Scholar citations, and BibTeX generation, refer to the `arxiv` skill.
 - File names: lowercase, hyphens, no spaces (e.g., `transformer-architecture.md`)
 - Every wiki page starts with YAML frontmatter (see below)
 - Use `[[wikilinks]]` to link between pages (minimum 2 outbound links per page)
@@ -388,6 +389,25 @@ When the user provides a source (URL, file, paste), integrate it into the wiki:
 
 A single source can trigger updates across 5-15 wiki pages. This is normal
 and desired — it's the compounding effect.
+
+### Academic Sources (arXiv + Semantic Scholar)
+
+For academic papers, use the **arxiv** skill to search and retrieve:
+
+1. **Search**: `python arxiv/scripts/search_arxiv.py "topic" --sort date --max 10`
+2. **Impact check**: Semantic Scholar API for citation counts
+   ```bash
+   curl -s "https://api.semanticscholar.org/graph/v1/paper/arXiv:ID?fields=citationCount,influentialCitationCount"
+   ```
+3. **Read**: `npx defuddle https://arxiv.org/pdf/ID` (fallback: `web_extract`)
+4. **Ingest** as normal — raw source goes to `raw/papers/`, wiki pages follow standard workflow
+
+On wiki pages for papers, add optional frontmatter fields:
+```yaml
+arxiv_id: "2402.03300"
+citation_count: 150
+influential_citations: 12
+```
 
 ### 2. Query
 
