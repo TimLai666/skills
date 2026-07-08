@@ -2,13 +2,6 @@
 name: coding-guidelines
 version: 1.0.0
 description: "Behavioral guidelines for writing code. Think before coding, simplicity first, surgical changes, TDD, verifiable success criteria. Triggers on: 寫 code, 改 code, 做功能, 修 bug, refactor, 開發, coding, development, 實作, 實現, 寫程式, 改程式, 加功能, 修問題"
-allowed-tools:
-  - Bash
-  - Read
-  - Write
-  - Edit
-  - Grep
-  - AskUserQuestion
 ---
 
 ## Auto-trigger
@@ -24,6 +17,7 @@ allowed-tools:
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
 
 Before implementing:
+
 - State your assumptions explicitly. If uncertain, ask.
 - If multiple interpretations exist, present them — don't pick silently.
 - If a simpler approach exists, say so. Push back when warranted.
@@ -46,6 +40,7 @@ Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, sim
 **Touch only what you must. Clean up only your own mess.**
 
 When editing existing code:
+
 - Don't "improve" adjacent code, comments, or formatting — but if you spot issues, mention them and suggest a separate follow-up.
 - Don't refactor things that aren't broken — but if you see something worth refactoring, flag it and propose how to approach it.
 - Match existing style, even if you'd do it differently.
@@ -54,6 +49,7 @@ When editing existing code:
 **Recording rule:** All discovered issues that are out of scope for the current task must be mentioned to the user and recorded in the repo (e.g. `AGENTS.md`, `delivery-plan.md`, or a dedicated issue). Don't just mention them in chat and let them disappear — record them so the user can decide whether to act on them now or later.
 
 When your changes create orphans:
+
 - Remove imports/variables/functions that YOUR changes made unused.
 - Don't remove pre-existing dead code unless asked.
 
@@ -64,6 +60,7 @@ The test: Every changed line should trace directly to the user's request.
 **All changes and features must have corresponding tests. No test = not done.**
 
 Cycle:
+
 ```
 1. Write a failing test (define expected behavior)
 2. Write minimum code to make the test pass
@@ -72,6 +69,7 @@ Cycle:
 ```
 
 Rules:
+
 - **Write the test first, then implement.** Don't write code and backfill tests.
 - **Every bug fix must start with a test that reproduces the bug.** Test passes after fix.
 - **Every new feature must have a corresponding test.** Feature without test coverage is not done.
@@ -84,11 +82,13 @@ Rules:
 **Define success criteria. Loop until verified.**
 
 Transform tasks into verifiable goals:
+
 - "Add validation" → "Write tests for invalid inputs, then make them pass"
 - "Fix the bug" → "Write a test that reproduces it, then make it pass"
 - "Refactor X" → "Ensure tests pass before and after"
 
 For multi-step tasks, state a brief plan:
+
 ```
 1. [Step] → verify: [check]
 2. [Step] → verify: [check]
