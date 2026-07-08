@@ -348,8 +348,8 @@ Two levels: global index (wiki root) and topic index (each topic subdirectory).
 When the user provides a source (URL, file, paste), integrate it into the wiki:
 
 ① **Capture the raw source:**
-   - URL → use `web_extract` to get markdown, save to `raw/articles/`
-   - PDF → use `web_extract` (handles PDFs), save to `raw/papers/`
+   - URL → use **defuddle** (run `npx defuddle <url>`) to extract clean markdown; fallback to `web_extract` if defuddle fails or is unavailable
+   - PDF → use **defuddle** (handles PDFs natively); fallback to `web_extract`
    - Pasted text → save to appropriate `raw/` subdirectory
    - Name the file descriptively: `raw/articles/karpathy-llm-wiki-2026.md`
    - **Add raw frontmatter** (`source_url`, `ingested`, `sha256` of the body).

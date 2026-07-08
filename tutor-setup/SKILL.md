@@ -10,11 +10,14 @@ description: >
 
 # Tutor Setup — Knowledge to Obsidian StudyVault
 
-## CWD Boundary Rule (ALL MODES)
+## CWD Boundary Rule (Document Mode & Codebase Mode)
 
 > **NEVER access files outside the current working directory (CWD).**
 > All source scanning, reading, and vault output MUST stay within CWD and its subdirectories.
 > If the user provides an external path, ask them to copy the files into CWD first.
+
+**Wiki Mode exception:** Wiki Mode reads from a user-specified wiki path, which may
+be outside CWD. StudyVault output (sync target) still goes into CWD.
 
 ## Mode Detection
 

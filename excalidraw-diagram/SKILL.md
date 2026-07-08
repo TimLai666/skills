@@ -1,6 +1,6 @@
 ---
 name: excalidraw-diagram
-description: Generate hand-drawn style Excalidraw diagrams from text content. Supports three output modes - Obsidian (.md), Standard (.excalidraw), and Animated (.excalidraw with animation order). Choose this over Obsidian Canvas when the user wants an Excalidraw hand-drawn whiteboard style. Triggers on "Excalidraw", "畫圖", "Excalidraw流程圖", "Excalidraw心智圖", "標準Excalidraw", "standard excalidraw", "Excalidraw動畫", "動畫圖".
+description: Generate hand-drawn style Excalidraw diagrams from text content. Supports three output modes - Obsidian (.md), Standard (.excalidraw), and Animated (.excalidraw with animation order). Choose this over Obsidian Canvas when the user wants an Excalidraw hand-drawn whiteboard style. For standard Mermaid diagrams (flowcharts, sequence diagrams, etc.), use the mermaid-visualizer skill instead. Triggers on "Excalidraw", "畫圖", "Excalidraw流程圖", "Excalidraw心智圖", "標準Excalidraw", "standard excalidraw", "Excalidraw動畫", "動畫圖".
 metadata:
   version: 1.2.1
 ---
@@ -141,10 +141,10 @@ tags: [excalidraw]
   - 標題：20-28px（最小 20px）
   - 副標題：18-20px
   - 正文/標籤：16-18px（最小 16px）
-  - 次要註釋：14px（僅限不重要的辅助說明，慎用）
+  - 次要註釋：14px（僅限不重要的輔助說明，慎用）
   - **絕對禁止低於 14px**
 - **行高**：所有文字使用 `lineHeight: 1.25`
-- **文字置中估算**：獨立文字元素沒有自动置中，需手動計算 x 座標：
+- **文字置中估算**：獨立文字元素沒有自動置中，需手動計算 x 座標：
   - 估算文字寬度：`estimatedWidth = text.length * fontSize * 0.5`（CJK 字元用 `* 1.0`）
   - 置中公式：`x = centerX - estimatedWidth / 2`
   - 範例：文字 "Hello"（5字元, fontSize 20）置中於 x=300 → `estimatedWidth = 5 * 20 * 0.5 = 50` → `x = 300 - 25 = 275`

@@ -1,6 +1,6 @@
 ---
 name: obsidian-canvas-creator
-description: Create native Obsidian Canvas files (.canvas) from text content, supporting both MindMap and freeform layouts. Choose this over Excalidraw when the user specifically wants an interactive Obsidian Canvas or spatial organization of notes and cards. Triggers on "Canvas", "Obsidian Canvas", "畫Canvas", "Canvas心智圖", "Canvas佈局".
+description: Create native Obsidian Canvas files (.canvas) from text content, supporting both MindMap and freeform layouts. Choose this over Excalidraw when the user specifically wants an interactive Obsidian Canvas or spatial organization of notes and cards. For hand-drawn whiteboard style, use excalidraw-diagram. For standard flowcharts/sequence diagrams, use mermaid-visualizer. Triggers on "Canvas", "Obsidian Canvas", "畫Canvas", "Canvas心智圖", "Canvas佈局".
 ---
 
 # Obsidian Canvas Creator

@@ -1,6 +1,6 @@
 ---
 name: mermaid-visualizer
-description: Transform text content into professional Mermaid diagrams for presentations and documentation. Use when users ask to visualize concepts, create flowcharts, or make diagrams from text. Supports process flows, system architectures, comparisons, mindmaps, and more with built-in syntax error prevention.
+description: Transform text content into professional Mermaid diagrams for presentations and documentation. Use when users ask to visualize concepts, create flowcharts, or make diagrams from text. For hand-drawn whiteboard style, use excalidraw-diagram. For interactive Obsidian Canvas with spatial organization, use obsidian-canvas-creator. Supports process flows, system architectures, comparisons, mindmaps, and more with built-in syntax error prevention.
 ---
 
 # Mermaid Visualizer
