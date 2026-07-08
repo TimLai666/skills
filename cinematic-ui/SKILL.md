@@ -230,6 +230,11 @@ Keep `SKILL.md` lean. Load only the references needed for the current phase.
 - Add reduced-motion handling and responsive behavior without breaking the chosen film language.
 - Verify the output against the storyboard and compiled spec.
 - Use the Screening Room and Post-Screening Adjustments rules from [references/implementation-guardrails.md](references/implementation-guardrails.md) when refining the result after the first build.
+- **Anti-pattern check**: after the first build passes visual inspection, run the impeccable anti-pattern detector on the output files:
+  ```bash
+  npx impeccable detect <output-dir-or-file>
+  ```
+  The detector catches 45 deterministic issues including: overused fonts (Inter, system defaults), purple-to-blue gradients, cards nested inside cards, bounce/elastic easing, low-contrast text on colored backgrounds, flat type hierarchy, side-tab borders, icon-tile stacking. Fix any flagged issues before declaring done. If the detector is unavailable, manually check against the anti-pattern list in [references/anti-garbage.md](references/anti-garbage.md) — the intent is the same: no generic AI slop in the final output.
 
 
 ## PPTX Mode
@@ -331,6 +336,7 @@ Write `slide-spec.md` containing:
 - Do not reuse the previous demo's hero posture, navigation posture, section rhythm, or dominant geometry unless the user explicitly requests continuity.
 - Do not read the entire library at once.
 - Do not jump from user request directly to HTML without writing `decisions.md`, `storyboard.md`, and `compiled-spec.md`.
+- Do not ship output with any of these deterministic flags: overused fonts, purple gradients, nested cards, bounce easing, low-contrast text, flat type hierarchy. Run `npx impeccable detect` as a final gate.
 
 ## File Guide
 
@@ -340,3 +346,4 @@ Write `slide-spec.md` containing:
 - Use [references/reference-protocol.md](references/reference-protocol.md) when the user provides visual references but wants to avoid template copying.
 - Use [references/anti-garbage.md](references/anti-garbage.md) as the final filter before coding.
 - Use [references/pptx-cinematic.md](references/pptx-cinematic.md) for all PPTX-mode builds — PptxGenJS rules, composition families, table patterns, and QA checklist.
+- Use `npx impeccable detect` as the final deterministic anti-pattern gate after build.
