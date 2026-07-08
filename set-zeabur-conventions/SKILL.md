@@ -1,13 +1,13 @@
 ---
 name: set-zeabur-conventions
-description: 在專案中建立並維護 Zeabur 部署規範，會在專案根目錄的 CLAUDE.md 寫入一段部署約束（Zeabur 只支援 Dockerfile、不支援 docker-compose；compose 僅供本地開發測試）。僅在使用者明確指定專案要部署到 Zeabur 時才使用 — 例如使用者明說「這個專案要部署到 Zeabur」「要上 Zeabur」「設定 Zeabur 部署」，或直接呼叫此 skill。不要在僅僅提到 Docker、寫 Dockerfile、討論部署平台、或泛泛談到 Zeabur 時觸發；必須有明確的「部署到 Zeabur」意圖。Only trigger when the user explicitly states the project deploys to Zeabur — do not infer from Docker usage or general deployment talk.
+description: 在專案中建立並維護 Zeabur 部署規範，會在專案根目錄的 AGENTS.md 寫入一段部署約束（Zeabur 只支援 Dockerfile、不支援 docker-compose；compose 僅供本地開發測試）。僅在使用者明確指定專案要部署到 Zeabur 時才使用 — 例如使用者明說「這個專案要部署到 Zeabur」「要上 Zeabur」「設定 Zeabur 部署」，或直接呼叫此 skill。不要在僅僅提到 Docker、寫 Dockerfile、討論部署平台、或泛泛談到 Zeabur 時觸發；必須有明確的「部署到 Zeabur」意圖。Only trigger when the user explicitly states the project deploys to Zeabur — do not infer from Docker usage or general deployment talk.
 ---
 
 # Zeabur 部署規範
 
-把一個專案的部署目標設定成 Zeabur 時，最容易踩的坑是：開發者習慣用 `docker-compose.yml` 把整套服務跑起來，理所當然地以為「compose 跑得起來 = 上線跑得起來」。在 Zeabur 上這個假設是錯的。這個 skill 的工作是把這個約束寫進專案的 `CLAUDE.md`，讓之後在這個專案裡工作的 Claude（包含未來的你自己）一開始就知道規則。
+把一個專案的部署目標設定成 Zeabur 時，最容易踩的坑是：開發者習慣用 `docker-compose.yml` 把整套服務跑起來，理所當然地以為「compose 跑得起來 = 上線跑得起來」。在 Zeabur 上這個假設是錯的。這個 skill 的工作是把這個約束寫進專案的 `AGENTS.md`，讓之後在這個專案裡工作的所有 agent（包含未來的你自己）一開始就知道規則。
 
-> **只在明確指定 Zeabur 部署時使用。** 這個 skill 只處理「使用者明說專案要部署到 Zeabur」的情況。單純提到 Docker、寫 Dockerfile、或泛泛討論部署平台，都不該觸發 — 不要從這些線索去推測。若不確定使用者是不是真的要用 Zeabur，先問清楚，不要先動 `CLAUDE.md`。
+> **只在明確指定 Zeabur 部署時使用。** 這個 skill 只處理「使用者明說專案要部署到 Zeabur」的情況。單純提到 Docker、寫 Dockerfile、或泛泛討論部署平台，都不該觸發 — 不要從這些線索去推測。若不確定使用者是不是真的要用 Zeabur，先問清楚，不要先動 `AGENTS.md`。
 
 ## 核心事實
 
@@ -82,16 +82,16 @@ Zeabur 的 `${...}` 是 project-level shared reference。Service A 設 `JWT_SECR
 
 ## 觸發此 skill 時要做的事
 
-### 步驟 1：找到專案根目錄的 CLAUDE.md
+### 步驟 1：找到專案根目錄的 AGENTS.md
 
-從目前工作目錄往上找專案根（通常有 `.git`、`package.json`、`pyproject.toml` 等標記）。目標檔案是該根目錄的 `CLAUDE.md`。若不存在就建立一個。
+從目前工作目錄往上找專案根（通常有 `.git`、`package.json`、`pyproject.toml` 等標記）。目標檔案是該根目錄的 `AGENTS.md`。若不存在就建立一個。
 
 ### 步驟 2：檢查是否已有 Zeabur 區段
 
-讀 `CLAUDE.md`，看是否已有標題為 `## Zeabur 部署規範` 的區段。
+讀 `AGENTS.md`，看是否已有標題為 `## Zeabur 部署規範` 的區段。
 
-- **沒有** → 把 `assets/claude-md-section.md` 的完整內容附加到檔案末尾（前面留一個空行）。
-- **已有** → 比對內容，若與 `assets/claude-md-section.md` 不一致就更新成最新版本；一致就不動，並告知使用者已經是最新。
+- **沒有** → 把 `assets/agents-md-section.md` 的完整內容附加到檔案末尾（前面留一個空行）。
+- **已有** → 比對內容，若與 `assets/agents-md-section.md` 不一致就更新成最新版本；一致就不動，並告知使用者已經是最新。
 
 絕不重複插入同一個區段。
 
@@ -101,7 +101,7 @@ Zeabur 的 `${...}` 是 project-level shared reference。Service A 設 `JWT_SECR
 
 ## 寫入後的長期行為
 
-這段規範一旦進了 `CLAUDE.md`，就要在這個專案的後續開發中實際遵守，不是放著好看：
+這段規範一旦進了 `AGENTS.md`，就要在這個專案的後續開發中實際遵守，不是放著好看：
 
 1. **新增服務或依賴時**，先自問：「這個只靠 Dockerfile 在 Zeabur 上跑得起來嗎？」答案必須是「可以」。若某服務只有 compose 才跑得起來、沒有對應的 Dockerfile 部署路徑，要主動指出這在 Zeabur 上會壞掉。
 2. **不要把 `docker compose up` 當成部署指令**或部署文件的主要路徑。部署說明要以 Dockerfile / Zeabur 服務設定為主。
