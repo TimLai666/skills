@@ -88,7 +88,8 @@
 | `dev-task-loop` | 想用已知 backlog / ticket / 設計參考，一次處理一系列開發任務。 | `dev-task-loop` |
 | `openclaw-agent-builder` | 想建立、配置或改造 OpenClaw agent，包括 workspace、channel、bindings、RAG 知識庫與安全設定。 | `openclaw-agent-builder` |
 | `openclaw-ops` | 想在運行中的 OpenClaw 機器上做運維、配置、診斷。 | `openclaw-ops` |
-| `postgrest-baas-builder` | 想建立或開發以 PostgREST-compatible BaaS 為後端的服務。 | `postgrest-baas-builder` |
+| `db-engineering` | 任何資料庫相關工作都要先載入：migration 紀律、稽核 log、軟刪除、效能、完整性、環境分離。 | `db-engineering` |
+| `postgrest-baas-builder` | 用 Supabase / InsForge 做後端時：RLS policy、Auth 串接、PostgREST 查詢、MCP 設定。需搭配 db-engineering。 | `postgrest-baas-builder` |
 | `zeabur-deployment` | 想為專案設定 Zeabur 部署規範。 | `zeabur-deployment` |
 
 ### 資料分析與建模
