@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "a7b8f885fc473dba",
+        "id": "b7c56e7b7f014da1",
         "type": "tabs",
         "children": [
           {
-            "id": "073945af9187e0f3",
+            "id": "68923854dd241fa4",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "SKILL_REVIEW_LOG.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "SKILL_REVIEW_LOG"
+              "title": "新分頁"
             }
           }
         ]
@@ -94,8 +90,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "未命名.base",
-                "collapseAll": false,
+                "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
                 "showSearch": false,
@@ -104,7 +99,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "未命名 的反向連結"
+              "title": "反向連結"
             }
           },
           {
@@ -113,12 +108,11 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "未命名.base",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "未命名 的對外連結"
+              "title": "對外連結"
             }
           },
           {
@@ -156,21 +150,20 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "未命名.base",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "未命名 的大綱"
+              "title": "大綱"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -183,9 +176,12 @@
       "bases:建立新的 base": false
     }
   },
-  "active": "073945af9187e0f3",
+  "active": "68923854dd241fa4",
   "lastOpenFiles": [
+    "2026-07-09.md",
     "未命名.base",
+    "未命名.canvas",
+    "SKILL_REVIEW_LOG.md",
     "未命名 1.base",
     "tutor/SKILL.md"
   ]
