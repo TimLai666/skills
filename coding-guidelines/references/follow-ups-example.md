@@ -16,9 +16,3 @@ Resolved items should be deleted from this list.
 - **Suggestion**: Use `JOIN` or batch load with `WHERE id IN (...)`. Low risk, self-contained fix.
 - **Status**: decided
 - **Decision**: Do it now — add it to current sprint.
-
-### [2025-07-09] — Unused test helper in fixtures
-- **Where**: `tests/helpers/setup.ts`
-- **What**: `createMockUser()` is never called anywhere. Likely leftover from deleted test.
-- **Suggestion**: Delete it. No dependents.
-- **Status**: done
