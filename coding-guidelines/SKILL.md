@@ -51,6 +51,8 @@ When editing existing code:
 - Match existing style, even if you'd do it differently.
 - If you notice unrelated dead code, mention it and suggest what to do — don't silently delete it.
 
+**Recording rule:** All discovered issues that are out of scope for the current task must be recorded in a visible place (e.g. `delivery-plan.md`, a `## Follow-up` section in PR description, or a dedicated issue). Don't just mention them in chat and let them disappear. The user decides whether to act on them now or later.
+
 When your changes create orphans:
 - Remove imports/variables/functions that YOUR changes made unused.
 - Don't remove pre-existing dead code unless asked.
