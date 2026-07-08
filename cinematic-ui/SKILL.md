@@ -230,11 +230,14 @@ Keep `SKILL.md` lean. Load only the references needed for the current phase.
 - Add reduced-motion handling and responsive behavior without breaking the chosen film language.
 - Verify the output against the storyboard and compiled spec.
 - Use the Screening Room and Post-Screening Adjustments rules from [references/implementation-guardrails.md](references/implementation-guardrails.md) when refining the result after the first build.
-- **Anti-pattern check**: after the first build passes visual inspection, run the impeccable anti-pattern detector on the output files:
-  ```bash
-  npx impeccable detect <output-dir-or-file>
-  ```
-  The detector catches 45 deterministic issues including: overused fonts (Inter, system defaults), purple-to-blue gradients, cards nested inside cards, bounce/elastic easing, low-contrast text on colored backgrounds, flat type hierarchy, side-tab borders, icon-tile stacking. Fix any flagged issues before declaring done.
+- **Anti-pattern check**: after the first build passes visual inspection, run both checks:
+  1. Run the impeccable anti-pattern detector:
+     ```bash
+     npx impeccable detect <output-dir-or-file>
+     ```
+     Fix any flagged issues (overused fonts, purple gradients, nested cards, bounce easing, low-contrast text, flat type hierarchy, side-tab borders, icon-tile stacking).
+  2. Read [references/anti-garbage.md](references/anti-garbage.md) and check the output against it. The detector catches deterministic issues; anti-garbage.md catches film-language violations that only a human/LLM can judge.
+  Fix all issues from both checks before declaring done.
 
 
 ## PPTX Mode
