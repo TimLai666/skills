@@ -1,7 +1,7 @@
 ---
 name: coding-guidelines
 version: 1.0.0
-description: "Behavioral guidelines for writing code. Think before coding, simplicity first, surgical changes, TDD-driven development, verifiable success criteria. Triggers on: 寫 code, 改 code, 做功能, 修 bug, refactor, 開發, coding, development, 實作, 實現, 寫程式, 改程式, 加功能, 修問題"
+description: "Behavioral guidelines for writing code. Think before coding, simplicity first, surgical changes, TDD, verifiable success criteria. Triggers on: 寫 code, 改 code, 做功能, 修 bug, refactor, 開發, coding, development, 實作, 實現, 寫程式, 改程式, 加功能, 修問題"
 allowed-tools:
   - Bash
   - Read
