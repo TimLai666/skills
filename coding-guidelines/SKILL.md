@@ -46,7 +46,7 @@ When editing existing code:
 - Match existing style, even if you'd do it differently.
 - If you notice unrelated dead code, mention it and suggest what to do — don't silently delete it.
 
-**Recording rule:** All discovered issues that are out of scope for the current task must be mentioned to the user and recorded in the project's `AGENTS.md` under `## Follow-ups`. Don't just mention them in chat and let them disappear — record them so the user can decide whether to act on them now or later. Once a follow-up is resolved, delete it from the list.
+**Recording rule:** All discovered issues that are out of scope for the current task must be mentioned to the user and recorded in the project's `AGENTS.md` under `## Follow-ups`. Don't just mention them in chat and let them disappear — record them so the user can decide whether to act on them now or later. Once a follow-up is resolved, delete it from the list. See [references/follow-ups-example.md](references/follow-ups-example.md) for format and examples.
 
 When your changes create orphans:
 
