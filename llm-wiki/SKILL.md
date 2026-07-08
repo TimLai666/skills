@@ -165,6 +165,7 @@ Adapt to the user's domain. The schema constrains agent behavior and ensures con
 - Cross-topic pages should link back to all relevant topics via `[[wikilink]]`
 
 ## Conventions
+- **Markdown formatting:** Wiki pages use Obsidian Flavored Markdown. For wikilinks, embeds, callouts, frontmatter properties, and other Obsidian-specific syntax, refer to the `obsidian-markdown` skill.
 - File names: lowercase, hyphens, no spaces (e.g., `transformer-architecture.md`)
 - Every wiki page starts with YAML frontmatter (see below)
 - Use `[[wikilinks]]` to link between pages (minimum 2 outbound links per page)
