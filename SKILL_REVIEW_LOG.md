@@ -7,6 +7,18 @@
 
 以下 10 個 skill
 
+| Skill                     |
+| ------------------------- |
+| `excalidraw-diagram`      |
+| `tutor`                   |
+| `tutor-setup`             |
+| `defuddle`                |
+| `llm-wiki`                |
+| `mermaid-visualizer`      |
+| `obsidian-bases`          |
+| `obsidian-canvas-creator` |
+| `obsidian-cli`            |
+| `obsidian-markdown`       |
 ## 衝突處理
 
 | 衝突                                                           | 決定                                                                | 狀態      |
@@ -16,15 +28,15 @@
 
 ## 簡體→繁體轉換
 
-| 檔案                               | 狀態                                                                          |
-| ---------------------------------- | ----------------------------------------------------------------------------- |
-| `excalidraw-diagram/SKILL.md`      | ✅ 轉換完成，觸發詞與內文改為繁體台灣用語                                     |
-| `tutor/SKILL.md`                   | ✅ 轉換完成，韓文殘留與觸發詞改為繁體台灣語系                                 |
-| `tutor-setup/SKILL.md`             | ✅ 轉換完成，韓文範例改為繁體中文對照                                         |
-| `defuddle/SKILL.md`                | ✅ 純英文，無需修改                                                           |
+| 檔案                                 | 狀態                                                |
+| ---------------------------------- | ------------------------------------------------- |
+| `excalidraw-diagram/SKILL.md`      | ✅ 轉換完成，觸發詞與內文改為繁體台灣用語                             |
+| `tutor/SKILL.md`                   | ✅ 轉換完成，韓文殘留與觸發詞改為繁體台灣語系                           |
+| `tutor-setup/SKILL.md`             | ✅ 轉換完成，韓文範例改為繁體中文對照                               |
+| `defuddle/SKILL.md`                | ✅ 純英文，無需修改                                        |
 | `llm-wiki/SKILL.md`                | ✅ 已微調觸發器，以確保使用者要求新建立 Obsidian 結構時預設使用 llm-wiki 架構 |
-| `mermaid-visualizer/SKILL.md`      | ✅ 純英文，無需修改                                                           |
-| `obsidian-bases/SKILL.md`          | ✅ 純英文，無需修改                                                           |
-| `obsidian-canvas-creator/SKILL.md` | ✅ description 已調整，以明確區隔 Excalidraw                                  |
-| `obsidian-cli/SKILL.md`            | ✅ 純英文，無需修改                                                           |
-| `obsidian-markdown/SKILL.md`       | ✅ 已加入新建立 Obsidian 結構時預設使用 llm-wiki 架構之規範                   |
+| `mermaid-visualizer/SKILL.md`      | ✅ 純英文，無需修改                                        |
+| `obsidian-bases/SKILL.md`          | ✅ 純英文，無需修改                                        |
+| `obsidian-canvas-creator/SKILL.md` | ✅ description 已調整，以明確區隔 Excalidraw                |
+| `obsidian-cli/SKILL.md`            | ✅ 純英文，無需修改                                        |
+| `obsidian-markdown/SKILL.md`       | ✅ 已加入新建立 Obsidian 結構時預設使用 llm-wiki 架構之規範          |
