@@ -1,6 +1,6 @@
 ---
 name: cinematic-ui
-description: 'Design and build film-inspired visual work — websites AND PowerPoint presentations (.pptx). Use this skill when the user wants a visually distinctive, high-quality website or presentation that goes beyond generic templates — whether they mention film, cinema, directors, or simply ask for something with strong visual direction, editorial feel, or premium aesthetics. Also use when the user asks to redesign a presentation, deck, or 簡報 with a cinematic or editorial visual system, or uses /cinematic-ui before any slide-related request. Do not use for generic web design or generic slide design unless the user wants a strong visual direction.'
+description: 'Design and build film-inspired visual work — websites AND PowerPoint presentations (.pptx). Use this skill when the user wants a visually distinctive, high-quality website or presentation that goes beyond generic templates — whether they mention film, cinema, directors, or simply ask for something with strong visual direction, editorial feel, or premium aesthetics. Also use when the user asks to redesign a presentation, deck, or 簡報 with a cinematic or editorial visual system, or uses /cinematic-ui before any slide-related request.'
 ---
 
 # Cinematic Layout
