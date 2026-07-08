@@ -46,8 +46,8 @@ Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, sim
 **Touch only what you must. Clean up only your own mess.**
 
 When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
+- Don't "improve" adjacent code, comments, or formatting — but if you spot issues, mention them and suggest a separate follow-up.
+- Don't refactor things that aren't broken — but if you see something worth refactoring, flag it and propose how to approach it.
 - Match existing style, even if you'd do it differently.
 - If you notice unrelated dead code, mention it and suggest what to do — don't silently delete it.
 
