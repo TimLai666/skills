@@ -13,137 +13,137 @@ allowed-tools:
 
 ## Auto-trigger
 
-**任何寫 code 或改 code 的工作都要先載入這個 skill。** 不論是新功能、bug fix、refactor、還是 code review，只要動到程式碼就先讀。
+**Any code writing or code changing work must load this skill first.** Whether it's a new feature, bug fix, refactor, or code review — if you're touching code, read this first.
 
 ---
 
-## 核心原則
+## Core Principles
 
-### 1. 想清楚再寫
+### 1. Think Before Coding
 
-**不要假設。不要隱藏困惑。把 tradeoff 搬上檯面。**
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
 
-實作前：
-- 明確陳述你的假設。不確定就問。
-- 有多種解法就都列出，不要默默選一個。
-- 有更簡單的做法就講，該擋就擋。
-- 有不清楚的地方就停下來，說清楚哪裡不懂，問。
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them — don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
 
-### 2. 最小變更
+### 2. Simplicity First
 
-**能少改就少改，只解決被要求的事。**
+**Minimum code that solves the problem. Nothing speculative.**
 
-- 不做沒被要求的功能。
-- 不為一次性使用的 code 做抽象。
-- 不加沒被要求的「彈性」或「可配置」。
-- 不為不可能的場景加 error handling。
-- 寫了 200 行但 50 行就能搞定，重寫。
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
 
-問自己：「資深工程師會不會覺得太複雜？」會的話就簡化。
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
-### 3. 精準手術
+### 3. Surgical Changes
 
-**只動該動的。只清自己製造的垃圾。**
+**Touch only what you must. Clean up only your own mess.**
 
-改既有 code 時：
-- 不要「順便改善」旁邊的 code、註解或格式。
-- 不要 refactor 沒壞的東西。
-- 沿用現有風格，即使你會寫不一樣。
-- 發現不相關的死 code 就提一下，不要刪。
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it — don't delete it.
 
-當你的變更產生 orphan 時：
-- 刪除你的變更造成的 unused imports/variables/functions。
-- 不要删既有的死 code，除非被要求。
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
 
-**檢驗標準：每一行改動都要能直接追溯到使用者的需求。**
+The test: Every changed line should trace directly to the user's request.
 
-### 4. TDD（Test-Driven Development）
+### 4. TDD (Test-Driven Development)
 
-**所有變更和功能都必須有對應的測試。沒有測試等於沒做完。**
+**All changes and features must have corresponding tests. No test = not done.**
 
-流程：
+Cycle:
 ```
-1. 寫失敗的 test（定義期望行為）
-2. 寫最少的 code 讓 test 通過
-3. 重構，確保 test 仍通過
-4. 重複
-```
-
-規則：
-- **先寫 test，再寫 implementation。** 不要寫完 code 才補 test。
-- **每個 bug fix 都要先有一個能重現 bug 的 test。** 修完後 test 要通過。
-- **每個新功能都要有對應的 test。** 功能沒有 test 覆蓋就不算完成。
-- **重構前先確認所有 test 都通過。** 重構後再確認一次。
-- **不要為了讓 test 過而硬改 test。** 除非 test 本身確實寫錯。
-- Test 要能證明這次修改有效，不是只為了 coverage 數字。
-
-### 5. 目標驅動執行
-
-**定義成功標準。跑迴圈直到驗證通過。**
-
-把任務轉成可驗證的目標：
-- 「加 validation」→ 「為無效輸入寫 test，然後让它通過」
-- 「修 bug」→ 「寫一個能重現 bug 的 test，然後让它通過」
-- 「refactor X」→ 「確認 test 在改前改後都通過」
-
-多步驟任務要列出計畫：
-```
-1. [步驟] → 驗證：[怎麼確認]
-2. [步驟] → 驗證：[怎麼確認]
-3. [步驟] → 驗證：[怎麼確認]
+1. Write a failing test (define expected behavior)
+2. Write minimum code to make the test pass
+3. Refactor, ensure tests still pass
+4. Repeat
 ```
 
-強的成功標準讓你自己能跑迴圈。弱的成功標準（「讓它能用」）需要一直問人。
+Rules:
+- **Write the test first, then implement.** Don't write code and backfill tests.
+- **Every bug fix must start with a test that reproduces the bug.** Test passes after fix.
+- **Every new feature must have a corresponding test.** Feature without test coverage is not done.
+- **Before refactoring, confirm all tests pass.** After refactoring, confirm again.
+- **Don't weaken a test just to make it pass.** Unless the test itself is wrong.
+- Tests must prove the change works, not just inflate coverage numbers.
+
+### 5. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
+```
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
+
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
 ---
 
-## 工作流程
+## Workflow
 
-### A. 開始寫 code 前
+### A. Before Writing Code
 
-1. 確認你理解需求。有不清楚的先問。
-2. 陳述假設和限制。
-3. 列出可能的解法，說明你選哪個、為什麼。
-4. 定義成功標準：怎麼樣算「做完」。
-5. 如果有既有 test，先跑一次確認都通過。
+1. Confirm you understand the requirement. Ask if unclear.
+2. State assumptions and constraints.
+3. List possible approaches, explain which you choose and why.
+4. Define success criteria: what does "done" look like.
+5. If existing tests exist, run them first to confirm they all pass.
 
-### B. 寫 code 時
+### B. While Writing Code
 
-1. **TDD 迴圈**：紅 → 綠 → 重構。
-2. 每個變更都要能追溯到需求。
-3. 不動不該動的東西。
-4. 保持 code 簡單，不超過需求。
-5. 沿用既有 code style。
+1. **TDD loop**: red → green → refactor.
+2. Every change must trace back to a requirement.
+3. Don't touch what you shouldn't.
+4. Keep code simple, no more than required.
+5. Match existing code style.
 
-### C. 完成後
+### C. After Completion
 
-1. 跑全部 test，確認都通過。
-2. 跑 linter / type checker（如果專案有的話）。
-3. 檢查：每一行改動都能追溯到需求嗎？
-4. 檢查：有沒有不小心動到不該動的東西？
-5. 檢查：code 夠簡單嗎？資深工程師會不會覺得太複雜？
-
----
-
-## 常見地雷
-
-- **Gold plating**：加了沒被要求的功能，因為「順手」。
-- **Premature abstraction**：只出現一次的邏輯就抽成共用函式。
-- **Defensive coding for impossible scenarios**：為不可能發生的錯誤加 error handling。
-- **Refactoring unrelated code**：改 A 的時候順便改 B，結果 B 壞了。
-- **Test-after**：先寫 code 再補 test，結果 test 只能測到表面。
-- **Making test pass by weakening assertion**：test 失敗了就改 test 而不是改 code。
+1. Run all tests, confirm they all pass.
+2. Run linter / type checker (if the project has one).
+3. Check: can every changed line trace back to a requirement?
+4. Check: did you accidentally touch something you shouldn't have?
+5. Check: is the code simple enough? Would a senior engineer call it overcomplicated?
 
 ---
 
-## 收尾自我檢查
+## Common Pitfalls
 
-- [ ] 每一行改動都能追溯到使用者的需求。
-- [ ] 沒有做沒被要求的事。
-- [ ] 沒有為一次性使用的 code 做抽象。
-- [ ] 所有變更和功能都有對應的 test。
-- [ ] 先寫了 test，再寫 implementation。
-- [ ] Bug fix 有一個能重現 bug 的 test。
-- [ ] 全部 test 都通過。
-- [ ] Linter / type checker 沒有報錯。
-- [ ] Code 夠簡單，不超過需求。
+- **Gold plating**: adding features not asked for because it was "easy."
+- **Premature abstraction**: extracting shared logic that only appears once.
+- **Defensive coding for impossible scenarios**: error handling for errors that can't happen.
+- **Refactoring unrelated code**: changing A while "cleaning up" B, breaking B.
+- **Test-after**: writing code first then backfilling tests that only test the surface.
+- **Making test pass by weakening assertion**: failing test → change test instead of changing code.
+
+---
+
+## Pre-Ship Checklist
+
+- [ ] Every changed line traces to a user's request.
+- [ ] Nothing was added that wasn't asked for.
+- [ ] No abstractions for single-use code.
+- [ ] All changes and features have corresponding tests.
+- [ ] Test was written before implementation.
+- [ ] Bug fix has a test that reproduces the bug.
+- [ ] All tests pass.
+- [ ] Linter / type checker reports no errors.
+- [ ] Code is simple, no more than required.
