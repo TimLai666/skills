@@ -104,3 +104,55 @@ Before reporting completion, verify every item in the relevant mode's section. F
 - [ ] No references to files outside the project directory
 - [ ] All file paths in notes are relative to project root
 - [ ] No hardcoded absolute paths
+
+---
+
+## Wiki Mode
+
+### Wiki Source Integrity
+- [ ] Wiki path verified and accessible
+- [ ] Wiki structure complete (`SCHEMA.md`, `index.md`, `concepts/`)
+- [ ] Orientation completed (SCHEMA + index + recent log read before any sync)
+
+### Sync Manifest
+- [ ] `.sync-manifest.json` exists (created on first sync, updated on subsequent)
+- [ ] Every synced wiki page has an entry with valid `sha256`, `vault_path`, `synced_at`
+- [ ] `wiki_path` in manifest matches the actual wiki location
+- [ ] `last_sync` timestamp is current
+- [ ] `grouping.tag_to_folder` mapping is populated from wiki SCHEMA.md tags
+
+### Diff Detection
+- [ ] NEW wiki pages (not in manifest) are detected and imported
+- [ ] CHANGED wiki pages (sha256 mismatch) are re-imported
+- [ ] DELETED wiki pages (manifest entry without wiki file) trigger removal from StudyVault
+- [ ] Learning progress (`concepts/{area}.md`) is preserved across re-imports
+
+### Concept Grouping
+- [ ] Wiki concept/entity pages grouped by top-level domain tag
+- [ ] Grouping matches wiki SCHEMA.md tag taxonomy
+- [ ] Each group maps to a StudyVault folder (`01-Topic/`, `02-Topic/`, etc.)
+
+### Concept Note Quality
+- [ ] Every wiki concept/entity page has a corresponding StudyVault concept note
+- [ ] YAML frontmatter present: `source_pdf` (mapped from wiki `sources`), `keywords`
+- [ ] `[[wiki-links]]` preserved from wiki
+- [ ] Overview Table + Exam Patterns sections present
+- [ ] High-risk content (`contested: true`, `confidence: low`) flagged as Exam Trap candidates
+
+### Practice Questions
+- [ ] Every concept note folder has a practice file (≥8 questions)
+- [ ] Question type mix: ≥60% recall, ≥20% application, ≥2% analysis
+- [ ] All answers use `> [!answer]-` fold callout (zero-hint policy)
+- [ ] High-risk wiki content prioritized for analysis questions
+
+### Dashboard
+- [ ] MOC Topic Map links to all concept notes
+- [ ] New topics default to ⬜ (unmeasured) in proficiency table
+- [ ] Existing topics retain their learning progress
+- [ ] Weak Areas section updated with any new low-proficiency topics
+
+### Incremental Sync
+- [ ] On re-sync: only NEW/CHANGED pages are processed (not full regeneration)
+- [ ] User-added StudyVault files (not in manifest) are untouched
+- [ ] Sync report lists: added N, updated N, removed N
+- [ ] Manifest updated after sync completes

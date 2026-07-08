@@ -1,15 +1,9 @@
 ---
 name: llm-wiki
 description: "Karpathy's LLM Wiki: build/query interlinked markdown KB."
-version: 2.1.0
-author: Hermes Agent
+version: 3.0.0
 license: MIT
 platforms: [linux, macos, windows]
-metadata:
-  hermes:
-    tags: [wiki, knowledge-base, research, notes, markdown, rag-alternative]
-    category: research
-    related_skills: [obsidian, arxiv]
 ---
 
 # Karpathy's LLM Wiki
@@ -27,24 +21,44 @@ summarizes, cross-references, files, and maintains consistency.
 ## When This Skill Activates
 
 Use this skill when the user:
-- Asks to create, build, start, or structure a new Obsidian vault, note system, or knowledge base
+- Wants to research a topic (auto-create wiki if none exists, then proceed with research)
+- Asks to create, build, start, or structure a new wiki, note system, or knowledge base
 - Asks to ingest, add, or process a source into their wiki
-- Asks a question and an existing wiki is present at the configured path
+- Asks a question and an existing wiki is present
 - Asks to lint, audit, or health-check their wiki
 - References their wiki, knowledge base, or "notes" in a research context
 
+**The wiki is research infrastructure, not the end goal.** Users want research
+results; the wiki is the mechanism that makes research compounding and persistent.
+When a user says "help me research X" and no wiki exists, create one and proceed
+with the research.
+
 ## Wiki Location
-
-**Location:** Set via `WIKI_PATH` environment variable (e.g. in `${HERMES_HOME:-~/.hermes}/.env`).
-
-If unset, defaults to `~/wiki`.
-
-```bash
-WIKI="${WIKI_PATH:-$HOME/wiki}"
-```
 
 The wiki is just a directory of markdown files — open it in Obsidian, VS Code, or
 any editor. No database, no special tooling required.
+
+### Path Resolution
+
+1. **User specifies a path** — use it directly.
+2. **No path given** — analyze the context to suggest paths:
+   - What is the user researching? What kind of directory name fits this topic?
+   - What does the CWD directory structure look like? Are there existing directories
+     that suggest a naming convention?
+   - Suggest 2-3 contextually appropriate options, then let the user confirm or
+     provide their own.
+3. **Never scan `~/`** — do not search the home directory for existing wikis.
+4. **Never assume a default path** — always resolve explicitly.
+
+```
+User provides path → use it
+    ↓ (no path)
+Analyze context (topic, CWD structure, existing dirs)
+    ↓
+Suggest 2-3 fitting options → user confirms or gives own path
+    ↓
+Use confirmed path for all subsequent operations
+```
 
 ## Architecture: Three Layers
 
@@ -78,11 +92,10 @@ When the user has an existing wiki, **always orient yourself before doing anythi
 ③ **Scan recent `log.md`** — read the last 20-30 entries to understand recent activity.
 
 ```bash
-WIKI="${WIKI_PATH:-$HOME/wiki}"
-# Orientation reads at session start
-read_file "$WIKI/SCHEMA.md"
-read_file "$WIKI/index.md"
-read_file "$WIKI/log.md" offset=<last 30 lines>
+# Orientation reads at session start (replace <wiki> with the resolved path)
+read_file "<wiki>/SCHEMA.md"
+read_file "<wiki>/index.md"
+read_file "<wiki>/log.md" offset=<last 30 lines>
 ```
 
 Only after orientation should you ingest, query, or lint. This prevents:
@@ -98,7 +111,7 @@ at hand before creating anything new.
 
 When the user asks to create or start a wiki:
 
-1. Determine the wiki path (from `$WIKI_PATH` env var, or ask the user; default `~/wiki`)
+1. Resolve the wiki path (see Path Resolution above)
 2. Create the directory structure above
 3. Ask the user what domain the wiki covers — be specific
 4. Write `SCHEMA.md` customized to the domain (see template below)
@@ -324,7 +337,7 @@ When the user asks to lint, health-check, or audit the wiki:
 # Use execute_code for this — programmatic scan across all wiki pages
 import os, re
 from collections import defaultdict
-wiki = "<WIKI_PATH>"
+wiki = "<wiki>"  # replace with resolved wiki path
 # Scan all .md files in entities/, concepts/, comparisons/, queries/
 # Extract all [[wikilinks]] — build inbound link map
 # Pages with zero inbound links are orphans
@@ -370,17 +383,17 @@ wiki = "<WIKI_PATH>"
 ### Searching
 
 ```bash
-# Find pages by content
-search_files "transformer" path="$WIKI" file_glob="*.md"
+# Find pages by content (replace <wiki> with resolved path)
+search_files "transformer" path="<wiki>" file_glob="*.md"
 
 # Find pages by filename
-search_files "*.md" target="files" path="$WIKI"
+search_files "*.md" target="files" path="<wiki>"
 
 # Find pages by tag
-search_files "tags:.*alignment" path="$WIKI" file_glob="*.md"
+search_files "tags:.*alignment" path="<wiki>" file_glob="*.md"
 
 # Recent activity
-read_file "$WIKI/log.md" offset=<last 20 lines>
+read_file "<wiki>/log.md" offset=<last 20 lines>
 ```
 
 ### Bulk Ingest
@@ -436,7 +449,7 @@ ob login --email <email> --password '<password>'
 ob sync-create-remote --name "LLM Wiki"
 
 # Connect the wiki directory to the vault
-cd ~/wiki
+cd <wiki>
 ob sync-setup --vault "<vault-id>"
 
 # Initial sync
@@ -456,7 +469,7 @@ Wants=network-online.target
 
 [Service]
 ExecStart=/path/to/ob sync --continuous
-WorkingDirectory=/home/user/wiki
+WorkingDirectory=<wiki>
 Restart=on-failure
 RestartSec=10
 
@@ -471,7 +484,7 @@ systemctl --user enable --now obsidian-wiki-sync
 sudo loginctl enable-linger $USER
 ```
 
-This lets the agent write to `~/wiki` on a server while you browse the same
+This lets the agent write to the wiki on a server while you browse the same
 vault in Obsidian on your laptop/phone — changes appear within seconds.
 
 ## Pitfalls

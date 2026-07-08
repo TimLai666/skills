@@ -2,6 +2,8 @@
 
 ## Vault Folder Structure
 
+### Document Mode / Codebase Mode
+
 ```
 StudyVault/
   00-Dashboard/          # MOC + cheat sheets + Exam Traps
@@ -10,6 +12,24 @@ StudyVault/
   ...
   NN-문제풀이/ (or Practice/)
 ```
+
+### Wiki Mode
+
+Same structure, plus a sync manifest for incremental updates:
+
+```
+StudyVault/
+  .sync-manifest.json    # Tracks wiki → StudyVault mapping + sha256
+  00-Dashboard/          # MOC + cheat sheets + Exam Traps
+  01-<Topic1>/           # Concept notes grouped by wiki domain tags
+  02-<Topic2>/
+  ...
+```
+
+- Folders are created based on wiki tag taxonomy grouping (Phase W4).
+- Concept notes are transformed from wiki concept/entity pages.
+- Practice questions are auto-generated from wiki content.
+- `.sync-manifest.json` enables incremental sync without full regeneration.
 
 ## Dashboard MOC Template
 
@@ -211,3 +231,61 @@ keywords: practice, <topic keywords>
   - ≥60% recall, ≥20% application, ≥2 analysis per file
 - Scenario in one `>` blockquote line; answer 1-3 lines in fold
 - `## Related Concepts` with `[[wiki-links]]` (MANDATORY)
+
+---
+
+## Sync Manifest Template (Wiki Mode)
+
+Stored at `StudyVault/.sync-manifest.json`. Created on first sync, updated on every subsequent sync.
+
+```json
+{
+  "version": 1,
+  "wiki_path": "/absolute/path/to/wiki",
+  "last_sync": "2026-07-09T10:00:00Z",
+  "grouping": {
+    "tag_to_folder": {
+      "model": "01-AI",
+      "training": "01-AI",
+      "marketing-strategy": "02-Marketing"
+    }
+  },
+  "pages": {
+    "concepts/transformer-architecture.md": {
+      "sha256": "a1b2c3d4...",
+      "vault_path": "01-AI/transformer-architecture.md",
+      "synced_at": "2026-07-09T10:00:00Z"
+    },
+    "entities/openai.md": {
+      "sha256": "e5f6g7h8...",
+      "vault_path": "01-AI/openai.md",
+      "synced_at": "2026-07-09T10:00:00Z"
+    }
+  }
+}
+```
+
+### Fields
+
+| Field | Purpose |
+|-------|---------|
+| `version` | Manifest schema version (currently 1) |
+| `wiki_path` | Absolute path to the source wiki |
+| `last_sync` | ISO 8601 timestamp of last sync |
+| `grouping.tag_to_folder` | Maps wiki domain tags to StudyVault folder names. Auto-populated from wiki SCHEMA.md tag taxonomy. User can override. |
+| `pages` | Key = wiki page path (relative to wiki root). Value = sync metadata. |
+
+### Page Entry Fields
+
+| Field | Purpose |
+|-------|---------|
+| `sha256` | SHA-256 hash of wiki page content (body only, excludes frontmatter). Used to detect changes. |
+| `vault_path` | Corresponding StudyVault file path (relative to StudyVault root). |
+| `synced_at` | ISO 8601 timestamp of when this page was last synced. |
+
+### Behavior
+
+- **First sync**: Create manifest, import all wiki concept/entity pages.
+- **Subsequent syncs**: Compare sha256 per page. Only NEW/CHANGED pages are processed.
+- **Deleted pages**: If a manifest entry has no matching wiki file, the StudyVault file is removed and learning progress is archived (not deleted).
+- **User-added files**: Any StudyVault file not tracked in the manifest is left untouched by sync.
