@@ -85,6 +85,7 @@
 | `ship-it` | 想準備 PR、sync base、跑測試、開 PR，上線後提醒你 CI/deploy 監控方式。 | `ship-it` |
 | `project-memory` | 想記錄專案教訓、踩過的雷、學到的 pattern，支援搜尋與匯出。 | `project-memory` |
 | `investigate` | 想先調查根因、驗證假設、再修復，不要先修再問。 | `investigate` |
+| `coding-guidelines` | 寫 code 或改 code 前先載入：想清楚再寫、最小變更、精準手術、TDD 驅動、目標驅動。 | `coding-guidelines` |
 | `dev-task-loop` | 想用已知 backlog / ticket / 設計參考，一次處理一系列開發任務。 | `dev-task-loop` |
 | `openclaw-agent-builder` | 想建立、配置或改造 OpenClaw agent，包括 workspace、channel、bindings、RAG 知識庫與安全設定。 | `openclaw-agent-builder` |
 | `openclaw-ops` | 想在運行中的 OpenClaw 機器上做運維、配置、診斷。 | `openclaw-ops` |
