@@ -65,23 +65,45 @@ Use confirmed path for all subsequent operations
 ```
 wiki/
 ├── SCHEMA.md           # Conventions, structure rules, domain config
-├── index.md            # Sectioned content catalog with one-line summaries
+├── index.md            # Global catalog: topics + cross-topic pages
 ├── log.md              # Chronological action log (append-only, rotated yearly)
 ├── raw/                # Layer 1: Immutable source material
 │   ├── articles/       # Web articles, clippings
 │   ├── papers/         # PDFs, arxiv papers
 │   ├── transcripts/    # Meeting notes, interviews
 │   └── assets/         # Images, diagrams referenced by sources
-├── entities/           # Layer 2: Entity pages (people, orgs, products, models)
-├── concepts/           # Layer 2: Concept/topic pages
+├── topics/             # Layer 2: Per-research-topic grouping
+│   ├── {topic-slug}/
+│   │   ├── concepts/   # Concepts specific to this topic
+│   │   ├── entities/   # Entities specific to this topic
+│   │   └── index.md    # Topic-level catalog
+│   └── ...
+├── concepts/           # Layer 2: Cross-topic concept pages
+├── entities/           # Layer 2: Cross-topic entity pages
 ├── comparisons/        # Layer 2: Side-by-side analyses
 └── queries/            # Layer 2: Filed query results worth keeping
 ```
 
 **Layer 1 — Raw Sources:** Immutable. The agent reads but never modifies these.
 **Layer 2 — The Wiki:** Agent-owned markdown files. Created, updated, and
-cross-referenced by the agent.
+cross-referenced by the agent. Organized by research topic.
 **Layer 3 — The Schema:** `SCHEMA.md` defines structure, conventions, and tag taxonomy.
+
+### Topic Grouping Rules
+
+Each research topic gets its own subdirectory under `topics/`. When ingesting:
+
+- **Single-topic page** (only relevant to one research area) → `topics/{topic}/concepts/` or `topics/{topic}/entities/`
+- **Cross-topic page** (relevant to 2+ research areas) → global `concepts/` or `entities/`
+- Topic pages use `[[wikilink]]` to reference global pages and vice versa
+
+**判断标准:** When a new entity/concept appears in a source, check if it's already
+referenced in another topic. If yes → global. If no → place in the current topic.
+
+### Two-Level Index
+
+- **Global `index.md`** — Lists all research topics (linking to their index) + cross-topic pages
+- **Topic `index.md`** — Lists all pages within that specific topic
 
 ## Resuming an Existing Wiki (CRITICAL — do this every session)
 
@@ -114,10 +136,11 @@ When the user asks to create or start a wiki:
 1. Resolve the wiki path (see Path Resolution above)
 2. Create the directory structure above
 3. Ask the user what domain the wiki covers — be specific
-4. Write `SCHEMA.md` customized to the domain (see template below)
-5. Write initial `index.md` with sectioned header
-6. Write initial `log.md` with creation entry
-7. Confirm the wiki is ready and suggest first sources to ingest
+4. Ask what research topics they plan to work on (creates `topics/` subdirectories)
+5. Write `SCHEMA.md` customized to the domain (see template below)
+6. Write initial `index.md` with topic listings
+7. Write initial `log.md` with creation entry
+8. Confirm the wiki is ready and suggest first sources to ingest
 
 ### SCHEMA.md Template
 
@@ -128,6 +151,18 @@ Adapt to the user's domain. The schema constrains agent behavior and ensures con
 
 ## Domain
 [What this wiki covers — e.g., "AI/ML research", "personal health", "startup intelligence"]
+
+## Topics
+[List research topics. Each gets a subdirectory under `topics/`.]
+- topic-slug: [description]
+- topic-slug: [description]
+
+## Topic Grouping Rules
+- Each research topic = `topics/{topic-slug}/` with its own `concepts/`, `entities/`, `index.md`
+- Only appears in one topic → place in that topic's subdirectory
+- Appears in 2+ topics → place in global `concepts/` or `entities/`
+- When unsure, check existing pages across topics before placing
+- Cross-topic pages should link back to all relevant topics via `[[wikilink]]`
 
 ## Conventions
 - File names: lowercase, hyphens, no spaces (e.g., `transformer-architecture.md`)
@@ -227,28 +262,68 @@ When new information conflicts with existing content:
 
 ### index.md Template
 
-The index is sectioned by type. Each entry is one line: wikilink + summary.
+Two levels: global index (wiki root) and topic index (each topic subdirectory).
+
+**Global index.md:**
 
 ```markdown
 # Wiki Index
 
-> Content catalog. Every wiki page listed under its type with a one-line summary.
-> Read this first to find relevant pages for any query.
-> Last updated: YYYY-MM-DD | Total pages: N
+> Global catalog. Research topics and cross-topic pages.
+> Last updated: YYYY-MM-DD | Topics: N | Total pages: N
 
-## Entities
-<!-- Alphabetical within section -->
+## Topics
 
-## Concepts
+| Topic | Pages | Index |
+|-------|-------|-------|
+| [topic name] | N | [[topics/{slug}/index|→ index]] |
+
+## Cross-Topic Concepts
+
+| Page | Summary | Topics |
+|------|---------|--------|
+| [[page-name]] | One-line summary | topic-a, topic-b |
+
+## Cross-Topic Entities
+
+| Page | Summary | Topics |
+|------|---------|--------|
 
 ## Comparisons
 
+| Page | Summary |
+|------|---------|
+
 ## Queries
+
+| Page | Summary |
+|------|---------|
 ```
 
-**Scaling rule:** When any section exceeds 50 entries, split it into sub-sections
-by first letter or sub-domain. When the index exceeds 200 entries total, create
-a `_meta/topic-map.md` that groups pages by theme for faster navigation.
+**Topic index.md** (`topics/{slug}/index.md`):
+
+```markdown
+# {Topic Name} — Index
+
+> Pages: N | Last updated: YYYY-MM-DD
+
+## Concepts
+
+| Page | Summary |
+|------|---------|
+
+## Entities
+
+| Page | Summary |
+|------|---------|
+
+## Comparisons
+
+| Page | Summary |
+|------|---------|
+```
+
+**Scaling rule:** When any section exceeds 50 entries, split into sub-sections.
 
 ### log.md Template
 

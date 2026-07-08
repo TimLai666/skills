@@ -207,12 +207,13 @@ the full manifest.
 
 ### Phase W4: Concept Grouping
 
-Wiki concept pages are flat; StudyVault needs area-based grouping:
+Wiki already has topic-based structure. Use it directly:
 
-1. Read each wiki concept page's `tags` frontmatter.
-2. Group by top-level domain tag (e.g., `model`, `training`, `optimization` → separate areas).
-3. Map groups to StudyVault folder structure (`01-AI/`, `02-Marketing/`, etc.).
-4. User can override grouping via manifest config.
+1. Read wiki's `topics/` directory — each subdirectory is a research topic.
+2. Read each topic's `index.md` to understand its scope.
+3. Map wiki topics to StudyVault folders (`topics/ai-safety/` → `01-AI-Safety/`, etc.).
+4. Global `concepts/` and `entities/` (cross-topic pages) → map to a "Cross-Topic" StudyVault folder or distribute to relevant topic folders based on tags.
+5. User can override mapping via manifest `grouping.tag_to_folder` config.
 
 ### Phase W5: Transform & Generate
 
