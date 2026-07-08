@@ -234,7 +234,7 @@ Keep `SKILL.md` lean. Load only the references needed for the current phase.
   ```bash
   npx impeccable detect <output-dir-or-file>
   ```
-  The detector catches 45 deterministic issues including: overused fonts (Inter, system defaults), purple-to-blue gradients, cards nested inside cards, bounce/elastic easing, low-contrast text on colored backgrounds, flat type hierarchy, side-tab borders, icon-tile stacking. Fix any flagged issues before declaring done. If the detector is unavailable, manually check against the anti-pattern list in [references/anti-garbage.md](references/anti-garbage.md) — the intent is the same: no generic AI slop in the final output.
+  The detector catches 45 deterministic issues including: overused fonts (Inter, system defaults), purple-to-blue gradients, cards nested inside cards, bounce/elastic easing, low-contrast text on colored backgrounds, flat type hierarchy, side-tab borders, icon-tile stacking. Fix any flagged issues before declaring done.
 
 
 ## PPTX Mode
