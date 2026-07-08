@@ -1,6 +1,6 @@
 ---
 name: cinematic-ui
-description: 'Design and build film-inspired visual work — websites AND PowerPoint presentations (.pptx). Use when the user asks for a cinematic site, movie-style landing page, director-inspired UI, film-noir, sci-fi, romance, thriller, action, animation, or a movie-like web aesthetic. Also use when the user asks to redesign a presentation, deck, or 簡報 with a cinematic or editorial visual system, or uses /cinematic-ui before any slide-related request. Trigger on: cinematic site, cinematic deck, 電影感簡報, 重新設計簡報, 好看的網站, 有質感的頁面, 高級感, 奢華感, 重新設計我的簡報, 做簡報, 做投影片, 做 landing page, 做一個有質感的頁面, 做一個好看的網站, editorial presentation, Wes Anderson slides, noir pptx, or any combination of film language with slides / deck / pptx / 簡報 / 投影片. Do not use for generic web design or generic slide design unless the user explicitly wants a film or director reference.'
+description: 'Design and build film-inspired visual work — websites AND PowerPoint presentations (.pptx). Use this skill when the user wants a visually distinctive, high-quality website or presentation that goes beyond generic templates — whether they mention film, cinema, directors, or simply ask for something with strong visual direction, editorial feel, or premium aesthetics. Also use when the user asks to redesign a presentation, deck, or 簡報 with a cinematic or editorial visual system, or uses /cinematic-ui before any slide-related request. Do not use for generic web design or generic slide design unless the user wants a strong visual direction.'
 ---
 
 # Cinematic Layout
