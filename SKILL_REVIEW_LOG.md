@@ -22,9 +22,9 @@
 | `tutor/SKILL.md` | ✅ 轉換完成，韓文殘留與觸發詞改為繁體台灣語系 |
 | `tutor-setup/SKILL.md` | ✅ 轉換完成，韓文範例改為繁體中文對照 |
 | `defuddle/SKILL.md` | ✅ 純英文，無需修改 |
-| `llm-wiki/SKILL.md` | ✅ 純英文，無需修改 |
+| `llm-wiki/SKILL.md` | ✅ 已微調觸發器，以確保使用者要求新建立 Obsidian 結構時預設使用 llm-wiki 架構 |
 | `mermaid-visualizer/SKILL.md` | ✅ 純英文，無需修改 |
 | `obsidian-bases/SKILL.md` | ✅ 純英文，無需修改 |
 | `obsidian-canvas-creator/SKILL.md` | ✅ description 已調整，以明確區隔 Excalidraw |
 | `obsidian-cli/SKILL.md` | ✅ 純英文，無需修改 |
-| `obsidian-markdown/SKILL.md` | ✅ 純英文，無需修改 |
+| `obsidian-markdown/SKILL.md` | ✅ 已加入新建立 Obsidian 結構時預設使用 llm-wiki 架構之規範 |

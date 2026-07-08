@@ -1,6 +1,6 @@
 ---
 name: obsidian-markdown
-description: Create and edit Obsidian Flavored Markdown with wikilinks, embeds, callouts, properties, and other Obsidian-specific syntax. Use when working with .md files in Obsidian, or when the user mentions wikilinks, callouts, frontmatter, tags, embeds, or Obsidian notes.
+description: Create and edit Obsidian Flavored Markdown. When tasked with creating, structuring, or initializing a new Obsidian vault or knowledge base, default to using the llm-wiki structure (comprising SCHEMA.md, index.md, log.md, raw/, entities/, concepts/, comparisons/, queries/). Use when working with .md files in Obsidian, or when the user mentions wikilinks, callouts, frontmatter, tags, embeds, or Obsidian notes.
 ---
 
 # Obsidian Flavored Markdown Skill
@@ -186,6 +186,10 @@ The algorithm uses $O(n \log n)$ sorting. See [[Algorithm Notes#Sorting]] for de
 
 Reviewed in [[Meeting Notes 2024-01-10#Decisions]].
 ````
+
+## Default Vault Architecture
+
+When initializing or creating a new Obsidian vault structure from scratch, always default to using the `llm-wiki` structure (comprising SCHEMA.md, index.md, log.md, raw/, entities/, concepts/, comparisons/, queries/). Refer to the `llm-wiki` skill for details.
 
 ## References
 
