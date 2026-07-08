@@ -125,6 +125,28 @@
 | `tutor-setup` | 想建立 Obsidian StudyVault，從既有 wiki 或文件匯入學習素材，設定 quiz 規則與進度追蹤。 | `tutor-setup` |
 | `tutor` | 想用互動式 quiz 學習 StudyVault 裡的概念，追蹤已知/未知、生成練習題與解釋。 | `tutor` |
 
+### 圖表製作
+
+| Skill | 適合什麼需求 | Install Path |
+| --- | --- | --- |
+| `excalidraw-diagram` | 想產出手繪風格的 Excalidraw 圖（流程圖、心智圖、對比圖），支援 Obsidian .md、標準 .excalidraw 與動畫模式。 | `excalidraw-diagram` |
+| `mermaid-visualizer` | 想把文字內容轉成 Mermaid 圖表（流程圖、序列圖、架構圖等），用於簡報與文件。 | `mermaid-visualizer` |
+| `obsidian-canvas-creator` | 想建立 Obsidian Canvas（.canvas），做空間佈局、心智圖或自由版面配置。 | `obsidian-canvas-creator` |
+
+### Obsidian 工具
+
+| Skill | 適合什麼需求 | Install Path |
+| --- | --- | --- |
+| `obsidian-markdown` | 想建立或編輯 Obsidian Flavored Markdown，處理 wikilinks、callouts、frontmatter、embeds 等語法。 | `obsidian-markdown` |
+| `obsidian-cli` | 想用 CLI 操作 Obsidian vault（搜尋、替換、匯出、管理 vault）。 | `obsidian-cli` |
+| `obsidian-bases` | 想在 Obsidian 裡建立資料庫視圖（類似 Notion database），管理結構化資料。 | `obsidian-bases` |
+
+### 網頁與內容提取
+
+| Skill | 適合什麼需求 | Install Path |
+| --- | --- | --- |
+| `defuddle` | 想從網頁或 PDF 提取乾淨的 markdown 內容，移除廣告與導航列。 | `defuddle` |
+
 ## Notes
 
 - 根目錄的草稿、zip、筆記不是 install path。
