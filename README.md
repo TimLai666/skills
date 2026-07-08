@@ -67,13 +67,6 @@
 | Skill | 適合什麼需求 | Install Path |
 | --- | --- | --- |
 | `folder-organizer` | 想整理檔案與資料夾結構，快速把專案內容分類成可上傳或分享的格式。 | `folder-organizer` |
-| `dev-task-loop` | 想用已知 backlog / ticket /設計參考，一次處理一系列開發任務，從實作到驗證再到追蹤。 | `dev-task-loop` |
-
-### 後端與基礎設施
-
-| Skill | 適合什麼需求 | Install Path |
-| --- | --- | --- |
-| `postgrest-baas-builder` | 想建立或開發以 PostgREST-compatible BaaS 為後端的服務，涵蓋環境分離、migration、RLS、Auth、稽核 log、軟刪除等規範。 | `postgrest-baas-builder` |
 
 ### 系統救援與維修
 
@@ -83,20 +76,20 @@
 
 ### 開發流程與工程支援
 
-> **Stacksmith 系列** 是一套完整的軟體開發流程工具組，從規劃到上線都有對應的 skill，可單獨使用也可串接。
-
 | Skill | 適合什麼需求 | Install Path |
 | --- | --- | --- |
+| `feature-planner` | 想規劃功能、釐清痛點、挑戰 scope。一題一題問，每題提供 agent 建議，決策立即記錄。 | `feature-planner` |
+| `eng-architect` | 想設計技術架構、畫 architecture diagram、做 error map、建立 delivery-plan.md 等協作 artifact。 | `eng-architect` |
+| `diff-inspector` | 想在合併前審查 diff：scope drift check、critical code review、specialist 並行扫描、adversarial review。 | `diff-inspector` |
+| `test-and-fix` | 想跑測試、根據 diff 自動找出 affected routes、修復後加回歸測試。 | `test-and-fix` |
+| `ship-it` | 想準備 PR、sync base、跑測試、開 PR，上線後提醒你 CI/deploy 監控方式。 | `ship-it` |
+| `project-memory` | 想記錄專案教訓、踩過的雷、學到的 pattern，支援搜尋與匯出。 | `project-memory` |
 | `investigate` | 想先調查根因、驗證假設、再修復，不要先修再問。 | `investigate` |
+| `dev-task-loop` | 想用已知 backlog / ticket / 設計參考，一次處理一系列開發任務。 | `dev-task-loop` |
 | `openclaw-agent-builder` | 想建立、配置或改造 OpenClaw agent，包括 workspace、channel、bindings、RAG 知識庫與安全設定。 | `openclaw-agent-builder` |
-| `openclaw-ops` | 想在運行中的 OpenClaw 機器上做運維、配置、診斷，包括 gateway、daemon、channels、config、models、plugins 與安全稽核。 | `openclaw-ops` |
-| `stacksmith-plan` | 想規劃功能、挑戰 scope、鎖定架構；eng 模式結束後自動建立 delivery-plan.md、AGENTS.md、CLAUDE.md 等協作 artifact，新舊專案皆適用。 | `stacksmith-plan` |
-| `stacksmith-review` | 想審查 PR diff、UI 品質或掃描安全漏洞。 | `stacksmith-review` |
-| `stacksmith-qa` | 想跑測試、修復後驗證、或在上線前做 QA 稽核。 | `stacksmith-qa` |
-| `stacksmith-release` | 想準備 PR、合併上線、或在發佈後同步 changelog 與文件。 | `stacksmith-release` |
-| `stacksmith-ops` | 想存一個專案 checkpoint、記錄教訓、查健康狀態、或跑回顧。 | `stacksmith-ops` |
-| `stacksmith-safety` | 想在大範圍編輯、migration 或高風險操作前開啟確認閘道或鎖定範圍。 | `stacksmith-safety` |
-| `zeabur-deployment` | 想為專案設定 Zeabur 部署規範，建立 CLAUDE.md 部署約束（Zeabur 只支援 Dockerfile、不支援 docker-compose）。 | `zeabur-deployment` |
+| `openclaw-ops` | 想在運行中的 OpenClaw 機器上做運維、配置、診斷。 | `openclaw-ops` |
+| `postgrest-baas-builder` | 想建立或開發以 PostgREST-compatible BaaS 為後端的服務。 | `postgrest-baas-builder` |
+| `zeabur-deployment` | 想為專案設定 Zeabur 部署規範。 | `zeabur-deployment` |
 
 ### 資料分析與建模
 
