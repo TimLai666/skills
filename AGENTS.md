@@ -39,13 +39,41 @@ Frontmatter 只有兩個欄位：`name`（必須等於資料夾名）與 `descri
 
 內容語言以繁體中文（台灣）為主，frontmatter description 為英文夾中文觸發詞。
 
-## 必須同步的東西
+## 增減修改 skills 的必做事項
 
-新增、改名、刪除、搬移 skill 時，以下三處必須同步：
+### 新增 skill
 
-1. `README.md` 對應 plugin 區塊的目錄表（skill 名 / 適合什麼需求）。
-2. 若 plugin 的收納範圍變了，`.claude-plugin/marketplace.json` 與該 plugin 的 `plugin.json` 的 description 也要跟著改。
-3. skill 資料夾必須放在某個 `plugins/<plugin>/skills/` 底下，不要放回根目錄。
+1. 先決定歸屬哪個 plugin，資料夾建在 `plugins/<plugin>/skills/<skill>/`，不要放根目錄。
+2. SKILL.md 遵守上方結構慣例（章節順序、frontmatter 只有 name 與 description、name 等於資料夾名）。
+3. 在 `README.md` 對應 plugin 區塊的表格加一列（skill 名 / 適合什麼需求），並更新 README 開頭的 skill 總數。
+4. 若這個 skill 改變了 plugin 的收納範圍描述，同步更新 `.claude-plugin/marketplace.json` 與該 plugin 的 `plugin.json` 的 description。
+5. 調升該 plugin 的 `plugin.json` version（內容變了，已安裝的使用者靠版本號知道要更新）。
+
+### 修改 skill
+
+1. 只動該 skill 資料夾內的檔案；SKILL.md 與 references/ 的相對連結要保持有效。
+2. 若 name 或觸發 description 變了，確認 frontmatter name 仍等於資料夾名。
+3. 若 skill 的定位或適用需求變了，同步更新 README.md 表格中該列的描述。
+4. 調升該 plugin 的 `plugin.json` version。
+
+### 刪除 skill
+
+1. 刪除 `plugins/<plugin>/skills/<skill>/` 整個資料夾。
+2. 從 README.md 對應表格移除該列，並更新 README 開頭的 skill 總數。
+3. 若 plugin description 有點名這個 skill，同步更新 marketplace.json 與 plugin.json。
+4. 調升該 plugin 的 `plugin.json` version。
+
+### 搬移 skill（換 plugin）
+
+1. 用 `git mv` 保留歷史，搬到新的 `plugins/<plugin>/skills/` 底下。
+2. README.md 把該列從舊 plugin 表格移到新 plugin 表格。
+3. 兩個受影響 plugin 的 description（marketplace.json + plugin.json）都檢查是否要改，version 都要調升。
+
+### 收尾檢查（所有操作共通）
+
+- `plugins/*/skills/*/SKILL.md` 的數量、README 表格列數、README 開頭總數三者一致。
+- 所有動過的 JSON 能正常解析。
+- 需要 claude.ai 上傳包時，跑 `python zip_subfolders.py` 確認 exit 0。
 
 ## 重要注意事項
 
