@@ -53,7 +53,7 @@
 | --- | --- | --- |
 | `commercial-proposal-writing` | 想寫或改提案、合作方案、募資 deck、商業計畫。 | `commercial-proposal-writing` |
 | `landing-page-studio` | 想產出偏高轉換導向的 landing page、hero section、行銷頁面。 | `landing-page-studio` |
-| `cinematic-ui` | 想做電影感網站設計或導演式、電影風格的簡報 / PPTX。 | `cinematic-ui` |
+| `design-studio` | 所有設計事務的統一入口：網站、App、簡報、動畫、資訊圖、品牌設計。每次設計會產出或擴充 `DESIGN.md`（Google 格式設計系統檔）。支援電影感（cinematic-ui）與實操快速（huashu-design）雙引擎。 | `design-studio` |
 | `human-writing` | 想要產出文案、文章、內容重寫或其他寫作支援。 | `human-writing` |
 
 ### 法務與合約審閱
