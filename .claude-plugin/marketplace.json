@@ -1,0 +1,57 @@
+{
+  "name": "skills",
+  "owner": {
+    "name": "TimLai666"
+  },
+  "metadata": {
+    "description": "TimLai666's agent skills collection, grouped into installable plugins.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "business-strategy",
+      "source": "./plugins/business-strategy",
+      "description": "商業策略與評估：商業模式設計、BCG 矩陣、PESTEL、SWOT、決策偏誤檢查、合約紅旗掃描。"
+    },
+    {
+      "name": "customer-insight",
+      "source": "./plugins/customer-insight",
+      "description": "顧客研究與洞察：研究方法選擇、persona、顧客旅程、評論探勘 STP、理論編碼分析、評論評分與聯合分析。"
+    },
+    {
+      "name": "marketing-strategy",
+      "source": "./plugins/marketing-strategy",
+      "description": "行銷策略與訊息設計：S-O-R 模型、心理促發、Maslow 五情、內容成長、Threads 爆文、體驗與游擊行銷。"
+    },
+    {
+      "name": "service-innovation",
+      "source": "./plugins/service-innovation",
+      "description": "服務設計與創新：生態系地圖與服務藍圖、服務設計/創新工作坊、案例分析、SCAMPER、減法思考。"
+    },
+    {
+      "name": "writing-and-design",
+      "source": "./plugins/writing-and-design",
+      "description": "提案與頁面產出：商業提案撰寫、landing page、統一設計工作室、人味寫作。"
+    },
+    {
+      "name": "dev-workflow",
+      "source": "./plugins/dev-workflow",
+      "description": "開發流程與工程支援：功能規劃、架構設計、diff 審查、測試修復、出貨、專案記憶、根因調查、coding 準則、DB 工程、BaaS、Zeabur、OpenClaw。"
+    },
+    {
+      "name": "data-and-research",
+      "source": "./plugins/data-and-research",
+      "description": "資料分析與研究：端到端資料分析流程、投資研究模板、arXiv 文獻搜尋。"
+    },
+    {
+      "name": "knowledge-tools",
+      "source": "./plugins/knowledge-tools",
+      "description": "知識管理與圖表：LLM wiki、tutor 學習系統、Obsidian 工具組、Excalidraw、Mermaid、Canvas。"
+    },
+    {
+      "name": "utilities",
+      "source": "./plugins/utilities",
+      "description": "通用工具：網頁內容提取、檔案整理、Windows 系統救援。"
+    }
+  ]
+}

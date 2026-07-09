@@ -39,7 +39,10 @@ def run() -> int:
     failure_count = 0
     skipped_count = 0
 
-    child_directories = sorted((path for path in root.iterdir() if path.is_dir()), key=lambda p: p.name.lower())
+    child_directories = sorted(
+        (path for path in root.glob("plugins/*/skills/*") if path.is_dir()),
+        key=lambda p: p.name.lower(),
+    )
 
     for child_dir in child_directories:
         if is_excluded_directory(child_dir):
