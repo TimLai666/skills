@@ -28,7 +28,7 @@ npx skills add TimLai666/skills
 npx skills add TimLai666/skills --all
 
 # 裝單一 skill（指定完整路徑）
-npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflow/skills/coding-guidelines
+npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflow/skills/software-engineering-guidelines
 ```
 
 ### claude.ai（逐個上傳 zip）
@@ -105,7 +105,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | `ship-it` | 想準備 PR、sync base、跑測試、開 PR，上線後提醒你 CI/deploy 監控方式。 |
 | `project-memory` | 想記錄專案教訓、踩過的雷、學到的 pattern，支援搜尋與匯出。 |
 | `investigate` | 想先調查根因、驗證假設、再修復，不要先修再問。 |
-| `coding-guidelines` | 寫 code 或改 code 前先載入：想清楚再寫、最小變更、精準手術、TDD、目標驅動。 |
+| `software-engineering-guidelines` | 任何軟體規劃、架構、實作、重構、review、測試前先載入：想清楚再做、最小變更、精準手術、TDD、目標驅動。 |
 | `dev-task-loop` | 想用已知 backlog / ticket / 設計參考，一次處理一系列開發任務。 |
 | `db-engineering` | 任何資料庫相關工作都要先載入：先畫 ER model、以 BCNF 優先設計並至少維持 3NF，再處理 migration、稽核 log、軟刪除、效能、完整性與環境分離。 |
 | `postgrest-baas-builder` | 用 Supabase / InsForge 做後端時：RLS policy、Auth 串接、PostgREST 查詢、MCP 設定。需搭配 db-engineering。 |

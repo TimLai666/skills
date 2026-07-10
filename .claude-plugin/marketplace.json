@@ -36,7 +36,7 @@
     {
       "name": "dev-workflow",
       "source": "./plugins/dev-workflow",
-      "description": "開發流程與工程支援：功能規劃、架構設計、diff 審查、測試修復、出貨、專案記憶、根因調查、coding 準則、DB 工程、BaaS、Zeabur、OpenClaw。"
+      "description": "開發流程與工程支援：功能規劃、架構設計、diff 審查、測試修復、出貨、專案記憶、根因調查、軟體工程準則、DB 工程、BaaS、Zeabur、OpenClaw。"
     },
     {
       "name": "data-and-research",
