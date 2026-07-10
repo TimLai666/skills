@@ -30,13 +30,19 @@ If another skill owns the structure or domain logic, let that skill drive the co
    - Use `voiced` for commentary, essays, persuasive copy, social writing, brand writing, or any case where stronger personality helps.
 5. Draft or rewrite.
    - Make the prose specific rather than vague. Name the relevant people, things, actions, conditions, and outcomes whenever they matter.
+   - Set shared context to zero by default. Assume the reader has none of the writer's or Agent's prior conversation, planning, reasoning, project background, or unstated domain knowledge unless the current text introduces it.
    - Assume the reader cannot see the writer's thoughts or unstated context. State the necessary reasoning and connections instead of expecting the reader to infer them.
+   - Do not expose the writer's internal analysis as if it were shared context. Terms such as「這一層」「下一層」「上游」「下游」「分層處理」must either be translated into the actual actions and relationships the reader needs, or introduced and explained before use.
+   - Avoid niche vocabulary, jargon, project shorthand, and author-created labels. Replace them with common words, or explain them in plain language at first use. Do not assume that a reader understands a term just because the writer does.
    - Make it controlled rather than inflated.
    - Make it varied rather than templated.
    - Make it voiced when useful and restrained when needed.
 6. Run a cleanup pass.
    - Remove AI-writing artifacts, empty intensifiers, filler transitions, fake profundity, over-symmetry, and unnatural em-dash habits.
    - Watch for stacked short fragments separated by 頓號 and repeated「不是……而是……」對比句型.
+   - Treat semicolons as a near-prohibited mark in ordinary prose. Rewrite them as full stops, commas, colons, or separate sentences. Keep a semicolon only when a formal quotation, legal or technical syntax, or a genuinely complex list requires it. Do not use semicolons merely to make a sentence sound polished or authoritative.
+   - Check every sentence for reader context. If a concept came from the writer's planning, decomposition, or chain of thought rather than from the source or the reader's known context, rewrite it into observable facts, actions, sequence, reason, or consequence.
+   - Check every uncommon term as if the reader were encountering it for the first time. If the term is not necessary, remove it. If it is necessary, explain it before relying on it.
    - Keep the meaning, facts, and intent intact.
 
 ## Mode guide
@@ -88,13 +94,17 @@ Before finalizing, check that the text:
 - says something concrete
 - makes the situation, action, reason, and expected result clear enough that the reader does not need to guess what the writer means
 - sounds like it was written for someone, not for a benchmark
+- remains understandable even when the reader has none of the Agent's prior context
 - does not rely on the reader to fill in missing context or read the writer's mind
+- does not leak internal planning language or unexplained analytical frames into the final prose
+- does not use niche vocabulary, jargon, or project shorthand without explanation
 - replaces vague abstractions with concrete nouns, verbs, examples, conditions, or consequences where needed
 - does not rely on vague authorities or inflated importance
 - does not march in identical sentence lengths
 - does not stack several short fragments with 頓號 just to create a slogan-like rhythm
 - does not repeatedly force ordinary statements into「不是……而是……」對比句型
 - does not lean on unnatural em dashes to simulate voice
+- contains no semicolon unless removing it would make a formal quotation, required syntax, or a genuinely complex list less clear
 - does not hide weak thinking behind smooth phrasing
 - matches the user's language and implied social context
 
