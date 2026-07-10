@@ -1,14 +1,16 @@
 ---
 name: human-writing
-description: Use when writing, rewriting, polishing, editing, drafting, humanizing, or improving any text meant to be read by people. This is the default skill for human-facing writing such as emails, docs, memos, proposals, landing-page copy, social posts, essays, commentary, explanatory prose, product copy, internal updates, and other reader-facing text that should feel natural, believable, and human-readable in Chinese or English.
+description: Use by default for any user-facing writing, including answers to users, emails, documents, formal correspondence, reports, proposals, landing-page copy, social posts, essays, commentary, explanations, summaries, product copy, internal updates, and other prose intended to be read by people. Apply it whenever the output contains human-readable text, unless another skill explicitly owns the writing style or the output is purely code, structured data, or a command. Supports Chinese and English.
 ---
 
 # Human Writing
 
 ## Overview
 
-Treat this as the default prose skill for anything a person will read.
+Treat this as the default prose skill for anything a person will read, including every user-facing answer and any formal or informal document.
 Use it for both `rewrite` and `generate` tasks. Aim for writing that sounds like someone meant it, not like a model averaged it.
+
+Apply it by default when the output contains prose intended for a person. Do not force it onto purely technical output such as source code, JSON, SQL, shell commands, or other structured data. If another skill explicitly owns the output's domain structure or style, let that skill lead while using this skill to improve the human-readable prose around it.
 
 If another skill owns the structure or domain logic, let that skill drive the content plan and use this skill to shape the final prose.
 
@@ -27,12 +29,14 @@ If another skill owns the structure or domain logic, let that skill drive the co
    - Use `grounded` for professional, factual, restrained, or credibility-sensitive writing.
    - Use `voiced` for commentary, essays, persuasive copy, social writing, brand writing, or any case where stronger personality helps.
 5. Draft or rewrite.
-   - Make the prose specific rather than vague.
+   - Make the prose specific rather than vague. Name the relevant people, things, actions, conditions, and outcomes whenever they matter.
+   - Assume the reader cannot see the writer's thoughts or unstated context. State the necessary reasoning and connections instead of expecting the reader to infer them.
    - Make it controlled rather than inflated.
    - Make it varied rather than templated.
    - Make it voiced when useful and restrained when needed.
 6. Run a cleanup pass.
    - Remove AI-writing artifacts, empty intensifiers, filler transitions, fake profundity, over-symmetry, and unnatural em-dash habits.
+   - Watch for stacked short fragments separated by 頓號 and repeated「不是……而是……」對比句型.
    - Keep the meaning, facts, and intent intact.
 
 ## Mode guide
@@ -82,12 +86,21 @@ Use for commentary, opinion, social posts, persuasive copy, essays, and prose th
 Before finalizing, check that the text:
 
 - says something concrete
+- makes the situation, action, reason, and expected result clear enough that the reader does not need to guess what the writer means
 - sounds like it was written for someone, not for a benchmark
+- does not rely on the reader to fill in missing context or read the writer's mind
+- replaces vague abstractions with concrete nouns, verbs, examples, conditions, or consequences where needed
 - does not rely on vague authorities or inflated importance
 - does not march in identical sentence lengths
+- does not stack several short fragments with 頓號 just to create a slogan-like rhythm
+- does not repeatedly force ordinary statements into「不是……而是……」對比句型
 - does not lean on unnatural em dashes to simulate voice
 - does not hide weak thinking behind smooth phrasing
 - matches the user's language and implied social context
+
+## Rewrite examples
+
+具體的「原句 → 較自然改寫」範例請參考：[references/human-writing-examples.md](./references/human-writing-examples.md)。範例中的照護、AI 或系統只是句子的內容背景，不是本 skill 的使用限制。重點是辨認哪些語氣、節奏和句型太像 AI，再把它們改得更具體、克制、像人會自然說出的話。
 
 ## Resources
 
