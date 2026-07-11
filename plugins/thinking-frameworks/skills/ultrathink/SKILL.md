@@ -1,6 +1,6 @@
 ---
 name: ultrathink
-description: Use before producing any deliverable — articles, reports, proposals, plans, business models, or code — to run a structured pre-work thinking pass through curated thinking frameworks in sequence (currently 邏輯推導 logical reasoning with MECE), locking direction and key points so the output is substantive and well-aimed. Trigger on ultrathink, 深度思考, 想清楚再做, 思考框架, 抓重點, 言之有物, 沒抓到重點, 邏輯推導, MECE, 不重不漏, or when the user wants output that misses fewer points and has real depth.
+description: Use before producing any deliverable — articles, reports, proposals, plans, business models, or code — to run a structured pre-work thinking pass through curated thinking frameworks in sequence (currently 邏輯推導 logical reasoning with MECE and 空雨傘), locking direction and key points so the output is substantive and well-aimed. Trigger on ultrathink, 深度思考, 想清楚再做, 思考框架, 抓重點, 言之有物, 沒抓到重點, 邏輯推導, MECE, 不重不漏, 空雨傘, or when the user wants output that misses fewer points and has real depth.
 ---
 
 # Ultrathink 動手前思考層
@@ -9,7 +9,7 @@ description: Use before producing any deliverable — articles, reports, proposa
 
 在產出任何交付物之前，先依序套用內建的思考框架，把方向和重點想清楚，再動手。任務型態不限：文章、報告、提案、企劃、商業模式、程式，或其他任何要交付成果的工作。
 
-本 skill 只負責思考層，不規定交付物的最終格式，可與負責產出的其他 skill 疊加使用。
+本 skill 只負責思考層，不規定交付物的最終格式，可與負責產出的其他 skill 疊加使用。使用時，所有框架與其內含工具全部依序跑過一遍，不挑選、不跳過。
 
 輸出包含：
 
@@ -35,16 +35,14 @@ description: Use before producing any deliverable — articles, reports, proposa
 ## Workflow
 
 1. **界定任務** — 用一兩句話寫下：交付物是什麼、給誰、要造成什麼效果、怎樣算成功。這是後續所有框架共用的邊界。
-2. **依序套用思考框架** — 按下表順序逐一執行：讀取該框架的 reference，照裡面的步驟套用到當前任務，留下針對這個任務的具體思考筆記，不是框架定義的複述。
+2. **依序套用思考框架** — 按下表順序逐一執行：讀取該框架的 reference，把裡面每一個工具依序套用到當前任務，留下針對這個任務的具體思考筆記，不是框架定義的複述。每用完一個工具，立刻跑該工具的自檢清單，發現漏想的補完再往下。
 
 | 順序 | 框架 | 內含工具 | 作用 |
 | --- | --- | --- | --- |
-| 1 | [邏輯推導](./references/01-logical-reasoning.md) | MECE | 依事物的道理拆解問題；列舉與分類做到不重複、不遺漏 |
+| 1 | [邏輯推導](./references/01-logical-reasoning.md) | MECE、空雨傘 | 依事物的道理思考；列舉分類不重不漏，從事實、解釋一路推到行動 |
 
 3. **收斂成方向摘要** — 整合各框架的筆記，寫出：核心結論或主張、支撐它的結構、考慮過但排除的方向與原因。
 4. **產出交付物** — 帶著方向摘要動手。完成後回頭對照思考筆記，確認產出沒有偏離結論、沒有漏掉筆記裡的重點。
-
-某個框架對當前任務確實無處著力時，寫一行理由後略過，不要硬套。
 
 ## Output Contract
 
@@ -59,7 +57,7 @@ description: Use before producing any deliverable — articles, reports, proposa
 - 每個框架都要實際套用到當前任務並產出具體內容，只複述框架定義等於沒做。
 - 思考筆記裡的每個關鍵判斷，要能在最終交付物中指認得到，不能思考歸思考、產出歸產出。
 - 先思考後產出，不要先寫完再回頭補筆記。
-- 略過任何框架都必須附一行理由，不能默默跳過。
+- 所有框架與工具全部依序跑過，不挑選、不跳過；每個工具做完都要跑完它的自檢清單，漏想的補完才能往下。
 - 假設要標明，不要把假設寫成結論。
 
 ## Common Mistakes
@@ -68,10 +66,11 @@ description: Use before producing any deliverable — articles, reports, proposa
 - 思考做完，產出卻自顧自地寫，方向摘要完全沒有進到交付物。
 - 在交付物裡大量鋪陳思考過程，淹沒真正的內容（除非使用者要求展示）。
 - 跳過任務界定直接套框架，連要窮盡的「整體」都沒定義。
+- 只挑「看起來適合」的框架跑，其他默默略過。本 skill 的設計是全部跑過一遍。
 
 ## Quick Reference
 
-- 邏輯推導（MECE 操作步驟、切入維度選單、檢查方法與對照範例）：讀 [references/01-logical-reasoning.md](./references/01-logical-reasoning.md)
+- 邏輯推導（MECE、空雨傘：操作步驟、對照範例與自檢清單）：讀 [references/01-logical-reasoning.md](./references/01-logical-reasoning.md)
 
 ## Suggested Prompt
 
