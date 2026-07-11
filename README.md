@@ -1,6 +1,6 @@
 # Agent Skills
 
-61 個 agent skills，分成 9 個 plugins，這個 repo 同時是 Claude Code plugin marketplace。
+62 個 agent skills，分成 10 個 plugins，這個 repo 同時是 Claude Code plugin marketplace。
 
 ## 安裝方式
 
@@ -36,6 +36,12 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 在 repo 根目錄執行 `python zip_subfolders.py`，會把每個 skill 壓成 `output/<skill>.zip`，再到 claude.ai Settings → Capabilities 上傳。
 
 ## Plugin 目錄
+
+### `thinking-frameworks` — 通用思考框架
+
+| Skill | 適合什麼需求 |
+| --- | --- |
+| `ultrathink` | 想在產出文章、報告、提案、商業模式、程式等任何交付物之前，先依序跑過內建思考框架（目前含邏輯推導／MECE），把方向與重點想清楚再動手。 |
 
 ### `business-strategy` — 商業策略與評估
 

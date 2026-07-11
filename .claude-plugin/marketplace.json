@@ -9,6 +9,11 @@
   },
   "plugins": [
     {
+      "name": "thinking-frameworks",
+      "source": "./plugins/thinking-frameworks",
+      "description": "通用思考框架：ultrathink 動手前思考層，產出任何交付物前依序套用思考框架（目前含邏輯推導／MECE），先鎖定方向與重點。"
+    },
+    {
       "name": "business-strategy",
       "source": "./plugins/business-strategy",
       "description": "商業策略與評估：商業模式設計、BCG 矩陣、PESTEL、SWOT、決策偏誤檢查、合約紅旗掃描。"
