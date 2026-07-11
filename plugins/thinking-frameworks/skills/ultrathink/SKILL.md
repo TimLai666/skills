@@ -1,6 +1,6 @@
 ---
 name: ultrathink
-description: Use before producing any deliverable — articles, reports, proposals, plans, business models, or code — to run a structured pre-work thinking pass through curated thinking frameworks in sequence (currently 邏輯推導 logical reasoning: MECE, 空雨傘, 魚骨圖; 創意發想 creative ideation: 六頂思考帽, 腳本圖, 心智圖; 市場分析 market analysis: 3C 分析), locking direction and key points so the output is substantive and well-aimed. Trigger on ultrathink, 深度思考, 想清楚再做, 思考框架, 抓重點, 言之有物, 沒抓到重點, 邏輯推導, MECE, 不重不漏, 空雨傘, 魚骨圖, fishbone, 創意發想, 六頂思考帽, six thinking hats, 腳本圖, storyboard, 心智圖, mind map, 市場分析, 3C分析, or when the user wants output that misses fewer points and has real depth.
+description: Use before producing any deliverable — articles, reports, proposals, plans, business models, or code — to run a structured pre-work thinking pass through curated thinking frameworks in sequence (currently 邏輯推導 logical reasoning: MECE, 空雨傘, 魚骨圖; 創意發想 creative ideation: 六頂思考帽, 腳本圖, 心智圖; 市場分析 market analysis: 3C 分析, SWOT 分析), locking direction and key points so the output is substantive and well-aimed. Trigger on ultrathink, 深度思考, 想清楚再做, 思考框架, 抓重點, 言之有物, 沒抓到重點, 邏輯推導, MECE, 不重不漏, 空雨傘, 魚骨圖, fishbone, 創意發想, 六頂思考帽, six thinking hats, 腳本圖, storyboard, 心智圖, mind map, 市場分析, 3C分析, SWOT, or when the user wants output that misses fewer points and has real depth.
 ---
 
 # Ultrathink 動手前思考層
@@ -41,7 +41,7 @@ description: Use before producing any deliverable — articles, reports, proposa
 | --- | --- | --- | --- |
 | 1 | [邏輯推導](./references/01-logical-reasoning.md) | MECE、空雨傘、魚骨圖 | 依事物的道理思考：MECE 列舉不重不漏、空雨傘從事實推到行動、魚骨圖拆解成因對症下藥 |
 | 2 | [創意發想](./references/02-creative-ideation.md) | 六頂思考帽、腳本圖、心智圖 | 先發散再收斂：六頂思考帽多觀點集結點子、腳本圖把想法具體化成故事、心智圖窮盡選項拓寬廣度 |
-| 3 | [市場分析](./references/03-market-analysis.md) | 3C 分析 | 看清環境再定位：從顧客出發、研究競爭者、盤點自身，收斂出獨特而有價值的定位 |
+| 3 | [市場分析](./references/03-market-analysis.md) | 3C 分析、SWOT 分析 | 看清環境再定位：3C 從顧客、競爭者、自身收斂出定位；SWOT 盤點內外部優劣機威，導出行動方向 |
 
 3. **收斂成方向摘要** — 整合各框架的筆記，寫出：核心結論或主張、支撐它的結構、考慮過但排除的方向與原因。
 4. **產出交付物** — 帶著方向摘要動手。完成後回頭對照思考筆記，確認產出沒有偏離結論、沒有漏掉筆記裡的重點。
@@ -75,7 +75,7 @@ description: Use before producing any deliverable — articles, reports, proposa
 
 - 邏輯推導（MECE、空雨傘、魚骨圖：操作步驟、對照範例與自檢清單）：讀 [references/01-logical-reasoning.md](./references/01-logical-reasoning.md)
 - 創意發想（六頂思考帽、腳本圖、心智圖：操作步驟、對照範例與自檢清單）：讀 [references/02-creative-ideation.md](./references/02-creative-ideation.md)
-- 市場分析（3C 分析：檢視面向、操作步驟與自檢清單）：讀 [references/03-market-analysis.md](./references/03-market-analysis.md)
+- 市場分析（3C 分析、SWOT 分析：檢視面向、操作步驟與自檢清單）：讀 [references/03-market-analysis.md](./references/03-market-analysis.md)
 
 ## Suggested Prompt
 
