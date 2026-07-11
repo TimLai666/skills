@@ -41,7 +41,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 
 | Skill | 適合什麼需求 |
 | --- | --- |
-| `ultrathink` | 想在產出文章、報告、提案、商業模式、程式等任何交付物之前，先依序跑過全部內建思考框架（目前含邏輯推導：MECE、空雨傘、魚骨圖；創意發想：六頂思考帽、腳本圖），把方向與重點想清楚再動手。 |
+| `ultrathink` | 想在產出文章、報告、提案、商業模式、程式等任何交付物之前，先依序跑過全部內建思考框架（目前含邏輯推導：MECE、空雨傘、魚骨圖；創意發想：六頂思考帽、腳本圖、心智圖），把方向與重點想清楚再動手。 |
 
 ### `business-strategy` — 商業策略與評估
 
