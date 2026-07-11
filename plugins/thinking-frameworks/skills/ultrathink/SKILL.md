@@ -1,6 +1,6 @@
 ---
 name: ultrathink
-description: Use before producing any deliverable — articles, reports, proposals, plans, business models, or code — to run a structured pre-work thinking pass through curated thinking frameworks in sequence (currently 邏輯推導 logical reasoning: MECE, 空雨傘, 魚骨圖; 創意發想 creative ideation: 六頂思考帽, 腳本圖, 心智圖; 市場分析 market analysis: 3C 分析, SWOT 分析, 4P與4C; 進度管理 progress management: 惠特默模型, KPI 樹狀圖, PDCA; 權衡得失 weighing trade-offs: 決策矩陣, PMI 表, 力場分析; 預測未來 predicting the future: S 型曲線, 鴻溝理論, 長尾模型), locking direction and key points so the output is substantive and well-aimed. Trigger on ultrathink, 深度思考, 想清楚再做, 思考框架, 抓重點, 言之有物, 沒抓到重點, any of the framework or tool names above, or when the user wants output that misses fewer points and has real depth.
+description: Use before producing any deliverable — articles, reports, proposals, plans, business models, or code — to run a structured pre-work thinking pass through curated thinking frameworks in sequence (currently 邏輯推導 logical reasoning: MECE, 空雨傘, 魚骨圖; 創意發想 creative ideation: 六頂思考帽, 腳本圖, 心智圖; 市場分析 market analysis: 3C 分析, SWOT 分析, 4P與4C; 進度管理 progress management: 惠特默模型, KPI 樹狀圖, PDCA; 權衡得失 weighing trade-offs: 決策矩陣, PMI 表, 力場分析; 預測未來 predicting the future: S 型曲線, 鴻溝理論, 長尾模型; 思維模型 mental models: 第一性原理), locking direction and key points so the output is substantive and well-aimed. Trigger on ultrathink, 深度思考, 想清楚再做, 思考框架, 抓重點, 言之有物, 沒抓到重點, any of the framework or tool names above, or when the user wants output that misses fewer points and has real depth.
 ---
 
 # Ultrathink 動手前思考層
@@ -45,6 +45,7 @@ description: Use before producing any deliverable — articles, reports, proposa
 | 4 | [進度管理](./references/04-progress-management.md) | 惠特默模型、KPI 樹狀圖、PDCA | 把目標立正確、拆得動、滾得動：惠特默 14 項檢核目標、KPI 樹拆成可監控的子目標、PDCA 形成持續改善循環 |
 | 5 | [權衡得失](./references/05-weighing-tradeoffs.md) | 決策矩陣、PMI 表、力場分析 | 用最優原則取代滿意原則：決策矩陣加權比較選項、PMI 表納入有趣點、力場分析衡量改變的推力與拉力 |
 | 6 | [預測未來](./references/06-predicting-future.md) | S 型曲線、鴻溝理論、長尾模型 | 用模型推估接下來會怎樣：S 曲線判斷生命週期階段、鴻溝理論檢視能否跨進主流、長尾模型評估利基集結的價值 |
+| 7 | [思維模型](./references/07-mental-models.md) | 第一性原理 | 跨領域思考紀律，兼作前面所有結論的總體檢：回歸本質拆解、從零構建方案 |
 
 3. **收斂成方向摘要** — 整合各框架的筆記，寫出：核心結論或主張、支撐它的結構、考慮過但排除的方向與原因。
 4. **產出交付物** — 帶著方向摘要動手。完成後回頭對照思考筆記，確認產出沒有偏離結論、沒有漏掉筆記裡的重點。
@@ -82,6 +83,7 @@ description: Use before producing any deliverable — articles, reports, proposa
 - 進度管理（惠特默模型、KPI 樹狀圖、PDCA：操作步驟、對照範例與自檢清單）：讀 [references/04-progress-management.md](./references/04-progress-management.md)
 - 權衡得失（決策矩陣、PMI 表、力場分析：操作步驟、對照範例與自檢清單）：讀 [references/05-weighing-tradeoffs.md](./references/05-weighing-tradeoffs.md)
 - 預測未來（S 型曲線、鴻溝理論、長尾模型：判斷表、操作步驟與自檢清單）：讀 [references/06-predicting-future.md](./references/06-predicting-future.md)
+- 思維模型（第一性原理：操作步驟、對照範例與自檢清單）：讀 [references/07-mental-models.md](./references/07-mental-models.md)
 
 ## Suggested Prompt
 
