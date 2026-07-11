@@ -1,7 +1,7 @@
 {
   "name": "thinking-frameworks",
-  "description": "通用思考框架：ultrathink 動手前思考層，產出任何交付物前依序跑過全部思考框架（目前含邏輯推導：MECE、空雨傘），先鎖定方向與重點。",
-  "version": "0.2.0",
+  "description": "通用思考框架：ultrathink 動手前思考層，產出任何交付物前依序跑過全部思考框架（目前含邏輯推導：MECE、空雨傘、魚骨圖），先鎖定方向與重點。",
+  "version": "0.3.0",
   "author": {
     "name": "TimLai666"
   }

@@ -1,6 +1,6 @@
 ---
 name: ultrathink
-description: Use before producing any deliverable — articles, reports, proposals, plans, business models, or code — to run a structured pre-work thinking pass through curated thinking frameworks in sequence (currently 邏輯推導 logical reasoning with MECE and 空雨傘), locking direction and key points so the output is substantive and well-aimed. Trigger on ultrathink, 深度思考, 想清楚再做, 思考框架, 抓重點, 言之有物, 沒抓到重點, 邏輯推導, MECE, 不重不漏, 空雨傘, or when the user wants output that misses fewer points and has real depth.
+description: Use before producing any deliverable — articles, reports, proposals, plans, business models, or code — to run a structured pre-work thinking pass through curated thinking frameworks in sequence (currently 邏輯推導 logical reasoning with MECE, 空雨傘 and 魚骨圖), locking direction and key points so the output is substantive and well-aimed. Trigger on ultrathink, 深度思考, 想清楚再做, 思考框架, 抓重點, 言之有物, 沒抓到重點, 邏輯推導, MECE, 不重不漏, 空雨傘, 魚骨圖, fishbone, or when the user wants output that misses fewer points and has real depth.
 ---
 
 # Ultrathink 動手前思考層
@@ -39,7 +39,7 @@ description: Use before producing any deliverable — articles, reports, proposa
 
 | 順序 | 框架 | 內含工具 | 作用 |
 | --- | --- | --- | --- |
-| 1 | [邏輯推導](./references/01-logical-reasoning.md) | MECE、空雨傘 | 依事物的道理思考；列舉分類不重不漏，從事實、解釋一路推到行動 |
+| 1 | [邏輯推導](./references/01-logical-reasoning.md) | MECE、空雨傘、魚骨圖 | 依事物的道理思考：MECE 列舉不重不漏、空雨傘從事實推到行動、魚骨圖拆解成因對症下藥 |
 
 3. **收斂成方向摘要** — 整合各框架的筆記，寫出：核心結論或主張、支撐它的結構、考慮過但排除的方向與原因。
 4. **產出交付物** — 帶著方向摘要動手。完成後回頭對照思考筆記，確認產出沒有偏離結論、沒有漏掉筆記裡的重點。
@@ -70,7 +70,7 @@ description: Use before producing any deliverable — articles, reports, proposa
 
 ## Quick Reference
 
-- 邏輯推導（MECE、空雨傘：操作步驟、對照範例與自檢清單）：讀 [references/01-logical-reasoning.md](./references/01-logical-reasoning.md)
+- 邏輯推導（MECE、空雨傘、魚骨圖：操作步驟、對照範例與自檢清單）：讀 [references/01-logical-reasoning.md](./references/01-logical-reasoning.md)
 
 ## Suggested Prompt
 
