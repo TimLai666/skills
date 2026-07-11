@@ -1,6 +1,6 @@
 ---
 name: ultrathink
-description: Use before producing any deliverable — articles, reports, proposals, plans, business models, or code — to run a structured pre-work thinking pass through curated thinking frameworks in sequence (currently 邏輯推導 logical reasoning: MECE, 空雨傘, 魚骨圖; 創意發想 creative ideation: 六頂思考帽, 腳本圖, 心智圖; 市場分析 market analysis: 3C 分析, SWOT 分析, 4P與4C; 進度管理 progress management: 惠特默模型), locking direction and key points so the output is substantive and well-aimed. Trigger on ultrathink, 深度思考, 想清楚再做, 思考框架, 抓重點, 言之有物, 沒抓到重點, 邏輯推導, MECE, 不重不漏, 空雨傘, 魚骨圖, fishbone, 創意發想, 六頂思考帽, six thinking hats, 腳本圖, storyboard, 心智圖, mind map, 市場分析, 3C分析, SWOT, 4P, 4C, 進度管理, 惠特默模型, SMART, or when the user wants output that misses fewer points and has real depth.
+description: Use before producing any deliverable — articles, reports, proposals, plans, business models, or code — to run a structured pre-work thinking pass through curated thinking frameworks in sequence (currently 邏輯推導 logical reasoning: MECE, 空雨傘, 魚骨圖; 創意發想 creative ideation: 六頂思考帽, 腳本圖, 心智圖; 市場分析 market analysis: 3C 分析, SWOT 分析, 4P與4C; 進度管理 progress management: 惠特默模型, KPI 樹狀圖), locking direction and key points so the output is substantive and well-aimed. Trigger on ultrathink, 深度思考, 想清楚再做, 思考框架, 抓重點, 言之有物, 沒抓到重點, 邏輯推導, MECE, 不重不漏, 空雨傘, 魚骨圖, fishbone, 創意發想, 六頂思考帽, six thinking hats, 腳本圖, storyboard, 心智圖, mind map, 市場分析, 3C分析, SWOT, 4P, 4C, 進度管理, 惠特默模型, SMART, KPI, KGI, or when the user wants output that misses fewer points and has real depth.
 ---
 
 # Ultrathink 動手前思考層
@@ -42,7 +42,7 @@ description: Use before producing any deliverable — articles, reports, proposa
 | 1 | [邏輯推導](./references/01-logical-reasoning.md) | MECE、空雨傘、魚骨圖 | 依事物的道理思考：MECE 列舉不重不漏、空雨傘從事實推到行動、魚骨圖拆解成因對症下藥 |
 | 2 | [創意發想](./references/02-creative-ideation.md) | 六頂思考帽、腳本圖、心智圖 | 先發散再收斂：六頂思考帽多觀點集結點子、腳本圖把想法具體化成故事、心智圖窮盡選項拓寬廣度 |
 | 3 | [市場分析](./references/03-market-analysis.md) | 3C 分析、SWOT 分析、4P與4C | 看清環境再定位：3C 收斂定位、SWOT 盤點內外優劣導出方向、4P×4C 交叉比對賣方設計與買方感受 |
-| 4 | [進度管理](./references/04-progress-management.md) | 惠特默模型 | 把目標立正確：SMART、PURE、CLEAR 共 14 項逐一檢核，符合原則再執行 |
+| 4 | [進度管理](./references/04-progress-management.md) | 惠特默模型、KPI 樹狀圖 | 把目標立正確、拆得動：惠特默 14 項檢核目標有效性，KPI 樹用加減乘除把大目標拆成可監控的子目標 |
 
 3. **收斂成方向摘要** — 整合各框架的筆記，寫出：核心結論或主張、支撐它的結構、考慮過但排除的方向與原因。
 4. **產出交付物** — 帶著方向摘要動手。完成後回頭對照思考筆記，確認產出沒有偏離結論、沒有漏掉筆記裡的重點。
@@ -77,7 +77,7 @@ description: Use before producing any deliverable — articles, reports, proposa
 - 邏輯推導（MECE、空雨傘、魚骨圖：操作步驟、對照範例與自檢清單）：讀 [references/01-logical-reasoning.md](./references/01-logical-reasoning.md)
 - 創意發想（六頂思考帽、腳本圖、心智圖：操作步驟、對照範例與自檢清單）：讀 [references/02-creative-ideation.md](./references/02-creative-ideation.md)
 - 市場分析（3C 分析、SWOT 分析、4P與4C：檢視面向、操作步驟與自檢清單）：讀 [references/03-market-analysis.md](./references/03-market-analysis.md)
-- 進度管理（惠特默模型：14 項指標、操作步驟與自檢清單）：讀 [references/04-progress-management.md](./references/04-progress-management.md)
+- 進度管理（惠特默模型、KPI 樹狀圖：操作步驟、對照範例與自檢清單）：讀 [references/04-progress-management.md](./references/04-progress-management.md)
 
 ## Suggested Prompt
 
