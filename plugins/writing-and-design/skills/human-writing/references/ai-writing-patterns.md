@@ -4,6 +4,10 @@ Use this file as a cleanup checklist after drafting or rewriting.
 
 ## High-priority patterns
 
+- Invented shorthand modifiers
+  - Examples:「不繞」「最穩」「一直在撐」「很頂」— punchy-sounding abstract descriptors no real person uses, where the reader cannot even tell what quality is being claimed.
+  - Fix: rewrite the whole sentence to say the concrete thing in ordinary spoken wording. There is no one-word substitute; the shorthand exists because the model skipped the actual content.
+
 - Vague attribution
   - Examples: "experts say", "observers note", "industry reports suggest"
   - Fix: name the source or state the claim directly.
@@ -42,8 +46,15 @@ Use this file as a cleanup checklist after drafting or rewriting.
   - In Chinese, do not lean on long or repeated 破折號 just to fake tone or emphasis.
 
 - Symmetry artifacts
-  - Examples: every sentence same length, every paragraph same arc, repeated "not just X, but Y"
-  - Fix: vary cadence and sentence design.
+  - Examples: every sentence same length, every paragraph same arc, repeated "not just X, but Y" or「不是……而是……」
+  - Fix: vary cadence and sentence design. Keep「不是……而是……」only where a real misunderstanding needs correcting.
+
+- Slogan rhythm from stacked fragments
+  - Examples:「看見問題、快速判斷、即時處理、完整追蹤」— short fragments piled up with 頓號 for cadence.
+  - Fix: unless the items genuinely need enumerating, write full sentences that state how they relate.
+
+- Semicolon overuse in ordinary Chinese prose
+  - Fix: replace each semicolon with a full stop, comma, or clearer sentence boundary. Keep one only for formal quotations, required syntax, or a genuinely complex list.
 
 ## Bilingual cleanup notes
 
