@@ -1,6 +1,6 @@
 ---
 name: llm-wiki
-description: "Karpathy's LLM Wiki: build/query interlinked markdown KB."
+description: "Karpathy's LLM Wiki: build/query interlinked markdown KB with Zettelkasten note discipline. Triggers: 知識庫, 建 wiki, wiki 筆記, 研究筆記, ingest sources, knowledge base."
 version: 3.0.0
 license: MIT
 platforms: [linux, macos, windows]
@@ -105,6 +105,23 @@ referenced in another topic. If yes → global. If no → place in the current t
 - **Global `index.md`** — Lists all research topics (linking to their index) + cross-topic pages
 - **Topic `index.md`** — Lists all pages within that specific topic
 
+### Note Discipline (Zettelkasten)
+
+Wiki pages follow Zettelkasten（卡片盒筆記法）discipline — refer to the
+`zettelkasten` skill for the full method. Mapping:
+
+- **Concept and entity pages are cards** — one page = one distinct idea/entity.
+  Split by idea count, not just line count.
+- **Global/topic `index.md` are structure notes** — navigation, atomicity does not apply.
+- **Comparison and query pages are synthesis notes** — they exist to combine cards,
+  so atomicity does not apply, but linking rules do.
+- **`raw/` plays the literature-note role** — sources stay immutable; wiki pages
+  restate claims in their own words and cite provenance.
+
+**Every page create or update runs the `zettelkasten` change checklist before
+writing:** atomicity → split decision → duplicate check → links (bidirectional)
+→ self-contained. This is a per-write discipline, not a lint-time cleanup.
+
 ## Resuming an Existing Wiki (CRITICAL — do this every session)
 
 When the user has an existing wiki, **always orient yourself before doing anything**:
@@ -167,6 +184,7 @@ Adapt to the user's domain. The schema constrains agent behavior and ensures con
 ## Conventions
 - **Markdown formatting:** Wiki pages use Obsidian Flavored Markdown. For wikilinks, embeds, callouts, frontmatter properties, and other Obsidian-specific syntax, refer to the `obsidian-markdown` skill.
 - **Academic sources:** For arXiv paper search, Semantic Scholar citations, and BibTeX generation, refer to the `arxiv` skill.
+- **Note discipline:** Every page write runs the Zettelkasten change checklist — refer to the `zettelkasten` skill for atomicity, split criteria, and linking rules.
 - File names: lowercase, hyphens, no spaces (e.g., `transformer-architecture.md`)
 - Every wiki page starts with YAML frontmatter (see below)
 - Use `[[wikilinks]]` to link between pages (minimum 2 outbound links per page)
@@ -230,7 +248,7 @@ add it here first, then use it. This prevents tag sprawl.
 - **Create a page** when an entity/concept appears in 2+ sources OR is central to one source
 - **Add to existing page** when a source mentions something already covered
 - **DON'T create a page** for passing mentions, minor details, or things outside the domain
-- **Split a page** when it exceeds ~200 lines — break into sub-topics with cross-links
+- **Split a page** when it covers 2+ distinct ideas (Zettelkasten atomicity — see the `zettelkasten` skill's split criteria) or exceeds ~200 lines — break into atomic pages with cross-links
 - **Archive a page** when its content is fully superseded — move to `_archive/`, remove from index
 
 ## Entity Pages
@@ -366,6 +384,10 @@ When the user provides a source (URL, file, paste), integrate it into the wiki:
    a growing wiki and a pile of duplicates.
 
 ④ **Write or update wiki pages:**
+   - **Zettelkasten check (every page write):** Run the change checklist from the
+     `zettelkasten` skill — is this addition one idea? Does the page now cover
+     2+ distinct ideas → split into linked atomic pages, fix inbound links,
+     update the index.
    - **New entities/concepts:** Create pages only if they meet the Page Thresholds
      in SCHEMA.md (2+ source mentions, or central to one source)
    - **Existing pages:** Add new information, update facts, bump `updated` date.
@@ -463,7 +485,8 @@ wiki = "<wiki>"  # replace with resolved wiki path
    (shouldn't happen — raw/ is immutable) or ingested from a URL that has since
    changed. Not a hard error, but worth reporting.
 
-⑨ **Page size:** Flag pages over 200 lines — candidates for splitting.
+⑨ **Page size & atomicity:** Flag pages over 200 lines or covering 2+ distinct
+   ideas — candidates for splitting per the `zettelkasten` skill's split criteria.
 
 ⑩ **Tag audit:** List all tags in use, flag any not in the SCHEMA.md taxonomy.
 
@@ -597,8 +620,10 @@ vault in Obsidian on your laptop/phone — changes appear within seconds.
 - **Frontmatter is required** — it enables search, filtering, and staleness detection.
 - **Tags must come from the taxonomy** — freeform tags decay into noise. Add new tags to SCHEMA.md
   first, then use them.
-- **Keep pages scannable** — a wiki page should be readable in 30 seconds. Split pages over
-  200 lines. Move detailed analysis to dedicated deep-dive pages.
+- **Keep pages scannable** — a wiki page should be readable in 30 seconds. Split pages that
+  cover 2+ distinct ideas or exceed 200 lines. Move detailed analysis to dedicated deep-dive pages.
+- **Run the Zettelkasten checklist on every page write** — atomicity and split decisions
+  happen at write time, not only during lint. See the `zettelkasten` skill.
 - **Ask before mass-updating** — if an ingest would touch 10+ existing pages, confirm
   the scope with the user first.
 - **Rotate the log** — when log.md exceeds 500 entries, rename it `log-YYYY.md` and start fresh.

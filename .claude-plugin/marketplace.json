@@ -51,7 +51,7 @@
     {
       "name": "knowledge-tools",
       "source": "./plugins/knowledge-tools",
-      "description": "知識管理與圖表：LLM wiki、tutor 學習系統、Obsidian 工具組、Excalidraw、Mermaid、Canvas。"
+      "description": "知識管理與圖表：LLM wiki、卡片盒筆記法（Zettelkasten）、tutor 學習系統、Obsidian 工具組、Excalidraw、Mermaid、Canvas。"
     },
     {
       "name": "utilities",

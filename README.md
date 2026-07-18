@@ -1,6 +1,6 @@
 # Agent Skills
 
-62 個 agent skills，分成 10 個 plugins，這個 repo 同時是 Claude Code plugin marketplace。
+63 個 agent skills，分成 10 個 plugins，這個 repo 同時是 Claude Code plugin marketplace。
 
 ## 安裝方式
 
@@ -131,7 +131,8 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 
 | Skill | 適合什麼需求 |
 | --- | --- |
-| `llm-wiki` | 想把來源資料（文章、論文、筆記）整理成結構化 Obsidian 知識庫，含 entity/concept 頁面、交叉引用與版本追蹤。 |
+| `llm-wiki` | 想把來源資料（文章、論文、筆記）整理成結構化 Obsidian 知識庫，含 entity/concept 頁面、交叉引用與版本追蹤，頁面寫入採卡片盒筆記法紀律。 |
+| `zettelkasten` | 想建立或維護卡片盒筆記系統（原子卡片、永久筆記、連結網絡），或替既有筆記庫套上原子性檢核、拆卡判準與連結紀律。 |
 | `tutor-setup` | 想建立 Obsidian StudyVault，從既有 wiki 或文件匯入學習素材，設定 quiz 規則與進度追蹤。 |
 | `tutor` | 想用互動式 quiz 學習 StudyVault 裡的概念，追蹤已知/未知、生成練習題與解釋。 |
 | `obsidian-markdown` | 想建立或編輯 Obsidian Flavored Markdown，處理 wikilinks、callouts、frontmatter、embeds 等語法。 |
