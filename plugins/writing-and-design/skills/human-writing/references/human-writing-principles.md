@@ -84,25 +84,31 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 - Do not make every paragraph the same length.
 - Allow one sharp sentence, one longer turn, one quiet sentence when useful.
 
-### 12. Choose stronger verbs before adding adjectives
+### 12. Write body text as body text, not as slogans
+
+- Body sentences need a subject, a verb, and a connection to the sentences before and after. A paragraph built from headline-style declarations, such as「效率，從此不同」「一個平台，解決所有問題」, reads like presentation titles pasted together, and the reader cannot find the line of reasoning.
+- Headline diction belongs in headings. If a sentence would work unchanged as a slide title, it is probably not doing body-text work.
+- State the claim as a full sentence with its reason or consequence attached, then continue the thread into the next sentence.
+
+### 13. Choose stronger verbs before adding adjectives
 
 - Fix weak verb choice first.
 - Prefer "cut", "argue", "miss", "ship", "delay", "expose", or "earn" over soft general verbs.
 - Use adjectives only when they add meaning, not sheen.
 
-### 13. Keep emotional texture controlled
+### 14. Keep emotional texture controlled
 
 - Human writing is not emotionally flat, but it also does not overperform.
 - Add feeling through timing, specificity, and point of view.
 - Avoid melodrama unless the task genuinely calls for it.
 
-### 14. Use restraint as a feature
+### 15. Use restraint as a feature
 
 - The best human-like line is often simpler than the first draft.
 - Do not show off range when a plain sentence will land better.
 - Leave room for the reader to trust the voice.
 
-### 15. Match social context
+### 16. Match social context
 
 - Business writing should feel reliable, not robotic.
 - Public-facing copy should feel intentional, not inflated.
@@ -111,7 +117,7 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 ## Punctuation
 
-### 16. Treat semicolons as an exception
+### 17. Treat semicolons as an exception
 
 - In ordinary Chinese prose, do not use semicolons by default.
 - During the final pass, replace each semicolon with a full stop, comma, colon, or a clearer sentence boundary whenever possible.

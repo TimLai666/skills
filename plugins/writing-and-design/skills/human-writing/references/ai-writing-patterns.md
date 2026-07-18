@@ -57,6 +57,10 @@ Use this file as a cleanup checklist after drafting or rewriting.
   - Examples:「看見問題、快速判斷、即時處理、完整追蹤」— short fragments piled up with 頓號 for cadence.
   - Fix: unless the items genuinely need enumerating, write full sentences that state how they relate.
 
+- Headline-style body copy
+  - Examples:「效率，從此不同。」「一個平台，解決所有問題。」— body paragraphs built from tagline sentences that would work unchanged as slide titles.
+  - Fix: write running prose. Give each sentence a subject, a verb, and a connection to the sentence before it; keep headline diction in actual headings.
+
 - Semicolon overuse in ordinary Chinese prose
   - Fix: replace each semicolon with a full stop, comma, or clearer sentence boundary. Keep one only for formal quotations, required syntax, or a genuinely complex list.
 
