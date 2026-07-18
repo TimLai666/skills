@@ -1,6 +1,6 @@
 ---
 name: ultrathink
-description: Use whenever the agent thinks at all — writing copy or reports, proposals, planning products or features, coding, debugging, or any other task — running ALL curated thinking frameworks in sequence (currently 邏輯推導 logical reasoning：MECE, 空雨傘, 魚骨圖; 創意發想 creative ideation：六頂思考帽, 腳本圖, 心智圖; 市場分析 market analysis：3C 分析, SWOT 分析, 4P與4C; 進度管理 progress management：惠特默模型, KPI 樹狀圖, PDCA; 權衡得失 weighing trade-offs：決策矩陣, PMI 表, 力場分析; 預測未來 predicting the future：S 型曲線, 鴻溝理論, 長尾模型; 辯論思考 debate thinking：需根解損, 判定立駁, 論點以主張-資料-推論三要素構建 Claim-Data-Warrant; 思維模型 mental models：第一性原理, 反向思考法, 二階思考, 能力圈, 奧坎剃刀) to lock direction and key points before acting. Theme grouping is navigation only — work through every theme, not just the ones that look relevant. Trigger on ultrathink, 深度思考, 想清楚再做, 思考框架, 抓重點, 言之有物, 沒抓到重點, any framework or tool name above, or whenever a task involves thinking, planning, writing, building, or debugging.
+description: Use whenever the agent thinks at all — writing copy or reports, proposals, planning products or features, coding, debugging, or any other task — running ALL curated thinking frameworks in sequence (currently 邏輯推導 logical reasoning：MECE, 空雨傘, 魚骨圖; 創意發想 creative ideation：六頂思考帽, 腳本圖, 心智圖; 市場分析 market analysis：3C 分析, SWOT 分析, 4P與4C; 進度管理 progress management：惠特默模型, KPI 樹狀圖, PDCA; 權衡得失 weighing trade-offs：決策矩陣, PMI 表, 力場分析; 預測未來 predicting the future：S 型曲線, 鴻溝理論, 長尾模型; 辯論思考 debate thinking：需根解損, 判定立駁, 論點以主張-資料-推論三要素構建 Claim-Data-Warrant、以質詢拆解三問檢驗（事實為真？邏輯嚴密？有無其他可能？）; 思維模型 mental models：第一性原理, 反向思考法, 二階思考, 能力圈, 奧坎剃刀) to lock direction and key points before acting. Theme grouping is navigation only — work through every theme, not just the ones that look relevant. Trigger on ultrathink, 深度思考, 想清楚再做, 思考框架, 抓重點, 言之有物, 沒抓到重點, any framework or tool name above, or whenever a task involves thinking, planning, writing, building, or debugging.
 ---
 
 # Ultrathink 動手前思考層
@@ -45,7 +45,7 @@ description: Use whenever the agent thinks at all — writing copy or reports, p
 | 4 | [進度管理](./references/04-progress-management.md) | 惠特默模型、KPI 樹狀圖、PDCA | 把目標立正確、拆得動、滾得動：惠特默 14 項檢核目標、KPI 樹拆成可監控的子目標、PDCA 形成持續改善循環 |
 | 5 | [權衡得失](./references/05-weighing-tradeoffs.md) | 決策矩陣、PMI 表、力場分析 | 用最優原則取代滿意原則：決策矩陣加權比較選項、PMI 表納入有趣點、力場分析衡量改變的推力與拉力 |
 | 6 | [預測未來](./references/06-predicting-future.md) | S 型曲線、鴻溝理論、長尾模型 | 用模型推估接下來會怎樣：S 曲線判斷生命週期階段、鴻溝理論檢視能否跨進主流、長尾模型評估利基集結的價值 |
-| 7 | [辯論思考](./references/07-debate-thinking.md) | 需根解損、判定立駁 | 把前面產出的方向與方案當辯題攻防後裁決：需根解損四關檢驗變更提案是否成立、判定立駁立好判準與定義後正反交鋒裁決價值主張；所有論點以主張、資料、推論三要素構建與攻擊 |
+| 7 | [辯論思考](./references/07-debate-thinking.md) | 需根解損、判定立駁 | 把前面產出的方向與方案當辯題攻防後裁決：需根解損四關檢驗變更提案是否成立、判定立駁立好判準與定義後正反交鋒裁決價值主張；所有論點以主張、資料、推論三要素構建，以質詢拆解三問（事實為真？邏輯嚴密？有無其他可能？）檢驗與攻擊 |
 | 8 | [思維模型](./references/08-mental-models.md) | 第一性原理、反向思考法、二階思考、能力圈、奧坎剃刀 | 跨領域思考紀律，兼作前面所有結論的總體檢：拆到本質重建、反向排雷、推演連鎖反應、認清能力邊界、假設最少者優先 |
 
 3. **收斂成方向摘要** — 整合各框架的筆記，寫出：核心結論或主張、支撐它的結構、考慮過但排除的方向與原因。
@@ -86,7 +86,7 @@ description: Use whenever the agent thinks at all — writing copy or reports, p
 - 進度管理（惠特默模型、KPI 樹狀圖、PDCA：操作步驟、對照範例與自檢清單）：讀 [references/04-progress-management.md](./references/04-progress-management.md)
 - 權衡得失（決策矩陣、PMI 表、力場分析：操作步驟、對照範例與自檢清單）：讀 [references/05-weighing-tradeoffs.md](./references/05-weighing-tradeoffs.md)
 - 預測未來（S 型曲線、鴻溝理論、長尾模型：判斷表、操作步驟與自檢清單）：讀 [references/06-predicting-future.md](./references/06-predicting-future.md)
-- 辯論思考（論點三要素、需根解損、判定立駁：操作步驟、對照範例與自檢清單）：讀 [references/07-debate-thinking.md](./references/07-debate-thinking.md)
+- 辯論思考（論點三要素、質詢拆解、需根解損、判定立駁：操作步驟、對照範例與自檢清單）：讀 [references/07-debate-thinking.md](./references/07-debate-thinking.md)
 - 思維模型（第一性原理、反向思考法、二階思考、能力圈、奧坎剃刀：操作步驟、對照範例與自檢清單）：讀 [references/08-mental-models.md](./references/08-mental-models.md)
 
 ## Suggested Prompt
