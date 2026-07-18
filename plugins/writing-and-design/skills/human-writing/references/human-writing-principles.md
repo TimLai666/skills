@@ -100,3 +100,9 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 - Prefer common words over niche terms, jargon, project shorthand, and author-created labels.
 - If a term such as「剪刀差」is necessary, explain it in plain language at first use. Otherwise, directly describe the difference or consequence it refers to.
 - Do not treat a familiar term within one field as familiar to every reader.
+
+## 16. Do not default to setup-and-reveal structures
+
+- 先抑後揚 and 先破後立 — first putting something down or building up a wrong view, then revealing the real point — is a default rhetorical reflex of models, not of people. When every section opens by knocking something over, the whole text runs on one visible formula, and the reader learns to skip the first half of every paragraph.
+- Most points are stronger stated directly: lead with the claim, then support it.
+- Keep the structure only when the intended reader genuinely holds the misconception and correcting it is the point of the passage. Never invent a strawman just to have something to knock down. Even when justified, use it once in a piece, not as the skeleton of every section.

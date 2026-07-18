@@ -18,6 +18,7 @@ The text:
 - [ ] does not march in identical sentence lengths
 - [ ] does not stack several short fragments with 頓號 just to create a slogan-like rhythm
 - [ ] does not repeatedly force ordinary statements into「不是……而是……」對比句型
+- [ ] does not lean on 先抑後揚 or 先破後立 openings: at most one real-misconception correction per piece, and no invented strawman
 - [ ] does not lean on unnatural em dashes to simulate voice
 - [ ] contains no semicolon unless removing it would make a formal quotation, required syntax, or a genuinely complex list less clear
 - [ ] does not hide weak thinking behind smooth phrasing

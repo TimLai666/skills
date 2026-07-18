@@ -21,7 +21,7 @@ This file only defines the process. The actual rules live in the reference files
    Decide `rewrite` or `generate`, identify the audience and what the text must do, settle language handling, and pick `grounded` or `voiced`. The same file then gives the working rules for the mode and style you picked.
 
 2. Draft or rewrite.
-   Read [references/human-writing-principles.md](./references/human-writing-principles.md) and write under all of its principles. They cover specificity, anchoring actions and objects, zero shared reader context, abstract adjectives and adverbs, vocabulary, rhythm, tone, and punctuation.
+   Read [references/human-writing-principles.md](./references/human-writing-principles.md) and write under all of its principles. They cover specificity, anchoring actions and objects, zero shared reader context, abstract adjectives and adverbs, argument structure, vocabulary, rhythm, tone, and punctuation.
 
 3. Calibrate against examples.
    While drafting or rewriting, consult [references/human-writing-examples.md](./references/human-writing-examples.md) to see what each principle looks like when applied to real sentences, including cases where a first rewrite is still not concrete enough. The scenarios in the examples are only sentence content, not a limit on when this skill applies.

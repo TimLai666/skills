@@ -49,6 +49,10 @@ Use this file as a cleanup checklist after drafting or rewriting.
   - Examples: every sentence same length, every paragraph same arc, repeated "not just X, but Y" or「不是……而是……」
   - Fix: vary cadence and sentence design. Keep「不是……而是……」only where a real misunderstanding needs correcting.
 
+- Setup-and-reveal reflex（先抑後揚、先破後立）
+  - Examples:「很多人以為……但其實……」「傳統做法的問題在於……而我們……」, sections that first build a wrong view just to knock it down.
+  - Fix: state the point directly and support it. Keep one correction only when the reader actually holds the misconception; never invent one, and never use the move as the skeleton of every section.
+
 - Slogan rhythm from stacked fragments
   - Examples:「看見問題、快速判斷、即時處理、完整追蹤」— short fragments piled up with 頓號 for cadence.
   - Fix: unless the items genuinely need enumerating, write full sentences that state how they relate.
