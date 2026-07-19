@@ -71,7 +71,7 @@ inbox 積壓超過一週就是系統警訊。
 
 ### 永久筆記（permanent）
 
-系統的本體。自己的話、至少 1-2 條說明關係的連結、`source` 指向文獻筆記。分兩種：
+系統的本體。自己的話、至少 1-2 條說明關係的連結、`sources` 指向文獻筆記。分兩種：
 
 - **概念卡** — 一個主張、機制、定義或判準。陳述句標題，一卡一想法。
 - **實體卡** — 一個人、事件、組織、作品或事物（如一場颶風）。實體名稱標題，
@@ -90,6 +90,7 @@ inbox 積壓超過一週就是系統警訊。
   是實體名稱（`颶風基科-1989.md`）。中文內容用中文標題，英文內容用小寫連字號
   slug（`spaced-repetition-beats-cramming.md`）。
 - Luhmann 式時間戳 ID（`202607181530-`）為可選前綴，使用者沒要求就不加。
+- 既有筆記庫仍用舊鍵 `source:` 時，視為現場慣例沿用即可；audit 時提示統一，不判違規。
 - frontmatter 最小集：
 
 ```yaml
@@ -98,7 +99,7 @@ title: 陳述句標題（實體卡：實體名稱）
 type: fleeting | literature | permanent | structure
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
-source: [literature/某文獻筆記.md]   # permanent 卡適用；literature 卡改放原始出處
+sources: [literature/某文獻筆記.md]   # 一律清單。permanent 卡指向文獻筆記；literature 卡放原始出處
 ---
 ```
 
@@ -115,7 +116,7 @@ title: Ahrens《How to Take Smart Notes》重點
 type: literature
 created: 2026-07-18
 updated: 2026-07-18
-source: "Sönke Ahrens, How to Take Smart Notes (2017)"
+sources: ["Sönke Ahrens, How to Take Smart Notes (2017)"]
 ---
 
 - 筆記系統的瓶頸不在收集而在思考的外部化，寫作是研究的媒介不是產出。（ch.1）
@@ -133,7 +134,7 @@ title: 間隔重複比集中複習有效
 type: permanent
 created: 2026-07-18
 updated: 2026-07-18
-source: [literature/ahrens-2017-how-to-take-smart-notes.md]
+sources: [literature/ahrens-2017-how-to-take-smart-notes.md]
 ---
 
 集中複習靠重讀製造熟悉感，但熟悉感不等於記得。間隔重複有效的原因是每次複習都
@@ -143,7 +144,7 @@ source: [literature/ahrens-2017-how-to-take-smart-notes.md]
 ```
 
 重點：陳述句標題、一個想法講完就停、連結就地長在內文提到的詞上（機制與適用
-邊界都在句子裡連出去，不另立清單）、`source` 指向文獻筆記。
+邊界都在句子裡連出去，不另立清單）、`sources` 指向文獻筆記。
 
 ### 實體卡：`permanent/颶風基科-1989.md`
 
@@ -157,7 +158,7 @@ title: 颶風基科（1989）
 type: permanent
 created: 2026-07-18
 updated: 2026-07-18
-source: [literature/wikipedia-hurricane-kiko-1989.md]
+sources: [literature/wikipedia-hurricane-kiko-1989.md]
 ---
 
 [[1989年太平洋颶風季]]第 11 個獲命名的風暴。由大型中尺度對流系統形成，
@@ -192,7 +193,7 @@ updated: 2026-07-18
 - [[間隔重複只適合原子化知識點]]
 
 ## 工具
-- [[anki-用-sm2-演算法排程]]
+- [[anki]]
 
 ## 空缺
 - 尚無卡片：交錯練習（interleaving）與間隔重複的關係

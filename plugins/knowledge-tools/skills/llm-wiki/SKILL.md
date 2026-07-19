@@ -66,7 +66,7 @@ Use confirmed path for all subsequent operations
 wiki/
 ├── SCHEMA.md           # Conventions, structure rules, domain config
 ├── index.md            # Global catalog: topics + cross-topic pages
-├── log.md              # Chronological action log (append-only, rotated yearly)
+├── log.md              # Chronological action log (append-only, rotated at 500 entries)
 ├── raw/                # Layer 1: Immutable source material
 │   ├── articles/       # Web articles, clippings
 │   ├── papers/         # PDFs, arxiv papers
@@ -76,6 +76,7 @@ wiki/
 │   ├── {topic-slug}/
 │   │   ├── concepts/   # Concepts specific to this topic
 │   │   ├── entities/   # Entities specific to this topic
+│   │   ├── comparisons/ # Comparisons specific to this topic
 │   │   └── index.md    # Topic-level catalog
 │   └── ...
 ├── concepts/           # Layer 2: Cross-topic concept pages
@@ -93,8 +94,8 @@ cross-referenced by the agent. Organized by research topic.
 
 Each research topic gets its own subdirectory under `topics/`. When ingesting:
 
-- **Single-topic page** (only relevant to one research area) → `topics/{topic}/concepts/` or `topics/{topic}/entities/`
-- **Cross-topic page** (relevant to 2+ research areas) → global `concepts/` or `entities/`
+- **Single-topic page** (only relevant to one research area) → `topics/{topic}/concepts/`, `topics/{topic}/entities/`, or `topics/{topic}/comparisons/`
+- **Cross-topic page** (relevant to 2+ research areas) → global `concepts/`, `entities/`, or `comparisons/`
 - Topic pages use `[[wikilink]]` to reference global pages and vice versa
 
 **判断标准:** When a new entity/concept appears in a source, check if it's already
@@ -120,7 +121,8 @@ Wiki pages follow Zettelkasten（卡片盒筆記法）discipline — refer to th
 
 **Every page create or update runs the `zettelkasten` change checklist before
 writing:** atomicity → split decision → duplicate check → links (bidirectional)
-→ self-contained. This is a per-write discipline, not a lint-time cleanup.
+→ structure/index update → self-contained → own words. This is a per-write
+discipline, not a lint-time cleanup.
 
 ## Resuming an Existing Wiki (CRITICAL — do this every session)
 
@@ -175,7 +177,7 @@ Adapt to the user's domain. The schema constrains agent behavior and ensures con
 - topic-slug: [description]
 
 ## Topic Grouping Rules
-- Each research topic = `topics/{topic-slug}/` with its own `concepts/`, `entities/`, `index.md`
+- Each research topic = `topics/{topic-slug}/` with its own `concepts/`, `entities/`, `comparisons/`, `index.md`
 - Only appears in one topic → place in that topic's subdirectory
 - Appears in 2+ topics → place in global `concepts/` or `entities/`
 - When unsure, check existing pages across topics before placing
@@ -184,10 +186,10 @@ Adapt to the user's domain. The schema constrains agent behavior and ensures con
 ## Conventions
 - **Markdown formatting:** Wiki pages use Obsidian Flavored Markdown. For wikilinks, embeds, callouts, frontmatter properties, and other Obsidian-specific syntax, refer to the `obsidian-markdown` skill.
 - **Academic sources:** For arXiv paper search, Semantic Scholar citations, and BibTeX generation, refer to the `arxiv` skill.
-- **Note discipline:** Every page write runs the Zettelkasten change checklist — refer to the `zettelkasten` skill for atomicity, split criteria, and linking rules.
-- File names: lowercase, hyphens, no spaces (e.g., `transformer-architecture.md`)
+- **Note discipline:** Every page write runs the full seven-item Zettelkasten change checklist (atomicity, split, duplicate, links, structure/index, self-contained, own words) — refer to the `zettelkasten` skill for split criteria and linking rules.
+- File names: title as filename — English content: lowercase, hyphens, no spaces (e.g., `transformer-architecture.md`); Chinese content: use the Chinese title directly (e.g., `間隔重複比集中複習有效.md`), per the `zettelkasten` skill's naming convention
 - Every wiki page starts with YAML frontmatter (see below)
-- Use `[[wikilinks]]` to link between pages (minimum 2 outbound links per page)
+- Use `[[wikilinks]]` to link between pages (at least 1-2 real outbound links per page — link where the text mentions them, don't pad to hit a quota)
 - When updating a page, always bump the `updated` date
 - Every new page must be added to `index.md` under the correct section
 - Every action must be appended to `log.md`
@@ -202,7 +204,7 @@ Adapt to the user's domain. The schema constrains agent behavior and ensures con
   title: Page Title
   created: YYYY-MM-DD
   updated: YYYY-MM-DD
-  type: entity | concept | comparison | query | summary
+  type: entity | concept | comparison | query
   tags: [from taxonomy below]
   sources: [raw/articles/source-name.md]
   # Optional quality signals:
@@ -248,7 +250,7 @@ add it here first, then use it. This prevents tag sprawl.
 - **Create a page** when an entity/concept appears in 2+ sources OR is central to one source
 - **Add to existing page** when a source mentions something already covered
 - **DON'T create a page** for passing mentions, minor details, or things outside the domain
-- **Split a page** when it covers 2+ distinct ideas (Zettelkasten atomicity — see the `zettelkasten` skill's split criteria) or exceeds ~200 lines — break into atomic pages with cross-links
+- **Split a page** when it covers 2+ distinct ideas (Zettelkasten atomicity — see the `zettelkasten` skill's split criteria) — break into atomic pages with cross-links. Length is a warning, not a criterion: run the split criteria on pages over ~200 lines, but a long single-idea page stays whole. Comparison, query, and index pages are exempt from atomicity
 - **Archive a page** when its content is fully superseded — move to `_archive/`, remove from index
 
 ## Entity Pages
@@ -353,7 +355,7 @@ Two levels: global index (wiki root) and topic index (each topic subdirectory).
 > Chronological record of all wiki actions. Append-only.
 > Format: `## [YYYY-MM-DD] action | subject`
 > Actions: ingest, update, query, lint, create, archive, delete
-> When this file exceeds 500 entries, rotate: rename to log-YYYY.md, start fresh.
+> When this file exceeds 500 entries, rotate: rename to log-YYYY-MM.md (year-month of rotation), start fresh.
 
 ## [YYYY-MM-DD] create | Wiki initialized
 - Domain: [domain]
@@ -384,16 +386,18 @@ When the user provides a source (URL, file, paste), integrate it into the wiki:
    a growing wiki and a pile of duplicates.
 
 ④ **Write or update wiki pages:**
-   - **Zettelkasten check (every page write):** Run the change checklist from the
-     `zettelkasten` skill — is this addition one idea? Does the page now cover
+   - **Zettelkasten check (every page write):** Run the full seven-item change
+     checklist from the `zettelkasten` skill (atomicity → split → duplicate →
+     links → structure → self-contained → own words). Does the page now cover
      2+ distinct ideas → split into linked atomic pages, fix inbound links,
      update the index.
    - **New entities/concepts:** Create pages only if they meet the Page Thresholds
      in SCHEMA.md (2+ source mentions, or central to one source)
    - **Existing pages:** Add new information, update facts, bump `updated` date.
      When new info contradicts existing content, follow the Update Policy.
-   - **Cross-reference:** Every new or updated page must link to at least 2 other
-     pages via `[[wikilinks]]`. Check that existing pages link back.
+   - **Cross-reference:** Every new or updated page must link to at least 1-2 other
+     pages via `[[wikilinks]]`, placed where the text mentions them — real
+     relationships only. Check that existing pages link back.
    - **Tags:** Only use tags from the taxonomy in SCHEMA.md
    - **Provenance:** On pages synthesizing 3+ sources, append `^[raw/articles/source.md]`
      markers to paragraphs whose claims trace to a specific source.
@@ -485,8 +489,10 @@ wiki = "<wiki>"  # replace with resolved wiki path
    (shouldn't happen — raw/ is immutable) or ingested from a URL that has since
    changed. Not a hard error, but worth reporting.
 
-⑨ **Page size & atomicity:** Flag pages over 200 lines or covering 2+ distinct
-   ideas — candidates for splitting per the `zettelkasten` skill's split criteria.
+⑨ **Page size & atomicity:** Flag pages covering 2+ distinct ideas — candidates
+   for splitting per the `zettelkasten` skill's split criteria. Pages over ~200
+   lines are a warning to run those criteria, not grounds to split by length
+   alone. Skip comparison/query/index pages — they are exempt from atomicity.
 
 ⑩ **Tag audit:** List all tags in use, flag any not in the SCHEMA.md taxonomy.
 
@@ -545,7 +551,7 @@ The wiki directory works as an Obsidian vault out of the box:
 For best results:
 - Set Obsidian's attachment folder to `raw/assets/`
 - Enable "Wikilinks" in Obsidian settings (usually on by default)
-- Install Dataview plugin for queries like `TABLE tags FROM "entities" WHERE contains(tags, "company")`
+- Install Dataview plugin for queries like `TABLE tags WHERE type = "entity" AND contains(tags, "company")` — query by frontmatter `type`, not by folder: `FROM "entities"` would miss `topics/*/entities/`
 
 If using the Obsidian skill alongside this one, set `OBSIDIAN_VAULT_PATH` to the
 same directory as the wiki path.
@@ -616,17 +622,18 @@ vault in Obsidian on your laptop/phone — changes appear within seconds.
 - **Don't create pages for passing mentions** — follow the Page Thresholds in SCHEMA.md. A name
   appearing once in a footnote doesn't warrant an entity page.
 - **Don't create pages without cross-references** — isolated pages are invisible. Every page must
-  link to at least 2 other pages.
+  link to at least 1-2 other pages, via real relationships rather than quota-padding.
 - **Frontmatter is required** — it enables search, filtering, and staleness detection.
 - **Tags must come from the taxonomy** — freeform tags decay into noise. Add new tags to SCHEMA.md
   first, then use them.
 - **Keep pages scannable** — a wiki page should be readable in 30 seconds. Split pages that
-  cover 2+ distinct ideas or exceed 200 lines. Move detailed analysis to dedicated deep-dive pages.
+  cover 2+ distinct ideas; length (~200 lines) is a warning to run the split criteria, not a
+  reason to split by itself. Move detailed analysis to dedicated deep-dive pages.
 - **Run the Zettelkasten checklist on every page write** — atomicity and split decisions
   happen at write time, not only during lint. See the `zettelkasten` skill.
 - **Ask before mass-updating** — if an ingest would touch 10+ existing pages, confirm
   the scope with the user first.
-- **Rotate the log** — when log.md exceeds 500 entries, rename it `log-YYYY.md` and start fresh.
+- **Rotate the log** — when log.md exceeds 500 entries, rename it `log-YYYY-MM.md` and start fresh.
   The agent should check log size during lint.
 - **Handle contradictions explicitly** — don't silently overwrite. Note both claims with dates,
   mark in frontmatter, flag for user review.
