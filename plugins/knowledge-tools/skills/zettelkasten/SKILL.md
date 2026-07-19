@@ -48,7 +48,7 @@ description: Use when building, maintaining, or auditing a Zettelkasten (slip-bo
 |------|------|----------|
 | 靈感筆記 fleeting | 快速捕捉，未加工 | 1-2 天內處理掉，不留 |
 | 文獻筆記 literature | 來源說了什麼（自己的話＋出處） | 永久保留，供永久卡引用 |
-| 永久筆記 permanent | 系統的本體。概念卡（一個主張）或實體卡（一個人／事件／組織／作品） | 持續演化 |
+| 永久筆記 permanent | 系統的本體。概念卡（一個主張）或實體卡（一個人／事件／組織／作品／具名方法） | 持續演化 |
 | 結構筆記 structure | 卡片地圖、入口、閱讀動線 | 隨連結成長更新 |
 
 ### 流程
@@ -77,6 +77,8 @@ description: Use when building, maintaining, or auditing a Zettelkasten (slip-bo
 6. **自主性** — 卡片單獨讀成立嗎？
 7. **自己的話** — 是改寫還是貼原文？
 
+因回連而觸發的被連卡編輯只處理連結項，不重跑全清單、不遞迴觸發下一層回連。
+
 ## Output Contract
 
 - `cards_written` — 新增與更新的卡片清單（含類型）
@@ -87,8 +89,8 @@ description: Use when building, maintaining, or auditing a Zettelkasten (slip-bo
 ## Quality Rules
 
 - 概念卡標題用陳述句（「間隔重複比集中複習有效」，不是「間隔重複」）；
-  實體卡標題用實體名稱（「颶風基科（1989）」），內文寫成可掃讀的事實與時間線，
-  提到相關概念（如快速增強）時在內文就地連結。
+  實體卡標題用實體名稱（「颶風基科（1989）」），內文寫成可掃讀的事實、時間線
+  或步驟，提到相關概念（如快速增強）時在內文就地連結。
 - 連結長在內文提到的詞上，不為了連結另立清單；文末補充段只放內文沒自然提到的
   關係（對比、反駁）並標明關係。結構筆記除外，它天生就是連結清單。
 - 拆卡不拆到失去自主性，拆出來的每張卡都要單獨成立。

@@ -113,7 +113,11 @@ Wiki pages follow Zettelkasten（卡片盒筆記法）discipline — refer to th
 
 - **Concept and entity pages are cards** — one page = one distinct idea/entity.
   Split by idea count, not just line count.
-- **Global/topic `index.md` are structure notes** — navigation, atomicity does not apply.
+- **Global/topic `index.md` are structure notes** — navigation, atomicity does not
+  apply. The structure-note role is carried entirely by the two-level index: don't
+  create separate structure-note files in a wiki. Exception: a split remnant page
+  ("summary + links", zettelkasten split procedure step 4) is a small concept-type
+  page, not a structure-note violation.
 - **Comparison and query pages are synthesis notes** — they exist to combine cards,
   so atomicity does not apply, but linking rules do. Ideas born inside a synthesis
   page that stand on their own must be promoted to concept pages (see Page
@@ -138,12 +142,17 @@ that skill is unavailable:
    (note both positions, mark `contradictions`/`contested`, link both ways).
 4. **Links** — link terms in place where the text mentions them (1-2 real outbound
    links); relations the text doesn't naturally mention go in a labeled
-   end-section; check whether linked pages need a link back.
+   end-section; check whether linked pages need a link back. Backlink edits don't
+   recurse: fixing a backlink doesn't trigger a checklist run on that page.
 5. **Structure/index** — add or refresh the page's row in the topic/global index.
 6. **Self-contained** — the page stands alone without the source context.
 7. **Own words** — restate, don't paste; cite provenance.
 
 This is a per-write discipline, not a lint-time cleanup.
+
+**Deference:** this discipline governs llm-wiki wikis. When working in a notes
+repository that is not an llm-wiki (no SCHEMA.md/index.md), follow that
+repository's own conventions — mirroring the zettelkasten skill's 沿用現場 rule.
 
 ## Resuming an Existing Wiki (CRITICAL — do this every session)
 
@@ -245,6 +254,9 @@ Adapt to the user's domain. The schema constrains agent behavior and ensures con
 topics. Lint surfaces `contested: true` and `confidence: low` pages for review so weak claims
 don't silently harden into accepted wiki fact.
 
+Type governance: adding a new `type` value requires three things at once — a one-line
+definition, a title convention, and a lint mapping. Never add a bare enum value.
+
 ### raw/ Frontmatter
 
 Raw sources ALSO get a small frontmatter block so re-ingests can detect drift:
@@ -308,6 +320,9 @@ When new information conflicts with existing content:
 2. If genuinely contradictory, note both positions with dates and sources
 3. Mark the contradiction in frontmatter: `contradictions: [page-name]`
 4. Flag for user review in the lint report
+5. When a contradiction is resolved (user ruling or a decisive source): update both
+   pages, clear `contested`, remove the pair from `contradictions:`, archive or mark
+   the superseded claim, and log the resolution
 ```
 
 ### index.md Template
@@ -615,7 +630,9 @@ When content is fully superseded or the domain scope changes:
 1. Create `_archive/` directory if it doesn't exist
 2. Move the page to `_archive/` with its original path (e.g., `_archive/entities/old-page.md`)
 3. Remove from `index.md`
-4. Update any pages that linked to it — replace wikilink with plain text + "(archived)"
+4. Update any pages that linked to it — replace wikilink with plain text + "(archived)";
+   also remove or repoint its slug in any `contradictions:` or other frontmatter
+   fields that reference it
 5. Log the archive action
 
 ### Obsidian Integration
