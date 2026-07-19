@@ -490,7 +490,10 @@ When the user asks a question about the wiki's domain:
 
 ### 3. Lint
 
-When the user asks to lint, health-check, or audit the wiki:
+When the user asks to lint, health-check, or audit the wiki (also suggest it
+proactively after any ingest touching 10+ pages — see ingest ⑥). Items marked
+*(semantic, agent-run)* are judgment-based candidate reports, not mechanical
+checks — expect false positives, report only:
 
 ① **Orphan pages:** Find pages with no inbound `[[wikilinks]]` from other pages.
 ```python
@@ -536,10 +539,43 @@ wiki = "<wiki>"  # replace with resolved wiki path
 
 ⑪ **Log rotation:** If log.md exceeds 500 entries, rotate it.
 
-⑫ **Report findings** with specific file paths and suggested actions, grouped by
-   severity (broken links > orphans > source drift > contested pages > stale content > style issues).
+⑫ **Log reconciliation:** compare recent page `updated` dates against log entries —
+   flag pages changed with no log record (writes that bypassed the discipline).
 
-⑬ **Append to log.md:** `## [YYYY-MM-DD] lint | N issues found`
+⑬ **Link symmetry:** build the bidirectional link map; report A→B edges where B
+   doesn't link back, excluding pairs whose declined-backlink decision is recorded
+   in the log (ingest ⑤). Backlinks are curation judgments — report for review,
+   don't auto-fix. Exception: `contradictions` frontmatter must be mutual
+   (A lists B ⇒ B lists A) — asymmetry there is a hard error.
+
+⑭ **Frontmatter link fields:** verify every slug in `contradictions:` (and any
+   other frontmatter field that references pages) resolves to an existing page —
+   renames and archiving leave these dangling silently, since they are not
+   `[[wikilinks]]` and no other check covers them.
+
+⑮ **Misplacement & promote:** find `topics/{t}/` pages referenced from 2+ topics —
+   candidates for promotion to global. Promote = move the file keeping the
+   filename (filename-based `[[wikilinks]]` survive), fix any path-style links,
+   update both indexes, log the move.
+
+⑯ **Duplicate page detection** *(semantic, agent-run)*: near-duplicate titles or
+   high content overlap between pages sharing tags/entities.
+
+⑰ **Verbatim-copy check** *(semantic, agent-run)*: wiki pages whose paragraphs are
+   near-verbatim from `raw/` — entity facts, figures, and provenance markers
+   legitimately repeat, so candidates only.
+
+⑱ **Title-form ↔ type spot check** *(semantic, agent-run)*: sample pages — concept
+   pages should carry statement titles, entity pages name titles.
+
+⑲ **Index summary drift:** sample index rows against current page content — flag
+   stale one-line summaries.
+
+⑳ **Report findings** with specific file paths and suggested actions, grouped by
+   severity (broken links > orphans > dangling frontmatter slugs > source drift >
+   contested pages > stale content > style issues).
+
+㉑ **Append to log.md:** `## [YYYY-MM-DD] lint | N issues found`
 
 ## Working with the Wiki
 
