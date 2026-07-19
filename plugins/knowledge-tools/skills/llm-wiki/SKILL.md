@@ -115,14 +115,35 @@ Wiki pages follow Zettelkasten（卡片盒筆記法）discipline — refer to th
   Split by idea count, not just line count.
 - **Global/topic `index.md` are structure notes** — navigation, atomicity does not apply.
 - **Comparison and query pages are synthesis notes** — they exist to combine cards,
-  so atomicity does not apply, but linking rules do.
+  so atomicity does not apply, but linking rules do. Ideas born inside a synthesis
+  page that stand on their own must be promoted to concept pages (see Page
+  Thresholds) — synthesis pages must not become a shelter from atomicity.
 - **`raw/` plays the literature-note role** — sources stay immutable; wiki pages
   restate claims in their own words and cite provenance.
 
-**Every page create or update runs the `zettelkasten` change checklist before
-writing:** atomicity → split decision → duplicate check → links (bidirectional)
-→ structure/index update → self-contained → own words. This is a per-write
-discipline, not a lint-time cleanup.
+**Every page create or update runs this checklist before writing.** Authoritative
+version with full split criteria and worked cases: the `zettelkasten` skill
+(`references/02-split-and-checklist.md`); the core below is the fallback when
+that skill is unavailable:
+
+1. **Atomicity** — is this addition a single idea (entity pages: a single entity)?
+2. **Split decision** — split when any criterion hits: the title needs "and" to
+   cover the content; a passage could be cited independently from another context;
+   the page answers more than one question; parts update at different rates;
+   inbound links can't say which point they target. Don't split when pieces would
+   lose self-containment or are only ever cited together. Length (~200 lines) is
+   a warning to run these criteria, not a reason to split.
+3. **Duplicate & conflict check** — search first. Existing idea → update that page.
+   Conflicting information → don't merge-overwrite; follow the Update Policy
+   (note both positions, mark `contradictions`/`contested`, link both ways).
+4. **Links** — link terms in place where the text mentions them (1-2 real outbound
+   links); relations the text doesn't naturally mention go in a labeled
+   end-section; check whether linked pages need a link back.
+5. **Structure/index** — add or refresh the page's row in the topic/global index.
+6. **Self-contained** — the page stands alone without the source context.
+7. **Own words** — restate, don't paste; cite provenance.
+
+This is a per-write discipline, not a lint-time cleanup.
 
 ## Resuming an Existing Wiki (CRITICAL — do this every session)
 
@@ -131,6 +152,12 @@ When the user has an existing wiki, **always orient yourself before doing anythi
 ① **Read `SCHEMA.md`** — understand the domain, conventions, and tag taxonomy.
 ② **Read `index.md`** — learn what pages exist and their summaries.
 ③ **Scan recent `log.md`** — read the last 20-30 entries to understand recent activity.
+④ **Quick consistency probes** (cheap, catches drift before it compounds):
+   compare the actual page count against the index header's "Total pages"; and
+   spot-check the wiki's SCHEMA.md for rules superseded by the current skill
+   canon (e.g., "split at 200 lines" as a criterion, "minimum 2 links", missing
+   comparison/query exemptions). If either probe fails, suggest running lint or
+   updating SCHEMA.md before writing.
 
 ```bash
 # Orientation reads at session start (replace <wiki> with the resolved path)
@@ -250,6 +277,7 @@ add it here first, then use it. This prevents tag sprawl.
 - **Create a page** when an entity/concept appears in 2+ sources OR is central to one source
 - **Add to existing page** when a source mentions something already covered
 - **DON'T create a page** for passing mentions, minor details, or things outside the domain
+- **Promote synthesis-born ideas** — when a comparison/query page produces a claim that stands on its own (a mechanism, a generalizable conclusion), create a concept page for it and link it in place; wiki-internal origin counts toward page creation, not just source appearances
 - **Split a page** when it covers 2+ distinct ideas (Zettelkasten atomicity — see the `zettelkasten` skill's split criteria) — break into atomic pages with cross-links. Length is a warning, not a criterion: run the split criteria on pages over ~200 lines, but a long single-idea page stays whole. Comparison, query, and index pages are exempt from atomicity
 - **Archive a page** when its content is fully superseded — move to `_archive/`, remove from index
 
@@ -407,11 +435,21 @@ When the user provides a source (URL, file, paste), integrate it into the wiki:
 
 ⑤ **Update navigation:**
    - Add new pages to `index.md` under the correct section, alphabetically
+   - When updating an existing page, refresh its one-line summary in the index
+     if the content meaningfully shifted
    - Update the "Total pages" count and "Last updated" date in index header
    - Append to `log.md`: `## [YYYY-MM-DD] ingest | Source Title`
    - List every file created or updated in the log entry
+   - Record `split_decisions` in the log entry: pages split (which criterion hit)
+     and borderline pages judged not-split (why) — this persists the zettelkasten
+     Output Contract into the wiki so the next session can audit what was checked
+   - Record `links_updated`: backlinks added, and backlink decisions declined
+     with reasons (lint's symmetry check skips recorded declined pairs)
 
-⑥ **Report what changed** — list every file created or updated to the user.
+⑥ **Report what changed** — list every file created or updated, plus the
+   `split_decisions` and `links_updated` records. If the ingest touched 10+
+   pages, suggest running a light lint subset (broken links, index completeness,
+   log reconciliation) before ending the session.
 
 A single source can trigger updates across 5-15 wiki pages. This is normal
 and desired — it's the compounding effect.
@@ -529,7 +567,11 @@ When ingesting multiple sources at once, batch the updates:
 3. Check existing pages for all of them (one search pass, not N)
 4. Create/update pages in one pass (avoids redundant updates)
 5. Update index.md once at the end
-6. Write a single log entry covering the batch
+6. Append log entries per batch as you go — don't hold them all for the end
+   (removes the interruption window); include per-page `split_decisions` and
+   `links_updated`
+7. Defer backlink decisions to a single pass at the end of the batch (one pass,
+   not N — same principle as step 3)
 
 ### Archiving
 
