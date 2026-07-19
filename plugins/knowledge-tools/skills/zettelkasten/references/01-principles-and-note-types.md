@@ -247,6 +247,9 @@ slipbox/
   raw/ 或不落檔。
 - 建頁門檻：wiki 域內 llm-wiki 的 Page Thresholds（2+ 來源或單來源核心才建頁）
   優先於卡片盒「有想法就建卡」——這是 wiki 防 passing-mention 噪音的刻意覆寫。
+- 矛盾標記：正典的措辭是「依該庫慣例標記分歧」；llm-wiki 的具體慣例是
+  contradictions／contested frontmatter＋Update Policy。這是刻意的分層設計，
+  不是漂移。
 
 llm-wiki 的頁面寫入流程如何掛上檢核清單，見該 skill 的 Note Discipline 一節。
 

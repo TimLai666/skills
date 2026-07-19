@@ -61,7 +61,8 @@ description: Use when building, maintaining, or auditing a Zettelkasten (slip-bo
    保持語句通順；內文沒自然提到但關係重要的卡（對比、反駁）補在文末並說明
    關係；判斷被連卡是否回連、相關結構筆記是否要收錄這張卡。
 4. **變更檢核** — 每次 create/update 都跑下方檢核清單，再寫入。
-5. **盤點**（audit 模式）— 掃孤兒卡、待拆卡、重複卡、未處理 inbox，出報告。
+5. **盤點**（audit 模式）— 掃孤兒卡、待拆卡、重複卡、不對稱連結（A→B 無回連
+   且無不回連理由）、未處理 inbox，出報告。
 
 ### 變更檢核清單（每次寫入必跑）
 
@@ -83,8 +84,8 @@ description: Use when building, maintaining, or auditing a Zettelkasten (slip-bo
 
 - `cards_written` — 新增與更新的卡片清單（含類型）
 - `split_decisions` — 拆了哪些卡、依據哪條判準；判斷不拆的邊界案例也要說明理由
-- `links_updated` — 新增的連結與回連、更新的結構筆記
-- `audit_report` —（audit 模式）孤兒卡、待拆卡、重複卡、inbox 積壓，附路徑與建議動作
+- `links_updated` — 新增的連結與回連（含判斷不需回連的理由）、更新的結構筆記
+- `audit_report` —（audit 模式）孤兒卡、待拆卡、重複卡、不對稱連結、inbox 積壓，附路徑與建議動作
 
 ## Quality Rules
 

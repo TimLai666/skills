@@ -135,8 +135,9 @@ that skill is unavailable:
    cover the content; a passage could be cited independently from another context;
    the page answers more than one question; parts update at different rates;
    inbound links can't say which point they target. Don't split when pieces would
-   lose self-containment or are only ever cited together. Length (~200 lines) is
-   a warning to run these criteria, not a reason to split.
+   lose self-containment, are only ever cited together, or are mere rephrasings
+   or examples of the same idea. Length (~200 lines) is a warning to run these
+   criteria, not a reason to split.
 3. **Duplicate & conflict check** — search first. Existing idea → update that page.
    Conflicting information → don't merge-overwrite; follow the Update Policy
    (note both positions, mark `contradictions`/`contested`, link both ways).
@@ -548,7 +549,10 @@ wiki = "<wiki>"  # replace with resolved wiki path
 ⑨ **Page size & atomicity:** Flag pages covering 2+ distinct ideas — candidates
    for splitting per the `zettelkasten` skill's split criteria. Pages over ~200
    lines are a warning to run those criteria, not grounds to split by length
-   alone. Skip comparison/query/index pages — they are exempt from atomicity.
+   alone. Skip index pages. For comparison/query pages, replace the atomicity
+   check with a promotion spot-check *(semantic, agent-run)*: standalone ideas
+   living only inside a synthesis page that were never promoted to concept
+   pages (see Page Thresholds).
 
 ⑩ **Tag audit:** List all tags in use, flag any not in the SCHEMA.md taxonomy.
 
