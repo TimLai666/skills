@@ -116,7 +116,6 @@ Claude Code 另有 `disable-model-invocation`、`user-invocable`、`disallowed-t
 
 | ID | Problem | Classification | Status |
 |---|---|---|---|
-| P11 | feature-planner 內文引用 `~/.mystack/projects/<slug>/*-plan.md`，但自己沒有推導 `_SLUG` 的程式碼，依賴 eng-architect 先跑過 | Related | Open |
 | P6 | 本檔「新增 skill」原寫「frontmatter 只有 name 與 description」，與上方要求 metadata.version 的表格矛盾（已順手改成「frontmatter 欄位」，待確認是否為預期） | Related | Open |
 
 <!-- ACTIVE_ISSUES_END -->

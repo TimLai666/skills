@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.1.1"
+  version: "1.2.0"
 ---
 
 ## Command routing
@@ -30,12 +30,11 @@ metadata:
 ```bash
 _BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 _REPO=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")
-_SLUG=$(git remote get-url origin 2>/dev/null | sed 's|\.git$||; s|.*[:/]\([^/]*/[^/]*\)$|\1|' | tr '/' '-' | tr -cd 'a-zA-Z0-9._-')
-[ -z "$_SLUG" ] && _SLUG=$(basename "$PWD" | tr -cd 'a-zA-Z0-9._-')
+_DIR=$(python3 "<project-memory skill dir>/scripts/memory.py" projectdir 2>/dev/null)
 echo "BRANCH: $_BRANCH"
 echo "REPO: $_REPO"
-DESIGN=$(ls -t ~/.mystack/projects/$_SLUG/*-$_BRANCH-*-plan.md 2>/dev/null | head -1)
-[ -z "$DESIGN" ] && DESIGN=$(ls -t ~/.mystack/projects/$_SLUG/*-plan.md 2>/dev/null | head -1)
+DESIGN=$(ls -t "$_DIR"/*-$_BRANCH-*-plan.md 2>/dev/null | head -1)
+[ -z "$DESIGN" ] && DESIGN=$(ls -t "$_DIR"/*-plan.md 2>/dev/null | head -1)
 [ -n "$DESIGN" ] && echo "PLAN_DOC: $DESIGN" || echo "PLAN_DOC: none"
 [ -f PLAN.md ] && echo "PLAN_FILE: PLAN.md" || echo "PLAN_FILE: none"
 [ -f Gemfile ] && echo "STACK:ruby"

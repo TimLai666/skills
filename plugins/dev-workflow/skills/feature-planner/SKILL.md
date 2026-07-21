@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 ## Auto-trigger
@@ -46,7 +46,22 @@ After each answer, append the decision to the plan document before asking the ne
 - **Timestamp:** [ISO-8601]
 ```
 
-The plan document lives at `~/.mystack/projects/<slug>/<date>-<branch>-<feature>-plan.md`.
+### Where the plan document goes
+
+Resolve the directory once, at the start, and reuse it. Do not guess the slug —
+`eng-architect` looks for this file later using the same resolver, and a guessed
+directory means it finds nothing.
+
+```bash
+_MEM="<project-memory skill dir>/scripts/memory.py"
+_DIR=$(python3 "$_MEM" projectdir --mkdir)
+_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+_PLAN="$_DIR/$(date +%Y-%m-%d)-$_BRANCH-<feature>-plan.md"
+echo "PLAN: $_PLAN"
+```
+
+`memory.py` ships with the `project-memory` skill in this same plugin. If it is
+missing, say so rather than inventing a path.
 
 ---
 

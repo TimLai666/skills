@@ -11,6 +11,7 @@ Usage:
   memory.py search QUERY [--json]
   memory.py stats
   memory.py path
+  memory.py projectdir [--mkdir]
 """
 
 import argparse
@@ -242,6 +243,20 @@ def cmd_path(args):
     return 0
 
 
+def cmd_projectdir(args):
+    """Per-project directory shared by every dev-workflow skill.
+
+    Other skills call this instead of re-deriving the slug in shell. Three
+    copy-pasted derivations had already drifted into two behaviours before this
+    existed; a fourth would have drifted too.
+    """
+    d = os.path.join(ROOT, slug())
+    if args.mkdir:
+        os.makedirs(d, exist_ok=True)
+    print(d)
+    return 0
+
+
 def main():
     p = argparse.ArgumentParser(prog="memory.py", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -272,6 +287,10 @@ def main():
 
     pa = sub.add_parser("path", help="print the store path for this project")
     pa.set_defaults(func=cmd_path)
+
+    pd = sub.add_parser("projectdir", help="print this project's shared directory")
+    pd.add_argument("--mkdir", action="store_true", help="create it if missing")
+    pd.set_defaults(func=cmd_projectdir)
 
     args = p.parse_args()
     return args.func(args)
