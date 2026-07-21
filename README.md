@@ -1,6 +1,6 @@
 # Agent Skills
 
-63 個 agent skills，分成 10 個 plugins，這個 repo 同時是 Claude Code plugin marketplace。
+64 個 agent skills，分成 11 個 plugins，這個 repo 同時是 Claude Code plugin marketplace。
 
 ## 安裝方式
 
@@ -42,6 +42,12 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | Skill | 適合什麼需求 |
 | --- | --- |
 | `ultrathink` | 任何需要動腦的時刻——文案、報告、提案、規劃商品或功能、寫程式、debug——都先依序跑過全部內建思考框架（目前含邏輯推導：MECE、空雨傘、魚骨圖；創意發想：六頂思考帽、腳本圖、心智圖；市場分析：3C 分析、SWOT 分析、4P與4C；進度管理：惠特默模型、KPI 樹狀圖、PDCA；權衡得失：決策矩陣、PMI 表、力場分析；預測未來：S 型曲線、鴻溝理論、長尾模型；辯論思考：需根解損、判定立駁，論點以主張、資料、推論三要素構建、以質詢拆解三問檢驗；思維模型：第一性原理、反向思考法、二階思考、能力圈、奧坎剃刀），全程以約 160 條謬誤檢核清單把關推理，把方向與重點想清楚再動手。 |
+
+### `output-style` — 輸出呈現層
+
+| Skill | 適合什麼需求 |
+| --- | --- |
+| `i-have-adhd` | 想讓每一則回覆都好讀好動手：先給目前焦點、多步驟編號、每輪重述進度，發現的問題全部揭露並寫進專案 `AGENTS.md` 的 Active Issues ledger 持續追蹤，驗證通過才移除。只管呈現方式，不覆蓋 `AGENTS.md` 的流程與完成回報規則。 |
 
 ### `business-strategy` — 商業策略與評估
 
