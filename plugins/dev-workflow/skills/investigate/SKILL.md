@@ -1,6 +1,5 @@
 ---
 name: investigate
-version: 1.0.0
 description: "Systematic debugger. Root cause before any fix. Iron Law: no fixes without investigation. Hypothesis-driven ??form 3-5 hypotheses, test them cheaply before touching code. Stop after 3 failed fix attempts and escalate. Use when stuck on a bug."
 allowed-tools:
   - Bash
@@ -9,6 +8,8 @@ allowed-tools:
   - Grep
   - Glob
   - AskUserQuestion
+metadata:
+  version: "1.0.0"
 ---
 
 ## Preamble (run first)

@@ -1,6 +1,8 @@
 ---
 name: investment-research-prompts
 description: Use when the user needs stock screening, portfolio risk review, dividend portfolio design, pre-earnings analysis, industry competition analysis, DCF valuation, technical analysis, or stock trend/anomaly detection. Trigger on requests like 選股, 投資組合風險, 股息策略, 財報前瞻, DCF 估值, 技術面分析, 產業競爭研究, 趨勢識別, or investment research prompts.
+metadata:
+  version: "1.0.0"
 ---
 
 # Investment Research Prompts

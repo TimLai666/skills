@@ -1,6 +1,8 @@
 ---
 name: threads-viral-growth
 description: Produce viral, high-engagement Threads (脆) posts in Traditional Chinese for Taiwan audiences. Use this skill whenever the user wants to write, plan, draft, or improve Threads posts — whether for personal brands, products, campuses, departments, course assignments, retail stores, or company accounts. Always trigger when the user mentions 脆、Threads、社群貼文、社群小編、社群行銷、社群文案、爆文、貼文設計、社群提案、社群圖卡, or any phrasing that points at writing for the Threads platform. Also trigger when the user uploads a brief, course task, brand positioning sheet, or pitch deck about Threads and wants posts produced from it. This skill is opinionated — it forces a trend research step BEFORE any post is drafted, applies Hook-driven structures, designs for the Threads algorithm (留言、引用、分享、讚 由重到輕), and outputs ready-to-post drafts plus engagement tactics, not vague advice. Default output is Traditional Chinese (Taiwan).
+metadata:
+  version: "1.0.0"
 ---
 
 # Threads Viral Growth — 爆文操作 skill

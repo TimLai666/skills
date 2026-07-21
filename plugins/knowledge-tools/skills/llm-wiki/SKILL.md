@@ -1,9 +1,10 @@
 ---
 name: llm-wiki
 description: "Karpathy's LLM Wiki: build/query interlinked markdown KB with Zettelkasten note discipline. Triggers: 知識庫, 建 wiki, wiki 筆記, 研究筆記, ingest sources, knowledge base."
-version: 3.0.0
 license: MIT
-platforms: [linux, macos, windows]
+compatibility: "Runs on Linux, macOS, and Windows"
+metadata:
+  version: "3.0.0"
 ---
 
 # Karpathy's LLM Wiki

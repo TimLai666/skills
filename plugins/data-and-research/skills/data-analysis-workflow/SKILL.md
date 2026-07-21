@@ -1,6 +1,8 @@
 ---
 name: data-analysis-workflow
 description: Use when planning or executing a full data analysis workflow, including schema inspection, data quality audit, data cleaning, EDA, relationship analysis, feature engineering, modeling, evaluation, and report generation. Trigger on requests like 資料分析流程, EDA 到建模, 數據分析規劃, 分析報告產出, or end-to-end analytics workflow.
+metadata:
+  version: "1.0.0"
 ---
 
 # Data Analysis Workflow

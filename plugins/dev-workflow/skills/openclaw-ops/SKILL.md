@@ -15,6 +15,8 @@ description: >-
   Hand off to **openclaw-agent-builder** for any work that creates or edits an
   agent's workspace files (SOUL.md / AGENTS.md / IDENTITY.md / USER.md / RAG
   knowledge / `agents.list[]` entries / `bindings[]`).
+metadata:
+  version: "1.0.0"
 ---
 
 # OpenClaw Ops

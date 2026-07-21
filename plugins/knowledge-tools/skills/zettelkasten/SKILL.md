@@ -1,6 +1,8 @@
 ---
 name: zettelkasten
 description: Use when building, maintaining, or auditing a Zettelkasten (slip-box) note system, or when applying atomic-note discipline to an existing markdown knowledge base — atomicity checks, card-splitting decisions, linking rules, note-type workflow. Trigger on 卡片盒筆記法、卡片盒、Zettelkasten、原子筆記、永久筆記、文獻筆記、結構筆記、拆卡、筆記連結、smart notes、atomic notes、permanent notes、slip-box, or when another skill (e.g. llm-wiki) needs per-change note-discipline checks.
+metadata:
+  version: "1.0.0"
 ---
 
 # Zettelkasten 卡片盒筆記法

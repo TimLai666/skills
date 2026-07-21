@@ -1,7 +1,8 @@
 ---
 name: arxiv
 description: "Search arXiv papers by keyword, author, category, or ID. Find related work via Semantic Scholar citations and recommendations."
-version: 1.0.0
+metadata:
+  version: "1.0.0"
 ---
 
 # arXiv Research

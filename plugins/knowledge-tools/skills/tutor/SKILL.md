@@ -7,6 +7,8 @@ description: >
   (3) Drill weak areas identified in previous sessions,
   (4) Check their learning progress or dashboard,
   or says things like "quiz me", "test me", "let's study", "/tutor", "學習", "測驗", "評量".
+metadata:
+  version: "1.0.0"
 ---
 
 # Tutor Skill

@@ -12,6 +12,8 @@ description: >-
   openclaw.json, agent bindings, agent workspace, "add an agent", "build a bot",
   "編一個 agent", "做一個客服 bot" — and also whenever ~/.openclaw or an
   openclaw.json file is present in the working host even if OpenClaw is not named.
+metadata:
+  version: "1.0.0"
 ---
 
 # OpenClaw Agent Builder

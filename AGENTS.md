@@ -33,7 +33,16 @@ plugins/<plugin>/
 - `scripts/` — 可執行工具（少數 skill 有）
 - `agents/` — 驗證情境或壓力測試案例（少數 skill 有）
 
-Frontmatter 只有兩個欄位：`name`（必須等於資料夾名）與 `description`（英文觸發說明並嵌入中文觸發詞，<1024 字元）。不要加其他欄位。
+Frontmatter 依 [Agent Skills 規範](https://agentskills.io/specification)，只用規範定義的欄位，不要自創：
+
+| 欄位 | 本 repo 的規定 |
+| --- | --- |
+| `name` | 必填。必須等於資料夾名，小寫英數與連字號，≤64 字元 |
+| `description` | 必填。英文觸發說明並嵌入中文觸發詞，<1024 字元。內含半形冒號加空格時**必須用雙引號包住**，否則 YAML 解析失敗、skill 完全載入不了 |
+| `metadata.version` | 必填（本 repo 自訂要求）。字串形式的語意化版本，例如 `version: "1.0.0"`。規範沒有頂層 `version` 欄位，一律放在 `metadata` 底下 |
+| `license`、`compatibility`、`allowed-tools` | 選填，有需要才加 |
+
+Claude Code 另有 `disable-model-invocation`、`user-invocable`、`disallowed-tools`、`context`、`agent`、`model` 等擴充欄位，需要時可用，但會綁定 Claude Code。
 
 範本級 skill 可參考：`plugins/marketing-strategy/skills/sor-marketing-strategy`（完整結構）、`plugins/service-innovation/skills/scamper`（精簡版）、`plugins/dev-workflow/skills/postgrest-baas-builder`（大型多檔）。
 
@@ -72,8 +81,9 @@ Frontmatter 只有兩個欄位：`name`（必須等於資料夾名）與 `descri
 ### 收尾檢查（所有操作共通）
 
 - 每次把新內容加進 skill，先判斷它該落在哪個檔案、哪個段落，插到最合適的位置，必要時重新組織該檔的分組或順序。不要一律附加在檔尾，不要製造重複段落、不順的引用或檔案間的耦合。加了新規則後，回頭檢查既有內容（尤其示例）是否仍符合全部規則。
+- 動到某個 skill 的內容時，同時調升該 skill 的 `metadata.version` 與所屬 plugin 的 `plugin.json` version。前者標示這個 skill 本身變了，後者讓已安裝的使用者知道要更新。
 - `plugins/*/skills/*/SKILL.md` 的數量、README 表格列數、README 開頭總數三者一致。
-- 所有動過的 JSON 能正常解析。
+- 所有動過的 JSON 能正常解析，所有動過的 SKILL.md frontmatter 能通過 YAML parser。
 - 需要 claude.ai 上傳包時，跑 `python zip_subfolders.py` 確認 exit 0。
 
 ## 重要注意事項

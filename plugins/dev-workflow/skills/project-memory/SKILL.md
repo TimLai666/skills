@@ -1,6 +1,5 @@
 ---
 name: project-memory
-version: 1.0.0
 description: "Capture and retrieve project learnings. Record pitfalls, patterns, and preferences from real work. Triggers on: 記一下, 之前踩過什麼雷, 學到什麼, 有什麼教訓, remember this, lesson learned, project learnings, 記錄一下, 之前遇過的, 把這個記起來"
 allowed-tools:
   - Bash
@@ -8,6 +7,8 @@ allowed-tools:
   - Write
   - Edit
   - AskUserQuestion
+metadata:
+  version: "1.0.0"
 ---
 
 ## Auto-trigger

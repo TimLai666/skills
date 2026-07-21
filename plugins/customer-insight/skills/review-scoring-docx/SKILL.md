@@ -9,6 +9,8 @@ description: >
   Also trigger when the user uploads review files (CSV, JSON, TXT, or similar) and asks
   for comparative analysis, attribute extraction, or scoring — even without mentioning
   Maslow or Word explicitly.
+metadata:
+  version: "1.0.0"
 ---
 
 # Review Scoring → Word Document

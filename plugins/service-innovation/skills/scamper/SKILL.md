@@ -1,6 +1,8 @@
 ---
 name: scamper
 description: Use when applying the SCAMPER creative thinking framework to systematically generate innovation ideas for products, services, processes, or concepts. Trigger on requests involving 奔馳法、SCAMPER、創意發想、創新思考、產品改良、服務優化、創意激盪、系統化創新, or when the user wants to explore multiple creative angles for an existing object/service/business model.
+metadata:
+  version: "1.0.0"
 ---
 
 # SCAMPER 奔馳法創意思考工具

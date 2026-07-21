@@ -1,6 +1,8 @@
 ---
 name: psychological-trigger-marketing
 description: Use when generating high-conversion marketing angles, campaign hooks, landing page messaging, promotional copy directions, social post hooks, or CTA concepts with psychological triggers such as FOMO, justification, desire, priming, anchoring, and framing, especially for offers, launches, limited-time promotions, and Traditional Chinese marketing for Taiwan audiences.
+metadata:
+  version: "1.0.0"
 ---
 
 # Psychological Trigger Marketing

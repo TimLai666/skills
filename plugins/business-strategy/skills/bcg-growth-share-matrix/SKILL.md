@@ -1,6 +1,8 @@
 ---
 name: bcg-growth-share-matrix
 description: Use when analyzing a group, business-unit, product-line, or brand portfolio with the BCG growth-share matrix, especially when the task involves relative market share, market growth, quadrant classification, capital allocation, portfolio prioritization, or deciding whether to invest, maintain, harvest, reposition, or exit.
+metadata:
+  version: "1.0.0"
 ---
 
 # BCG 成長佔有率矩陣

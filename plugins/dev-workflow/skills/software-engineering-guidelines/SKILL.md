@@ -1,7 +1,8 @@
 ---
 name: software-engineering-guidelines
-version: 1.0.1
 description: "Software engineering guidelines for any software change. Always load this skill before requirement clarification, architecture/design, implementation, refactoring, code review, testing, or shipping. Covers simplicity, surgical changes, TDD, and verifiable success criteria. Triggers on: 任何軟體規劃, 需求釐清, 架構設計, 寫 code, 改 code, 做功能, 修 bug, refactor, 開發, coding, development, 實作, 實現, 寫程式, 改程式, 加功能, 修問題, code review, 測試, 重構"
+metadata:
+  version: "1.0.1"
 ---
 
 ## Auto-trigger

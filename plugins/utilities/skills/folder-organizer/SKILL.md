@@ -2,6 +2,8 @@
 name: folder-organizer
 description: >
   Use when a user wants to scan, audit, analyze, or tidy up a folder or collection of files — whether uploaded directly to the conversation, specified by local path, or described verbally. Trigger on requests like 整理檔案、掃描資料夾、幫我分類檔案、檔案整理計畫、資料夾結構建議、file organization, folder audit, help me sort my files, clean up my downloads, rename and categorize files, suggest a folder structure. Always follow a plan-first, execute-later pattern — never rename, move, or delete anything before the user confirms the full plan.
+metadata:
+  version: "1.0.0"
 ---
 
 # Folder Organizer

@@ -1,6 +1,8 @@
 ---
 name: sor-marketing-strategy
 description: Use when the user wants to apply the S-O-R model, Stimulus-Organism-Response, 消費者行為分析, 行銷心理, 刺激-有機體-反應, or to turn 廣告、CRM、落地頁、電商、會員、回購、KPI、A/B 測試 ideas into a structured marketing strategy, psychology map, measurement plan, or experiment brief.
+metadata:
+  version: "1.0.0"
 ---
 
 # S-O-R 行銷策略

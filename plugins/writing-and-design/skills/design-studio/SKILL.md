@@ -1,6 +1,8 @@
 ---
 name: design-studio
 description: 'Unified design skill for ALL design work — websites, apps, presentations, animations, prototypes, infographics, branding. Every session produces or evolves a DESIGN.md (Google format). Routes to cinematic-ui or huashu-design sub-skills based on task. Triggers: 設計, design, 原型, prototype, PPT, 幻燈片, slides, 動畫, animation, 簡報, deck, landing page, website, UI, mockup, MP4, GIF, infographic, branding, logo, 評審, critique, film-inspired, cinematic.'
+metadata:
+  version: "1.0.0"
 ---
 
 # Design Studio

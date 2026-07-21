@@ -1,6 +1,5 @@
 ---
 name: test-and-fix
-version: 1.0.0
 description: "Run tests, find failures, fix them, verify. Diff-aware: tests the routes/pages your changes affect. Triggers on: 跑測試, 測一下, 有沒有壞掉, run tests, test this, 跑一下 tests, 測試, check if broken, 有沒有問題"
 allowed-tools:
   - Bash
@@ -9,6 +8,8 @@ allowed-tools:
   - Edit
   - Grep
   - AskUserQuestion
+metadata:
+  version: "1.0.0"
 ---
 
 ## Auto-trigger

@@ -1,6 +1,8 @@
 ---
 name: customer-journey-mapper
 description: Use when the final customer journey map, CJM, or touchpoint-based journey table must be produced from a completed persona, product or service, or a `handoff_to_customer_journey_mapper` block, especially when the user asks for 顧客旅程地圖, CJM, final journey table, or wants prior persona/framing work turned into the finished map. Also trigger when the user asks for 情緒分數, 情緒曲線, 加減分原因, sparkline, or wants emotion scoring added to an existing CJM.
+metadata:
+  version: "1.0.0"
 ---
 
 # Customer Journey Mapper

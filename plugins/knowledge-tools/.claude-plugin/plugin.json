@@ -1,7 +1,7 @@
 {
   "name": "knowledge-tools",
   "description": "知識管理與圖表：LLM wiki、卡片盒筆記法（Zettelkasten）、tutor 學習系統、Obsidian 工具組、Excalidraw、Mermaid、Canvas。",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": {
     "name": "TimLai666"
   }

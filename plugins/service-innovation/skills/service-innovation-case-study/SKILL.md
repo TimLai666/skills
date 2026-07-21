@@ -14,6 +14,8 @@ description: |
   - `assets/report-template.md` — 空白報告模板
 
   每次開始新案例前，先讀 `references/01-research-protocol.md` 和 `references/02-analysis-chain.md`。
+metadata:
+  version: "1.0.0"
 ---
 
 # 服務創新案例研究 Skill

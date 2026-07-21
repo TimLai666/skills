@@ -6,6 +6,8 @@ description: >
   (2) Codebase Mode — source code project → onboarding vault for new developers.
   (3) Wiki Mode — llm-wiki knowledge base → StudyVault with incremental sync.
   Mode is auto-detected based on project markers and wiki presence.
+metadata:
+  version: "1.0.0"
 ---
 
 # Tutor Setup — Knowledge to Obsidian StudyVault

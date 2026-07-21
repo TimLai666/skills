@@ -7,6 +7,8 @@ description: >
   service blueprint, ecosystem map, stakeholder mapping, service design workshop, CJM to blueprint,
   or any request to diagram/analyze/teach service delivery systems. Also trigger when someone uploads
   a service blueprint PDF or asks to turn a service journey into a blueprint structure.
+metadata:
+  version: "1.0.0"
 ---
 
 # Service Blueprint & Ecosystem Map Workshop Skill

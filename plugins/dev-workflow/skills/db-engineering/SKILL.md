@@ -1,6 +1,5 @@
 ---
 name: db-engineering
-version: 1.0.1
 description: "Universal database engineering rules. Migration discipline, audit logging, soft delete, performance, data integrity. Triggers on: 任何資料庫相關工作, 建表, 改 schema, 寫 migration, DB design, database development, 設計資料庫, 改 DB 結構, 加欄位, 加索引, 改 table, SQL, 寫 trigger, 設計 API 的 DB 層, 查詢很慢, N+1, 效能優化, 資料完整性, CASCADE, 外鍵, 新增 table, 刪除資料, backup, 環境分離, dev prod 分開"
 allowed-tools:
   - Bash
@@ -9,6 +8,8 @@ allowed-tools:
   - Edit
   - Grep
   - AskUserQuestion
+metadata:
+  version: "1.0.1"
 ---
 
 ## Auto-trigger

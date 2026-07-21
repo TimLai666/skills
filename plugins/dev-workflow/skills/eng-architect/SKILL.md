@@ -1,6 +1,5 @@
 ---
 name: eng-architect
-version: 1.0.0
 description: "Design architecture and lock technical decisions for a feature. Produces architecture diagrams, error maps, and convergence artifacts (delivery-plan.md, AGENTS.md, OpenSpec proposals). Triggers on: 技術方案, 架構設計, 怎麼切模組, eng planning, architecture design, 技術規劃, 這個功能技術上怎麼做, design review, UI review, AI slop scan"
 allowed-tools:
   - Bash
@@ -12,6 +11,8 @@ allowed-tools:
   - Agent
   - AskUserQuestion
   - WebSearch
+metadata:
+  version: "1.0.0"
 ---
 
 ## Command routing

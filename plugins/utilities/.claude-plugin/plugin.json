@@ -1,7 +1,7 @@
 {
   "name": "utilities",
   "description": "通用工具：網頁內容提取、檔案整理、Windows 系統救援。",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "TimLai666"
   }

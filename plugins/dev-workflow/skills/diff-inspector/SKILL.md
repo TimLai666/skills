@@ -1,6 +1,5 @@
 ---
 name: diff-inspector
-version: 1.0.0
 description: "Inspect a diff before merging. Scope drift check, critical code review, specialist parallel dispatch, adversarial review. Triggers on: 幫我看 diff, 看一下改了什麼, review 一下, PR review, diff review, 幫我看看這個, code review, 看看有沒有問題"
 allowed-tools:
   - Bash
@@ -12,6 +11,8 @@ allowed-tools:
   - Agent
   - AskUserQuestion
   - WebSearch
+metadata:
+  version: "1.0.0"
 ---
 
 ## Auto-trigger

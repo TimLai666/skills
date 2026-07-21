@@ -10,6 +10,8 @@ description: >
   Also trigger when this step follows an attribute-discovery workflow and the
   user wants scored data, dimensionality reduction, or segmentation. Use this
   skill even if the user only mentions part of the pipeline.
+metadata:
+  version: "1.0.0"
 ---
 
 # Review Salience → PCA → K-means Customer Segmentation
