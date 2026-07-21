@@ -86,6 +86,15 @@ Claude Code 另有 `disable-model-invocation`、`user-invocable`、`disallowed-t
 - 所有動過的 JSON 能正常解析，所有動過的 SKILL.md frontmatter 能通過 YAML parser。
 - 需要 claude.ai 上傳包時，跑 `python zip_subfolders.py` 確認 exit 0。
 
+## Active Issues
+
+<!-- ACTIVE_ISSUES_START -->
+
+| ID | Problem | Classification | Status |
+|---|---|---|---|
+
+<!-- ACTIVE_ISSUES_END -->
+
 ## 重要注意事項
 
 - 根目錄可能有草稿散檔或筆記，是使用者刻意保留的，不要清理或移動。

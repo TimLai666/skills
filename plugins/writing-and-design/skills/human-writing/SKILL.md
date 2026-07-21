@@ -2,7 +2,7 @@
 name: human-writing
 description: Use by default for any user-facing writing, including answers to users, emails, documents, formal correspondence, reports, proposals, landing-page copy, social posts, essays, commentary, explanations, summaries, product copy, internal updates, and other prose intended to be read by people. Apply it whenever the output contains human-readable text, unless another skill explicitly owns the writing style or the output is purely code, structured data, or a command. Supports Chinese and English.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Human Writing

@@ -51,20 +51,29 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 - If a term such as「剪刀差」is necessary, explain it in plain language at first use. Otherwise, directly describe the difference or consequence it refers to.
 - Do not treat a familiar term within one field as familiar to every reader.
 
-### 7. Remove unexplained figurative language
+### 7. Do not clip a two-syllable verb down to one character
+
+- A one-character Chinese verb needs something behind it to stand on: an object（查資料）, a complement（改好了、查清楚）, or an aspect marker（測過了、拆掉）. Left bare at the end of a clause, it stops sounding like anything a person would say.「範例照抄也要驗」「命中的已拆」「表現優異的項目也要查」are all the same failure.
+- Clipping the verb usually drops its object with it, so putting the second character back is not enough.「範例照抄也要驗一次」reads more smoothly, but the reader still cannot tell what to verify. Write「就算照抄範例，也要自己檢查每一條有沒有歸錯欄」. This is rule 3 from another angle: a verb worn down to one character is usually the sign that its object went missing.
+- Status columns in a table are the exception. The row subject already supplies the object, so it does not need repeating, but the verb still has to be whole: write「驗過」, not「已驗」.
+- Column width is not a reason to shave characters. When something has to be shorter, choose a shorter complete wording instead.
+- The same applies to nouns: do not coin an abbreviation on the spot. Use only ones already in circulation（健保、台大、API）, and drop any that collides with an existing word —「產品經理」cut down to「產經」reads as 產業經濟.
+- In English the matching habit is inventing an acronym mid-paragraph, or using a verb as a noun ("a solve", "the ask", "learnings"). Restore the ordinary wording.
+
+### 8. Remove unexplained figurative language
 
 - Keep a metaphor only when the reader can tell what it refers to and what it means in the situation.
 - Replace vague images such as「漏過去」with the concrete missing data, action, location, or consequence.
 
 ## Structure the argument straight
 
-### 8. Do not default to setup-and-reveal structures
+### 9. Do not default to setup-and-reveal structures
 
 - 先抑後揚 and 先破後立 — first putting something down or building up a wrong view, then revealing the real point — is a default rhetorical reflex of models, not of people. When every section opens by knocking something over, the whole text runs on one visible formula, and the reader learns to skip the first half of every paragraph.
 - Most points are stronger stated directly: lead with the claim, then support it.
 - Keep the structure only when the intended reader genuinely holds the misconception and correcting it is the point of the passage. Never invent a strawman just to have something to knock down. Even when justified, use it once in a piece, not as the skeleton of every section.
 
-### 9. Sound like someone is making a point
+### 10. Sound like someone is making a point
 
 - Give the prose a center of gravity.
 - In restrained writing, this means clear judgment and stable framing.
@@ -72,43 +81,43 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 ## Control rhythm and tone
 
-### 10. Vary rhythm on purpose
+### 11. Vary rhythm on purpose
 
 - Mix short sentences with longer ones.
 - Avoid paragraphs where every sentence has the same shape.
 - Let emphasis come from contrast, not from constant intensity.
 
-### 11. Break sterile symmetry
+### 12. Break sterile symmetry
 
 - Do not force every idea into neat triples.
 - Do not make every paragraph the same length.
 - Allow one sharp sentence, one longer turn, one quiet sentence when useful.
 
-### 12. Write body text as body text, not as slogans
+### 13. Write body text as body text, not as slogans
 
 - Body sentences need a subject, a verb, and a connection to the sentences before and after. A paragraph built from headline-style declarations, such as「效率，從此不同」「一個平台，解決所有問題」, reads like presentation titles pasted together, and the reader cannot find the line of reasoning.
 - Headline diction belongs in headings. If a sentence would work unchanged as a slide title, it is probably not doing body-text work.
 - State the claim as a full sentence with its reason or consequence attached, then continue the thread into the next sentence.
 
-### 13. Choose stronger verbs before adding adjectives
+### 14. Choose stronger verbs before adding adjectives
 
 - Fix weak verb choice first.
 - Prefer "cut", "argue", "miss", "ship", "delay", "expose", or "earn" over soft general verbs.
 - Use adjectives only when they add meaning, not sheen.
 
-### 14. Keep emotional texture controlled
+### 15. Keep emotional texture controlled
 
 - Human writing is not emotionally flat, but it also does not overperform.
 - Add feeling through timing, specificity, and point of view.
 - Avoid melodrama unless the task genuinely calls for it.
 
-### 15. Use restraint as a feature
+### 16. Use restraint as a feature
 
 - The best human-like line is often simpler than the first draft.
 - Do not show off range when a plain sentence will land better.
 - Leave room for the reader to trust the voice.
 
-### 16. Match social context
+### 17. Match social context
 
 - Business writing should feel reliable, not robotic.
 - Public-facing copy should feel intentional, not inflated.
@@ -117,7 +126,7 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 ## Punctuation
 
-### 17. Treat semicolons as an exception
+### 18. Treat semicolons as an exception
 
 - In ordinary Chinese prose, do not use semicolons by default.
 - During the final pass, replace each semicolon with a full stop, comma, colon, or a clearer sentence boundary whenever possible.

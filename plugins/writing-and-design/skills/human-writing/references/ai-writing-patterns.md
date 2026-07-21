@@ -8,6 +8,14 @@ Use this file as a cleanup checklist after drafting or rewriting.
   - Examples:「不繞」「最穩」「一直在撐」「很頂」— punchy-sounding abstract descriptors no real person uses, where the reader cannot even tell what quality is being claimed.
   - Fix: rewrite the whole sentence to say the concrete thing in ordinary spoken wording. There is no one-word substitute; the shorthand exists because the model skipped the actual content.
 
+- Clipped verbs
+  - Examples:「範例照抄也要驗」「命中的已拆」「表現優異的項目也要查」— a two-syllable verb shaved down to one character with nothing behind it.
+  - Fix: write the verb whole and say what it acts on.「也要驗一次」still fails, because the reader cannot tell what to verify. A table's status column may take the object from its row subject, but the verb still has to be whole:「驗過」, not「已驗」.
+
+- Invented abbreviations
+  - Examples:「產品經理」cut to「產經」, or an acronym coined mid-paragraph in English and then reused as if the reader knows it.
+  - Fix: keep only abbreviations already in circulation（健保、台大、API）, and never one that collides with an existing word. When something has to be shorter, choose a shorter complete wording instead of shaving characters.
+
 - Vague attribution
   - Examples: "experts say", "observers note", "industry reports suggest"
   - Fix: name the source or state the claim directly.
