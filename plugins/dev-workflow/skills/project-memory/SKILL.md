@@ -1,6 +1,6 @@
 ---
 name: project-memory
-description: "Capture and retrieve project learnings. Record pitfalls, patterns, and preferences from real work. Triggers on: 記一下, 之前踩過什麼雷, 學到什麼, 有什麼教訓, remember this, lesson learned, project learnings, 記錄一下, 之前遇過的, 把這個記起來"
+description: "Capture and retrieve project learnings, recording pitfalls, patterns, and preferences from real work. This skill MUST be invoked on the triggers below, and SHOULD be invoked whenever the user states something worth remembering about how this project behaves. Triggers on: 記一下, 之前踩過什麼雷, 學到什麼, 有什麼教訓, remember this, lesson learned, project learnings, 記錄一下, 之前遇過的, 把這個記起來"
 allowed-tools:
   - Bash
   - Read
@@ -8,7 +8,7 @@ allowed-tools:
   - Edit
   - AskUserQuestion
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 ## Auto-trigger

@@ -1,7 +1,7 @@
 ---
 name: service-innovation-case-study
 description: |
-  用於完整的服務創新案例分析報告。觸發於使用者要求研究某品牌、App、平台
+  本 skill MUST 用於完整的服務創新案例分析報告。MUST 觸發於使用者要求研究某品牌、App、平台
   或服務,要求依課堂格式完成案例分析,指定做一份某案例風格的服務創新研究,
   或要求以 PESTEL、五力、SWOT、STP、BMC、persona、服務藍圖、CJM 等一種以上
   框架分析服務創新案例。
@@ -13,9 +13,9 @@ description: |
   - `references/04-quality-checklist.md` — 輸出前的自我檢查清單
   - `assets/report-template.md` — 空白報告模板
 
-  每次開始新案例前，先讀 `references/01-research-protocol.md` 和 `references/02-analysis-chain.md`。
+  每次開始新案例前，MUST 先讀 `references/01-research-protocol.md` 和 `references/02-analysis-chain.md`。
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # 服務創新案例研究 Skill

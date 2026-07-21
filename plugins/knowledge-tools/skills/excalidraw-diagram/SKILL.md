@@ -1,8 +1,16 @@
 ---
 name: excalidraw-diagram
-description: Generate hand-drawn style Excalidraw diagrams from text content. Supports three output modes - Obsidian (.md), Standard (.excalidraw), and Animated (.excalidraw with animation order). Choose this over Obsidian Canvas when the user wants an Excalidraw hand-drawn whiteboard style. For standard Mermaid diagrams (flowcharts, sequence diagrams, etc.), use the mermaid-visualizer skill instead. Triggers on "Excalidraw", "畫圖", "Excalidraw流程圖", "Excalidraw心智圖", "標準Excalidraw", "standard excalidraw", "Excalidraw動畫", "動畫圖".
+description: >-
+  Generate hand-drawn style Excalidraw diagrams from text content. Supports
+  three output modes - Obsidian (.md), Standard (.excalidraw), and Animated
+  (.excalidraw with animation order). This skill MUST be used when the user
+  names Excalidraw, and SHOULD be used when the user wants a hand-drawn
+  whiteboard style. For standard Mermaid diagrams (flowcharts, sequence
+  diagrams, etc.), MUST use the mermaid-visualizer skill instead. Triggers on
+  "Excalidraw", "畫圖", "Excalidraw流程圖", "Excalidraw心智圖", "標準Excalidraw",
+  "standard excalidraw", "Excalidraw動畫", "動畫圖".
 metadata:
-  version: "1.2.1"
+  version: "1.3.0"
 ---
 
 # Excalidraw Diagram Generator

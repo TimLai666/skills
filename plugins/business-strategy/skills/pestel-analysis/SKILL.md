@@ -1,9 +1,9 @@
 ---
 name: pestel-analysis
-description: >
-  Use when conducting external environment analysis for strategic planning, market entry, competitive assessment, or feeding into SWOT. Trigger on requests like PESTEL分析、PEST分析、總體環境分析、外部環境掃描、宏觀環境分析、macro environment、political economic social technological environmental legal、總經分析、產業環境、市場進入分析、or when the user provides a company/industry/product and needs external environment mapped before strategy work. Also trigger when the swot-analysis skill reaches 階段一 and needs PESTEL data as input. Never generate factors without evidence-based sourcing and scoring — every factor must be rated on importance and impact before being carried forward.
+description: |
+  This skill MUST be used when conducting external environment analysis for strategic planning, market entry, competitive assessment, or feeding into SWOT. Trigger on requests like PESTEL分析、PEST分析、總體環境分析、外部環境掃描、宏觀環境分析、macro environment、political economic social technological environmental legal、總經分析、產業環境、市場進入分析、or when the user provides a company/industry/product and needs external environment mapped before strategy work. Also trigger when the swot-analysis skill reaches 階段一 and needs PESTEL data as input. MUST NOT generate factors without evidence-based sourcing and scoring — every factor MUST be rated on importance and impact before being carried forward.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # PESTEL Analysis Skill

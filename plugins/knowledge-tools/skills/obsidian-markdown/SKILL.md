@@ -1,8 +1,14 @@
 ---
 name: obsidian-markdown
-description: Create and edit Obsidian Flavored Markdown. When tasked with creating, structuring, or initializing a new Obsidian vault or knowledge base, default to using the llm-wiki structure (comprising SCHEMA.md, index.md, log.md, raw/, topics/, entities/, concepts/, comparisons/, queries/). Use when working with .md files in Obsidian, or when the user mentions wikilinks, callouts, frontmatter, tags, embeds, or Obsidian notes.
+description: >-
+  Create and edit Obsidian Flavored Markdown. When tasked with creating,
+  structuring, or initializing a new Obsidian vault or knowledge base, MUST
+  default to the llm-wiki structure (comprising SCHEMA.md, index.md, log.md,
+  raw/, topics/, entities/, concepts/, comparisons/, queries/). This skill
+  MUST be used when working with .md files in Obsidian, or when the user
+  mentions wikilinks, callouts, frontmatter, tags, embeds, or Obsidian notes.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Obsidian Flavored Markdown Skill

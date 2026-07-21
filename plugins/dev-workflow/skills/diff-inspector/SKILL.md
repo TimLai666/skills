@@ -1,6 +1,6 @@
 ---
 name: diff-inspector
-description: "Inspect a diff before merging. Scope drift check, critical code review, specialist parallel dispatch, adversarial review. Triggers on: 幫我看 diff, 看一下改了什麼, review 一下, PR review, diff review, 幫我看看這個, code review, 看看有沒有問題"
+description: "Inspect a diff before merging. This skill MUST be invoked when the user shows a diff, pastes code changes, or asks for a review, and MUST be invoked on your own changes once a unit of work is complete, before committing or handing back. MUST NOT be skipped because the change looks small. Scope drift check, critical code review, specialist parallel dispatch, adversarial review. Triggers on: 幫我看 diff, 看一下改了什麼, review 一下, PR review, diff review, 幫我看看這個, code review, 看看有沒有問題"
 allowed-tools:
   - Bash
   - Read
@@ -12,12 +12,14 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 ## Auto-trigger
 
 When the user shows a diff, pastes code changes, or asks to review something, activate immediately. Do not ask which mode.
+
+Also self-trigger on your own work: once a unit of work is complete — before committing, opening a PR, or handing back to the user — review your own diff with this skill. Once per completed unit of work, not after every individual edit.
 
 ---
 

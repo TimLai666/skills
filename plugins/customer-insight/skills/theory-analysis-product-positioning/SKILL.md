@@ -1,8 +1,12 @@
 ---
 name: theory-analysis-product-positioning
-description: Use when coding cross-source evidence with Product Positioning Theory to classify attributes, functions, benefits, and usage/service context, and when optionally exporting theory_annotations compatible with review-mining-stp.
+description: >-
+  This skill MUST be used when the user names Product Positioning Theory, and
+  SHOULD be used when coding cross-source evidence to classify attributes,
+  functions, benefits, and usage/service context, and when optionally
+  exporting theory_annotations compatible with review-mining-stp.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Theory Analysis Product Positioning

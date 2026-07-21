@@ -1,10 +1,14 @@
 ---
 name: llm-wiki
-description: "Karpathy's LLM Wiki: build/query interlinked markdown KB with Zettelkasten note discipline. Triggers: 知識庫, 建 wiki, wiki 筆記, 研究筆記, ingest sources, knowledge base."
+description: >-
+  Karpathy's LLM Wiki: build/query interlinked markdown KB with Zettelkasten
+  note discipline. This skill MUST be used for building or querying such a
+  knowledge base. MUST trigger on: 知識庫, 建 wiki, wiki 筆記, 研究筆記, ingest sources,
+  knowledge base.
 license: MIT
 compatibility: "Runs on Linux, macOS, and Windows"
 metadata:
-  version: "3.0.0"
+  version: "3.1.0"
 ---
 
 # Karpathy's LLM Wiki

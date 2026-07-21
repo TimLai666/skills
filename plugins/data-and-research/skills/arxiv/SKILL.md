@@ -1,8 +1,12 @@
 ---
 name: arxiv
-description: "Search arXiv papers by keyword, author, category, or ID. Find related work via Semantic Scholar citations and recommendations."
+description: >-
+  Search arXiv papers by keyword, author, category, or ID. This skill MUST be
+  used when the user asks for papers, preprints, or related work, and SHOULD
+  be used for any academic literature lookup. Find related work via Semantic
+  Scholar citations and recommendations.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # arXiv Research

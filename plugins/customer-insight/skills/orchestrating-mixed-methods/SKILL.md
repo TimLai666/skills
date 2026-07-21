@@ -1,8 +1,13 @@
 ---
 name: orchestrating-mixed-methods
-description: Use when research, analysis, evaluation, diagnosis, discovery, insight, or study-design tasks require deciding between qualitative, quantitative, or mixed-methods approaches, especially when the user does not specify a method or the work needs both measurement and explanation.
+description: >-
+  This skill MUST be used when research, analysis, evaluation, diagnosis,
+  discovery, insight, or study-design tasks require deciding between
+  qualitative, quantitative, or mixed-methods approaches, and SHOULD be used
+  whenever the user does not specify a method or the work needs both
+  measurement and explanation.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Orchestrating Mixed Methods

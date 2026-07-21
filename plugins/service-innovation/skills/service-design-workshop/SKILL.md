@@ -1,8 +1,13 @@
 ---
 name: service-design-workshop
-description: Use when turning a service design problem into a structured workshop output, especially for 服務設計, 服務藍圖, 服務流程, 接觸點, 前台後台, 服務實證, 顧客體驗, 利害關係人, 服務概念, or 服務架構. Trigger when the task asks for a practical service design brief, blueprint-ready structure, touchpoint analysis, or prototype and validation next steps rather than only theory review.
+description: >-
+  This skill MUST be used when turning a service design problem into a
+  structured workshop output, especially for 服務設計, 服務藍圖, 服務流程, 接觸點, 前台後台,
+  服務實證, 顧客體驗, 利害關係人, 服務概念, or 服務架構. Trigger when the task asks for a practical
+  service design brief, blueprint-ready structure, touchpoint analysis, or
+  prototype and validation next steps rather than only theory review.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Service Design Workshop

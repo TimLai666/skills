@@ -1,14 +1,9 @@
 ---
 name: ecosystem-map-and-blueprint
-description: >
-  Use when designing, analyzing, teaching, or facilitating service design tools — especially the
-  Ecosystem Map (生態系地圖) and Service Blueprint (服務藍圖). Trigger on requests involving
-  服務設計、服務藍圖、生態系地圖、前台後台分析、利害關係人地圖、服務流程優化、服務旅程、接觸點、
-  service blueprint, ecosystem map, stakeholder mapping, service design workshop, CJM to blueprint,
-  or any request to diagram/analyze/teach service delivery systems. Also trigger when someone uploads
-  a service blueprint PDF or asks to turn a service journey into a blueprint structure.
+description: |
+  This skill MUST be used when designing, analyzing, teaching, or facilitating service design tools — especially the Ecosystem Map (生態系地圖) and Service Blueprint (服務藍圖). Trigger on requests involving 服務設計、服務藍圖、生態系地圖、前台後台分析、利害關係人地圖、服務流程優化、服務旅程、接觸點、 service blueprint, ecosystem map, stakeholder mapping, service design workshop, CJM to blueprint, or any request to diagram/analyze/teach service delivery systems. SHOULD also be used when someone uploads a service blueprint PDF or asks to turn a service journey into a blueprint structure.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Service Blueprint & Ecosystem Map Workshop Skill

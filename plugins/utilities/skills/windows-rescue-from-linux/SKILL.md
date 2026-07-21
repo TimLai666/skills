@@ -1,8 +1,18 @@
 ---
 name: windows-rescue-from-linux
-description: Use when repairing a broken Windows PC from a Linux Live USB. Handles boot failure, BCD or UEFI corruption, NTFS damage, lost partitions, forgotten passwords, malware infection, profile corruption, BitLocker decryption, failing disks, and data backup before destructive repair. Also bootstraps the rescue USB itself with Node.js, Claude Code, and tools like ntfsfix, chntpw, testdisk, photorec, ddrescue, smartctl, clamav, dislocker, efibootmgr. Trigger on Windows 開不了機, BSOD 救援, 救資料, BitLocker, chntpw, ntfsfix, testdisk, photorec, ddrescue, BCD 修復, 重設 Windows 密碼, 離線掃毒, 隨身碟救援系統, Live USB rescue Windows, fix Windows from Ubuntu, 把 Ubuntu 弄成救援碟, 救援工具安裝. Default language is Traditional Chinese for Taiwan.
+description: >-
+  This skill MUST be used when repairing a broken Windows PC from a Linux Live
+  USB. Handles boot failure, BCD or UEFI corruption, NTFS damage, lost
+  partitions, forgotten passwords, malware infection, profile corruption,
+  BitLocker decryption, failing disks, and data backup before destructive
+  repair. Also bootstraps the rescue USB itself with Node.js, Claude Code, and
+  tools like ntfsfix, chntpw, testdisk, photorec, ddrescue, smartctl, clamav,
+  dislocker, efibootmgr. MUST trigger on Windows 開不了機, BSOD 救援, 救資料,
+  BitLocker, chntpw, ntfsfix, testdisk, photorec, ddrescue, BCD 修復, 重設 Windows
+  密碼, 離線掃毒, 隨身碟救援系統, Live USB rescue Windows, fix Windows from Ubuntu, 把
+  Ubuntu 弄成救援碟, 救援工具安裝. Default language is Traditional Chinese for Taiwan.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Windows 救援工具箱（從 Linux Live USB 修 Windows）

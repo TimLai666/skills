@@ -1,6 +1,6 @@
 ---
 name: eng-architect
-description: "Design architecture and lock technical decisions for a feature. Produces architecture diagrams, error maps, and convergence artifacts (delivery-plan.md, AGENTS.md, OpenSpec proposals). Triggers on: 技術方案, 架構設計, 怎麼切模組, eng planning, architecture design, 技術規劃, 這個功能技術上怎麼做, design review, UI review, AI slop scan"
+description: "Design architecture and lock technical decisions for a feature. This skill MUST be used before implementation of a non-trivial feature begins, and SHOULD be used whenever the user is unsure how to split modules. Produces architecture diagrams, error maps, and convergence artifacts (delivery-plan.md, AGENTS.md, OpenSpec proposals). Triggers on: 技術方案, 架構設計, 怎麼切模組, eng planning, architecture design, 技術規劃, 這個功能技術上怎麼做, design review, UI review, AI slop scan"
 allowed-tools:
   - Bash
   - Read
@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 ## Command routing

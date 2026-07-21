@@ -1,6 +1,6 @@
 ---
 name: feature-planner
-description: "Plan a feature before building. Brainstorm the idea, challenge scope, and lock decisions one at a time. Triggers on: 幫我想這個功能, 幫我規劃, 這個怎麼做, 幫我想一下, feature planning, planning mode, 規劃一下, 做這個功能之前先想清楚"
+description: "Plan a feature before building: brainstorm the idea, challenge scope, and lock decisions one at a time. This skill MUST be invoked on the triggers below, and SHOULD be invoked whenever the user thinks aloud about a feature without naming one. Triggers on: 幫我想這個功能, 幫我規劃, 這個怎麼做, 幫我想一下, feature planning, planning mode, 規劃一下, 做這個功能之前先想清楚"
 allowed-tools:
   - Bash
   - Read
@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 ## Auto-trigger

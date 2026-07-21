@@ -1,8 +1,12 @@
 ---
 name: review-mining-stp
-description: Use when customer reviews, support tickets, app store feedback, or other review-like text must be converted into STP analysis through a review scoring workflow upstream and statistical scripts downstream.
+description: >-
+  This skill MUST be used when customer reviews, support tickets, app store
+  feedback, or other review-like text must be converted into STP analysis
+  through a review scoring workflow upstream and statistical scripts
+  downstream.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Review Mining STP

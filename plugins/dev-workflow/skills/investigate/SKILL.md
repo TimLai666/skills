@@ -1,6 +1,6 @@
 ---
 name: investigate
-description: "Systematic debugger. Root cause before any fix. Iron Law: no fixes without investigation. Hypothesis-driven ??form 3-5 hypotheses, test them cheaply before touching code. Stop after 3 failed fix attempts and escalate. Use when stuck on a bug."
+description: "Systematic debugger. Root cause before any fix. Iron Law: no fixes without investigation. This skill MUST be invoked when the user reports a bug, and MUST NOT be skipped because the cause looks obvious. SHOULD also be invoked on 為什麼會這樣, 壞掉了, failing, broken, or flaky. Hypothesis-driven — form 3-5 hypotheses, test them cheaply before touching code. Stop after 3 failed fix attempts and escalate."
 allowed-tools:
   - Bash
   - Read
@@ -9,7 +9,7 @@ allowed-tools:
   - Glob
   - AskUserQuestion
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 ## Preamble (run first)

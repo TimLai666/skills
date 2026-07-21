@@ -1,6 +1,6 @@
 ---
 name: ship-it
-description: "Prepare and ship a feature branch. Sync, test, open PR. Triggers on: 可以上了嗎, 準備上線, 開 PR, ship this, deploy, release, 上線, merge, push this, 準備好了嗎, ready to go"
+description: "Prepare and ship a feature branch: sync, test, open PR. This skill MUST be invoked on the triggers below, and SHOULD be invoked when the user sounds ready to merge without saying so outright. Triggers on: 可以上了嗎, 準備上線, 開 PR, ship this, deploy, release, 上線, merge, push this, 準備好了嗎, ready to go"
 allowed-tools:
   - Bash
   - Read
@@ -9,7 +9,7 @@ allowed-tools:
   - Grep
   - AskUserQuestion
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 ## Auto-trigger

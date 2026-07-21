@@ -1,8 +1,14 @@
 ---
 name: commercial-proposal-writing
-description: Use when drafting or reviewing internal proposals, fundraising decks, partnership proposals, proposal rewrites, and decision-oriented business plans that must persuade a specific audience to approve resources, invest money, or commit to collaboration. Trigger on requests such as 商業企劃, 內部提案, 募資提案, 合作提案, 提案優化, 提案審稿, 董事會版本, 投資人版本, ask 撰寫, 資料不足處理.
+description: >-
+  This skill MUST be used when drafting or reviewing internal proposals,
+  fundraising decks, partnership proposals, proposal rewrites, and
+  decision-oriented business plans that must persuade a specific audience to
+  approve resources, invest money, or commit to collaboration. MUST trigger on
+  requests such as 商業企劃, 內部提案, 募資提案, 合作提案, 提案優化, 提案審稿, 董事會版本, 投資人版本, ask 撰寫,
+  資料不足處理.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # 商業企劃寫作

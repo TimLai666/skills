@@ -1,8 +1,14 @@
 ---
 name: service-innovation-workshop
-description: Use when turning a service innovation problem into concept options, prototype testing, and risk checks, especially for 服務創新, 創新機會, 價值共創, 服務原型, SCAMPER, 購買者效用矩陣, 創新流程, 創新困境, or 服務體驗工程. Trigger when the task asks for practical innovation directions, concept generation, opportunity framing, or validation planning rather than only concept definitions.
+description: >-
+  This skill MUST be used when turning a service innovation problem into
+  concept options, prototype testing, and risk checks, especially for 服務創新,
+  創新機會, 價值共創, 服務原型, SCAMPER, 購買者效用矩陣, 創新流程, 創新困境, or 服務體驗工程. Trigger when the
+  task asks for practical innovation directions, concept generation,
+  opportunity framing, or validation planning rather than only concept
+  definitions.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Service Innovation Workshop

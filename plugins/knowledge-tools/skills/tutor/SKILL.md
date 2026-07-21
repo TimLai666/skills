@@ -1,14 +1,9 @@
 ---
 name: tutor
-description: >
-  Interactive quiz tutor for Obsidian StudyVault learning. Use when the user wants to:
-  (1) Take a diagnostic assessment of their knowledge,
-  (2) Study or review specific sections/topics,
-  (3) Drill weak areas identified in previous sessions,
-  (4) Check their learning progress or dashboard,
-  or says things like "quiz me", "test me", "let's study", "/tutor", "學習", "測驗", "評量".
+description: |
+  Interactive quiz tutor for Obsidian StudyVault learning. This skill MUST be used when the user wants to: (1) Take a diagnostic assessment of their knowledge, (2) Study or review specific sections/topics, (3) Drill weak areas identified in previous sessions, (4) Check their learning progress or dashboard, or says things like "quiz me", "test me", "let's study", "/tutor", "學習", "測驗", "評量".
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Tutor Skill

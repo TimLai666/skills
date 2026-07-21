@@ -1,9 +1,9 @@
 ---
 name: dev-task-loop
 description: >
-  Use when the user wants to process a backlog of dev tickets end-to-end with a known project / branch / merge target / task tracker / design reference workflow, but without committing to any specific platform (Jira / Linear / GitHub Issues / Notion / Figma / Zeplin / etc.). Trigger on requests like 「幫我跑任務」、「照我的流程把 backlog 做完」、「review failed 的全部處理掉」、「用我那套開發流程做事」、"work through my task list", "run my dev loop", "process my tickets end-to-end". Always asks the user up-front for project root, working branch, merge target, task list location, design reference location, and how to mark a task done — then loops through tickets implementing → verifying → committing → opening PR → merging → syncing → updating the tracker. Never bake in platform-specific API calls; figure those out at run time from the user's answers.
+  This skill MUST be used when the user wants to process a backlog of dev tickets end-to-end with a known project / branch / merge target / task tracker / design reference workflow, but without committing to any specific platform (Jira / Linear / GitHub Issues / Notion / Figma / Zeplin / etc.). Trigger on requests like 「幫我跑任務」、「照我的流程把 backlog 做完」、「review failed 的全部處理掉」、「用我那套開發流程做事」、"work through my task list", "run my dev loop", "process my tickets end-to-end". MUST NOT be used for a single ticket, which belongs to the other dev-workflow skills. MUST ask the user up-front for project root, working branch, merge target, task list location, design reference location, and how to mark a task done — then loops through tickets implementing → verifying → committing → opening PR → merging → syncing → updating the tracker. MUST NOT bake in platform-specific API calls; figure those out at run time from the user's answers.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Dev Task Loop

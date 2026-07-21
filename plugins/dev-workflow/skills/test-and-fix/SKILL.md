@@ -1,6 +1,6 @@
 ---
 name: test-and-fix
-description: "Run tests, find failures, fix them, verify. Diff-aware: tests the routes/pages your changes affect. Triggers on: 跑測試, 測一下, 有沒有壞掉, run tests, test this, 跑一下 tests, 測試, check if broken, 有沒有問題"
+description: "Run tests, find failures, fix them, verify. Diff-aware: tests the routes/pages your changes affect. This skill MUST be invoked on the triggers below, and SHOULD be invoked after any code change the user has not yet verified. Triggers on: 跑測試, 測一下, 有沒有壞掉, run tests, test this, 跑一下 tests, 測試, check if broken, 有沒有問題"
 allowed-tools:
   - Bash
   - Read
@@ -9,7 +9,7 @@ allowed-tools:
   - Grep
   - AskUserQuestion
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 ## Auto-trigger

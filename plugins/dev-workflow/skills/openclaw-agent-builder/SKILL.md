@@ -2,18 +2,18 @@
 name: openclaw-agent-builder
 description: >-
   Create, configure, and edit OpenClaw agents from a host machine (locally or
-  over SSH). Use this whenever the user wants to add a new OpenClaw agent, build
+  over SSH). This skill MUST be used whenever the user wants to add a new OpenClaw agent, build
   an agent for a business or organization (customer service, internal helpdesk,
   booking bot, etc.), scaffold agent workspace files (SOUL.md / AGENTS.md /
   IDENTITY.md / USER.md), wire channels (LINE / WhatsApp / Discord / Telegram /
   Slack and others) and bindings, set up an agent knowledge base (RAG), harden an
   agent against prompt injection and identity confusion, or edit / reconfigure /
-  retune an existing OpenClaw agent. Trigger on any mention of OpenClaw agents,
+  retune an existing OpenClaw agent. MUST trigger on any mention of OpenClaw agents,
   openclaw.json, agent bindings, agent workspace, "add an agent", "build a bot",
   "編一個 agent", "做一個客服 bot" — and also whenever ~/.openclaw or an
   openclaw.json file is present in the working host even if OpenClaw is not named.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # OpenClaw Agent Builder

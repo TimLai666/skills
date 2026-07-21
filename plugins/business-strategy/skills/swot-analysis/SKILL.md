@@ -1,9 +1,9 @@
 ---
 name: swot-analysis
-description: >
-  Use when designing, executing, or facilitating a complete SWOT strategic analysis workflow — especially when the task involves environment scanning (PEST/industry analysis), competitive positioning, S/W/O/T identification and validation, strategy formulation via SO/ST/WO/WT collision, and strategy selection. Trigger on requests like SWOT分析、優劣勢分析、機會威脅分析、策略定調、外部環境分析、競爭策略、TOWS矩陣、SWOT到策略、PEST分析、or any combination of competitive analysis and strategy direction. Also trigger when the user uploads a case, company description, or product brief and asks for strategic analysis or positioning.
+description: |
+  This skill MUST be used when designing, executing, or facilitating a complete SWOT strategic analysis workflow — especially when the task involves environment scanning (PEST/industry analysis), competitive positioning, S/W/O/T identification and validation, strategy formulation via SO/ST/WO/WT collision, and strategy selection. Trigger on requests like SWOT分析、優劣勢分析、機會威脅分析、策略定調、外部環境分析、競爭策略、TOWS矩陣、SWOT到策略、PEST分析、or any combination of competitive analysis and strategy direction. SHOULD also be used when the user uploads a case, company description, or product brief and asks for strategic analysis or positioning.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # SWOT Analysis Skill

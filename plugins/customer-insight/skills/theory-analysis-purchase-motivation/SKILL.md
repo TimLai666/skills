@@ -1,8 +1,12 @@
 ---
 name: theory-analysis-purchase-motivation
-description: Use when coding cross-source evidence with Purchase Motivation Theory to classify functional, security, and relational drivers, and when optionally exporting theory_annotations compatible with review-mining-stp.
+description: >-
+  This skill MUST be used when the user names Purchase Motivation Theory, and
+  SHOULD be used when coding cross-source evidence to classify functional,
+  security, and relational drivers, and when optionally exporting
+  theory_annotations compatible with review-mining-stp.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Theory Analysis Purchase Motivation

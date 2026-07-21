@@ -1,16 +1,9 @@
 ---
 name: review-scoring-docx
-description: >
-  Use this skill whenever the user has one or more product review files and wants to
-  (1) extract product attributes from the reviews, (2) score each product on those
-  attributes, and (3) export the results into a Word document (.docx). Trigger on
-  requests like 「從評論歸納屬性」、「幫我評分每個產品」、「做成 Word」、「產品屬性分析」、
-  「評論轉評分表」, or any combination of "reviews → attributes → scores → Word/docx".
-  Also trigger when the user uploads review files (CSV, JSON, TXT, or similar) and asks
-  for comparative analysis, attribute extraction, or scoring — even without mentioning
-  Maslow or Word explicitly.
+description: |
+  This skill MUST be used whenever the user has one or more product review files and wants to (1) extract product attributes from the reviews, (2) score each product on those attributes, and (3) export the results into a Word document (.docx). Trigger on requests like 「從評論歸納屬性」、「幫我評分每個產品」、「做成 Word」、「產品屬性分析」、 「評論轉評分表」, or any combination of "reviews → attributes → scores → Word/docx". MUST also be used when the user uploads review files (CSV, JSON, TXT, or similar) and asks for comparative analysis, attribute extraction, or scoring — even without mentioning Maslow or Word explicitly.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Review Scoring → Word Document

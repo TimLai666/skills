@@ -1,17 +1,9 @@
 ---
 name: review-salience-xlsx
-description: >
-  Use this skill when the user has product review files and wants to: (1) score
-  each review on a set of attributes using a salience scale (0–7) and export a
-  review × attribute matrix as .xlsx; (2) run PCA to reduce attributes into
-  latent dimensions; (3) cluster reviews into customer segments with K-means.
-  Trigger on requests like 「逐則評論評分」、「顯著度矩陣」、「salience scoring」、「主成分分析」、
-  「PCA」、「顧客分群」、「K-means」、「評論×屬性 Excel」, or any combination thereof.
-  Also trigger when this step follows an attribute-discovery workflow and the
-  user wants scored data, dimensionality reduction, or segmentation. Use this
-  skill even if the user only mentions part of the pipeline.
+description: |
+  This skill MUST be used when the user has product review files and wants to: (1) score each review on a set of attributes using a salience scale (0–7) and export a review × attribute matrix as .xlsx; (2) run PCA to reduce attributes into latent dimensions; (3) cluster reviews into customer segments with K-means. Trigger on requests like 「逐則評論評分」、「顯著度矩陣」、「salience scoring」、「主成分分析」、 「PCA」、「顧客分群」、「K-means」、「評論×屬性 Excel」, or any combination thereof. Also trigger when this step follows an attribute-discovery workflow and the user wants scored data, dimensionality reduction, or segmentation. MUST be used even if the user only mentions part of the pipeline.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Review Salience → PCA → K-means Customer Segmentation

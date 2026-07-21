@@ -1,8 +1,13 @@
 ---
 name: business-model-architect
-description: Use when designing, evaluating, or refining a business model with nine elements, especially for new products, pivots, monetization, and go-to-market decisions. Starts with Epicenter Selection (震央選擇) — choosing one of four innovation starting points (資源／產品／顧客／財務導向) to anchor design before filling the nine boxes.
+description: >-
+  This skill MUST be used when designing, evaluating, or refining a business
+  model with nine elements, and SHOULD be used for new products, pivots,
+  monetization, and go-to-market decisions. Starts with Epicenter Selection
+  (震央選擇) — choosing one of four innovation starting points (資源／產品／顧客／財務導向) to
+  anchor design before filling the nine boxes.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Business Model Architect

@@ -1,8 +1,11 @@
 ---
 name: maslow-five-needs-marketing
-description: Use when designing or optimizing layered emotional marketing and copy messaging frameworks based on Maslow needs, including 五情疊加行銷、想打動消費者、訂定文案方向、主訴求設計、CTA 設計、跨通路訊息框架、品牌故事訴求、品牌忠誠提升與會員策略。
+description: >-
+  This skill MUST be used when designing or optimizing layered emotional
+  marketing and copy messaging frameworks based on Maslow needs, including
+  五情疊加行銷、想打動消費者、訂定文案方向、主訴求設計、CTA 設計、跨通路訊息框架、品牌故事訴求、品牌忠誠提升與會員策略。
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # 馬斯洛五需求行銷策略

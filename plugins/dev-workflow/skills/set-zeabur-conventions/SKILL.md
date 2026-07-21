@@ -1,8 +1,8 @@
 ---
 name: set-zeabur-conventions
-description: 在專案中建立並維護 Zeabur 部署規範，會在專案根目錄的 AGENTS.md 寫入一段部署約束（Zeabur 只支援 Dockerfile、不支援 docker-compose；compose 僅供本地開發測試）。僅在使用者明確指定專案要部署到 Zeabur 時才使用 — 例如使用者明說「這個專案要部署到 Zeabur」「要上 Zeabur」「設定 Zeabur 部署」，或直接呼叫此 skill。不要在僅僅提到 Docker、寫 Dockerfile、討論部署平台、或泛泛談到 Zeabur 時觸發；必須有明確的「部署到 Zeabur」意圖。Only trigger when the user explicitly states the project deploys to Zeabur — do not infer from Docker usage or general deployment talk.
+description: 在專案中建立並維護 Zeabur 部署規範，會在專案根目錄的 AGENTS.md 寫入一段部署約束（Zeabur 只支援 Dockerfile、不支援 docker-compose；compose 僅供本地開發測試）。僅在使用者明確指定專案要部署到 Zeabur 時才使用 — 例如使用者明說「這個專案要部署到 Zeabur」「要上 Zeabur」「設定 Zeabur 部署」，或直接呼叫此 skill。不要在僅僅提到 Docker、寫 Dockerfile、討論部署平台、或泛泛談到 Zeabur 時觸發；必須有明確的「部署到 Zeabur」意圖。This skill MUST be used only when the user explicitly states the project deploys to Zeabur, and MUST NOT be triggered by Docker usage, Dockerfile work, or general deployment talk.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Zeabur 部署規範

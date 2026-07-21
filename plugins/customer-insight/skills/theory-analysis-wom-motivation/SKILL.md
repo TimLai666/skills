@@ -1,8 +1,13 @@
 ---
 name: theory-analysis-wom-motivation
-description: Use when coding cross-source evidence with Word-of-Mouth Motivation Theory to classify altruistic, social identity, self-enhancement, and emotional expression motives, and when optionally exporting theory_annotations compatible with review-mining-stp.
+description: >-
+  This skill MUST be used when the user names Word-of-Mouth Motivation Theory,
+  and SHOULD be used when coding cross-source evidence to classify altruistic,
+  social identity, self-enhancement, and emotional expression motives, and
+  when optionally exporting theory_annotations compatible with
+  review-mining-stp.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Theory Analysis WOM Motivation

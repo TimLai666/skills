@@ -1,13 +1,9 @@
 ---
 name: tutor-setup
-description: >
-  Transforms knowledge sources into an Obsidian StudyVault. Three modes:
-  (1) Document Mode — PDF/text/web sources → study notes with practice questions.
-  (2) Codebase Mode — source code project → onboarding vault for new developers.
-  (3) Wiki Mode — llm-wiki knowledge base → StudyVault with incremental sync.
-  Mode is auto-detected based on project markers and wiki presence.
+description: |
+  Transforms knowledge sources into an Obsidian StudyVault. This skill MUST be used when the user asks to build a StudyVault from documents, a codebase, or an llm-wiki. Three modes: (1) Document Mode — PDF/text/web sources → study notes with practice questions. (2) Codebase Mode — source code project → onboarding vault for new developers. (3) Wiki Mode — llm-wiki knowledge base → StudyVault with incremental sync. Mode is auto-detected based on project markers and wiki presence.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Tutor Setup — Knowledge to Obsidian StudyVault

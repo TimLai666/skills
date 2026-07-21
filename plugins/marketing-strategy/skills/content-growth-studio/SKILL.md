@@ -1,8 +1,17 @@
 ---
 name: content-growth-studio
-description: Use when planning, analyzing, rewriting, packaging, producing, or systemizing growth-oriented content across article, video, and social channels. Trigger on requests involving content research from URLs, transcripts, existing articles or scripts, competitor examples, uploaded notes, topic ideation, positioning, title and hook generation, article rewrites, video scripting, repurposing, thumbnail or CTA concepts, editorial workflow design, or repeatable content SOPs. Supports both source-led and brief-led work. Default output is Traditional Chinese for Taiwan unless the user's material clearly indicates another language.
+description: >-
+  This skill MUST be used when planning, analyzing, rewriting, packaging,
+  producing, or systemizing growth-oriented content across article, video, and
+  social channels. MUST trigger on requests involving content research from
+  URLs, transcripts, existing articles or scripts, competitor examples,
+  uploaded notes, topic ideation, positioning, title and hook generation,
+  article rewrites, video scripting, repurposing, thumbnail or CTA concepts,
+  editorial workflow design, or repeatable content SOPs. Supports both
+  source-led and brief-led work. Default output is Traditional Chinese for
+  Taiwan unless the user's material clearly indicates another language.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Content Growth Studio

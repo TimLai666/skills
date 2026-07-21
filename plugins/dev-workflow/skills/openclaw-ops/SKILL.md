@@ -5,18 +5,16 @@ description: >-
   machine (locally or over SSH). Covers the whole runtime surface **except**
   building agent personalities/workspaces — channels, gateway, daemon/service,
   config (`openclaw.json`), models + auth, cron, hooks, plugins, sandbox,
-  sessions, security audit, doctor, reset, uninstall. Also the go-to runbook
-  for diagnosing OpenClaw issues: gateway probes, channel status, doctor,
-  security audit, logs, sessions. Trigger on any mention of `openclaw` CLI
+  sessions, security audit, doctor, reset, uninstall. This skill MUST be invoked on any mention of `openclaw` CLI
   commands, `~/.openclaw`, `openclaw.json`, "restart gateway", "add a channel",
   "check why my bot isn't responding", "openclaw doctor", "channels status",
   "ssh into the OpenClaw box", and similar — also whenever a host has
   `~/.openclaw/openclaw.json` and OpenClaw work is implied even if not named.
-  Hand off to **openclaw-agent-builder** for any work that creates or edits an
+  MUST hand off to **openclaw-agent-builder** for any work that creates or edits an
   agent's workspace files (SOUL.md / AGENTS.md / IDENTITY.md / USER.md / RAG
   knowledge / `agents.list[]` entries / `bindings[]`).
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # OpenClaw Ops

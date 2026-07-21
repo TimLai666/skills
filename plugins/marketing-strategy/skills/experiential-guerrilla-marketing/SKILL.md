@@ -1,12 +1,9 @@
 ---
 name: experiential-guerrilla-marketing
-description: >
-  用於體驗行銷與游擊行銷的策略規劃、創意發想與成效評估。觸發於體驗行銷、
-  游擊行銷、快閃活動、品牌體驗、沉浸式體驗、低預算行銷、Ambient Marketing、
-  行銷 KPI、體驗 × 游擊矩陣設計等需求,或使用者想做讓人拍照分享、低預算高效果、
-  可評估成效的品牌活動。
+description: |
+  本 skill MUST 用於體驗行銷與游擊行銷的策略規劃、創意發想與成效評估。MUST 觸發於體驗行銷、 游擊行銷、快閃活動、品牌體驗、沉浸式體驗、低預算行銷、Ambient Marketing、 行銷 KPI、體驗 × 游擊矩陣設計等需求,或使用者想做讓人拍照分享、低預算高效果、 可評估成效的品牌活動。
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # 體驗 × 游擊行銷矩陣設計 Skill

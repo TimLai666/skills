@@ -1,6 +1,6 @@
 ---
 name: postgrest-baas-builder
-description: "Build services on PostgREST-compatible BaaS (Supabase / InsForge). RLS, Auth, PostgREST queries, MCP settings. Triggers on: 用 Supabase / InsForge 做後端, 設計 RLS policy, 寫 PostgREST query, 處理 BaaS Auth, 設定 MCP, 推 Supabase production, 自架 Supabase, InsForge"
+description: "Build services on PostgREST-compatible BaaS (Supabase / InsForge) — RLS, Auth, PostgREST queries, MCP settings. This skill MUST be loaded before writing any RLS policy or PostgREST query, and MUST NOT be skipped because the query looks like ordinary SQL. Triggers on: 用 Supabase / InsForge 做後端, 設計 RLS policy, 寫 PostgREST query, 處理 BaaS Auth, 設定 MCP, 推 Supabase production, 自架 Supabase, InsForge"
 allowed-tools:
   - Bash
   - Read
@@ -9,7 +9,7 @@ allowed-tools:
   - Grep
   - AskUserQuestion
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 ## 前置

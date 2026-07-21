@@ -1,8 +1,12 @@
 ---
 name: decision-bias-quality-control
-description: Use when evaluating high-stakes decisions with bias-aware quality control, including proposal review, decision meeting facilitation, and personal coaching. Trigger on requests such as 重大決策、偏誤檢查、提案審查、決策會議引導、決策教練、go/no-go 決策。
+description: >-
+  This skill MUST be used when evaluating high-stakes decisions with
+  bias-aware quality control, including proposal review, decision meeting
+  facilitation, and personal coaching. MUST trigger on requests such as
+  重大決策、偏誤檢查、提案審查、決策會議引導、決策教練、go/no-go 決策。
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Decision Bias Quality Control
