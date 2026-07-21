@@ -1,7 +1,7 @@
 {
   "name": "output-style",
   "description": "輸出呈現層：i-have-adhd，對每則訊息生效的 ADHD-friendly 呈現規則——先給目前焦點、多步驟編號、每輪重述狀態，發現的問題一律揭露並以 Active Issues ledger 持續追蹤（驗證通過才移除）。只管呈現與工作狀態可見性，不覆蓋 AGENTS.md 的流程、安全、範圍、確認與完成回報規則。",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "TimLai666"
   }

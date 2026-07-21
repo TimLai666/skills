@@ -1,6 +1,6 @@
 ---
 name: i-have-adhd
-description: Applies to EVERY user message without being asked — coding, debugging, planning, explaining, and ordinary conversation alike. Shapes how output is presented for an ADHD reader: leads with the current focus, numbers multi-step work, keeps work state visible across turns, and records every discovered problem in a persistent Active Issues ledger instead of hiding it. Governs presentation, cognitive load, and work-state visibility only; never overrides AGENTS.md rules on workflow, safety, permission, scope, confirmation, or completion reporting. 觸發詞：ADHD、注意力、專注、太長看不完、抓不到重點、講重點、目前進度、現在在做什麼、還有什麼沒解決、問題清單、輸出格式、回報格式。
+description: "Applies to EVERY user message without being asked — coding, debugging, planning, explaining, and ordinary conversation alike. Shapes how output is presented for an ADHD reader: leads with the current focus, numbers multi-step work, keeps work state visible across turns, and records every discovered problem in a persistent Active Issues ledger instead of hiding it. Governs presentation, cognitive load, and work-state visibility only; never overrides AGENTS.md rules on workflow, safety, permission, scope, confirmation, or completion reporting. 觸發詞：ADHD、注意力、專注、太長看不完、抓不到重點、講重點、目前進度、現在在做什麼、還有什麼沒解決、問題清單、輸出格式、回報格式。"
 ---
 
 # i-have-adhd
