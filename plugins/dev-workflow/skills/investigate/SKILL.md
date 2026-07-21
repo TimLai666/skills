@@ -9,7 +9,7 @@ allowed-tools:
   - Glob
   - AskUserQuestion
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 ## Preamble (run first)
@@ -17,15 +17,7 @@ metadata:
 ```bash
 _BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 echo "BRANCH: $_BRANCH"
-# Auto-activate freeze to prevent accidental changes during investigation
-_FREEZE=$(cat ~/.mystack/freeze.txt 2>/dev/null || echo "none")
-if [ "$_FREEZE" = "none" ]; then
-  echo "." > ~/.mystack/freeze.txt
-  echo "FREEZE_AUTO_ACTIVATED: edits locked to current directory during investigation"
-fi
 ```
-
-Note: Freeze is auto-activated during investigation to prevent accidentally "fixing" unrelated code. Run `/stacksmith-safety off` after investigation to remove.
 
 ---
 
@@ -165,14 +157,3 @@ Recommended next step:
 ```
 
 **STOP HERE.** Do not attempt a 4th fix.
-
----
-
-## Log + unfreeze reminder
-
-```bash
-echo "{\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"skill\":\"investigate\",\"branch\":\"$(git branch --show-current 2>/dev/null || echo 'N/A')\",\"outcome\":\"success\",\"repo\":\"$(basename $(git rev-parse --show-toplevel 2>/dev/null) 2>/dev/null || echo 'N/A')\"}" >> ~/.mystack/timeline.jsonl
-```
-
-After investigation completes: "Investigation complete. Auto-freeze is still active. Run `/stacksmith-safety off` to remove edit restrictions."
-

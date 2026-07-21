@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 ## Command routing
@@ -381,12 +381,4 @@ _[date] - eng-architect design - [branch]_
 ## Motion
 | Trigger | Animation | Duration | Purpose |
 |---------|-----------|----------|---------|
-```
-
----
-
-## Log
-
-```bash
-echo "{\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"skill\":\"eng-architect\",\"branch\":\"$(git branch --show-current 2>/dev/null || echo 'N/A')\",\"outcome\":\"success\",\"repo\":\"$(basename $(git rev-parse --show-toplevel 2>/dev/null) 2>/dev/null || echo 'N/A')\"}" >> ~/.mystack/timeline.jsonl
 ```

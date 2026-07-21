@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 ## Auto-trigger
@@ -157,12 +157,4 @@ _Created: [date] - feature-planner - [repo]:[branch]_
 
 ## Next step
 Run eng-architect to lock architecture and build convergence artifacts.
-```
-
----
-
-## Log
-
-```bash
-echo "{\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"skill\":\"feature-planner\",\"branch\":\"$(git branch --show-current 2>/dev/null || echo 'N/A')\",\"outcome\":\"success\",\"repo\":\"$(basename $(git rev-parse --show-toplevel 2>/dev/null) 2>/dev/null || echo 'N/A')\"}" >> ~/.mystack/timeline.jsonl
 ```

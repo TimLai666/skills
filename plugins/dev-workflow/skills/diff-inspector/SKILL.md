@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 ## Auto-trigger
@@ -251,12 +251,4 @@ Quality Score: N/10
 
 ### Adversarial review
 [Findings or "No additional issues found"]
-```
-
----
-
-## Log
-
-```bash
-echo "{\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"skill\":\"diff-inspector\",\"branch\":\"$(git branch --show-current 2>/dev/null || echo 'N/A')\",\"outcome\":\"success\",\"repo\":\"$(basename $(git rev-parse --show-toplevel 2>/dev/null) 2>/dev/null || echo 'N/A')\"}" >> ~/.mystack/timeline.jsonl
 ```

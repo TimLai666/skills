@@ -8,7 +8,7 @@ allowed-tools:
   - Edit
   - AskUserQuestion
 metadata:
-  version: "1.4.0"
+  version: "1.5.0"
 ---
 
 ## Why this store and not the agent's own memory
@@ -181,11 +181,3 @@ is right for loading context and wrong for a handover document.
 The output is already markdown. Copy it, or append it to the target file if the
 user asks. Never append automatically — that file is version-controlled and
 shared with other people.
-
----
-
-## Log
-
-```bash
-echo "{\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"skill\":\"project-memory\",\"branch\":\"$(git branch --show-current 2>/dev/null || echo 'N/A')\",\"outcome\":\"success\",\"repo\":\"$(basename $(git rev-parse --show-toplevel 2>/dev/null) 2>/dev/null || echo 'N/A')\"}" >> ~/.mystack/timeline.jsonl
-```
