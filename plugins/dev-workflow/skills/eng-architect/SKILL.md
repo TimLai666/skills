@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 ## Command routing
@@ -30,7 +30,8 @@ metadata:
 ```bash
 _BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 _REPO=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")
-_SLUG=$(git remote get-url origin 2>/dev/null | sed 's|.*[:/]\([^/]*/[^/]*\)\.git$|\1|;s|.*[:/]\([^/]*/[^/]*\)$|\1|' | tr '/' '-' | tr -cd 'a-zA-Z0-9._-' 2>/dev/null || basename "$PWD")
+_SLUG=$(git remote get-url origin 2>/dev/null | sed 's|\.git$||; s|.*[:/]\([^/]*/[^/]*\)$|\1|' | tr '/' '-' | tr -cd 'a-zA-Z0-9._-')
+[ -z "$_SLUG" ] && _SLUG=$(basename "$PWD" | tr -cd 'a-zA-Z0-9._-')
 echo "BRANCH: $_BRANCH"
 echo "REPO: $_REPO"
 DESIGN=$(ls -t ~/.mystack/projects/$_SLUG/*-$_BRANCH-*-plan.md 2>/dev/null | head -1)
