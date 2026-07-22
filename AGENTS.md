@@ -122,7 +122,6 @@ skill 若會在使用者專案裡產生檔案，額外檢查三條：
 
 | ID | Task | Status |
 |---|---|---|
-| P1 | review-mining-stp 的 Axis B 從 valence 改成 quality（破壞性契約變更，做法待決；待你選 A 先建驗證／B 並存不破壞／C 規格收回） | Blocked |
 
 <!-- ACTIVE_ISSUES_END -->
 
