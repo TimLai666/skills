@@ -3,7 +3,7 @@ name: dev-task-loop
 description: >
   This skill MUST be used when the user wants to process a backlog of dev tickets end-to-end with a known project / branch / merge target / task tracker / design reference workflow, but without committing to any specific platform (Jira / Linear / GitHub Issues / Notion / Figma / Zeplin / etc.). Trigger on requests like 「幫我跑任務」、「照我的流程把 backlog 做完」、「review failed 的全部處理掉」、「用我那套開發流程做事」、"work through my task list", "run my dev loop", "process my tickets end-to-end". MUST NOT be used for a single ticket, which belongs to the other dev-workflow skills. MUST ask the user up-front for project root, working branch, merge target, task list location, design reference location, and how to mark a task done — then loops through tickets implementing → verifying → committing → opening PR → merging → syncing → updating the tracker. MUST NOT bake in platform-specific API calls; figure those out at run time from the user's answers.
 metadata:
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # Dev Task Loop
@@ -31,7 +31,7 @@ The six questions (Traditional Chinese — translate if the user is writing in E
 3. **開發完合併到哪？** — merge target. Example: `main`, `develop`, `release/v2`.
 4. **任務清單在哪？** — where the backlog lives + how to filter for "ready to work". Example: "Jira project HTLIFE, status = Review Failed, assignee = me", "GitHub issues label:bug", "Notion DB X filter Y", "this markdown file at TODO.md".
 5. **示意圖／設計在哪？** — design reference, or "no design needed". Example: "Figma file URL", "screenshots in /docs/mocks/", "no design — text spec only".
-6. **完成後任務頁面要怎麼操作？** — definition-of-done actions on the task page. Example: "comment 已修正 @reviewer, set status to 審核中", "close the issue, leave PR link", "tick the checkbox in the markdown file".
+6. **完成後任務要怎麼標記？** — definition-of-done actions, on the task page or on disk. Example: "comment 已修正 @reviewer, set status to 審核中", "close the issue, leave PR link", "tick the checkbox in the markdown file", "run `openspec archive <change>`".
 
 For each option list in `AskUserQuestion`, include the most likely choices the user has named in past sessions plus a free-text fallback (the harness adds "Other" automatically).
 
@@ -49,6 +49,7 @@ How you do this depends on what they named:
 |---|---|
 | REST API with session cookie (Jira Cloud, Linear, Asana, etc.) | Navigate to the tracker once in the browser MCP, then call its REST endpoints via `javascript_tool` against the open tab — the session cookie carries auth. |
 | GitHub / GitLab | Try the platform CLI (`gh issue list`, `glab issue list`) first; fall back to web automation if missing. |
+| OpenSpec / Spectra (an `openspec/` directory in the repo) | `openspec list` for active changes. **One change is one ticket, not one task** — the `tasks.md` inside it is that ticket's checklist, ticked off during 2.4. Treating each task as a ticket produces one PR per line item. |
 | Markdown / Google Doc / Notion table | Read the file or the URL; parse the rows that match the filter. |
 | User-named ad hoc list | Read whatever they pointed you at. |
 
@@ -60,9 +61,13 @@ Cache the result as a list of task IDs + one-line summaries. Show the list to th
 
 For each ticket, run these steps in order. **Do not skip verification.**
 
-**Browser is the default lens.** Open the task page in the browser to read it (so you see screenshots / inline images QA attached), and open the affected route in the browser to verify the fix. Source-level inspection and TypeScript checks are supporting evidence, not replacements.
+**Browser is the default lens.** If the backlog has task pages, open them to read (QA attaches screenshots and recordings that only render in the web UI). Either way, open the affected route in the browser to verify the fix — that half holds no matter where the backlog lives. Source-level inspection and TypeScript checks are supporting evidence, not replacements.
 
 ### 2.1 Read the task
+
+File-based backlogs (OpenSpec `tasks.md`, a markdown checklist) have no task page. Read the files instead — `proposal.md`, `tasks.md`, and any `design.md` in that change — and skip the browser steps below.
+
+For everything else:
 
 - **Open the task page in the browser** (Chrome MCP / browser automation). Don't rely on a REST-only fetch alone — QA usually attaches screenshots, recordings, or inline images that only render in the web UI, and you'll miss them if you only call the API.
 - Once the page is open you can still call the tracker's REST endpoints via `javascript_tool` against that tab to pull the description text cleanly.
@@ -105,6 +110,7 @@ Run the verification appropriate to what changed:
   - For per-tenant / per-company / per-role behavior: ideally log in as the affected role; at minimum verify the route doesn't error.
   - If you can't open a browser session (no preview running, no logged-in tab), **stop and tell the user** — don't guess "looks fine from the source."
 - **TypeScript / build signal**: `pnpm tsc --noEmit` (or `tsc`, `npx tsc`) in the relevant package. Ignore pre-existing baseline errors; flag only new ones. This is *necessary but not sufficient* for UI work.
+- **OpenSpec change**: `openspec validate <change-id> --strict`. Structural check on the spec itself, same tier as the type check — catches a malformed change before archive rejects it, says nothing about whether the code works.
 - **Unit / integration tests**: run the test command from `package.json` / `pyproject.toml` / etc. if the project has them for the touched module.
 - **Backend-only change**: `curl` / `httpie` against the local API if running, otherwise rely on type + test signal.
 
@@ -162,13 +168,14 @@ Use `--force-with-lease`, never raw `--force`.
 
 ### 2.10 Mark the task done
 
-**Open the task page in the browser first**, then run the actions the user named in question 6. Common patterns:
+When the backlog lives in a web tracker, **open the task page in the browser first**. Then run the actions the user named in question 6. Common patterns:
 
 - **Tracker REST API** (Jira Cloud, Linear, etc.): once the tracker tab is open, you can POST via `javascript_tool` against it — the session cookie carries auth. After the API calls, eyeball the page to confirm the comment is visible and the status badge changed.
 - **Web UI only** (no REST or no API access): click the comment box, type the message (including any @mention), submit; then open the status dropdown and pick the target state. Take a screenshot or read the page back to confirm.
 - **Markdown checklist / Notion table**: edit the file or row, commit (for markdown) or save (for Notion). For markdown, ship the doc edit in a separate small commit.
+- **OpenSpec / Spectra**: `openspec archive <change-name>`. It merges the delta specs into the main specs and moves the change into the archive directory — a file change, so it belongs in a commit. There is no page to open and no status badge to eyeball; confirm by re-running `openspec list` and seeing the change gone from active.
 
-Confirm with the user: "Comment posted, status moved to X — next ticket?"
+Confirm with the user in one line: what got written back, and where. "Comment posted, status moved to 審核中 — next ticket?" / "HTLIFE-12 archived, no longer in `openspec list` — next ticket?"
 
 ---
 
