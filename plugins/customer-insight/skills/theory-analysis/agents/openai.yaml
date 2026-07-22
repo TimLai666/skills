@@ -1,0 +1,4 @@
+interface:
+  display_name: "理論分析：證據編碼"
+  short_description: "用產品定位、購買動機、口碑動機三套理論解析多來源證據，逐句標註構面並保留可追溯引文，可同時套用多個理論。"
+  default_prompt: "Use $theory-analysis to code mixed evidence items against one or more theories in Traditional Chinese and return both JSON and Markdown outputs."

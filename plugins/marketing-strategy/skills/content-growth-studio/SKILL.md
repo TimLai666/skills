@@ -11,7 +11,7 @@ description: >-
   source-led and brief-led work. Default output is Traditional Chinese for
   Taiwan unless the user's material clearly indicates another language.
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Content Growth Studio

@@ -13,10 +13,8 @@ Use the skills below when the task needs deeper logic than this umbrella skill s
 | `scamper` | Need structured topic expansion or angle generation | target topic, innovation goal, constraints | expanded angle set |
 | `customer-persona-framer` | Audience is unclear, underdefined, or conflicting | product/topic, audience clues, usage context | persona or journey-framing block |
 | `sor-marketing-strategy` | The task is strategy-first, funnel-first, or behavior-design-first | brand or offer, audience, channel context, goal | message strategy brief, psychology map, KPI direction |
-| `theory-analysis-product-positioning` | Need stronger positioning line, attribute-benefit framing, or usage-context angle | evidence items, analysis goal | theory-coded positioning insights |
+| `theory-analysis` | Need evidence-backed coding of positioning angles, purchase drivers, or sharing motives — one theory or several at once | evidence items, analysis goal, chosen theories | theory-coded insights with auditable quotes |
 | `review-mining-stp` | The user provides review-like corpora and wants evidence-backed segmentation before content generation | scored or prepared review artifacts, goal | segment insights and evidence-backed framing |
-| `theory-analysis-purchase-motivation` | Need evidence-backed motivation coding from mixed evidence | evidence items, analysis goal | coded motivations |
-| `theory-analysis-wom-motivation` | Need evidence-backed sharing or WOM motive coding | evidence items, analysis goal | coded WOM motives |
 
 ## Boundary Reminder
 
