@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 ## Auto-trigger
@@ -72,9 +72,9 @@ Before reviewing code quality, check whether they built what was requested:
 
 ```bash
 git log origin/$_BASE..HEAD --oneline 2>/dev/null
-cat TODOS.md 2>/dev/null | head -20
-cat PLAN.md 2>/dev/null | head -30
 ```
+
+The scope baseline is `delivery-plan.md`'s `Next Verifiable Output`, already read in the preamble. Do not reach for `PLAN.md` or `TODOS.md` — nothing in this toolchain writes them, so reading them yields nothing on most projects while looking like a real check.
 
 Compare stated intent vs. actual diff:
 

@@ -83,7 +83,7 @@ Use this whenever the same user has already used this skill to create one or mor
 
 ## Operating Model
 
-Use four strict phases. Do not skip forward. Keep each phase's output in its own markdown file inside the working project.
+Use four strict phases. Do not skip forward. Keep each phase's output in its own markdown file under `docs/design/` in the working project — see "Where Process Files Go" in the parent `design-studio/SKILL.md`. Bare filenames below resolve against that directory.
 
 1. Phase 1: decisions
 2. Phase 2: storyboard

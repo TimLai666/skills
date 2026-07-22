@@ -52,7 +52,7 @@ description: 花叔Design——用HTML做高保真原型、幻灯片、动画、
 **硬流程（开工前执行，优先于 clarifying questions）**：
 1. `WebSearch` 产品名 + 最新时间词（"2026 latest"、"launch date"、"release"、"specs"）
 2. 读 1-3 条权威结果，确认：**存在性 / 发布状态 / 最新版本号 / 关键规格**
-3. 把事实写进项目的 `product-facts.md`（见工作流 Step 2），不靠记忆
+3. 把事实写进项目的 `docs/design/product-facts.md`（见工作流 Step 2），不靠记忆。本 skill 的过程档一律放 `docs/design/`，只有 `DESIGN.md` 留在项目根目录，详见母 skill `design-studio/SKILL.md` 的「Where Process Files Go」
 4. 搜不到或结果模糊 → 问用户，而不是自行假设
 
 **反例**（2026-04-20 实测）：用户要「大疆 Pocket 4 发布动画」，我凭记忆断言「还没发布」做了概念剪影——真相是 4 天前已发布、官方物料俱在。**成本对比：WebSearch 10 秒 << 返工 2 小时**。

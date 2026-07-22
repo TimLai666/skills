@@ -9,7 +9,7 @@ allowed-tools:
   - Grep
   - AskUserQuestion
 metadata:
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 ## Auto-trigger
@@ -58,7 +58,6 @@ Make sure this is the right thing to verify.
 git fetch origin $_BASE --quiet
 git diff origin/$_BASE --name-only
 git log origin/$_BASE..HEAD --oneline
-cat TODOS.md 2>/dev/null | head -20
 ```
 
 Identify affected routes/pages from changed files:

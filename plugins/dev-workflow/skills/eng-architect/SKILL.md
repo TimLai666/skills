@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.5.0"
+  version: "1.8.0"
 ---
 
 ## Command routing
@@ -40,18 +40,19 @@ DESIGN=$(find "$_DIR" -maxdepth 1 -name "*-$_BRANCH-*-plan.md" -type f -exec ls 
 [ -z "$DESIGN" ] && [ -n "$_ROOT" ] && DESIGN=$(find "$_ROOT" -name '*-plan.md' -type f \
   -not -path '*/.git/*' -not -path '*/node_modules/*' -exec ls -t {} + 2>/dev/null | head -1)
 [ -n "$DESIGN" ] && echo "PLAN_DOC: $DESIGN" || echo "PLAN_DOC: none"
-[ -f PLAN.md ] && echo "PLAN_FILE: PLAN.md" || echo "PLAN_FILE: none"
+[ -f ENG.md ] && echo "ENG_MD: exists" || echo "ENG_MD: none"
 [ -f Gemfile ] && echo "STACK:ruby"
 [ -f package.json ] && echo "STACK:node"
 [ -f requirements.txt ] || [ -f pyproject.toml ] && echo "STACK:python"
 [ -f go.mod ] && echo "STACK:go"
 [ -f Cargo.toml ] && echo "STACK:rust"
 git log --oneline -15 2>/dev/null
-cat TODOS.md 2>/dev/null | head -30
 cat ARCHITECTURE.md 2>/dev/null | head -40
 ```
 
-Read the plan document or `PLAN.md` if they exist. Read all existing architecture docs before designing anything new.
+Read the plan document if it exists. Read all existing architecture docs before designing anything new. If `ENG_MD: exists`, read `ENG.md` too — this run updates it rather than replacing it (Step 7).
+
+`ARCHITECTURE.md` is a convention some projects happen to carry; read it when present. Nothing in this toolchain writes it, so its absence means nothing.
 
 `plan-grilling` defaults to `docs/plans/` but writes wherever the user asked it to, which is why the last glob sweeps the whole repo. It matches on the `*-plan.md` filename, not the directory.
 
@@ -165,7 +166,9 @@ For each migration: reversible? locks tables? needs backfill? can run while old 
 
 ### Step 7 — Write ENG.md
 
-Write to project root:
+Write to project root. `ENG.md` is a **state file**: one per project, updated in place. Never date-stamp or branch-stamp the filename — git already provides version history and branch isolation, and a second copy would leave re-sync with no single target to read.
+
+**Read before writing.** If `ENG_MD: exists`, read it first and update the sections that changed. Do not regenerate from scratch — a re-sync that rewrites blind loses the prior run's error map and seam decisions.
 
 ```markdown
 # Engineering Plan: [feature]
@@ -194,11 +197,6 @@ _[date] - eng-architect - [repo]:[branch]_
 
 ## Migration plan
 [If applicable]
-
-## Implementation order
-1. [First]
-2. [Second]
-3. [Third]
 
 ## Hidden assumptions
 - [assumption] - risk: [consequence]
@@ -250,12 +248,13 @@ Rules:
 - State current phase in one line
 - Keep it short enough that a new agent can scan it first and act second
 - Must not become roadmap copy or changelog dump
+- `Source Links` must point at `ENG.md` whenever it exists. That link is the only route by which a later agent reaches the error map, shadow paths and test matrix — without it those sections are written and never found again.
 
 #### 8b — Create OpenSpec proposals for the active phase
 
 Read [references/openspec-breakdown-guidelines.md](./references/openspec-breakdown-guidelines.md).
 
-Break implementation order items into small proposals — one verifiable result per proposal. Map each proposal to one milestone id.
+Break the implementation sequence into small proposals — one verifiable result per proposal. Map each proposal to one milestone id. The proposals and their milestone ids are where the ordering lives; do not keep a second copy of it in `ENG.md`.
 
 **REQUIRED SUB-SKILL:** Use `openspec` for CLI commands, delta syntax, validation, and archive flow.
 
@@ -269,6 +268,18 @@ Read [references/agent-context-files.md](./references/agent-context-files.md) fi
 - planning discipline
 - update rules
 - project-specific constraints
+
+**`AGENTS.md` is shared. Own your sections, leave the rest alone.** Other skills maintain their own sections in the same file and none of them announce themselves here:
+
+| Section | Owner |
+|---|---|
+| The five items above | this skill |
+| `## Follow-ups` | `software-engineering-guidelines` |
+| `## Active Issues` | `i-have-adhd` |
+| `## Zeabur 部署規範` | `set-zeabur-conventions` |
+| Anything else | the user, or a skill not listed here |
+
+Update your own sections in place. Never delete or rewrite a section you do not own — an unfamiliar section is someone else's working state, not clutter. The "must not become a personal note file" rule below applies to the sections this skill owns, not to the whole file.
 
 `CLAUDE.md` must contain only:
 
@@ -321,9 +332,14 @@ When the user asks to review UI, check for AI slop, or audit design quality.
 ```bash
 _BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 echo "BRANCH: $_BRANCH"
-[ -f PLAN.md ] && echo "PLAN_FILE: PLAN.md" || echo "PLAN_FILE: none"
 find . -name "*.fig" -o -name "*.sketch" -o -name "DESIGN.md" 2>/dev/null | grep -v node_modules | head -5
+[ -f DESIGN-REVIEW.md ] && sed -n '/## Score history/,/^$/p' DESIGN-REVIEW.md
+[ -f DESIGN-REVIEW.md ] && sed -n '/## Open slop flags/,/^## /p' DESIGN-REVIEW.md
 ```
+
+A `DESIGN.md` found here is **input, not output**. It is `design-studio`'s design system file — read it and score against its tokens, never overwrite it. This mode writes `DESIGN-REVIEW.md` instead (Step 4).
+
+If a prior `DESIGN-REVIEW.md` exists, read its score history and open slop flags before scoring. A dimension that scored 4 last time and 4 again means the fix never landed — say so, rather than reporting it as a fresh finding.
 
 ### What AI design slop looks like
 
@@ -372,19 +388,37 @@ Flag any present:
 
 For any dimension scoring poorly or any slop flag raised, ask one question with options and recommendation. Wait for answer before moving on.
 
-### Step 4 — Write DESIGN.md (or update PLAN.md)
+### Step 4 — Update DESIGN-REVIEW.md
+
+Write to project root. **Never write `DESIGN.md`** — that filename belongs to `design-studio`, which keeps the project's long-lived design system there in Google DESIGN.md format. This artifact is a UI audit, not a design system.
+
+`DESIGN-REVIEW.md` is a **state file**: one per project, updated in place, no date or branch in the filename. A UI audit is usually project-wide rather than branch-scoped, so a second dated copy would fragment the history that makes the scores comparable. Prior scores stay in the score history table; git holds the rest.
+
+Update, do not replace:
+
+| Section | On re-review |
+|---|---|
+| Score history | Append one row. Never rewrite past rows |
+| Dimension scores | Overwrite with the current scores |
+| Open slop flags | Keep only what is still unresolved. Delete the ones that got fixed |
+| Component spec | Accumulate. Existing components stay unless the component itself is gone |
 
 ```markdown
-# Design: [feature]
-_[date] - eng-architect design - [branch]_
+# Design Review: [project]
+_Last reviewed: [date] - eng-architect design - [branch]_
+
+## Score history
+| Date | Hier | White | Type | Color | Consist | Copy | Empty | Error | Motion | Mobile |
+|------|------|-------|------|-------|---------|------|-------|-------|--------|--------|
+[one row per review, oldest first]
 
 ## Dimension scores
 | Dimension | Score | Notes |
 |-----------|-------|-------|
 [table]
 
-## Slop flags resolved
-[list]
+## Open slop flags
+[unresolved only]
 
 ## Component spec
 
@@ -394,26 +428,16 @@ _[date] - eng-architect design - [branch]_
 - **Mobile:** [specific behavior]
 - **Touch target:** [size in px]
 
-## Color tokens
-| Token | Hex | Usage |
-|-------|-----|-------|
-| --color-primary | #... | Primary actions only |
-| --color-danger | #... | Destructive actions, error states |
-| --color-surface | #... | Card backgrounds |
-| --color-border | #... | Dividers, input borders |
-
-## Spacing scale
-4px base grid: 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64
-
-## Typography scale
-| Role | Size | Weight | Usage |
-|------|------|--------|-------|
-| Heading | 24px | 600 | Page titles |
-| Body | 16px | 400 | Content |
-| Label | 14px | 500 | Form labels, nav |
-| Caption | 12px | 400 | Timestamps, metadata |
+## Token conformance
+| Token | DESIGN.md value | Used as | Verdict |
+|-------|-----------------|---------|---------|
+[one row per violation only — matches are not worth listing]
 
 ## Motion
 | Trigger | Animation | Duration | Purpose |
 |---------|-----------|----------|---------|
 ```
+
+**Do not define colors, spacing, or type scales here.** Those live in `DESIGN.md` and belong to `design-studio`. This mode scores the UI *against* them; a second set of tables here means two sources of truth and the UI ends up conforming to neither.
+
+No `DESIGN.md` in the project? Then there is no baseline to score Color, Typography or Consistency against. Say so, score those three dimensions as ungraded rather than inventing a scale, and recommend running `design-studio` first.

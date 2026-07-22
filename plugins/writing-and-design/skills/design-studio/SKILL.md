@@ -9,7 +9,7 @@ description: >-
   deck, landing page, website, UI, mockup, MP4, GIF, infographic, branding,
   logo, 評審, critique, film-inspired, cinematic.
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Design Studio
@@ -91,6 +91,23 @@ components:
 | DESIGN.md exists, new task on same project | **Read first**, stay consistent with existing tokens unless user says otherwise |
 
 **Iron rule**: Always read existing DESIGN.md before starting work. The design grows from what's already there, not from zero.
+
+## Where Process Files Go
+
+`DESIGN.md` is the only design file that belongs in the project root. Every working file a design session produces goes in `docs/design/`:
+
+| File | Engine | Holds |
+|------|--------|-------|
+| `docs/design/decisions.md` | cinematic-ui | Phase 1 — director, film reference, shell-ban list, uniqueness audit |
+| `docs/design/storyboard.md` | cinematic-ui | Phase 2 — scene-by-scene treatment |
+| `docs/design/compiled-spec.md` | cinematic-ui | Phase 3 — the sole implementation source (web) |
+| `docs/design/slide-spec.md` | cinematic-ui | Phase 3 — replaces compiled-spec.md for PPTX |
+| `docs/design/product-facts.md` | huashu-design | Verified product facts gathered before designing |
+| `docs/design/brand-spec.md` | shared | Frozen brand asset paths and extracted colors |
+
+Create the directory if it does not exist. Bare filenames elsewhere in this skill and its sub-skills resolve against `docs/design/`.
+
+These are session working state, not project assets. A user opening the repo root should see `DESIGN.md` and their own files, not six intermediate artifacts from one design run.
 
 ## Route Decision
 
