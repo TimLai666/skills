@@ -6,7 +6,7 @@ description: >-
   through a review scoring workflow upstream and statistical scripts
   downstream.
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Review Mining STP
@@ -54,7 +54,7 @@ Subtheories:
 Subtheories:
 - `physiological` — sensory comfort, physical ease, visual clarity during use
 - `safety` — protection from harm, certification compliance, structural durability
-- `belongingness` — fitting into a community, sports group, or professional identity
+- `social` — fitting into a community, sports group, or professional identity
 - `esteem` — status signalling, brand prestige, professional image display
 - `self_actualization` — enabling personal performance goals, empowerment, achievement
 
@@ -117,7 +117,7 @@ For each candidate attribute, assign `theory_annotations` by working through all
 **maslow** — ask: which need does concern about this attribute reflect?
 - `physiological`: physical sensation, visual comfort, weight, pressure on face
 - `safety`: protection level, certification, structural durability, after-sales security
-- `belongingness`: fitting into a community, professional group, sport team
+- `social`: fitting into a community, professional group, sport team
 - `esteem`: brand status, professional image, visible identity
 - `self_actualization`: enabling personal goals, performance achievement, empowerment
 
@@ -300,7 +300,7 @@ Each `dimension_catalog` item must include:
 - `theme`
 - `attribute_group`
 - `salience_column`
-- `quality_column`
+- `valence_column`
 - `stat_roles`
 - `plain_language_definition`
 - `theory_annotations`
@@ -315,7 +315,7 @@ Each `dimension_catalog` item must include:
 `theory_annotations` must map each scored item to at least one theory family plus subtheory. The four default families for this skill are:
 
 - `product_positioning` (subtheories: `attributes`, `functions`, `benefits`, `usage_context_service_experience`)
-- `maslow` (subtheories: `physiological`, `safety`, `belongingness`, `esteem`, `self_actualization`)
+- `maslow` (subtheories: `physiological`, `safety`, `social`, `esteem`, `self_actualization`)
 - `purchase_motivation` (subtheories: `functional`, `security`, `relational`)
 - `wom_motivation` (subtheories: `altruistic`, `social_identity`, `self_enhancement`, `emotional_expression`)
 
@@ -340,7 +340,7 @@ Required columns:
 - `source_type`
 - `mention_count`
 - `salience_column`
-- `quality_column`
+- `valence_column`
 - `example_review_id`
 - `example_quote`
 - `theory_families` — comma-separated list of applicable theory families from the four permitted
