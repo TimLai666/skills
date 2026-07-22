@@ -275,7 +275,6 @@ Read [references/agent-context-files.md](./references/agent-context-files.md) fi
 |---|---|
 | The five items above | this skill |
 | `## Follow-ups` | `software-engineering-guidelines` |
-| `## Active Issues` | `i-have-adhd` |
 | `## Zeabur 部署規範` | `set-zeabur-conventions` |
 | Anything else | the user, or a skill not listed here |
 
