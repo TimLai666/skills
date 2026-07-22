@@ -43,6 +43,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | --- | --- |
 | `ultrathink` | 任何需要動腦的時刻——文案、報告、提案、規劃商品或功能、寫程式、debug——都先依序跑過全部內建思考框架（目前含邏輯推導：MECE、空雨傘、魚骨圖；創意發想：六頂思考帽、腳本圖、心智圖；市場分析：3C 分析、SWOT 分析、4P與4C；進度管理：惠特默模型、KPI 樹狀圖、PDCA；權衡得失：決策矩陣、PMI 表、力場分析；預測未來：S 型曲線、鴻溝理論、長尾模型；辯論思考：需根解損、判定立駁，論點以主張、資料、推論三要素構建、以質詢拆解三問檢驗；思維模型：第一性原理、反向思考法、二階思考、能力圈、奧坎剃刀），全程以約 160 條謬誤檢核清單把關推理，把方向與重點想清楚再動手。 |
 | `plan-grilling` | 動手之前想被逼問一輪：功能、行銷檔期、提案、流程調整、個人抉擇都適用。釐清真正的痛點、挑戰 scope，一次問一題並附上建議選項，決策當場記進 `docs/plans/`。 |
+| `subtraction-thinking` | 想在動手前、途中、完成後強制做一輪減法審查：商業決策、組織流程、產品、行銷、提案報告、程式開發都適用。移除沒有存在理由的東西，簡化留下來的東西。 |
 
 ### `output-style` — 輸出呈現層
 
@@ -94,7 +95,6 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | `service-innovation-case-study` | 想把服務創新案例做成可教學、可討論、可演練的分析輸出，快速萃取關鍵洞察與可複用策略。 |
 | `service-innovation-workshop` | 想把服務創新機會轉成多個概念選項、原型測試與風險檢查。 |
 | `scamper` | 想對現有產品、服務、流程或商業模式套用 SCAMPER 奔馳法，從七個思維維度系統化產出創新構想與優先方案。 |
-| `subtraction-thinking` | 想在提案、報告、流程、產品或服務設計前後強制做減法審查，移除冗餘與簡化複雜度。 |
 
 ### `writing-and-design` — 提案與頁面產出
 

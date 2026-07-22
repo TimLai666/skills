@@ -1,7 +1,7 @@
 {
   "name": "service-innovation",
-  "description": "服務設計與創新：生態系地圖與服務藍圖、服務設計/創新工作坊、案例分析、SCAMPER、減法思考。",
-  "version": "1.1.0",
+  "description": "服務設計與創新：生態系地圖與服務藍圖、服務設計/創新工作坊、案例分析、SCAMPER。",
+  "version": "2.0.0",
   "author": {
     "name": "TimLai666"
   }
