@@ -1,0 +1,146 @@
+{
+  "dimension_catalog": [
+    {
+      "column": "anti_fog",
+      "label": "Anti-fog performance",
+      "theme": "protection",
+      "attribute_group": "attribute_function",
+      "salience_column": "anti_fog_salience",
+      "valence_column": "anti_fog_quality",
+      "stat_roles": [
+        "segmentation",
+        "positioning",
+        "comparison_axis"
+      ],
+      "plain_language_definition": "Does it fog up while you work?",
+      "theory_annotations": {
+        "product_positioning": [
+          "functions"
+        ],
+        "maslow": [
+          "physiological"
+        ],
+        "purchase_motivation": [
+          "functional"
+        ]
+      }
+    },
+    {
+      "column": "impact_protection",
+      "label": "Impact protection",
+      "theme": "protection",
+      "attribute_group": "attribute_function",
+      "salience_column": "impact_protection_salience",
+      "valence_column": "impact_protection_quality",
+      "stat_roles": [
+        "segmentation",
+        "positioning",
+        "current_target"
+      ],
+      "plain_language_definition": "Will it actually stop something hitting your eye?",
+      "theory_annotations": {
+        "product_positioning": [
+          "attributes"
+        ],
+        "maslow": [
+          "safety"
+        ],
+        "purchase_motivation": [
+          "security"
+        ]
+      }
+    },
+    {
+      "column": "comfort_fit",
+      "label": "Comfort and fit",
+      "theme": "wearability",
+      "attribute_group": "benefit_use",
+      "salience_column": "comfort_fit_salience",
+      "valence_column": "comfort_fit_quality",
+      "stat_roles": [
+        "segmentation",
+        "positioning",
+        "potential_target"
+      ],
+      "plain_language_definition": "Can you wear it all day without it hurting?",
+      "theory_annotations": {
+        "product_positioning": [
+          "benefits"
+        ],
+        "maslow": [
+          "physiological"
+        ],
+        "purchase_motivation": [
+          "functional"
+        ]
+      }
+    },
+    {
+      "column": "style_appearance",
+      "label": "Style and appearance",
+      "theme": "brand_experience",
+      "attribute_group": "brand_image",
+      "salience_column": "style_appearance_salience",
+      "valence_column": "style_appearance_quality",
+      "stat_roles": [
+        "segmentation",
+        "positioning"
+      ],
+      "plain_language_definition": "Do you mind being seen wearing them?",
+      "theory_annotations": {
+        "product_positioning": [
+          "benefits"
+        ],
+        "maslow": [
+          "esteem"
+        ],
+        "wom_motivation": [
+          "social_identity"
+        ]
+      }
+    },
+    {
+      "column": "after_sales",
+      "label": "After-sales support",
+      "theme": "brand_experience",
+      "attribute_group": "benefit_use",
+      "salience_column": "after_sales_salience",
+      "valence_column": "after_sales_quality",
+      "stat_roles": [
+        "positioning",
+        "potential_target"
+      ],
+      "plain_language_definition": "If it breaks, does anyone help you?",
+      "theory_annotations": {
+        "product_positioning": [
+          "usage_context_service_experience"
+        ],
+        "purchase_motivation": [
+          "relational"
+        ],
+        "wom_motivation": [
+          "altruistic"
+        ]
+      }
+    }
+  ],
+  "theme_mapping": {
+    "protection": [
+      "anti_fog",
+      "impact_protection"
+    ],
+    "wearability": [
+      "comfort_fit"
+    ],
+    "brand_experience": [
+      "style_appearance",
+      "after_sales"
+    ]
+  },
+  "attribute_extraction_summary": {
+    "target_minimum": 30,
+    "actual_count": 5,
+    "shortfall_reason": "Fixture corpus is deliberately small; it exists to verify the runner, not to model a real market.",
+    "theory_gap": []
+  }
+}

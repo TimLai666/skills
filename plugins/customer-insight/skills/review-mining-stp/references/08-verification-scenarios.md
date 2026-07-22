@@ -25,6 +25,7 @@ Use these scenarios to verify both the workflow boundary and the downstream stat
   - full STP completes
   - three intermediate statistical artifacts are emitted
   - `execution_scope` records both canonical inputs and emitted intermediates
+- Runnable form: [`fixtures/minimal/`](../fixtures/minimal/) holds all six inputs plus the before/after procedure. This scenario is the one that can actually be executed rather than reasoned about — use it whenever the scripts change.
 
 ## Scenario 3: Dynamic Item Schema
 

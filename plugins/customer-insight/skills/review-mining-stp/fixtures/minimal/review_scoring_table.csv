@@ -1,0 +1,21 @@
+review_id,unit_id,brand,product,review_text,anti_fog_salience,anti_fog_quality,impact_protection_salience,impact_protection_quality,comfort_fit_salience,comfort_fit_quality,style_appearance_salience,style_appearance_quality,after_sales_salience,after_sales_quality
+r001,r001,ArcShield,ArcShield Pro,Fogged only once all winter. Impact rating is the real reason I bought them.,7,9,6,9,3,6,1,4,0,
+r002,r002,ArcShield,ArcShield Pro,"Wore them under a respirator for a nine hour shift, stayed clear the whole time.",7,9,2,8,5,7,0,,0,
+r003,r003,ArcShield,ArcShield Pro,Lens held up to a stray grinder spark. Ugly as sin though.,2,7,7,10,0,,5,2,0,
+r004,r004,ArcShield,ArcShield Pro,Temples dig in after a few hours. Everything else is excellent.,3,8,3,9,6,3,1,3,0,
+r005,r005,ArcShield,ArcShield Pro,"Emailed about a scratched lens, got a reply in two days with a replacement.",1,8,0,,0,,0,,6,7
+r006,r006,ArcShield,ArcShield Pro,"Clear vision, solid build, looks like safety gear from 1998.",5,8,4,9,2,6,6,2,0,
+r007,r007,ArcShield,ArcShield Pro,No fogging even coming in from the cold. Worth every cent.,7,10,1,8,1,6,0,,0,
+r008,r008,VisorMax,VisorMax Lite,Fogs the moment I put a mask on. Had to keep lifting them.,7,2,2,8,4,8,2,6,0,
+r009,r009,VisorMax,VisorMax Lite,"Lightest pair I have owned, I forget they are on. Shame about the fogging.",5,2,1,8,7,10,3,6,0,
+r010,r010,VisorMax,VisorMax Lite,Z87 stamped and it took a knock without cracking.,0,,7,9,2,8,0,,0,
+r011,r011,VisorMax,VisorMax Lite,"Support never answered. Two emails, three weeks, nothing.",1,3,0,,2,9,0,,7,1
+r012,r012,VisorMax,VisorMax Lite,"Comfortable enough to wear over glasses, which nothing else managed.",2,3,1,8,7,9,2,5,0,
+r013,r013,VisorMax,VisorMax Lite,"Steams up constantly indoors. Returned them, refund took a month.",7,1,0,,3,8,0,,6,2
+r014,r014,VisorMax,VisorMax Lite,"Fit is great, optics are fine, anti-fog coating is marketing fiction.",6,2,2,7,6,9,2,5,0,
+r015,r015,ClearGuard,ClearGuard X1,Look sharp enough that I wear them off site. Fogging is average.,4,5,1,6,2,4,7,9,0,
+r016,r016,ClearGuard,ClearGuard X1,Best looking safety glasses on the market. Nose pads are torture.,0,,1,6,7,2,7,10,0,
+r017,r017,ClearGuard,ClearGuard X1,"Cracked lens replaced free within a week, no argument.",0,,4,5,0,,2,8,7,10
+r018,r018,ClearGuard,ClearGuard X1,"Mid range protection, fine for light work, would not use them grinding.",2,5,6,4,3,4,3,8,0,
+r019,r019,ClearGuard,ClearGuard X1,Seller walked me through the fit guide before I ordered.,0,,0,,4,5,2,9,6,9
+r020,r020,ClearGuard,ClearGuard X1,Fog clears fast once you move. Frame pinches by lunchtime.,5,6,1,6,6,3,4,8,0,

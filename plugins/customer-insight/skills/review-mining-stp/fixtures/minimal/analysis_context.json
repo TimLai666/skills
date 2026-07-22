@@ -1,0 +1,9 @@
+{
+  "analysis_goal": "Verify the runner end to end on a corpus small enough to check by hand.",
+  "comparison_axes": [
+    "brand"
+  ],
+  "scope_limits": [
+    "Synthetic reviews. Not evidence about any real product."
+  ]
+}

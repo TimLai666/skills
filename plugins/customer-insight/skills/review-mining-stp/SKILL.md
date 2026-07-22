@@ -6,7 +6,7 @@ description: >-
   through a review scoring workflow upstream and statistical scripts
   downstream.
 metadata:
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # Review Mining STP
@@ -358,7 +358,13 @@ The catalog is the script-facing bridge from upstream attribute extraction into 
   - `comparison_axes`
   - `scope_limits`
 - `brands.json`
+  - `brands` — a flat list of brand-name **strings**. A list of objects passes every contract check and then crashes report assembly after all other artifacts have already been written
+  - `similarity_matrix` — only needed for `--positioning-method mds`
 - `ideal_point.json`
+  - `label` — required. The perceptual map uses it to name the ideal point row
+  - `attributes` — one entry per attribute key, either a scalar or `{"salience": n, "valence": n}`. Only the attributes that also appear in `positioning_scorecard.csv` are used; at least two must overlap
+
+A working example of all six canonical inputs lives in [fixtures/minimal/](./fixtures/minimal/). Run it before trusting a change to the scripts.
 
 ## Run Modes
 

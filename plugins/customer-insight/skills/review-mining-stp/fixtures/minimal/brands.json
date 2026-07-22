@@ -1,0 +1,12 @@
+{
+  "brands": [
+    "ArcShield",
+    "VisorMax",
+    "ClearGuard"
+  ],
+  "products": {
+    "ArcShield": "ArcShield Pro",
+    "VisorMax": "VisorMax Lite",
+    "ClearGuard": "ClearGuard X1"
+  }
+}
