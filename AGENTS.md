@@ -114,8 +114,8 @@ Claude Code 另有 `disable-model-invocation`、`user-invocable`、`disallowed-t
 
 <!-- ACTIVE_ISSUES_START -->
 
-| ID | Problem | Classification | Status |
-|---|---|---|---|
+| ID | Task | Status |
+|---|---|---|
 
 <!-- ACTIVE_ISSUES_END -->
 
