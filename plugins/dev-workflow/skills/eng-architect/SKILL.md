@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.4.0"
+  version: "1.5.0"
 ---
 
 ## Command routing
@@ -117,7 +117,33 @@ For each shadow path: does the plan handle it? If not, flag it.
 
 Flag any `?` as a gap.
 
-### Step 5 — Test matrix
+### Step 5 — Test seams and matrix
+
+#### 5a — Pick the seams first
+
+A seam is a place where behavior can be swapped without editing the code under test — where the fakes get injected. Decide where the feature is tested before deciding what kinds of tests to write.
+
+- Prefer existing seams to new ones. A seam that exists only to make testing possible is an architecture change, not a test decision.
+- Take the highest seam that still reaches the behavior. High seams survive internal refactors; low seams go red when a private method moves.
+- Fewer seams is better, one is ideal. Every extra seam is another set of fakes that can drift from the real thing.
+- If a new seam is needed, propose it at the highest point possible.
+
+Example — "place order, then send confirmation email":
+
+| Seam | What gets faked | Cost |
+|------|-----------------|------|
+| `POST /orders` | Email sender | Survives every refactor below the controller |
+| `OrderService.create` | Email sender, order repo | Breaks when the service interface moves |
+| One spec per collaborator | Validator, pricing, template, SMTP | Four sets of fakes, all red on any internal rename |
+
+Ask the user to confirm the seams before filling the matrix. Record decision.
+
+#### 5b — Fill the matrix
+
+Two rules before writing a single row:
+
+- Test external behavior only. A test that breaks when internals are rewritten but behavior is unchanged is testing the wrong thing.
+- Find prior art. Locate existing tests of the same shape in the codebase and follow their structure instead of inventing a new one.
 
 | Test type | What to cover | Priority |
 |-----------|---------------|----------|
@@ -159,6 +185,9 @@ _[date] - eng-architect - [repo]:[branch]_
 
 ## Interaction edge cases
 [Table]
+
+## Test seams
+[Chosen seam per flow, what gets faked, why this level]
 
 ## Test matrix
 [Table]
