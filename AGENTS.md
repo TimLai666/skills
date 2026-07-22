@@ -4,7 +4,7 @@ This file provides guidance to coding agents (Claude Code and others) when worki
 
 ## Repo 性質
 
-這是一個 Agent Skills 集合 repo（64 個 skill，分成 10 個 plugin），同時是 Claude Code plugin marketplace。沒有 build、lint、test 流程，唯一的腳本是打包工具：
+這是一個 Agent Skills 集合 repo（62 個 skill，分成 11 個 plugin），同時是 Claude Code plugin marketplace。沒有 build、lint、test 流程，唯一的腳本是打包工具：
 
 ```powershell
 python zip_subfolders.py
