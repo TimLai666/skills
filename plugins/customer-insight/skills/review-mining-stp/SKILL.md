@@ -6,7 +6,7 @@ description: >-
   through a review scoring workflow upstream and statistical scripts
   downstream.
 metadata:
-  version: "1.1.2"
+  version: "1.2.0"
 ---
 
 # Review Mining STP
@@ -180,31 +180,37 @@ Applied per review (or per customer). Measures how prominently the attribute fea
 
 Dependency rule: when `salience = 0`, the attribute is treated as absent for this review and must not be included in any per-review analysis. Only reviews with `salience ≥ 1` are counted as mentioning the attribute.
 
-#### Axis B — Product × Attribute: Quality Score (0–10)
+#### Axis B — Quality Score (0–10)
 
-Applied per product (aggregated across all reviews for that product). Measures the overall quality or performance of the product on this attribute as judged by its reviewers.
+**Scored per review, reported per product.** Score each review's evaluation of the attribute, then let the scripts aggregate those scores into the product-level figure. Do not skip the per-review step and judge the product directly — a product-level number with no per-review scores behind it cannot be traced to any review, and this skill's whole evidence contract depends on being able to trace it.
 
-- `0`: extremely poor — near-universal negative evaluation
-- `1–3`: below average — more negative than positive mentions
-- `4`: below average leaning negative — complaints outweigh praise
-- `5`: mixed or neutral — roughly equal positive and negative signals
-- `6–7`: above average — more positive than negative, with some complaints
-- `8–9`: strong — predominantly positive, only minor issues noted
-- `10`: exceptional — near-universal praise with no notable complaints
+Per review, the score measures how well that reviewer judged the product to perform on this attribute:
 
-This score is a product-level aggregate, not a per-review score. It is computed or estimated after all reviews for a product have been read, and represents the overall quality positioning of the product on that attribute.
+- `0`: outright failure — this reviewer says the attribute did not work at all
+- `1–3`: poor — clear complaint, the problem outweighs anything positive they say about it
+- `4`: leaning negative — reservations dominate, but they concede something
+- `5`: mixed or neutral — praise and complaint roughly balance, or the reviewer is genuinely undecided
+- `6–7`: decent — satisfied overall, with a caveat they bothered to write down
+- `8–9`: strong — clearly satisfied, at most a minor nitpick
+- `10`: exceptional — unreserved praise on this attribute
 
-Column naming:
-- Per-review salience: `<attribute_key>_salience`
-- Product-level quality: `<attribute_key>_quality`
+The wording is about one reviewer's verdict, not a tally across reviewers. Counting across reviewers happens in aggregation.
+
+Leave the cell empty when `salience = 0`. A reviewer who never raised the attribute has no opinion on it, and averaging in a default would drag every product toward the middle.
+
+**Aggregation is the scripts' job, not yours.** `build_positioning_scorecard` averages the per-review quality scores across the reviews that actually mentioned the attribute (`salience >= 1`), per brand. The product-level figure is therefore always derived, always reproducible, and always traceable back to the exact reviews that produced it.
+
+Column naming, both per review in `review_scoring_table.csv`:
+- Salience: `<attribute_key>_salience`
+- Quality: `<attribute_key>_quality`
 
 ### Scoring Workflow Steps
 
 1. Read each review one by one.
 2. Run an attribute-discovery pass across the full corpus.
 3. Freeze the attribute catalog with definitions, theory annotations (from the four permitted families only), and paired score-column names.
-4. Score every review against the frozen attribute catalog using Axis A (salience 0–7).
-5. After reading all reviews per product, compute Axis B (quality 0–10) per product per attribute.
+4. Score every review against the frozen attribute catalog on **both** axes: Axis A (salience 0–7) and Axis B (quality 0–10, left empty wherever salience is 0).
+5. Stop there. The product-level quality figure is aggregated by the scripts from these per-review scores — do not judge products directly.
 6. Convert qualitative review text into quantitative data on both axes.
 7. Use the scored output for downstream statistical analysis and research models.
 
@@ -265,18 +271,13 @@ Optional metadata columns may include:
 
 The table is per-review. If no stable person-level identity exists, `unit_id` may default to `review_id`.
 
-### `product_quality_scorecard.csv`
+### Product-level quality — derived, not supplied
 
-New artifact replacing the per-review valence axis. Required columns:
+There is no product × attribute file to prepare. The runner computes the product-level quality matrix from `review_scoring_table.csv` and emits it as the `quality` rows of `positioning_scorecard.csv`, one row per brand × attribute.
 
-- `product`
-- `brand`
-- `n_reviews` — number of reviews used to compute the scores
-- One `<attribute_key>_quality` column per attribute (Axis B, 0–10)
+Supply the per-review scores and the aggregate follows. Anything you hand-write at product level would be an unauditable second opinion competing with the derived figure.
 
-This is the product × attribute quality matrix. Each cell is the product-level quality score for that attribute, estimated from all reviews of that product.
-
-> **Not yet consumed by the scripts.** `scripts/stp_runner/router.py` does not list this file in `FULL_CANONICAL_REQUIRED`, and `positioning.py` still builds brand points from the `salience` / `valence` axes in `positioning_scorecard.csv`. The valence → quality migration described here is specified but not implemented. Do not prepare this file expecting the runner to read it, and do not treat its absence as a blocking error.
+> **Column label note.** `dimension_catalog` still declares the Axis B column under the field name `valence_column`, and `positioning_scorecard.csv` still labels the aggregated axis `valence`. Those are the internal field and axis names; the data column itself follows the `<attribute_key>_quality` convention. The internal labels are stale but harmless — do not rename them without updating `io.py`, `positioning.py` and `reporting.py` together.
 
 ### `review_foundation.json`
 
@@ -362,7 +363,7 @@ The catalog is the script-facing bridge from upstream attribute extraction into 
 ## Run Modes
 
 - `full`: starts from canonical scored artifacts and emits the three statistical intermediates
-- `full` canonical input requires `review_scoring_table.csv + review_foundation.json + attribute_catalog.csv + analysis_context.json + brands.json + ideal_point.json` — this list matches what `router.py` actually enforces. `product_quality_scorecard.csv` is specified but not yet consumed; see its section above
+- `full` canonical input requires `review_scoring_table.csv + review_foundation.json + attribute_catalog.csv + analysis_context.json + brands.json + ideal_point.json` — this list matches what `router.py` enforces. There is no product-level file to supply; the quality matrix is derived from the per-review scores
 - `segmentation`: uses `review_foundation.json + segmentation_variables.csv`
 - `targeting`: uses `segment_profiles.json + targeting_dataset.csv`
 - `positioning`: uses `positioning_scorecard.csv + brands.json + ideal_point.json`
@@ -398,7 +399,7 @@ Generated intermediate artifacts in `full` mode:
 ### Positioning
 
 - build the scorecard from `stat_roles` containing `positioning`
-- use `quality` columns (Axis B) from `product_quality_scorecard.csv` as the primary product positioning features
+- use the aggregated `quality` scores (Axis B) from `positioning_scorecard.csv` as the primary product positioning features
 - cross-reference with `salience` columns (Axis A) to weight attributes by customer concern level
 - default to `factor_analysis`
 - allow `MDS` when similarity-based input is explicitly requested
