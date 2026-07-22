@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 ## Command routing
@@ -28,13 +28,17 @@ metadata:
 ### Preamble
 
 ```bash
-_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
-_REPO=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")
-_DIR=$(python3 "<project-memory skill dir>/scripts/memory.py" projectdir 2>/dev/null)
+_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-')
+[ -z "$_BRANCH" ] && _BRANCH="unknown"
+_REPO=$(basename "$_ROOT" 2>/dev/null)
 echo "BRANCH: $_BRANCH"
-echo "REPO: $_REPO"
-DESIGN=$(ls -t "$_DIR"/*-$_BRANCH-*-plan.md 2>/dev/null | head -1)
-[ -z "$DESIGN" ] && DESIGN=$(ls -t "$_DIR"/*-plan.md 2>/dev/null | head -1)
+echo "REPO: ${_REPO:-unknown}"
+_DIR="$_ROOT/docs/plans"
+DESIGN=$(find "$_DIR" -maxdepth 1 -name "*-$_BRANCH-*-plan.md" -type f -exec ls -t {} + 2>/dev/null | head -1)
+[ -z "$DESIGN" ] && DESIGN=$(find "$_DIR" -maxdepth 1 -name '*-plan.md' -type f -exec ls -t {} + 2>/dev/null | head -1)
+[ -z "$DESIGN" ] && [ -n "$_ROOT" ] && DESIGN=$(find "$_ROOT" -name '*-plan.md' -type f \
+  -not -path '*/.git/*' -not -path '*/node_modules/*' -exec ls -t {} + 2>/dev/null | head -1)
 [ -n "$DESIGN" ] && echo "PLAN_DOC: $DESIGN" || echo "PLAN_DOC: none"
 [ -f PLAN.md ] && echo "PLAN_FILE: PLAN.md" || echo "PLAN_FILE: none"
 [ -f Gemfile ] && echo "STACK:ruby"
@@ -49,9 +53,11 @@ cat ARCHITECTURE.md 2>/dev/null | head -40
 
 Read the plan document or `PLAN.md` if they exist. Read all existing architecture docs before designing anything new.
 
+`plan-grilling` defaults to `docs/plans/` but writes wherever the user asked it to, which is why the last glob sweeps the whole repo. It matches on the `*-plan.md` filename, not the directory.
+
 ### One question at a time
 
-Same rule as feature-planner: ask one question, wait for answer, record decision, move on. Use multiple choice with recommendation when a decision is needed.
+Same rule as `plan-grilling`: ask one question, wait for answer, record decision, move on. Use multiple choice with recommendation when a decision is needed.
 
 ### Step 1 — Architecture diagram
 

@@ -42,6 +42,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | Skill | 適合什麼需求 |
 | --- | --- |
 | `ultrathink` | 任何需要動腦的時刻——文案、報告、提案、規劃商品或功能、寫程式、debug——都先依序跑過全部內建思考框架（目前含邏輯推導：MECE、空雨傘、魚骨圖；創意發想：六頂思考帽、腳本圖、心智圖；市場分析：3C 分析、SWOT 分析、4P與4C；進度管理：惠特默模型、KPI 樹狀圖、PDCA；權衡得失：決策矩陣、PMI 表、力場分析；預測未來：S 型曲線、鴻溝理論、長尾模型；辯論思考：需根解損、判定立駁，論點以主張、資料、推論三要素構建、以質詢拆解三問檢驗；思維模型：第一性原理、反向思考法、二階思考、能力圈、奧坎剃刀），全程以約 160 條謬誤檢核清單把關推理，把方向與重點想清楚再動手。 |
+| `plan-grilling` | 動手之前想被逼問一輪：功能、行銷檔期、提案、流程調整、個人抉擇都適用。釐清真正的痛點、挑戰 scope，一次問一題並附上建議選項，決策當場記進 `docs/plans/`。 |
 
 ### `output-style` — 輸出呈現層
 
@@ -108,7 +109,6 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 
 | Skill | 適合什麼需求 |
 | --- | --- |
-| `feature-planner` | 想規劃功能、釐清痛點、挑戰 scope。一題一題問，每題提供 agent 建議，決策立即記錄。 |
 | `eng-architect` | 想設計技術架構、畫 architecture diagram、做 error map、建立 delivery-plan.md 等協作 artifact。 |
 | `diff-inspector` | 想在合併前審查 diff：scope drift check、critical code review、specialist 並行掃描、adversarial review。 |
 | `test-and-fix` | 想跑測試、根據 diff 自動找出 affected routes、修復後加回歸測試。 |

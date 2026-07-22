@@ -8,7 +8,7 @@ allowed-tools:
   - Edit
   - AskUserQuestion
 metadata:
-  version: "1.5.0"
+  version: "1.6.0"
 ---
 
 ## Why this store and not the agent's own memory
@@ -57,12 +57,6 @@ python3 "$_MEM" --help
 | `search QUERY` | Filter learnings by substring |
 | `stats` | Counts by type and average confidence |
 | `path` | Print the store path for this project |
-| `projectdir [--mkdir]` | Print this project's shared directory |
-
-`projectdir` exists for the other dev-workflow skills. `feature-planner` writes
-its plan document there and `eng-architect` reads it back; both call this rather
-than deriving the slug themselves, because three copy-pasted shell derivations
-had already drifted into two different behaviours.
 
 ---
 

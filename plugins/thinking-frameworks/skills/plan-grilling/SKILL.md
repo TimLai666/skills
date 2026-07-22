@@ -1,6 +1,6 @@
 ---
-name: feature-planner
-description: "Plan a feature before building: brainstorm the idea, challenge scope, and lock decisions one at a time. This skill MUST be invoked on the triggers below, and SHOULD be invoked whenever the user thinks aloud about a feature without naming one. Triggers on: 幫我想這個功能, 幫我規劃, 這個怎麼做, 幫我想一下, feature planning, planning mode, 規劃一下, 做這個功能之前先想清楚"
+name: plan-grilling
+description: "Grill a plan before anyone commits to it — a feature, a campaign, a proposal, a process change, a personal decision. Reframes the problem, challenges the scope, and locks decisions one at a time. This skill MUST be invoked on the triggers below, and SHOULD be invoked whenever the user thinks aloud about something they want to build, launch, or decide. MUST NOT be skipped because the plan already sounds settled — a plan that sounds settled is exactly where unexamined decisions hide. Triggers on: 幫我規劃, 規劃一下, 幫我想一下, 這個怎麼做, 逼問我, 壓力測試這個計畫, 幫我想這個功能, grill me, planning mode, 動手之前先想清楚"
 allowed-tools:
   - Bash
   - Read
@@ -12,16 +12,37 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.3.0"
+  version: "2.0.0"
 ---
+
+## What this covers
+
+Any plan that someone is about to commit resources to. A feature, a marketing
+campaign, a proposal, a process change, a hiring decision, a personal call.
+The interview is the same in every case: find the real pain, reframe it,
+challenge the scope, and force every implicit decision into the open.
+
+Nothing here is specific to writing code. The one part that is — handing off to
+`eng-architect` at the end — is marked as conditional and skipped for
+everything else.
 
 ## Auto-trigger
 
-When the user describes something they want to build, is thinking about a new feature, or says anything that implies "I need to plan this before coding", activate this skill automatically. Do not wait for an explicit command.
+When the user describes something they want to build, launch, change, or
+decide, or says anything that implies "I need to think this through before I
+start", activate this skill automatically. Do not wait for an explicit command.
 
 ---
 
 ## Core rules
+
+### Ask about decisions, look up facts
+
+If an answer can be found by reading the files, the config, the git history, or
+by running a command, go and find it. Do not spend the user's turn on something
+you could have looked up yourself.
+
+The decisions are theirs. Put every one of those to them and wait.
 
 ### One question at a time
 
@@ -48,20 +69,33 @@ After each answer, append the decision to the plan document before asking the ne
 
 ### Where the plan document goes
 
-Resolve the directory once, at the start, and reuse it. Do not guess the slug —
-`eng-architect` looks for this file later using the same resolver, and a guessed
-directory means it finds nothing.
+Wherever the user says. They may already have a home for this kind of document —
+a `planning/` folder, an existing docs tree, a vault outside the repo. If they
+name one, use it and do not talk them out of it.
+
+Only when they have not said anything, default to `docs/plans/` inside the repo.
+Resolve the directory once at the start and reuse it for the rest of the session.
 
 ```bash
-_MEM="<project-memory skill dir>/scripts/memory.py"
-_DIR=$(python3 "$_MEM" projectdir --mkdir)
-_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
-_PLAN="$_DIR/$(date +%Y-%m-%d)-$_BRANCH-<feature>-plan.md"
-echo "PLAN: $_PLAN"
+_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-')
+[ -z "$_BRANCH" ] && _BRANCH="no-branch"
+if [ -n "$_ROOT" ]; then
+  mkdir -p "$_ROOT/docs/plans"
+  echo "PLAN: $_ROOT/docs/plans/$(date +%Y-%m-%d)-$_BRANCH-<slug>-plan.md"
+else
+  echo "PLAN: none"
+fi
 ```
 
-`memory.py` ships with the `project-memory` skill in this same plugin. If it is
-missing, say so rather than inventing a path.
+The directory is negotiable, the filename is not. Keep the
+`<date>-<branch>-<slug>-plan.md` shape wherever the file lands — `eng-architect`
+locates the plan by globbing that shape, so a file named any other way is a file
+it will not find.
+
+`PLAN: none` means this is not a git repo — a standalone campaign or a personal
+decision, for instance. Ask the user where the plan should go. Do not pick a
+location yourself and do not write outside their project.
 
 ---
 
@@ -124,8 +158,8 @@ For each section:
 After all decisions are recorded, write the final plan document:
 
 ```markdown
-# Feature Plan: [feature name]
-_Created: [date] - feature-planner - [repo]:[branch]_
+# Plan: [what is being planned]
+_Created: [date] - plan-grilling - [repo]:[branch]_
 
 ## Problem
 [2-3 sentences: the real pain, who has it, why now]
@@ -156,5 +190,11 @@ _Created: [date] - feature-planner - [repo]:[branch]_
 [All recorded decisions from Phase 1-2]
 
 ## Next step
-Run eng-architect to lock architecture and build convergence artifacts.
+[One action, and only one.]
 ```
+
+For development work, that next step is `eng-architect` — it reads this file to
+lock architecture and build the convergence artifacts. It ships in the
+`dev-workflow` plugin, so only name it once you have confirmed the user has that
+plugin installed. For everything else, write the single action that moves this
+plan forward.
