@@ -47,7 +47,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 
 | Skill | 適合什麼需求 |
 | --- | --- |
-| `i-have-adhd` | 想讓每一則回覆都好讀好動手：先給目前焦點、多步驟編號、每輪重述進度，發現的問題全部揭露並寫進專案 `AGENTS.md` 的 Active Issues ledger 持續追蹤，驗證通過才移除。只管呈現方式，不覆蓋 `AGENTS.md` 的流程與完成回報規則。 |
+| `i-have-adhd` | 想讓每一則回覆都好讀好動手：先給目前焦點、多步驟編號、每輪重述進度，發現的問題全部當場揭露，你點頭要做的才寫進專案 `AGENTS.md` 的 Active Issues ledger 追蹤，驗證通過才移除。只管呈現方式，不覆蓋 `AGENTS.md` 的流程與完成回報規則。 |
 
 ### `business-strategy` — 商業策略與評估
 
