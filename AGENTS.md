@@ -6,8 +6,8 @@ This file provides guidance to coding agents (Claude Code and others) when worki
 
 這是一個 Agent Skills 集合 repo（62 個 skill，分成 11 個 plugin），同時是 Claude Code plugin marketplace。沒有 build、lint、test 流程，唯一的腳本是打包工具：
 
-```powershell
-python zip_subfolders.py
+```bash
+python3 zip_subfolders.py
 ```
 
 它會掃描 `plugins/*/skills/*`，把每個 skill 資料夾壓成 `output/<skill_name>.zip`（覆蓋重建）。`output/` 與 `*.zip` 已在 .gitignore。
@@ -108,7 +108,7 @@ Claude Code 另有 `disable-model-invocation`、`user-invocable`、`disallowed-t
 - `plugins/*/skills/*/SKILL.md` 的數量、README 表格列數、README 開頭總數三者一致。
 - 所有動過的 JSON 能正常解析，所有動過的 SKILL.md frontmatter 能通過 YAML parser。
 - 動過的 description 至少含一個 `MUST`，該有的 `SHOULD` 與 `MUST NOT` 也在，且總長仍 <1024 字元。
-- 需要 claude.ai 上傳包時，跑 `python zip_subfolders.py` 確認 exit 0。
+- 需要 claude.ai 上傳包時，跑 `python3 zip_subfolders.py` 確認 exit 0。
 
 skill 若會在使用者專案裡產生檔案，額外檢查三條：
 

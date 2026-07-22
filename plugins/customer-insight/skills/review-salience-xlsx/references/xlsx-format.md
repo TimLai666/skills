@@ -151,7 +151,9 @@ ws.row_dimensions[2].height = 42
 # Freeze panes
 ws.freeze_panes = "E3"
 
-# Save
+# Save to the working directory — not the outputs directory.
+# Formulas must be recalculated before the file is delivered (see below),
+# and recalc runs against this build path.
 wb.save("/home/claude/salience_matrix.xlsx")
 ```
 
@@ -161,4 +163,4 @@ wb.save("/home/claude/salience_matrix.xlsx")
 python scripts/recalc.py /home/claude/salience_matrix.xlsx 60
 ```
 
-Check that the returned JSON shows `"status": "success"` and `"total_errors": 0`.
+Check that the returned JSON shows `"status": "success"` and `"total_errors": 0`. Only then copy the file to the outputs directory and call `present_files` on the copy.

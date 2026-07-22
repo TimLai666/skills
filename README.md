@@ -33,7 +33,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 
 ### claude.ai（逐個上傳 zip）
 
-在 repo 根目錄執行 `python zip_subfolders.py`，會把每個 skill 壓成 `output/<skill>.zip`，再到 claude.ai Settings → Capabilities 上傳。
+在 repo 根目錄執行 `python3 zip_subfolders.py`，會把每個 skill 壓成 `output/<skill>.zip`，再到 claude.ai Settings → Capabilities 上傳。
 
 ## Plugin 目錄
 
@@ -178,7 +178,7 @@ plugins/<plugin>/
 - 在 repo 根目錄執行：
 
 ```powershell
-python zip_subfolders.py
+python3 zip_subfolders.py
 ```
 
 - 腳本會做的事：

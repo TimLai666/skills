@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.3.0"
+  version: "1.3.1"
 ---
 
 ## Auto-trigger
@@ -219,12 +219,14 @@ For ASK: batch into one question with recommendation.
 ## Step 5 — Documentation staleness
 
 ```bash
-for doc in README.md ARCHITECTURE.md CONTRIBUTING.md CLAUDE.md; do
+for doc in README.md ARCHITECTURE.md CONTRIBUTING.md AGENTS.md CLAUDE.md; do
   [ -f "$doc" ] && echo "DOC: $doc" || true
 done
 ```
 
 If the diff changes behavior described in a doc that was not updated, flag as informational.
+
+`AGENTS.md` matters most here: it is the project operating contract, and several skills write their own sections into it. A diff that changes required artifacts, handoff rules or deployment constraints without touching it leaves the contract lying to the next agent.
 
 ---
 

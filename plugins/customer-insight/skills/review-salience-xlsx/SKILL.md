@@ -3,7 +3,7 @@ name: review-salience-xlsx
 description: |
   This skill MUST be used when the user has product review files and wants to: (1) score each review on a set of attributes using a salience scale (0–7) and export a review × attribute matrix as .xlsx; (2) run PCA to reduce attributes into latent dimensions; (3) cluster reviews into customer segments with K-means. Trigger on requests like 「逐則評論評分」、「顯著度矩陣」、「salience scoring」、「主成分分析」、 「PCA」、「顧客分群」、「K-means」、「評論×屬性 Excel」, or any combination thereof. Also trigger when this step follows an attribute-discovery workflow and the user wants scored data, dimensionality reduction, or segmentation. MUST be used even if the user only mentions part of the pipeline.
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Review Salience → PCA → K-means Customer Segmentation
@@ -163,8 +163,8 @@ Key steps:
 
 ### Step 7 — Output
 
-- Save `.xlsx` to `/mnt/user-data/outputs/`
-- Save `.docx` to `/mnt/user-data/outputs/` (if Word output was requested)
+- Build the `.xlsx` in the working directory, then copy it to the outputs directory. The build path is where `scripts/recalc.py` runs — recalculate first, copy second, or the delivered file carries uncalculated formulas.
+- Build the `.docx` the same way, if Word output was requested.
 - Call `present_files` for every output file
 - Write a prose summary: total reviewed, cluster sizes + names, top finding per cluster
 

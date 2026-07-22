@@ -6,7 +6,7 @@ description: >-
   through a review scoring workflow upstream and statistical scripts
   downstream.
 metadata:
-  version: "1.1.1"
+  version: "1.1.2"
 ---
 
 # Review Mining STP
@@ -276,6 +276,8 @@ New artifact replacing the per-review valence axis. Required columns:
 
 This is the product × attribute quality matrix. Each cell is the product-level quality score for that attribute, estimated from all reviews of that product.
 
+> **Not yet consumed by the scripts.** `scripts/stp_runner/router.py` does not list this file in `FULL_CANONICAL_REQUIRED`, and `positioning.py` still builds brand points from the `salience` / `valence` axes in `positioning_scorecard.csv`. The valence → quality migration described here is specified but not implemented. Do not prepare this file expecting the runner to read it, and do not treat its absence as a blocking error.
+
 ### `review_foundation.json`
 
 Required keys for the scripts:
@@ -360,7 +362,7 @@ The catalog is the script-facing bridge from upstream attribute extraction into 
 ## Run Modes
 
 - `full`: starts from canonical scored artifacts and emits the three statistical intermediates
-- `full` canonical input requires `review_scoring_table.csv + product_quality_scorecard.csv + review_foundation.json + attribute_catalog.csv + analysis_context.json + brands.json + ideal_point.json`
+- `full` canonical input requires `review_scoring_table.csv + review_foundation.json + attribute_catalog.csv + analysis_context.json + brands.json + ideal_point.json` — this list matches what `router.py` actually enforces. `product_quality_scorecard.csv` is specified but not yet consumed; see its section above
 - `segmentation`: uses `review_foundation.json + segmentation_variables.csv`
 - `targeting`: uses `segment_profiles.json + targeting_dataset.csv`
 - `positioning`: uses `positioning_scorecard.csv + brands.json + ideal_point.json`
