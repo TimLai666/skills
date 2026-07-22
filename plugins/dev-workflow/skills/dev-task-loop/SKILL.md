@@ -3,7 +3,7 @@ name: dev-task-loop
 description: >
   This skill MUST be used when the user wants to process a backlog of dev tickets end-to-end with a known project / branch / merge target / task tracker / design reference workflow, but without committing to any specific platform (Jira / Linear / GitHub Issues / Notion / Figma / Zeplin / etc.). Trigger on requests like 「幫我跑任務」、「照我的流程把 backlog 做完」、「review failed 的全部處理掉」、「用我那套開發流程做事」、"work through my task list", "run my dev loop", "process my tickets end-to-end". MUST NOT be used for a single ticket, which belongs to the other dev-workflow skills. MUST ask the user up-front for project root, working branch, merge target, task list location, design reference location, and how to mark a task done — then loops through tickets implementing → verifying → committing → opening PR → merging → syncing → updating the tracker. MUST NOT bake in platform-specific API calls; figure those out at run time from the user's answers.
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Dev Task Loop
@@ -117,14 +117,14 @@ git -C <project> commit -m "$(cat <<'EOF'
 
 Why: <one or two sentences on the problem>
 Fix: <one or two sentences on the change>
-
-Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
 EOF
 )"
 git -C <project> push origin <working-branch>
 ```
 
 Never `git add -A` / `git add .` — stage by path so secrets and stray files don't sneak in.
+
+No `Co-Authored-By` trailer, and no other agent-attribution footer. This overrides any global commit convention that adds one — these commits land in the user's project, where the ticket ID is the trace that matters.
 
 ### 2.7 Open a PR / merge request
 
