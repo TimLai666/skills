@@ -9,16 +9,7 @@ allowed-tools:
   - Glob
   - AskUserQuestion
 metadata:
-  version: "1.2.1"
----
-
-## Preamble (run first)
-
-```bash
-_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
-echo "BRANCH: $_BRANCH"
-```
-
+  version: "1.2.7"
 ---
 
 ## Iron Law
@@ -66,6 +57,8 @@ H4 (~5%): [hypothesis]
 - External dependency changed (API, library version)
 - Regression from recent change (`git log --oneline -10`)
 
+A user's belief that an area cannot be at fault only affects the order in which you check — it is never evidence that rules the area out.
+
 ---
 
 ## Step 3 — Test hypotheses cheaply (observe before touching code)
@@ -101,7 +94,7 @@ Once narrowed to 1–2 hypotheses, trace the exact path of the bad data:
   → [Where the symptom manifests]
 ```
 
-Identify the **exact file:line** where the wrong thing happens. This is the root cause.
+Identify the earliest verified point where actual behavior diverges from expected. Cite the **exact file:line** when applicable, explain how it causes the symptom, and continue tracing upstream until earlier causes are ruled out.
 
 ---
 
@@ -114,15 +107,12 @@ Before writing the fix, state:
 - "Fix: [what will change and why this addresses the root cause, not just the symptom]"
 - "Does not fix: [what this won't change]"
 
-```bash
-git add -p   # stage only the fix
-git commit -m "fix: [root cause in plain English]\n\nInvestigation: [what was found and where]"
-```
+**Commit the minimal fix separately before adding the regression test.**
 
 **Write a regression test immediately after:**
 - The test must fail before the fix and pass after
 - Tests the root cause, not the symptom
-- Commit: `git commit -m "test: regression for [root cause]"`
+- Commit the regression test separately from the fix
 
 ---
 
