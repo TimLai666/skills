@@ -92,11 +92,11 @@ def _base_column_lookup(foundation: dict[str, Any]) -> dict[str, str]:
             continue
         lookup[column] = column
         salience_column = str(item.get("salience_column", ""))
-        valence_column = str(item.get("valence_column", ""))
+        quality_column = str(item.get("quality_column", ""))
         if salience_column:
             lookup[salience_column] = column
-        if valence_column:
-            lookup[valence_column] = column
+        if quality_column:
+            lookup[quality_column] = column
     return lookup
 
 
@@ -106,12 +106,12 @@ def _axis_for_column(foundation: dict[str, Any], column: str) -> str:
             continue
         if str(item.get("salience_column", "")) == str(column):
             return "salience"
-        if str(item.get("valence_column", "")) == str(column):
-            return "valence"
+        if str(item.get("quality_column", "")) == str(column):
+            return "quality"
     if str(column).endswith("_salience"):
         return "salience"
-    if str(column).endswith("_valence"):
-        return "valence"
+    if str(column).endswith("_quality"):
+        return "quality"
     return "mixed"
 
 
@@ -403,8 +403,8 @@ def _columns_for_stage(
         if not isinstance(item, dict):
             continue
         salience_column = str(item.get("salience_column", ""))
-        valence_column = str(item.get("valence_column", ""))
-        expanded_columns = [column for column in [salience_column, valence_column] if column]
+        quality_column = str(item.get("quality_column", ""))
+        expanded_columns = [column for column in [salience_column, quality_column] if column]
         if not expanded_columns:
             column = str(item.get("column", ""))
             expanded_columns = [column] if column else []
@@ -686,7 +686,7 @@ def _build_statistical_results(
         "coefficient": coefficient,
         "confidence_interval": confidence_interval,
         "result_direction": result_direction,
-        "axis_breakdown": axis_breakdown or {"salience": None, "valence": None},
+        "axis_breakdown": axis_breakdown or {"salience": None, "quality": None},
     }
 
 
@@ -720,12 +720,12 @@ def _axes_used_for_columns(foundation: dict[str, Any], columns: list[str]) -> st
     axes = {
         _axis_for_column(foundation, column)
         for column in columns
-        if _axis_for_column(foundation, column) in {"salience", "valence"}
+        if _axis_for_column(foundation, column) in {"salience", "quality"}
     }
     if axes == {"salience"}:
         return "salience"
-    if axes == {"valence"}:
-        return "valence"
+    if axes == {"quality"}:
+        return "quality"
     return "mixed"
 
 
@@ -736,20 +736,20 @@ def _axis_modeling_summary(
     positioning_method: str | None,
 ) -> dict[str, Any]:
     salience_columns = [column for column in relevant_columns if _axis_for_column(foundation, column) == "salience"]
-    valence_columns = [column for column in relevant_columns if _axis_for_column(foundation, column) == "valence"]
+    quality_columns = [column for column in relevant_columns if _axis_for_column(foundation, column) == "quality"]
     if stage == "segmentation":
-        modeling_rule = "Salience and valence columns are standardized separately, then modeled together through factor analysis before K-means clustering."
+        modeling_rule = "Salience and quality columns are standardized separately, then modeled together through factor analysis before K-means clustering."
     elif stage == "targeting":
-        modeling_rule = "Salience and valence columns are both tested as candidate drivers; continuous variables flow into ANOVA/regression, and binary variables flow into chi-square/logistic models."
+        modeling_rule = "Salience and quality columns are both tested as candidate drivers; continuous variables flow into ANOVA/regression, and binary variables flow into chi-square/logistic models."
     else:
         map_method = "factor analysis" if positioning_method != "mds" else "MDS"
-        modeling_rule = f"Salience and valence columns are combined into one feature matrix for the {map_method} perceptual map and ideal-point distance analysis."
+        modeling_rule = f"Salience and quality columns are combined into one feature matrix for the {map_method} perceptual map and ideal-point distance analysis."
     return {
         "axes_mode": _axes_used_for_columns(foundation, relevant_columns),
         "salience_columns_used": salience_columns,
-        "valence_columns_used": valence_columns,
+        "quality_columns_used": quality_columns,
         "modeling_rule": modeling_rule,
-        "plain_language_explanation": "Salience captures how much an attribute is mentioned; valence captures how positively or negatively that attribute is evaluated.",
+        "plain_language_explanation": "Salience captures how much an attribute is mentioned; quality captures how positively or negatively that attribute is evaluated.",
     }
 
 
@@ -763,10 +763,10 @@ def _axis_breakdown_from_result(
         if key != "axis_breakdown"
     }
     if axes_used == "salience":
-        return {"salience": payload, "valence": None}
-    if axes_used == "valence":
-        return {"salience": None, "valence": payload}
-    return {"salience": payload, "valence": payload}
+        return {"salience": payload, "quality": None}
+    if axes_used == "quality":
+        return {"salience": None, "quality": payload}
+    return {"salience": payload, "quality": payload}
 
 
 def _segmentation_sample_size(stage_summary: dict[str, Any], score_table: Any) -> int | None:
@@ -1751,7 +1751,7 @@ def _render_axis_modeling(summary: dict[str, Any], indent: str = "") -> list[str
     return [
         f"{indent}- axes_mode: {summary.get('axes_mode', 'n/a')}",
         f"{indent}- salience_columns_used: {', '.join(summary.get('salience_columns_used', [])) or 'none'}",
-        f"{indent}- valence_columns_used: {', '.join(summary.get('valence_columns_used', [])) or 'none'}",
+        f"{indent}- quality_columns_used: {', '.join(summary.get('quality_columns_used', [])) or 'none'}",
         f"{indent}- modeling_rule: {summary.get('modeling_rule', 'n/a')}",
         f"{indent}- plain_language_explanation: {summary.get('plain_language_explanation', 'n/a')}",
     ]
@@ -1759,7 +1759,7 @@ def _render_axis_modeling(summary: dict[str, Any], indent: str = "") -> list[str
 
 def _render_axis_breakdown(axis_breakdown: dict[str, Any], indent: str = "") -> list[str]:
     lines: list[str] = []
-    for axis in ["salience", "valence"]:
+    for axis in ["salience", "quality"]:
         payload = axis_breakdown.get(axis)
         if payload is None:
             lines.append(f"{indent}- {axis}: null")

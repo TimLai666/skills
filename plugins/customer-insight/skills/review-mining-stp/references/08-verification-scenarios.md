@@ -41,16 +41,16 @@ Use these scenarios to verify both the workflow boundary and the downstream stat
   - missing `review_text`
   - missing `product`
   - missing `plain_language_definition`
-  - missing paired `*_salience` or `*_valence` column
+  - missing paired `*_salience` or `*_quality` column
   - incomplete `theme_mapping`
   - empty `theme_mapping`
   - `theme_mapping` references an unknown column
   - one column is mapped to multiple themes
   - `dimension_catalog.theme` does not match `theme_mapping`
   - `salience` outside `0-7`
-  - `valence` outside `0-10`
-  - `salience = 0` but `valence` is present
-  - `salience >= 1` but `valence` is missing
+  - `quality` outside `0-10`
+  - `salience = 0` but `quality` is present
+  - `salience >= 1` but `quality` is missing
   - missing `attribute_catalog.csv`
   - fewer than `30` attributes without `shortfall_reason`
 - Expected:

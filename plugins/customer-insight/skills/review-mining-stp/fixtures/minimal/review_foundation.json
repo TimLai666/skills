@@ -6,7 +6,7 @@
       "theme": "protection",
       "attribute_group": "attribute_function",
       "salience_column": "anti_fog_salience",
-      "valence_column": "anti_fog_quality",
+      "quality_column": "anti_fog_quality",
       "stat_roles": [
         "segmentation",
         "positioning",
@@ -31,7 +31,7 @@
       "theme": "protection",
       "attribute_group": "attribute_function",
       "salience_column": "impact_protection_salience",
-      "valence_column": "impact_protection_quality",
+      "quality_column": "impact_protection_quality",
       "stat_roles": [
         "segmentation",
         "positioning",
@@ -56,7 +56,7 @@
       "theme": "wearability",
       "attribute_group": "benefit_use",
       "salience_column": "comfort_fit_salience",
-      "valence_column": "comfort_fit_quality",
+      "quality_column": "comfort_fit_quality",
       "stat_roles": [
         "segmentation",
         "positioning",
@@ -81,7 +81,7 @@
       "theme": "brand_experience",
       "attribute_group": "brand_image",
       "salience_column": "style_appearance_salience",
-      "valence_column": "style_appearance_quality",
+      "quality_column": "style_appearance_quality",
       "stat_roles": [
         "segmentation",
         "positioning"
@@ -105,7 +105,7 @@
       "theme": "brand_experience",
       "attribute_group": "benefit_use",
       "salience_column": "after_sales_salience",
-      "valence_column": "after_sales_quality",
+      "quality_column": "after_sales_quality",
       "stat_roles": [
         "positioning",
         "potential_target"

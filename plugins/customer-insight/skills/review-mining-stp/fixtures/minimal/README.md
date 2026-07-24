@@ -34,7 +34,7 @@ The fixture is small enough to verify the aggregation by hand. The product-level
 
 | Check | Expected |
 |---|---|
-| `positioning_scorecard.csv`, ArcShield × anti_fog, axis `valence` | `8.4286` |
+| `positioning_scorecard.csv`, ArcShield × anti_fog, axis `quality` | `8.4286` |
 | Same figure computed from `review_scoring_table.csv` by hand | `8.4286` |
 
 If those two ever disagree, the aggregation changed.

@@ -291,15 +291,15 @@ def _validate_statistical_results(package: Any, container_name: str) -> None:
     axis_breakdown = package["axis_breakdown"]
     if not isinstance(axis_breakdown, dict):
         fail(f"{container_name}.axis_breakdown must be an object.")
-    if set(axis_breakdown.keys()) != {"salience", "valence"}:
-        fail(f"{container_name}.axis_breakdown must contain salience and valence.")
+    if set(axis_breakdown.keys()) != {"salience", "quality"}:
+        fail(f"{container_name}.axis_breakdown must contain salience and quality.")
     for axis_name, axis_payload in axis_breakdown.items():
         if axis_payload is None:
             continue
         if not isinstance(axis_payload, dict):
             fail(f"{container_name}.axis_breakdown.{axis_name} must be an object or null.")
         nested = dict(axis_payload)
-        nested.setdefault("axis_breakdown", {"salience": None, "valence": None})
+        nested.setdefault("axis_breakdown", {"salience": None, "quality": None})
         _validate_statistical_results(nested, f"{container_name}.axis_breakdown.{axis_name}")
 
 
@@ -413,8 +413,8 @@ def _validate_findings(
         for text_key in ["finding_id", "finding_statement", "business_implication", "plain_language_explanation"]:
             if not str(finding[text_key]).strip():
                 fail(f"{container_name}[{index}].{text_key} must be non-empty.")
-        if str(finding.get("axes_used")) not in {"salience", "valence", "mixed"}:
-            fail(f"{container_name}[{index}].axes_used must be salience, valence, or mixed.")
+        if str(finding.get("axes_used")) not in {"salience", "quality", "mixed"}:
+            fail(f"{container_name}[{index}].axes_used must be salience, quality, or mixed.")
         _validate_described_items(
             finding.get("methods_used"),
             f"{container_name}[{index}].methods_used",
@@ -483,15 +483,15 @@ def _validate_stage_report_contract(
         [
             "axes_mode",
             "salience_columns_used",
-            "valence_columns_used",
+            "quality_columns_used",
             "modeling_rule",
             "plain_language_explanation",
         ],
         f"{summary_name}.axis_modeling_summary",
     )
-    if str(axis_modeling_summary["axes_mode"]) not in {"salience", "valence", "mixed"}:
-        fail(f"{summary_name}.axis_modeling_summary.axes_mode must be salience, valence, or mixed.")
-    for key in ["salience_columns_used", "valence_columns_used"]:
+    if str(axis_modeling_summary["axes_mode"]) not in {"salience", "quality", "mixed"}:
+        fail(f"{summary_name}.axis_modeling_summary.axes_mode must be salience, quality, or mixed.")
+    for key in ["salience_columns_used", "quality_columns_used"]:
         if not isinstance(axis_modeling_summary[key], list):
             fail(f"{summary_name}.axis_modeling_summary.{key} must be a list.")
     for key in ["modeling_rule", "plain_language_explanation"]:

@@ -37,7 +37,7 @@ The review scoring workflow:
 1. reads each review one by one
 2. extracts a corpus-level attribute catalog with definitions, mention counts, and example quotes
 3. freezes that attribute catalog for the scoring run
-4. scores each attribute with paired `salience + valence`
+4. scores each attribute with paired `salience + quality`
 5. assigns dynamic theme names plus theory annotations
 6. preserves verbatim `review_text`
 
@@ -75,7 +75,7 @@ The review scoring workflow:
 
 - `review_scoring_table.csv`
   - contains `review_id`, `unit_id`, `brand`, `product`, `review_text`
-  - contains paired columns such as `delivery_confidence_salience`, `delivery_confidence_valence`, `premium_finish_salience`, `premium_finish_valence`
+  - contains paired columns such as `delivery_confidence_salience`, `delivery_confidence_quality`, `premium_finish_salience`, `premium_finish_quality`
 - `review_foundation.json`
   - maps those columns into `dimension_catalog`
   - defines dynamic `theme_mapping`, `theory_annotations`, `attribute_extraction_summary`, and `stat_roles`
@@ -136,7 +136,7 @@ The review scoring workflow:
 ### Expected Outcome
 
 - targeting uses the updated comparison axes
-- the override base names expand into paired salience and valence columns
+- the override base names expand into paired salience and quality columns
 - output includes `priority_segments`, `secondary_segments`, and `deprioritized_segments`
 - the report explains the tests in plain language
 

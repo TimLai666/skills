@@ -210,8 +210,8 @@ def _resolve_comparison_axes(
             requested.append(column_name)
             continue
         salience_column = f"{column_name}_salience"
-        valence_column = f"{column_name}_valence"
-        for expanded in [salience_column, valence_column]:
+        quality_column = f"{column_name}_quality"
+        for expanded in [salience_column, quality_column]:
             if expanded in available_columns:
                 requested.append(expanded)
     if requested:

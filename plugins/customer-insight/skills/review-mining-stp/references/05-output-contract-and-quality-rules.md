@@ -71,7 +71,7 @@ Must be an object with:
 
 - `axes_mode`
 - `salience_columns_used`
-- `valence_columns_used`
+- `quality_columns_used`
 - `modeling_rule`
 - `plain_language_explanation`
 
@@ -281,12 +281,12 @@ Optional factor-analysis diagnostics may retain:
 - Full runs must include `attribute_catalog.csv` and `attribute_extraction_summary`.
 - Full runs must list all three emitted statistical intermediates in `execution_scope.emitted_intermediate_artifacts`.
 - Partial and custom runs must retain accurate prerequisite traces.
-- Full runs must preserve the dual-axis contract: `salience 0-7`, `valence 0-10`, `salience=0 -> valence empty`, `salience>=1 -> valence present`.
+- Full runs must preserve the dual-axis contract: `salience 0-7`, `quality 0-10`, `salience=0 -> quality empty`, `salience>=1 -> quality present`.
 - Segmentation must keep `System 1 / System 2`, Maslow, and the `>5%` cluster guardrail metadata.
 - Targeting must keep current-market and potential-market outputs plus pairwise comparisons where required.
 - Positioning must keep ideal-point logic, pairwise competition distance, and no fabricated vectors in `MDS`.
 - Reports must explain the method and theory used in language that non-specialists can understand.
-- Reports must explain how `salience` and `valence` were modeled.
+- Reports must explain how `salience` and `quality` were modeled.
 - Reports must show dynamic theme coverage in the report body, not only in appendix-style JSON.
 - Reports must show theory families, subtheories, and `not_evidenced` subtheories in the report body.
 - Reports must show attribute-extraction summary plus representative attributes in the report body.

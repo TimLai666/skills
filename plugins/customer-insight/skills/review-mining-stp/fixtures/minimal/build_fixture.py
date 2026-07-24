@@ -175,7 +175,7 @@ def write_review_scoring_table() -> None:
 def write_attribute_catalog() -> None:
     header = [
         "attribute_key", "label", "theme", "attribute_group", "definition",
-        "source_type", "mention_count", "salience_column", "valence_column",
+        "source_type", "mention_count", "salience_column", "quality_column",
         "example_review_id", "example_quote",
     ]
     rows = []
@@ -210,7 +210,7 @@ def write_review_foundation() -> None:
             "theme": attribute["theme"],
             "attribute_group": attribute["attribute_group"],
             "salience_column": f"{key}_salience",
-            "valence_column": f"{key}_quality",
+            "quality_column": f"{key}_quality",
             "stat_roles": attribute["stat_roles"],
             "plain_language_definition": attribute["plain_language_definition"],
             "theory_annotations": attribute["theory_annotations"],
@@ -249,7 +249,7 @@ def write_context_and_targets() -> None:
     (HERE / "ideal_point.json").write_text(json.dumps({
         "label": "Ideal",
         "attributes": {
-            attribute["key"]: {"salience": 6, "valence": 9}
+            attribute["key"]: {"salience": 6, "quality": 9}
             for attribute in ATTRIBUTES
         },
     }, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

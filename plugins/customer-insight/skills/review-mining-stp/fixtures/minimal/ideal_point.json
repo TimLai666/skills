@@ -3,23 +3,23 @@
   "attributes": {
     "anti_fog": {
       "salience": 6,
-      "valence": 9
+      "quality": 9
     },
     "impact_protection": {
       "salience": 6,
-      "valence": 9
+      "quality": 9
     },
     "comfort_fit": {
       "salience": 6,
-      "valence": 9
+      "quality": 9
     },
     "style_appearance": {
       "salience": 6,
-      "valence": 9
+      "quality": 9
     },
     "after_sales": {
       "salience": 6,
-      "valence": 9
+      "quality": 9
     }
   }
 }

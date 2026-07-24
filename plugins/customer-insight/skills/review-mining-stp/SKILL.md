@@ -6,7 +6,7 @@ description: >-
   through a review scoring workflow upstream and statistical scripts
   downstream.
 metadata:
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # Review Mining STP
@@ -277,7 +277,7 @@ There is no product × attribute file to prepare. The runner computes the produc
 
 Supply the per-review scores and the aggregate follows. Anything you hand-write at product level would be an unauditable second opinion competing with the derived figure.
 
-> **Column label note.** `dimension_catalog` still declares the Axis B column under the field name `valence_column`, and `positioning_scorecard.csv` still labels the aggregated axis `valence`. Those are the internal field and axis names; the data column itself follows the `<attribute_key>_quality` convention. The internal labels are stale but harmless — do not rename them without updating `io.py`, `positioning.py` and `reporting.py` together.
+The field that points at the Axis B column is `quality_column`, the aggregated axis in `positioning_scorecard.csv` is labelled `quality`, and the data column follows the `<attribute_key>_quality` convention — one name end to end.
 
 ### `review_foundation.json`
 
@@ -303,7 +303,7 @@ Each `dimension_catalog` item must include:
 - `theme`
 - `attribute_group`
 - `salience_column`
-- `valence_column`
+- `quality_column`
 - `stat_roles`
 - `plain_language_definition`
 - `theory_annotations`
@@ -343,7 +343,7 @@ Required columns:
 - `source_type`
 - `mention_count`
 - `salience_column`
-- `valence_column`
+- `quality_column`
 - `example_review_id`
 - `example_quote`
 - `theory_families` — comma-separated list of applicable theory families from the four permitted
@@ -362,7 +362,7 @@ The catalog is the script-facing bridge from upstream attribute extraction into 
   - `similarity_matrix` — only needed for `--positioning-method mds`
 - `ideal_point.json`
   - `label` — required. The perceptual map uses it to name the ideal point row
-  - `attributes` — one entry per attribute key, either a scalar or `{"salience": n, "valence": n}`. Only the attributes that also appear in `positioning_scorecard.csv` are used; at least two must overlap
+  - `attributes` — one entry per attribute key, either a scalar or `{"salience": n, "quality": n}`. Only the attributes that also appear in `positioning_scorecard.csv` are used; at least two must overlap
 
 A working example of all six canonical inputs lives in [fixtures/minimal/](./fixtures/minimal/). Run it before trusting a change to the scripts.
 
@@ -506,7 +506,7 @@ The final report should visibly show:
 - Always use `product` as the product field name.
 - Axis A scoring (customer × attribute): always use `salience 0–7`.
 - Axis B scoring (product × attribute): always use `quality 0–10`.
-- Never use `valence` as a column name — it is replaced by `quality` in this skill.
+- The Axis B column, field and axis label are all named `quality` end to end. Do not reintroduce `valence` anywhere — the scripts key on `quality` and a `valence` column will not be read.
 - Always preserve verbatim `review_text` for evidence quoting.
 - Always state the statistical method and theory used in each major report section.
 - Always show how Axis A and Axis B were modeled in each major report section.

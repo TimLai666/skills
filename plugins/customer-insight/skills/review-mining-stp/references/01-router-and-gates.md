@@ -14,7 +14,7 @@ The review scoring workflow handles:
 - extracting or curating the corpus-level attribute catalog
 - freezing that catalog before formal scoring starts
 - inferring scored items from the full corpus
-- applying paired `salience` and `valence` scoring to every inferred attribute for every review
+- applying paired `salience` and `quality` scoring to every inferred attribute for every review
 - assigning dynamic `theme` names inferred from the corpus
 - assigning `theory_annotations` and `stat_roles`
 - preserving verbatim review text for later evidence quoting
@@ -59,11 +59,11 @@ Must be per-review and must include:
 All scored attributes must:
 
 - exist in `dimension_catalog`
-- exist as paired `*_salience` and `*_valence` columns
+- exist as paired `*_salience` and `*_quality` columns
 - keep `*_salience` as numeric integers inside `0-7`
-- keep `*_valence` as numeric integers inside `0-10`
-- keep `*_valence` empty when `*_salience = 0`
-- keep `*_valence` present when `*_salience >= 1`
+- keep `*_quality` as numeric integers inside `0-10`
+- keep `*_quality` empty when `*_salience = 0`
+- keep `*_quality` present when `*_salience >= 1`
 
 The scored item count is dynamic. The contract never assumes a fixed item count.
 
@@ -86,7 +86,7 @@ Each `dimension_catalog` item must include:
 - `theme`
 - `attribute_group`
 - `salience_column`
-- `valence_column`
+- `quality_column`
 - `stat_roles`
 - `plain_language_definition`
 - `theory_annotations`
@@ -115,7 +115,7 @@ Must include:
 - `source_type`
 - `mention_count`
 - `salience_column`
-- `valence_column`
+- `quality_column`
 - `example_review_id`
 - `example_quote`
 

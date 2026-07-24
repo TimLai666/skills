@@ -100,7 +100,7 @@ def run_positioning(
     shared_columns = [column for column in pivot.columns if column in ideal_feature_map]
     if len(shared_columns) < 2:
         raise SystemExit(
-            "Positioning requires at least two shared salience/valence features between positioning_scorecard.csv and ideal_point.json."
+            "Positioning requires at least two shared salience/quality features between positioning_scorecard.csv and ideal_point.json."
         )
     pivot = pivot[shared_columns].sort_index()
     ideal_series = pd.Series({column: ideal_feature_map[column] for column in shared_columns}, name=ideal_point["label"])
@@ -147,9 +147,9 @@ def run_positioning(
         attribute_vectors_not_defined = False
         perceptual_map_method = {
             "method": positioning_method_used,
-            "brand_point_source": "factor scores on combined salience + valence feature matrix",
+            "brand_point_source": "factor scores on combined salience + quality feature matrix",
             "ideal_point_source": "factor scores on the same combined feature matrix",
-            "attribute_vector_source": "factor loadings on feature-level salience/valence axes",
+            "attribute_vector_source": "factor loadings on feature-level salience/quality axes",
         }
     else:
         similarity_matrix = brands.get("similarity_matrix")
@@ -344,7 +344,7 @@ def run_positioning(
             "status": "defined",
             "method": "factor_analysis",
             "rule": (
-                "Brand performance is interpreted by projecting brand points onto feature-level salience/valence "
+                "Brand performance is interpreted by projecting brand points onto feature-level salience/quality "
                 "vectors from the origin; ideal-point projection indicates relative importance."
             ),
             "attribute_projection_summary": projection_summary,
@@ -419,9 +419,9 @@ def run_positioning(
 
     axis_contribution_summary = {
         "salience_top_features": _top_axis_features(feature_benchmarks, "salience", reverse=True),
-        "valence_top_features": _top_axis_features(feature_benchmarks, "valence", reverse=True),
+        "quality_top_features": _top_axis_features(feature_benchmarks, "quality", reverse=True),
         "salience_low_features": _top_axis_features(feature_benchmarks, "salience", reverse=False),
-        "valence_low_features": _top_axis_features(feature_benchmarks, "valence", reverse=False),
+        "quality_low_features": _top_axis_features(feature_benchmarks, "quality", reverse=False),
     }
 
     diagnostics = {
@@ -440,7 +440,7 @@ def run_positioning(
         "axis_contribution_summary": axis_contribution_summary,
     }
     interpretation = (
-        f"{nearest['brand']} is closest to the ideal point on the combined salience and valence map. "
+        f"{nearest['brand']} is closest to the ideal point on the combined salience and quality map. "
         "Distance between brand points indicates competitive crowding, while feature vectors indicate which "
         "attribute-axis combinations pull brands toward the ideal."
     )

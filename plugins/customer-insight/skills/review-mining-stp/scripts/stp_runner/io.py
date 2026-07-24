@@ -10,7 +10,7 @@ REQUIRED_DIMENSION_KEYS = {
     "theme",
     "attribute_group",
     "salience_column",
-    "valence_column",
+    "quality_column",
     "stat_roles",
     "plain_language_definition",
 }
@@ -23,7 +23,7 @@ REQUIRED_ATTRIBUTE_CATALOG_COLUMNS = {
     "source_type",
     "mention_count",
     "salience_column",
-    "valence_column",
+    "quality_column",
     "example_review_id",
     "example_quote",
 }
@@ -205,7 +205,7 @@ def _expand_attribute_tokens(
         token_name = str(token)
         if token_name in pair_columns_by_base:
             pair = pair_columns_by_base[token_name]
-            for axis in ["salience", "valence"]:
+            for axis in ["salience", "quality"]:
                 column = pair[axis]
                 if column in available_columns:
                     expanded.append(column)
@@ -267,9 +267,9 @@ def _validate_attribute_catalog(
             _fail_contract(
                 f"attribute_catalog.csv salience_column for '{attribute_key}' must match dimension_catalog."
             )
-        if str(row["valence_column"]).strip() != str(item["valence_column"]).strip():
+        if str(row["quality_column"]).strip() != str(item["quality_column"]).strip():
             _fail_contract(
-                f"attribute_catalog.csv valence_column for '{attribute_key}' must match dimension_catalog."
+                f"attribute_catalog.csv quality_column for '{attribute_key}' must match dimension_catalog."
             )
         for field in ["label", "definition", "source_type", "example_review_id", "example_quote"]:
             if not str(row[field]).strip():
@@ -380,14 +380,14 @@ def validate_canonical_inputs(
             )
 
         salience_column = str(item["salience_column"]).strip()
-        valence_column = str(item["valence_column"]).strip()
-        if not salience_column or not valence_column:
+        quality_column = str(item["quality_column"]).strip()
+        if not salience_column or not quality_column:
             _fail_contract(
-                f"dimension_catalog column '{column}' must define both salience_column and valence_column."
+                f"dimension_catalog column '{column}' must define both salience_column and quality_column."
             )
-        if salience_column == valence_column:
+        if salience_column == quality_column:
             _fail_contract(
-                f"dimension_catalog column '{column}' must use distinct salience_column and valence_column values."
+                f"dimension_catalog column '{column}' must use distinct salience_column and quality_column values."
             )
 
         stat_roles = item.get("stat_roles")
@@ -403,14 +403,14 @@ def validate_canonical_inputs(
         dimension_columns.append(column)
         pair_columns_by_base[column] = {
             "salience": salience_column,
-            "valence": valence_column,
+            "quality": quality_column,
         }
         axis_column_to_base[salience_column] = column
-        axis_column_to_base[valence_column] = column
+        axis_column_to_base[quality_column] = column
         for role in stat_roles:
             role_name = str(role)
             role_map.setdefault(role_name, []).append(column)
-            expanded_role_map.setdefault(role_name, []).extend([salience_column, valence_column])
+            expanded_role_map.setdefault(role_name, []).extend([salience_column, quality_column])
 
     missing_axis_columns = sorted(
         column
@@ -420,16 +420,16 @@ def validate_canonical_inputs(
     )
     if missing_axis_columns:
         _fail_contract(
-            "review_scoring_table.csv is missing paired salience/valence columns declared in dimension_catalog: "
+            "review_scoring_table.csv is missing paired salience/quality columns declared in dimension_catalog: "
             + ", ".join(missing_axis_columns)
         )
 
     salience_columns: list[str] = []
-    valence_columns: list[str] = []
+    quality_columns: list[str] = []
     numeric_feature_columns: list[str] = []
     for base_column in dimension_columns:
         salience_column = pair_columns_by_base[base_column]["salience"]
-        valence_column = pair_columns_by_base[base_column]["valence"]
+        quality_column = pair_columns_by_base[base_column]["quality"]
 
         salience_values = pd.to_numeric(score_table[salience_column], errors="coerce")
         if salience_values.isna().any():
@@ -446,26 +446,26 @@ def validate_canonical_inputs(
             )
         score_table[salience_column] = salience_values.astype(int)
 
-        valence_values = _normalize_optional_axis_values(
-            score_table[valence_column],
-            valence_column,
+        quality_values = _normalize_optional_axis_values(
+            score_table[quality_column],
+            quality_column,
             max_score=10,
         )
-        invalid_present = (score_table[salience_column] == 0) & valence_values.notna()
+        invalid_present = (score_table[salience_column] == 0) & quality_values.notna()
         if invalid_present.any():
             _fail_contract(
-                f"review_scoring_table.csv column '{valence_column}' must be empty when '{salience_column}' is 0."
+                f"review_scoring_table.csv column '{quality_column}' must be empty when '{salience_column}' is 0."
             )
-        invalid_missing = (score_table[salience_column] >= 1) & valence_values.isna()
+        invalid_missing = (score_table[salience_column] >= 1) & quality_values.isna()
         if invalid_missing.any():
             _fail_contract(
-                f"review_scoring_table.csv column '{valence_column}' must be present when '{salience_column}' is at least 1."
+                f"review_scoring_table.csv column '{quality_column}' must be present when '{salience_column}' is at least 1."
             )
-        score_table[valence_column] = valence_values
+        score_table[quality_column] = quality_values
 
         salience_columns.append(salience_column)
-        valence_columns.append(valence_column)
-        numeric_feature_columns.extend([salience_column, valence_column])
+        quality_columns.append(quality_column)
+        numeric_feature_columns.extend([salience_column, quality_column])
 
     if len(dimension_columns) < 3:
         _fail_contract(
@@ -526,7 +526,7 @@ def validate_canonical_inputs(
         "catalog_by_column": catalog_by_column,
         "dimension_columns": dimension_columns,
         "salience_columns": salience_columns,
-        "valence_columns": valence_columns,
+        "quality_columns": quality_columns,
         "numeric_feature_columns": numeric_feature_columns,
         "pair_columns_by_base": pair_columns_by_base,
         "axis_column_to_base": axis_column_to_base,
@@ -562,13 +562,13 @@ def aggregate_review_scoring_table(score_table: Any, contract: dict[str, Any]) -
         row["review_count"] = int(len(group))
         for base_column, pair in pair_columns_by_base.items():
             salience_column = pair["salience"]
-            valence_column = pair["valence"]
+            quality_column = pair["quality"]
             salience_mean = round(float(pd.to_numeric(group[salience_column]).mean()), 4)
-            mentioned = group.loc[group[salience_column] >= 1, valence_column]
+            mentioned = group.loc[group[salience_column] >= 1, quality_column]
             mentioned_numeric = pd.to_numeric(mentioned, errors="coerce").dropna()
-            valence_mean = round(float(mentioned_numeric.mean()), 4) if not mentioned_numeric.empty else 0.0
+            quality_mean = round(float(mentioned_numeric.mean()), 4) if not mentioned_numeric.empty else 0.0
             row[salience_column] = salience_mean
-            row[valence_column] = valence_mean
+            row[quality_column] = quality_mean
         for column in metadata_columns:
             if column in {"unit_id", "brand", "product"}:
                 continue
@@ -656,11 +656,11 @@ def build_positioning_scorecard(score_table: Any, contract: dict[str, Any]) -> A
         for attribute in positioning_attributes:
             pair = contract["pair_columns_by_base"][attribute]
             salience_column = pair["salience"]
-            valence_column = pair["valence"]
+            quality_column = pair["quality"]
             salience_score = round(float(pd.to_numeric(group[salience_column]).mean()), 4)
-            mentioned = group.loc[group[salience_column] >= 1, valence_column]
-            valence_numeric = pd.to_numeric(mentioned, errors="coerce").dropna()
-            valence_score = round(float(valence_numeric.mean()), 4) if not valence_numeric.empty else 0.0
+            mentioned = group.loc[group[salience_column] >= 1, quality_column]
+            quality_numeric = pd.to_numeric(mentioned, errors="coerce").dropna()
+            quality_score = round(float(quality_numeric.mean()), 4) if not quality_numeric.empty else 0.0
             rows.append(
                 {
                     "brand": str(brand),
@@ -674,9 +674,9 @@ def build_positioning_scorecard(score_table: Any, contract: dict[str, Any]) -> A
                 {
                     "brand": str(brand),
                     "attribute": attribute,
-                    "axis": "valence",
-                    "feature": valence_column,
-                    "score": valence_score,
+                    "axis": "quality",
+                    "feature": quality_column,
+                    "score": quality_score,
                 }
             )
     return pd.DataFrame(rows)
@@ -688,9 +688,9 @@ def derive_role_columns(foundation: dict[str, Any]) -> dict[str, list[str]]:
         if not isinstance(item, dict):
             continue
         salience_column = str(item.get("salience_column", ""))
-        valence_column = str(item.get("valence_column", ""))
+        quality_column = str(item.get("quality_column", ""))
         fallback_column = str(item.get("column", ""))
-        expanded = [column for column in [salience_column, valence_column] if column] or [fallback_column]
+        expanded = [column for column in [salience_column, quality_column] if column] or [fallback_column]
         for role in item.get("stat_roles", []):
             role_name = str(role)
             role_map.setdefault(role_name, []).extend(expanded)
