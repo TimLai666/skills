@@ -10,6 +10,7 @@ The text:
 - [ ] remains understandable even when the reader has none of the Agent's prior context
 - [ ] does not rely on the reader to fill in missing context or read the writer's mind
 - [ ] does not leak internal planning language or unexplained analytical frames into the final prose
+- [ ] does not answer an objection, accusation, or inner judgment that no one raised
 - [ ] does not use niche vocabulary, jargon, or project shorthand without explanation
 - [ ] keeps every verb whole and says what it acts on: no two-syllable verb shaved to one character, in prose or in a table cell
 - [ ] uses no abbreviation the reader has not already met elsewhere, and none that collides with an existing word
