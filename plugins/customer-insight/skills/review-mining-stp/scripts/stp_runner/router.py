@@ -375,6 +375,10 @@ def main() -> None:
                 prepared_targeting_dataset,
                 generated_segmentation,
                 canonical_inputs["contract"]["expanded_role_map"],
+                {
+                    base: [pair["salience"], pair["quality"]]
+                    for base, pair in canonical_inputs["contract"]["pair_columns_by_base"].items()
+                },
             )
             for artifact_name in ["review_scoring_table.csv", "review_foundation.json", "attribute_catalog.csv", "analysis_context.json"]:
                 if find_artifact(artifact_paths, artifact_name):
@@ -392,12 +396,13 @@ def main() -> None:
             )
             return
 
-        dataset, segmentation_payload, role_columns = targeting_inputs
+        dataset, segmentation_payload, role_columns, axis_expansion = targeting_inputs
         targeting = run_targeting(
             dataset,
             segmentation_payload,
             list(analysis_context.get("comparison_axes", [])),
             role_columns,
+            axis_expansion,
         )
         write_json(output_dir / "targeting_results.json", targeting)
         write_json(output_dir / "target_selection_decision.json", targeting["target_selection_decision"])

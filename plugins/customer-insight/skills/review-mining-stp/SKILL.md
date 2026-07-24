@@ -6,7 +6,7 @@ description: >-
   through a review scoring workflow upstream and statistical scripts
   downstream.
 metadata:
-  version: "1.4.0"
+  version: "1.4.1"
 ---
 
 # Review Mining STP

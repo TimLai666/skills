@@ -8,7 +8,7 @@ from .io import derive_role_columns, find_artifact, read_json
 def load_targeting_inputs(
     artifact_paths: list,
     generated_segmentation: dict[str, Any] | None,
-) -> tuple[Any, dict[str, Any], dict[str, list[str]] | None] | None:
+) -> tuple[Any, dict[str, Any], dict[str, list[str]] | None, dict[str, list[str]]] | None:
     import pandas as pd
 
     dataset_path = find_artifact(artifact_paths, "targeting_dataset.csv")
@@ -32,7 +32,8 @@ def load_targeting_inputs(
 
     dataset = pd.read_csv(dataset_path)
     role_columns = derive_role_columns(foundation) if foundation else None
-    return dataset, segmentation, role_columns
+    axis_expansion = _build_axis_expansion(foundation)
+    return dataset, segmentation, role_columns, axis_expansion
 
 
 def _safe_float(value: Any) -> float:
@@ -195,13 +196,40 @@ def _resolve_target_columns(
     return current_candidates, potential_candidates, comparison_candidates
 
 
+def _build_axis_expansion(foundation: dict[str, Any]) -> dict[str, list[str]]:
+    """Map each attribute base name to its declared salience/quality columns.
+
+    The dimension_catalog names its axis columns explicitly, so a comparison
+    axis given as a base name must expand through those declared names rather
+    than by guessing a `_salience` / `_quality` suffix — the column names are
+    arbitrary and need not follow that convention.
+    """
+    expansion: dict[str, list[str]] = {}
+    for item in foundation.get("dimension_catalog", []):
+        if not isinstance(item, dict):
+            continue
+        base = str(item.get("column", ""))
+        if not base:
+            continue
+        columns = [
+            str(item.get(axis, ""))
+            for axis in ("salience_column", "quality_column")
+            if str(item.get(axis, ""))
+        ]
+        if columns:
+            expansion[base] = columns
+    return expansion
+
+
 def _resolve_comparison_axes(
     dataset: Any,
     comparison_axes: list[str],
     current_columns: list[str],
     potential_columns: list[str],
     role_comparison_columns: list[str],
+    axis_expansion: dict[str, list[str]] | None = None,
 ) -> list[str]:
+    axis_expansion = axis_expansion or {}
     requested: list[str] = []
     available_columns = set(dataset.columns)
     for column in comparison_axes:
@@ -209,9 +237,13 @@ def _resolve_comparison_axes(
         if column_name in available_columns:
             requested.append(column_name)
             continue
-        salience_column = f"{column_name}_salience"
-        quality_column = f"{column_name}_quality"
-        for expanded in [salience_column, quality_column]:
+        # Prefer the catalog's declared axis columns; fall back to the
+        # conventional suffixes only when the base name is not in the catalog.
+        expanded_columns = axis_expansion.get(column_name) or [
+            f"{column_name}_salience",
+            f"{column_name}_quality",
+        ]
+        for expanded in expanded_columns:
             if expanded in available_columns:
                 requested.append(expanded)
     if requested:
@@ -226,6 +258,7 @@ def run_targeting(
     segmentation: dict[str, Any],
     comparison_axes: list[str],
     role_columns: dict[str, list[str]] | None = None,
+    axis_expansion: dict[str, list[str]] | None = None,
 ) -> dict[str, Any]:
     import pandas as pd
     from scipy.stats import chi2_contingency, f_oneway
@@ -252,6 +285,7 @@ def run_targeting(
         current_continuous,
         potential_binary + potential_continuous,
         comparison_candidates,
+        axis_expansion,
     )
 
     current_results = []
