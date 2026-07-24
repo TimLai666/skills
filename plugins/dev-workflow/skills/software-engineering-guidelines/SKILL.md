@@ -2,7 +2,7 @@
 name: software-engineering-guidelines
 description: "Software engineering guidelines for any software change. This skill MUST be loaded before requirement clarification, architecture/design, implementation, refactoring, code review, testing, or shipping, and MUST NOT be skipped because the change is a one-liner. Covers simplicity, surgical changes, testing-first for high-impact changes with TDD (Test-Driven Development), and verifiable success criteria. Triggers on: 任何軟體規劃, 需求釐清, 架構設計, 寫 code, 改 code, 做功能, 修 bug, refactor, 開發, coding, development, 實作, 實現, 寫程式, 改程式, 加功能, 修問題, code review, 測試, 重構"
 metadata:
-  version: "1.2.6"
+  version: "1.2.13"
 ---
 
 ## Core Principles
@@ -13,10 +13,9 @@ metadata:
 
 Before implementing:
 
-- State your assumptions explicitly. If uncertain, ask.
+- State your assumptions explicitly. If something is unclear, stop, name what's confusing, and ask.
 - If multiple interpretations exist, present them — don't pick silently.
 - If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
 
 ### 2. Simplicity First
 
@@ -36,17 +35,11 @@ Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, sim
 
 When editing existing code:
 
-- Don't "improve" adjacent code, comments, or formatting — but if you spot issues, mention them and suggest a separate follow-up.
-- Don't refactor things that aren't broken — but if you see something worth refactoring, flag it and propose how to approach it.
+- Don't "improve" adjacent code, comments, or formatting; don't refactor things that aren't broken; don't delete pre-existing dead code. Mention what you spot and suggest how to handle it — see the recording rule below.
 - Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it and suggest what to do — don't silently delete it.
+- Remove imports/variables/functions that YOUR changes made unused.
 
 **Recording rule:** All discovered issues that are out of scope for the current task must be mentioned to the user and recorded in the project's `AGENTS.md` under `## Follow-ups`. Don't just mention them in chat and let them disappear — record them so the user can decide whether to act on them now or later. Once a follow-up is resolved, delete it from the list. See [references/follow-ups-example.md](references/follow-ups-example.md) for format and examples.
-
-When your changes create orphans:
-
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
 
 The test: Every changed line should trace directly to the user's request.
 
@@ -58,7 +51,7 @@ Baseline rule:
 
 - Every behavior-changing change needs test coverage.
 - For small, local, low-risk fixes, add/update tests around the change (before or immediately after implementation is acceptable if justified).
-- For large changes, broad-scope changes, or major new features, you MUST apply TDD.
+- For large changes, broad-scope changes, or major new features, you MUST apply TDD: write the failing test first, then implement — don't write code and backfill tests.
 
 判斷大改動的指標（任一符合即可）：
 
@@ -66,34 +59,17 @@ Baseline rule:
 2. 變更公開行為邊界，如 API 契約、資料模型、存取規則、核心流程。
 3. 新增核心新功能，或重構高風險路徑（付款、認證、權限、資料遷移、狀態轉換）。
 
-TDD (Test-Driven Development) Cycle:
-
-```
-1. Write a failing test (define expected behavior)
-2. Write minimum code to make the test pass
-3. Refactor, ensure tests still pass
-4. Repeat
-```
-
 Rules:
 
-- **For TDD scope changes, write the test first, then implement.** Don't write code and backfill tests.
-- **Every bug fix must start with a test that reproduces the bug.** For scoped or high-risk changes, test must be written before implementation.
-- **Every new feature must have a corresponding test.** Feature without test coverage is not done.
-- **Small scope changes still need explicit test coverage before marking done.**
-- **Before refactoring, confirm all tests pass.** After refactoring, confirm again.
+- **Every bug fix must start with a test that reproduces the bug.**
+- **Before refactoring, confirm all tests pass. After refactoring, confirm again.**
 - **Don't weaken a test just to make it pass.** Unless the test itself is wrong.
-- Tests must prove the change works, not just inflate coverage numbers.
 
 ### 5. Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
 
-Transform tasks into verifiable goals:
-
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
+Transform tasks into verifiable goals — e.g. "Add validation" → "Write tests for invalid inputs, then make them pass".
 
 For multi-step tasks, state a brief plan:
 
@@ -111,49 +87,28 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ### A. Before Writing Code
 
-1. Confirm you understand the requirement. Ask if unclear.
-2. State assumptions and constraints.
-3. List possible approaches, explain which you choose and why.
-4. Define success criteria: what does "done" look like.
-5. If existing tests exist, run them first to confirm they all pass.
+1. Confirm the requirement, state assumptions, surface anything unclear (Principle 1).
+2. List possible approaches, explain which you choose and why.
+3. Define success criteria: what does "done" look like (Principle 5).
+4. If tests exist, run them first to confirm they all pass.
 
 ### B. While Writing Code
 
-1. 如果是 TDD scope 的需求，用 **TDD loop**: red → green → refactor.
-2. Every change must trace back to a requirement.
-3. Don't touch what you shouldn't.
-4. Keep code simple, no more than required.
-5. Match existing code style.
+Apply Principles 2–4: keep it simple, change only what the request requires, and use the TDD loop for TDD-scope work.
 
 ### C. After Completion
 
 1. Run all tests, confirm they all pass.
 2. Run linter / type checker (if the project has one).
-3. Check: can every changed line trace back to a requirement?
-4. Check: did you accidentally touch something you shouldn't have?
-5. Check: is the code simple enough? Would a senior engineer call it overcomplicated?
-
----
-
-## Common Pitfalls
-
-- **Gold plating**: adding features not asked for because it was "easy."
-- **Premature abstraction**: extracting shared logic that only appears once.
-- **Defensive coding for impossible scenarios**: error handling for errors that can't happen.
-- **Refactoring unrelated code**: changing A while "cleaning up" B, breaking B.
-- **Test-after**: writing code first then backfilling tests that only test the surface.
-- **Making test pass by weakening assertion**: failing test → change test instead of changing code.
+3. Walk the Pre-Ship Checklist below.
 
 ---
 
 ## Pre-Ship Checklist
 
-- [ ] Every changed line traces to a user's request.
-- [ ] Nothing was added that wasn't asked for.
-- [ ] No abstractions for single-use code.
-- [ ] All changes and features have corresponding tests.
-- [ ] 所有變更有測試，且大範圍/高風險變更採 Test-First（TDD）實作後才標記完成。
+- [ ] Every changed line traces to the user's request — nothing was added that wasn't asked for.
+- [ ] No abstractions for single-use code; code is simple, no more than required.
+- [ ] All changes and features have corresponding tests; large or high-risk changes were implemented test-first (TDD).
 - [ ] Bug fix has a test that reproduces the bug.
-- [ ] All tests pass.
+- [ ] All tests pass, and no test was weakened just to make it pass.
 - [ ] Linter / type checker reports no errors.
-- [ ] Code is simple, no more than required.
