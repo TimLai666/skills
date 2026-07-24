@@ -9,7 +9,7 @@ allowed-tools:
   - Glob
   - AskUserQuestion
 metadata:
-  version: "1.2.0"
+  version: "1.2.1"
 ---
 
 ## Preamble (run first)
@@ -29,20 +29,20 @@ If you have attempted 3 different fixes and none worked: **STOP and escalate.** 
 
 ---
 
-## Step 1 ??Understand the symptom
+## Step 1 — Understand the symptom
 
 Ask if not clearly provided:
-- **Exact symptom** ??error message verbatim, wrong output, crash, silent failure?
-- **Reproduction** ??always, sometimes (what triggers it), or intermittent?
-- **When did it start** ??after what change? Or has it always been this way?
-- **Environment** ??local, staging, prod? All three?
-- **What was tried** ??what has already been attempted?
+- **Exact symptom** — error message verbatim, wrong output, crash, silent failure?
+- **Reproduction** — always, sometimes (what triggers it), or intermittent?
+- **When did it start** — after what change? Or has it always been this way?
+- **Environment** — local, staging, prod? All three?
+- **What was tried** — what has already been attempted?
 
 ---
 
-## Step 2 ??Form hypotheses
+## Step 2 — Form hypotheses
 
-Based on the symptom, list **3?? possible root causes** ranked by likelihood. For each, state the evidence that points to it:
+Based on the symptom, list **3–5 possible root causes** ranked by likelihood. For each, state the evidence that points to it:
 
 ```
 H1 (most likely, ~60%): [hypothesis]
@@ -68,9 +68,9 @@ H4 (~5%): [hypothesis]
 
 ---
 
-## Step 3 ??Test hypotheses cheaply (observe before touching code)
+## Step 3 — Test hypotheses cheaply (observe before touching code)
 
-For each hypothesis, design a minimal test that confirms or rules it out ??**without modifying code**:
+For each hypothesis, design a minimal test that confirms or rules it out — **without modifying code**:
 
 | Hypothesis | Test method | Cost |
 |------------|-------------|------|
@@ -89,25 +89,25 @@ git log --since="7 days ago" --name-only --format="" | sort | uniq -c | sort -rn
 
 ---
 
-## Step 4 ??Trace the data flow
+## Step 4 — Trace the data flow
 
-Once narrowed to 1?? hypotheses, trace the exact path of the bad data:
+Once narrowed to 1–2 hypotheses, trace the exact path of the bad data:
 
 ```
 [Request/Event enters at: ]
-  ??[Layer 1] ??state here: [what you found]
-  ??[Layer 2] ??state here: [what you found]
-  ??[Where behavior diverges from expected] ??state here: [what you found]
-  ??[Where the symptom manifests]
+  → [Layer 1] — state here: [what you found]
+  → [Layer 2] — state here: [what you found]
+  → [Where behavior diverges from expected] — state here: [what you found]
+  → [Where the symptom manifests]
 ```
 
 Identify the **exact file:line** where the wrong thing happens. This is the root cause.
 
 ---
 
-## Step 5 ??Fix (only after root cause confirmed)
+## Step 5 — Fix (only after root cause confirmed)
 
-**Minimal fix** ??change only what's necessary to address the root cause, not the symptom.
+**Minimal fix** — change only what's necessary to address the root cause, not the symptom.
 
 Before writing the fix, state:
 - "Root cause: [exact description]"
@@ -126,7 +126,7 @@ git commit -m "fix: [root cause in plain English]\n\nInvestigation: [what was fo
 
 ---
 
-## Step 6 ??Verify
+## Step 6 — Verify
 
 Reproduce the original symptom after the fix. Confirm it's gone.
 
@@ -134,20 +134,20 @@ If the symptom persists: you may have fixed a symptom, not the root cause. Go ba
 
 ---
 
-## Step 7 ??Escalation (after 3 failed attempts)
+## Step 7 — Escalation (after 3 failed attempts)
 
 If three different fixes have been tried and none resolved the symptom:
 
 ```
-??ESCALATION ??3 attempts failed
+⚠ ESCALATION — 3 attempts failed
 
 Attempts:
-1. [Fix 1] ??what changed ??result: [what happened]
-2. [Fix 2] ??what changed ??result: [what happened]
-3. [Fix 3] ??what changed ??result: [what happened]
+1. [Fix 1] — what changed — result: [what happened]
+2. [Fix 2] — what changed — result: [what happened]
+3. [Fix 3] — what changed — result: [what happened]
 
 Remaining hypotheses:
-H?: [hypothesis] ??need to test: [what information/access/expertise is required]
+H?: [hypothesis] — need to test: [what information/access/expertise is required]
 
 Current best understanding:
 The root cause is likely in [area], but I cannot verify without [specific missing info].
