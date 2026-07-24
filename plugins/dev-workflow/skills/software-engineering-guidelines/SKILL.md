@@ -1,14 +1,8 @@
 ---
 name: software-engineering-guidelines
-description: "Software engineering guidelines for any software change. This skill MUST be loaded before requirement clarification, architecture/design, implementation, refactoring, code review, testing, or shipping, and MUST NOT be skipped because the change is a one-liner. Covers simplicity, surgical changes, TDD, and verifiable success criteria. Triggers on: 任何軟體規劃, 需求釐清, 架構設計, 寫 code, 改 code, 做功能, 修 bug, refactor, 開發, coding, development, 實作, 實現, 寫程式, 改程式, 加功能, 修問題, code review, 測試, 重構"
+description: "Software engineering guidelines for any software change. This skill MUST be loaded before requirement clarification, architecture/design, implementation, refactoring, code review, testing, or shipping, and MUST NOT be skipped because the change is a one-liner. Covers simplicity, surgical changes, testing-first for high-impact changes with TDD (Test-Driven Development), and verifiable success criteria. Triggers on: 任何軟體規劃, 需求釐清, 架構設計, 寫 code, 改 code, 做功能, 修 bug, refactor, 開發, coding, development, 實作, 實現, 寫程式, 改程式, 加功能, 修問題, code review, 測試, 重構"
 metadata:
-  version: "1.1.0"
----
-
-## Auto-trigger
-
-**Any code writing or code changing work must load this skill first.** Whether it's a new feature, bug fix, refactor, or code review — if you're touching code, read this first.
-
+  version: "1.2.6"
 ---
 
 ## Core Principles
@@ -56,11 +50,23 @@ When your changes create orphans:
 
 The test: Every changed line should trace directly to the user's request.
 
-### 4. TDD (Test-Driven Development)
+### 4. Testing Strategy (Test-First + scoped TDD)
 
-**All changes and features must have corresponding tests. No test = not done.**
+**All changes and features must have meaningful tests. No test = not done.**
 
-Cycle:
+Baseline rule:
+
+- Every behavior-changing change needs test coverage.
+- For small, local, low-risk fixes, add/update tests around the change (before or immediately after implementation is acceptable if justified).
+- For large changes, broad-scope changes, or major new features, you MUST apply TDD.
+
+判斷大改動的指標（任一符合即可）：
+
+1. 觸及多個模組或層級（例如 UI、API、資料層同時調整）。
+2. 變更公開行為邊界，如 API 契約、資料模型、存取規則、核心流程。
+3. 新增核心新功能，或重構高風險路徑（付款、認證、權限、資料遷移、狀態轉換）。
+
+TDD (Test-Driven Development) Cycle:
 
 ```
 1. Write a failing test (define expected behavior)
@@ -71,9 +77,10 @@ Cycle:
 
 Rules:
 
-- **Write the test first, then implement.** Don't write code and backfill tests.
-- **Every bug fix must start with a test that reproduces the bug.** Test passes after fix.
+- **For TDD scope changes, write the test first, then implement.** Don't write code and backfill tests.
+- **Every bug fix must start with a test that reproduces the bug.** For scoped or high-risk changes, test must be written before implementation.
 - **Every new feature must have a corresponding test.** Feature without test coverage is not done.
+- **Small scope changes still need explicit test coverage before marking done.**
 - **Before refactoring, confirm all tests pass.** After refactoring, confirm again.
 - **Don't weaken a test just to make it pass.** Unless the test itself is wrong.
 - Tests must prove the change works, not just inflate coverage numbers.
@@ -112,7 +119,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ### B. While Writing Code
 
-1. **TDD loop**: red → green → refactor.
+1. 如果是 TDD scope 的需求，用 **TDD loop**: red → green → refactor.
 2. Every change must trace back to a requirement.
 3. Don't touch what you shouldn't.
 4. Keep code simple, no more than required.
@@ -145,7 +152,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - [ ] Nothing was added that wasn't asked for.
 - [ ] No abstractions for single-use code.
 - [ ] All changes and features have corresponding tests.
-- [ ] Test was written before implementation.
+- [ ] 所有變更有測試，且大範圍/高風險變更採 Test-First（TDD）實作後才標記完成。
 - [ ] Bug fix has a test that reproduces the bug.
 - [ ] All tests pass.
 - [ ] Linter / type checker reports no errors.
