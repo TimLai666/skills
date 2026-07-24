@@ -1,6 +1,6 @@
 ---
 name: test-and-fix
-description: "Run tests, find failures, fix them, verify. Diff-aware: tests the routes/pages your changes affect. This skill MUST be invoked on the triggers below, and SHOULD be invoked after any code change the user has not yet verified. Triggers on: 跑測試, 測一下, 有沒有壞掉, run tests, test this, 跑一下 tests, 測試, check if broken, 有沒有問題"
+description: "Run tests, find failures, fix them, verify. Diff-aware: tests the routes/pages your changes affect. This skill MUST be invoked on the triggers below, and SHOULD be invoked after any code change the user has not yet verified. Triggers on: 跑測試, 測一下, 有沒有壞掉, run tests, test this, 跑一下 tests, 測試, check if broken"
 allowed-tools:
   - Bash
   - Read
@@ -9,26 +9,18 @@ allowed-tools:
   - Grep
   - AskUserQuestion
 metadata:
-  version: "1.3.0"
----
-
-## Auto-trigger
-
-When the user asks to run tests, check if something is broken, or verify a fix, activate immediately.
-
+  version: "1.3.6"
 ---
 
 ## Preamble
 
 ```bash
 _BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
-_REPO=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")
 _BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||')
 [ -z "$_BASE" ] && git rev-parse --verify origin/main >/dev/null 2>&1 && _BASE="main"
 _BASE="${_BASE:-main}"
 echo "BRANCH: $_BRANCH"
 echo "BASE: $_BASE"
-echo "REPO: $_REPO"
 [ "$_BRANCH" = "$_BASE" ] && echo "ON_BASE=true" || echo "ON_BASE=false"
 [ -f Gemfile ] && echo "STACK:ruby"
 [ -f package.json ] && echo "STACK:node"
@@ -55,6 +47,7 @@ Make sure this is the right thing to verify.
 ## Phase 1 — Analyze what changed
 
 ```bash
+_BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'); _BASE="${_BASE:-main}"
 git fetch origin $_BASE --quiet
 git diff origin/$_BASE --name-only
 git log origin/$_BASE..HEAD --oneline
@@ -65,14 +58,6 @@ Identify affected routes/pages from changed files:
 - view/template/component files → which pages render
 - model/service files → which pages use those models
 - API files → test endpoints directly
-
-Framework detection:
-
-```bash
-grep -r "resources\|get\|post\|put\|delete\|patch" config/routes.rb 2>/dev/null | head -20
-find . -name "*.ts" -o -name "*.js" | xargs grep -l "router\.\|app\." 2>/dev/null | head -10
-grep -r "@app\.\|@router\." --include="*.py" 2>/dev/null | head -20
-```
 
 Detect running app:
 
@@ -104,27 +89,7 @@ Cross-reference commit messages and TODOs to verify the branch does what it was 
 
 ## Phase 3 — Execute tests
 
-Run existing test suite first:
-
-```bash
-[ -f package.json ] && npm test 2>&1
-[ -f Gemfile ] && bundle exec rspec 2>&1
-[ -f go.mod ] && go test ./... 2>&1
-[ -f Cargo.toml ] && cargo test 2>&1
-[ -f requirements.txt ] && python -m pytest 2>&1
-[ -f pyproject.toml ] && python -m pytest 2>&1
-```
-
-Then test affected routes/pages manually:
-
-```bash
-curl -s -X POST http://localhost:3000/api/payments \
-  -H "Content-Type: application/json" \
-  -d '{}' | jq .
-
-curl -s http://localhost:3000/api/users/2 \
-  -H "Authorization: Bearer <user-1-token>" | jq .
-```
+Run the existing test suite first, then manually test the affected routes/pages against the running app, following the Phase 2 plan.
 
 For each test:
 - **Pass** — describe what was verified
@@ -135,20 +100,11 @@ For each test:
 
 ## Phase 4 — Fix loop
 
-For each failure:
-1. Locate root cause first
-2. Write the minimal fix
-3. Write a regression test that would have caught this specific bug
-4. Commit atomically:
+For each failure, locate the root cause first. If the cause cannot be proven on the spot from the changes just tested, invoke the **investigate** skill and follow it through — it ends with the same fix and regression-test discipline. When the cause is proven:
 
-```bash
-git add -p
-git commit -m "fix: [exact description]
-
-Regression: [test name that covers this]"
-```
-
-5. Re-test the failing case
+1. Write the minimal fix and commit it on its own
+2. Write a regression test that would have caught this specific bug — it must fail without the fix and pass with it — and commit it separately
+3. Re-test the failing case
 
 **Iron Law: every bug fixed must add one regression test.**
 
