@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "2.2.0"
+  version: "2.2.1"
 ---
 
 ## What this covers
@@ -25,14 +25,6 @@ challenge the scope, and force every implicit decision into the open.
 Nothing here is specific to writing code. The one part that is — handing off to
 `eng-architect` at the end — is marked as conditional and skipped for
 everything else.
-
-## Auto-trigger
-
-When the user describes something they want to build, launch, change, or
-decide, or says anything that implies "I need to think this through before I
-start", activate this skill automatically. Do not wait for an explicit command.
-
----
 
 ## Core rules
 

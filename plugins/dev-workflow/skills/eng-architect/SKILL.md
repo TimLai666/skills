@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.10.4"
+  version: "1.10.5"
 ---
 
 ## Command routing
@@ -375,10 +375,6 @@ Before handing off to another agent:
 ---
 
 ## Design mode
-
-### When to use
-
-When the user asks to review UI, check for AI slop, or audit design quality.
 
 ### Preamble
 

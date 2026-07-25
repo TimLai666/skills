@@ -9,7 +9,7 @@ description: >-
   and infer multi-attribute preferences from observed market behavior, and
   MUST NOT be used for a generic survey-only conjoint setup.
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Product Conjoint Analysis
@@ -20,16 +20,7 @@ The skill is opinionated about **decisions that beginners commonly get wrong** �
 
 ---
 
-## When to use this skill
-
-Trigger on any of these intents:
-
-- "I want to know which product attributes matter most to customers"
-- "How much would customers pay for [feature X]?"
-- "Help me design a conjoint study / choice experiment"
-- "Analyze this product/review data to figure out optimal configuration"
-- "I have purchase records — can you reverse-engineer preferences?"
-- Any mention of: conjoint, part-worth utility, trade-off analysis, discrete choice, attribute importance, willingness-to-pay (WTP), 聯合分析, 屬性重要性, 願付價格
+## Out of scope
 
 Do **not** use this skill for: simple A/B testing, pure descriptive statistics, recommendation systems based on collaborative filtering, or single-attribute pricing studies.
 

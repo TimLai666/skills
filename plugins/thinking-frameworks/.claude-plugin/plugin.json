@@ -1,7 +1,7 @@
 {
   "name": "thinking-frameworks",
   "description": "通用思考框架：ultrathink 會把每個決策單元路由到 1～2 個相關任務類別，完整執行類內工具，再固定跑完五個共用思維模型、謬誤檢核與減法審查。另含 plan-grilling 逼問式規劃層與 subtraction-thinking 減法審查層。",
-  "version": "0.36.0",
+  "version": "0.36.1",
   "author": {
     "name": "TimLai666"
   }
