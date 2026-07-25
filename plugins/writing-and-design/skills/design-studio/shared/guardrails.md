@@ -1,0 +1,24 @@
+# Performance, Accessibility & Dark Mode Guardrails (Shared)
+
+Curated from [leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill) (MIT). These bind every route at build time — not only at final verification.
+
+## Motion & Performance
+
+- Animate **only `transform` and `opacity`** — never `top` / `left` / `width` / `height`. Use `will-change` sparingly, only on elements that actually animate.
+- Any non-trivial motion MUST honor `prefers-reduced-motion`: gate behind `@media (prefers-reduced-motion: no-preference)` or degrade to static. Infinite loops, parallax, and scroll-hijack collapse to static under reduced motion.
+- Grain / noise filters go exclusively on fixed `pointer-events-none` pseudo-elements — never on scrolling containers; continuous GPU repaints destroy mobile FPS.
+- Lazy-load anything below the fold. Motion libraries and Three.js are not small.
+- Z-index only for systemic layers (sticky nav, modals, overlays, grain). No arbitrary `z-50` spam — document the scale.
+
+## Core Web Vitals
+
+- LCP < 2.5s (preload the hero image), INP < 200ms, CLS < 0.1 (reserve space for images, fonts, embeds).
+- Run Lighthouse before declaring a page done.
+
+## Dark Mode (dual-mode by default)
+
+- Design **both modes from the start** for any consumer-facing page. Skip only when the brief is print-emulating editorial or the user says so.
+- Pick ONE token strategy per project and stick to it: Tailwind `dark:` variants, or CSS semantic variables (`--surface`, `--text-primary`…) swapped under `[data-theme="dark"]` / `prefers-color-scheme`.
+- The brief and brand decide the actual colors. Enforced here: WCAG AA contrast (AAA for hero copy), hierarchy parity across modes, the brand color stays recognisable, no pure `#000000` / `#ffffff` — off-black and off-white keep depth.
+- Default to system preference; add a manual toggle if either mode would lose key brand expression.
+- **Test in both modes before finishing.** Never ship a page seen in only one mode.

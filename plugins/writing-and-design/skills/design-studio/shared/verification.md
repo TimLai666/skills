@@ -49,3 +49,4 @@ Must show audio stream. No audio = half-finished product.
 6. Typography: no generic fallback fonts in display positions
 7. Color: all colors from spec, no invented colors
 8. Content: no fabricated stats/quotes/data as decoration
+9. Dark mode: page checked in both modes (see `guardrails.md`)
