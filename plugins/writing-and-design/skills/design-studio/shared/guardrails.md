@@ -21,4 +21,5 @@ Curated from [leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill) (MI
 - Pick ONE token strategy per project and stick to it: Tailwind `dark:` variants, or CSS semantic variables (`--surface`, `--text-primary`…) swapped under `[data-theme="dark"]` / `prefers-color-scheme`.
 - The brief and brand decide the actual colors. Enforced here: WCAG AA contrast (AAA for hero copy), hierarchy parity across modes, the brand color stays recognisable, no pure `#000000` / `#ffffff` — off-black and off-white keep depth.
 - Default to system preference; add a manual toggle if either mode would lose key brand expression.
+- **Page theme lock** — the page has ONE theme; sections do not invert mid-scroll (no warm-paper section inside a dark page). Set the theme once at the page root; section tints within the same family are fine (`zinc-950` next to `zinc-900`). A deliberate full theme switch is allowed at most once per page, and only when the brief calls for it.
 - **Test in both modes before finishing.** Never ship a page seen in only one mode.

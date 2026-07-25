@@ -50,3 +50,4 @@ Must show audio stream. No audio = half-finished product.
 7. Color: all colors from spec, no invented colors
 8. Content: no fabricated stats/quotes/data as decoration
 9. Dark mode: page checked in both modes (see `guardrails.md`)
+10. Copy self-audit done: every visible string re-read, broken or AI-cute copy rewritten (see `hard-rules.md`)
