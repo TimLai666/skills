@@ -15,6 +15,27 @@
 4. **字体**：每种给了开源替代（Inter/Geist/Manrope/Space Grotesk/Fraunces/Playfair 等），不要写付费字体（Söhne/Circular 等）。
 5. 配套：SKILL「设计方向顾问」Phase 3-5 用本库推 3 方向；`assets/showcases/` 有预制截图画廊。
 
+## 三轴校准（翻库之前先定强度）
+
+压缩自 [leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill)（MIT）的 dial 概念。没有 design context、要从库里推方向时，先从 brief 读出三个轴的档位再去选半区和温度——三轴管「多强」，温度体系管「哪种气质」：
+
+- **变异度**（版面离安全默认多远）：低＝对称网格、居中；中＝错位重叠、混合图片比例；高＝masonry、fractional grid、大偏置留白。高档位在 `<768px` 一律塌回单列。
+- **动态强度**：低＝只有 hover/active；中＝transform/opacity 过渡＋载入级联；高＝scroll-driven 编排（CSS `animation-timeline` 或 GSAP ScrollTrigger；**硬禁 `window.addEventListener('scroll')`**）。
+- **视觉密度**：低＝画廊式大留白（`py-32`+）；中＝日常 app（`py-16`～`py-24`）；高＝驾驶舱式紧凑、1px 分线、数字一律 `font-mono`。
+
+| 情境 | 变异 | 动态 | 密度 |
+|---|---|---|---|
+| SaaS 主流 landing | 中高 | 中 | 中 |
+| Agency／创意 landing | 高 | 高 | 低 |
+| 高端消费品牌 | 中高 | 中 | 低 |
+| 设计师作品集 | 高 | 中高 | 低 |
+| 开发者作品集 | 中 | 中 | 中 |
+| Editorial／Blog | 中 | 低中 | 低 |
+| 公部门／合规敏感 | 低 | 低 | 中高 |
+| Redesign（Preserve） | 跟现况 | 现况略升 | 跟现况 |
+
+档位是推荐起点：用户点名的风格、既有 design context 永远优先。
+
 ---
 
 ## 色彩推导协议（用任何风格前先走这三步）
