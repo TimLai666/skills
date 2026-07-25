@@ -1,8 +1,8 @@
 ---
 name: software-engineering-guidelines
-description: "Software engineering guidelines for any software change. This skill MUST be loaded before requirement clarification, architecture/design, implementation, refactoring, code review, testing, or shipping, and MUST NOT be skipped because the change is a one-liner. Covers simplicity, surgical changes, testing-first for high-impact changes with TDD (Test-Driven Development), and verifiable success criteria. Triggers on: 任何軟體規劃, 需求釐清, 架構設計, 寫 code, 改 code, 做功能, 修 bug, refactor, 開發, coding, development, 實作, 實現, 寫程式, 改程式, 加功能, 修問題, code review, 測試, 重構"
+description: "Software engineering guidelines for any software change. This skill MUST be loaded before requirement clarification, architecture/design, implementation, refactoring, code review, testing, or shipping, and MUST NOT be skipped because the change is a one-liner. Covers simplicity, surgical changes, testing-first for high-impact changes with TDD (Test-Driven Development), and verifiable success criteria. Triggers on: 任何軟體規劃, 需求釐清, 架構設計, 寫 code, 改 code, 做功能, 修 bug, refactor, 開發, coding, development, 實作, 實現, 寫程式, 改程式, 加功能, 修問題, code review, 測試, 重構, init, 初始化專案, 建立 CLAUDE.md, 建立 AGENTS.md"
 metadata:
-  version: "1.2.13"
+  version: "1.3.0"
 ---
 
 ## Core Principles
@@ -40,6 +40,8 @@ When editing existing code:
 - Remove imports/variables/functions that YOUR changes made unused.
 
 **Recording rule:** All discovered issues that are out of scope for the current task must be mentioned to the user and recorded in the project's `AGENTS.md` under `## Follow-ups`. Don't just mention them in chat and let them disappear — record them so the user can decide whether to act on them now or later. Once a follow-up is resolved, delete it from the list. See [references/follow-ups-example.md](references/follow-ups-example.md) for format and examples.
+
+**Agent context files:** `AGENTS.md` is the project's operating contract; `CLAUDE.md` is a one-line pointer to it: "Read `AGENTS.md` before doing any project work." When initializing project docs (e.g. `/init`) or asked to create or update `CLAUDE.md`, write the actual content into `AGENTS.md` and keep `CLAUDE.md` as the pointer — create either file if missing.
 
 The test: Every changed line should trace directly to the user's request.
 

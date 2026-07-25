@@ -8,7 +8,7 @@ allowed-tools:
   - Edit
   - AskUserQuestion
 metadata:
-  version: "1.6.0"
+  version: "1.6.1"
 ---
 
 ## Why this store and not the agent's own memory
@@ -23,7 +23,7 @@ is the first half of this skill, not an optional extra.
 
 ---
 
-## Auto-trigger
+## Two mandatory moves
 
 Two situations, both mandatory.
 
