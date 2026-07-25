@@ -9,7 +9,7 @@ description: >-
   comes from the design-studio style library; this skill owns conversion
   structure, autonomous iteration, and delivery contracts.
 metadata:
-  version: "2.0.1"
+  version: "2.0.2"
 ---
 
 # Landing Page Studio
@@ -31,7 +31,7 @@ metadata:
 本 skill 是疊在 `design-studio` 上的**轉換層**：視覺與品質底線由 design-studio 供給，本 skill 只管轉換結構、輸入契約、自主迭代與交付格式。
 
 1. 讀 design-studio 的 `shared/anti-slop.md`、`shared/hard-rules.md`、`shared/guardrails.md`——它們對本 skill 的所有產出生效。
-2. 遵守 DESIGN.md 公約：專案有 `DESIGN.md` 就先讀並沿用 token；交付後把本次的色彩／字體／間距 token 寫回去。
+2. 遵守 DESIGN.md 公約：專案有 `DESIGN.md` 就先讀並沿用 token；沒有就從 design-studio 的 `shared/DESIGN-template.md` 複製到專案根目錄建立；交付後把本次的色彩／字體／間距 token 寫回去。
 3. 風格方向（`style_direction`）從 design-studio 的風格庫取得：`huashu-design/references/design-styles.md`（三軸校準 → 40 風格 → 深度風格包）。使用者沒給方向時，用該庫的三方向推薦流程讓使用者選，不要自己發明色板。
 
 ## Input Contract
