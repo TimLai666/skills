@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "2.0.0"
+  version: "2.2.0"
 ---
 
 ## What this covers
@@ -151,6 +151,42 @@ For each section:
 - If not clear, ask one question with options and a recommendation
 - Record the decision immediately
 
+### Scope items name what someone can do
+
+This governs how sections 3 and 4 get written, and applies only when the plan is
+about building something — a feature, a product, a service. Campaigns, hiring
+calls and other non-build plans keep plain `- [item] - reason` entries.
+
+Every scope item must read as "<who> can <do what>". An item that cannot be said
+that way is not a scope item yet.
+
+- Rewrite anything whose subject is a module, a layer or a technology.
+  「做會員 API」is not a scope item;「訪客可以用 email 註冊並登入」is.
+- Test each item: once this is done, can anyone see or use the difference? If
+  not, it is not a feature.
+- Foundations do not disappear, they move. Shared scaffolding, auth, core tables
+  and mechanical refactors that fan across the codebase are not user functions.
+  Collect them into one item the others depend on, rather than slicing them into
+  one item per layer.
+- Layers still matter, but only inside a single item — schema first, then logic,
+  then screen. Never as the axis that splits the whole plan.
+
+The last two bullets travel together. Without the test, "the member module's
+backend" gets dressed up as a user function and the plan is layered again;
+without somewhere for foundations to go, they get crammed into whichever feature
+happens to touch them first.
+
+**This check is not skippable.** Sections 3 and 4 may be recorded as
+`[already addressed]` only when the items are already phrased as user functions.
+A scope list that arrives written by module or by layer reads as settled — that
+is exactly when it needs the rewrite, not when it earns a skip.
+
+**Rewrites are a question, not an edit.** Show the item as given and as
+rewritten, say which layer it was cut on, and ask which one to record. The scope
+is the user's call; silently rephrasing their words hides a decision instead of
+locking it. If they keep the technical phrasing, record it and record the reason
+— that is a decision too.
+
 ---
 
 ## Phase 3 — Write plan document
@@ -169,7 +205,7 @@ _Created: [date] - plan-grilling - [repo]:[branch]_
 
 ## Scope decisions
 ### Chosen scope
-- [item] - reason
+- [who] can [do what] - reason
 
 ### Explicitly out
 - [item] - reason
