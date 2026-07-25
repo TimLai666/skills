@@ -59,8 +59,9 @@ Use headings close to this shape:
 - Record deltas only; do not duplicate unchanged history.
 
 ### `Source Links`
-- Link to the primary sources needed to reconstruct context quickly.
-- Include pointers such as: spec, proposal, thread, document, issue, or PR.
+- Link `ENG.md` whenever it exists. This is not one option among several — it is the only route by which a later agent reaches the architecture, the seam strategy and the standing assumptions before changing any of them. Omit it and those decisions are written once and never found again.
+- Then link the plan document, and the ticket directory or change directory.
+- Add the other primary sources needed to reconstruct context quickly: thread, document, issue, or PR.
 - Prefer stable links and concise labels over raw dump content.
 
 ### `Handoff Notes`
@@ -85,5 +86,6 @@ Update `delivery-status.md` when:
 - The file points to the next ticket directly.
 - Milestone status is current and tied to verifiable signals.
 - Critical decisions are recoverable from `Decision Log` plus `Source Links`.
+- `Source Links` names `ENG.md`, so the architecture and seam decisions are reachable from here.
 - The file is shorter than the chat history it replaces.
 - The file does not try to serve roadmap, launch, and handoff purposes at the same time.

@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.10.0"
+  version: "1.10.1"
 ---
 
 ## Command routing
