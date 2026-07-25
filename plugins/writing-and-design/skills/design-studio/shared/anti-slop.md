@@ -20,15 +20,15 @@ AI slop = the visual lowest common denominator from training data. It's not ugly
 
 ## AI Tells (Forbidden Patterns)
 
-Curated from [leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill) (MIT). Empirical signatures of LLM-generated design — hard bans unless the brief explicitly asks for one.
+Curated from [leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill) (MIT). Empirical signatures of LLM-generated design — hard bans as default moves. A brief, brand spec, or chosen style direction may deliberately override a specific tell: a default reach is the tell; a documented choice is design.
 
 **Visual & type**
 - No neon / outer glows by default — inner borders or subtle tinted shadows instead
 - No gradient text-fill on large headers; no custom mouse cursors
 - No oversized screaming H1 — control hierarchy with weight and color, not raw scale
-- Serif for editorial / luxury only, never on dashboards
+- No serif on data/UI layers — dashboards, tables, and dense product UI stay sans/mono; display-level serif is a style-direction decision, not a premium reflex
 - No `<br>`-broken italicized headline splits as a default move
-- No em-dash (`—`) as a design element; use plain hyphens in copy
+- No em-dash (`—`) as a design element; use plain hyphens in English copy (full-width Chinese dashes are punctuation, not a tell)
 
 **Layout micro-labels**
 - No version labels as hero eyebrows (`V0.6`, `BETA`, `EARLY ACCESS`) unless the brief is about launch status
@@ -61,7 +61,7 @@ Curated from [leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill) (MI
 
 ## Judgment Boundary
 
-"Brand actually uses it" is the only valid exception. If brand spec says purple gradient, use it — it's brand signature, not slop.
+"Brand actually uses it" is the strongest exception. If brand spec says purple gradient, use it — it's brand signature, not slop.
 
 ## Anti-Slop Detector
 
