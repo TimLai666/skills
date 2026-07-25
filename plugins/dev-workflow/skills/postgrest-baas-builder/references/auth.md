@@ -16,7 +16,7 @@ RLS policy 裡用 `auth.uid()` 取得目前請求者的使用者 ID，用 `auth.
 
 ```sql
 create table public.profiles (
-  id uuid primary key references auth.users(id) on delete cascade,
+  id uuid primary key references auth.users(id) on delete restrict,
   display_name text,
   avatar_url text,
   created_at timestamptz not null default now(),
@@ -42,7 +42,7 @@ create trigger set_updated_at
   for each row execute function extensions.moddatetime(updated_at);
 ```
 
-`on delete cascade` 讓使用者被刪時 profile 一併清掉。這是「擴充使用者資訊」的合理例外——它不是另一套帳密系統，只是 `auth.users` 的衛星表。
+FK 用 `on delete restrict`：profile 帶著軟刪歷史（角色、停權紀錄），隨手刪 `auth.users` 不該連帶抹掉它（理由見 `db-engineering` 的 `db-integrity-checklist.md` A 段）。要刪使用者走兩步：先處理 profile，再刪 `auth.users`。
 
 ## 註冊時自動建立 profile
 
@@ -153,4 +153,4 @@ func VerifyJWT(token string) (userID string, err error) {
 
 ## 認證事件的稽核
 
-登入、登出、密碼重設等認證事件，Supabase 本身會記錄在 `auth.audit_log_entries`，不需要自己重做。專案自訂的 `audit_log`（見 `logging-retention.md`）負責的是**應用層的業務操作**（建立訂單、修改資料…），兩者互補。
+登入、登出、密碼重設等認證事件，Supabase 本身會記錄在 `auth.audit_log_entries`，不需要自己重做。專案自訂的 `audit_log`（見 `db-engineering` 的 `references/logging-retention.md`）負責的是**應用層的業務操作**（建立訂單、修改資料…），兩者互補。

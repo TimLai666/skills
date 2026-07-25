@@ -1,6 +1,6 @@
 # InsForge (Cloud / 自架) 補充規範
 
-InsForge 是 PostgREST-compatible BaaS，跟 Supabase 形狀近 1:1：底層 Postgres + PostgREST，RLS 模型相同，`auth.uid()` / `auth.email()` / `auth.role()` 都有，PostgREST filter 語法 (`eq.`, `neq.`, `in.`, `is.`) 一模一樣。SKILL.md 的十條鐵則完全套用。
+InsForge 是 PostgREST-compatible BaaS，跟 Supabase 形狀近 1:1：底層 Postgres + PostgREST，RLS 模型相同，`auth.uid()` / `auth.email()` / `auth.role()` 都有，PostgREST filter 語法 (`eq.`, `neq.`, `in.`, `is.`) 一模一樣。SKILL.md 的 BaaS 鐵則與 `db-engineering` 的通用鐵則完全套用。
 
 差異集中在四件事：**API URL 前綴**、**admin 認證方式**、**幾個 Supabase 特有功能在 InsForge 平台不允許**、**dev/prod 兩個獨立 instance 怎麼部署**。
 
@@ -94,7 +94,7 @@ InsForge 用 HS256 對稱簽 JWT，後端要拿到這把 secret 才能本地驗�
 
 ### C. dev/prod 是不是真的兩個 instance
 
-回頭看鐵則 1：**一個 InsForge 實例 = 一個資料庫**。檢查：
+回頭看 `db-engineering` 鐵則 1（雙環境、雙資料庫）：**一個 InsForge 實例 = 一個資料庫**。檢查：
 
 - dev instance 跟 prod instance 是兩個分開的 InsForge project（Cloud）或兩個分開的 Zeabur project / 同 project 兩套 stack（自架）。
 - 兩邊的 `JWT_SECRET` 不能共用（共用 → dev 漏 key = prod 漏 key）。
@@ -119,7 +119,7 @@ select tablename, c.relrowsecurity as rls,
   (select count(*) from pg_policy where polrelid=c.oid) as policies
 from pg_tables t join pg_class c on c.relname=t.tablename
 where schemaname='public' order by t.tablename;
--- 鐵則 4：每張 public 表都該 rls=true 且 policies > 0
+-- 鐵則「一律啟用 RLS」：每張 public 表都該 rls=true 且 policies > 0
 ```
 
 ### E. Backend 對 InsForge 的連線測
@@ -197,21 +197,21 @@ InsForge MCP 是 **per-instance**（一把 API key 綁一個 URL），**必須�
 }
 ```
 - 工具會以 `mcp__insforge-dev__*` / `mcp__insforge-prod__*` 兩組命名出現，操作時對應到不同實例。
-- 風險：工具名稱看一眼就點錯，仍要靠鐵則 8 把關。
+- 風險：工具名稱看一眼就點錯，仍要靠「碰 prod 先取得同意」把關。
 
-**不論哪種，鐵則 8 不變**：操作 prod 前必須先取得使用者明確同意。
+**不論哪種，規則不變**（`db-engineering` 鐵則 5）：操作 prod 前必須先取得使用者明確同意。
 
 ---
 
 ## dev/prod 雙實例部署原則（自架）
 
-回到鐵則 1：「一個實例 = 一個資料庫」。自架 InsForge 要 dev/prod 兩環境，**必須部署兩份完整 InsForge stack**：
+回到 `db-engineering` 鐵則 1：「一個實例 = 一個資料庫」。自架 InsForge 要 dev/prod 兩環境，**必須部署兩份完整 InsForge stack**：
 
 - **Zeabur**：兩個 Zeabur project，各跑一份 InsForge template（4 容器：`insforge` + `postgrest` + `postgres` + `deno`）。命名建議 `<專案>-Dev` / `<專案>-Prod`。
 - **同 Zeabur 帳號下不同 project 比同 project 兩套 stack 更乾淨**：env vars / DNS / 內部 hostname 全部隔離，刪 dev 不會影響 prod。
 - 兩邊的 admin API key、JWT_SECRET、ANON_KEY 全部分別產，**禁止共用**。
 
-不要被「省一個容器」誘惑跑 「同 instance + 不同 schema 」這種偷懶分法 —— `auth.users`、`storage.buckets`、`system.secrets` 都會混在一起，違反鐵則 1。
+不要被「省一個容器」誘惑跑 「同 instance + 不同 schema 」這種偷懶分法 —— `auth.users`、`storage.buckets`、`system.secrets` 都會混在一起，違反 `db-engineering` 鐵則 1。
 
 ---
 
@@ -226,7 +226,7 @@ InsForge MCP 是 **per-instance**（一把 API key 綁一個 URL），**必須�
 | Insert 回 400 "Expected array, received object" | InsForge 強制 body 為 array | 後端 client 自動 wrap single object 成 `[obj]`；前端 SDK 已內建處理 |
 | ExecRawSQL 400 "params: Expected array, received null" | nil params 傳成 null | params 沒帶就傳 `[]`，不是 `null` |
 | **INSERT 任何掛 audit trigger 的表 400 `invalid input syntax for type uuid: "project-admin-with-api-key"`** | **InsForge admin API key 操作下，把 `request.jwt.claims.sub` 設成這字串；`auth.uid()` 內部試 `::uuid` cast 直接 raise，trigger 內 `auth.uid()` 撞牆 → 整個 transaction rollback** | **必修**：所有 trigger function（`record_audit`、`is_admin`、任何用 `auth.uid()` 的）內把 `auth.uid()` 用 PL/pgSQL `begin … exception when others then … end` 包起來，cast 失敗就視為 null（或 false）。範例見下方「safe `auth.uid()` polyfill」 |
-| `dev_url == prod_url` 才發現連錯 | env var 拼錯 / `.env.development` 跟 `.env.production` 共用 | 走鐵則 1 的「跑 select email from auth.users 對比」確認 |
+| `dev_url == prod_url` 才發現連錯 | env var 拼錯 / `.env.development` 跟 `.env.production` 共用 | 走上方 C 節的「select email from auth.users 對比」確認 |
 
 ### safe `auth.uid()` polyfill（任何 InsForge 專案開工就該套）
 

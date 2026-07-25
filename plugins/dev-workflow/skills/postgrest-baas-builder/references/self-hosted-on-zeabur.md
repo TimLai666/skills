@@ -2,7 +2,7 @@
 
 第一次接手一個 Zeabur 上的 Supabase stack（不論是自己剛建的、別人交接的、dev 還是 prod），開工前先跑這份 checklist。它把所有 Zeabur 自架 Supabase 已知的踩雷模式整理在一個地方 —— 一次性掃過比之後追怪 502 / Connection refused 省時間。
 
-執行 checklist 前要安裝 Zeabur MCP（見 `zeabur-deployment` skill），所有檢查都用 `mcp__zeabur__*` 工具加 `curl` / `psql` 完成。
+執行 checklist 前先確認 Zeabur MCP 可用，所有檢查都用 `mcp__zeabur__*` 工具加 `curl` / `psql` 完成。
 
 ---
 
@@ -32,7 +32,7 @@
 **步驟**：
 1. `mcp__zeabur__list-projects` → 確認當前要動的 project name + ID 對得上專案文件
 2. `mcp__zeabur__list-services projectId=<id>` → 12 個 Supabase 服務都在嗎？全 RUNNING 嗎？
-3. 比對 Kong 的對外 domain（`mcp__zeabur__get-service` for kong service）跟專案 `.env` / CLAUDE.md 寫的 `SUPABASE_URL` 是否一致
+3. 比對 Kong 的對外 domain（`mcp__zeabur__get-service` for kong service）跟專案 `.env` / `AGENTS.md` 寫的 `SUPABASE_URL` 是否一致
 4. 看 backend / dashboard 的 Zeabur env vars，確認他們的 `SUPABASE_URL` 也指到正確 project 的 Kong domain
 5. 如果有 dev/prod 兩套，務必 cross-check：dev backend → dev Kong，prod backend → prod Kong，**不能交叉**
 
@@ -134,7 +134,7 @@ mcp__zeabur__execute-command <some-service> "sh -c '
 
 修法：改 `KONG_DNS_ORDER=LAST,AAAA,A,CNAME`（優先 IPv6、後備 IPv4），然後 Redeploy kong。這繞過 stale IPv4 走 IPv6 解析（多數情況 IPv6 是新的、對的）。
 
-這個修法**不能改 kong.yml**（read-only mount）所以無法把 hostname 換成 service-ID；只能靠 DNS order 改用 IPv6。如果 IPv6 也 stale 就要 fork template 自 build image，把 kong.yml 內所有 `http://service-name:port` 改成 service-id（這時就是「不可避免要走 zeabur-deployment skill 的路線 B」）。
+這個修法**不能改 kong.yml**（read-only mount）所以無法把 hostname 換成 service-ID；只能靠 DNS order 改用 IPv6。如果 IPv6 也 stale 就要 fork template 自 build image，把 kong.yml 內所有 `http://service-name:port` 改成 service-id。
 
 ---
 
@@ -176,7 +176,7 @@ mcp__zeabur__get-service-variables kong-service-id
 # 找 KONG_PLUGINS
 ```
 
-`KONG_PLUGINS` 預設通常已含 `ip-restriction`，但 kong.yml 內的 service 沒套 plugin 也沒用。要在 kong.yml 裡實際綁定 plugin 到 routes —— 但 kong.yml 是 read-only mount，要 fork template 自己 build image 才能改（見 zeabur-deployment skill）。
+`KONG_PLUGINS` 預設通常已含 `ip-restriction`，但 kong.yml 內的 service 沒套 plugin 也沒用。要在 kong.yml 裡實際綁定 plugin 到 routes —— 但 kong.yml 是 read-only mount，要 fork template 自己 build image 才能改。
 
 ---
 

@@ -5,7 +5,9 @@
 -- ============================================================
 
 create table public.profiles (
-  id           uuid primary key references auth.users(id) on delete cascade,
+  id           uuid primary key references auth.users(id) on delete restrict,
+  -- restrict 不用 cascade：profile 帶著軟刪歷史（role、停權紀錄），隨手刪 auth.users
+  -- 不該連帶抹掉。刪使用者走兩步：先處理 profile，再刪 auth.users。
   display_name text,
   avatar_url   text,
   role         text not null default 'user',   -- 'user' / 'admin' 等
@@ -17,7 +19,7 @@ create table public.profiles (
 -- 一律啟用 RLS
 alter table public.profiles enable row level security;
 
--- policy 寫法細節（見 references/performance-pitfalls.md）：
+-- policy 寫法細節（見 references/performance.md）：
 --   to authenticated + (select auth.uid()) 兩個都要，避免 per-row 重算 & 預設 public
 
 -- 使用者只能讀自己的 profile

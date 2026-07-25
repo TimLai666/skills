@@ -8,16 +8,10 @@ RLS 是這類專案的資安底線，不是選項。Supabase 的 anon / authenti
 - 啟用 RLS 後，沒有 policy = 預設全部拒絕（對 anon／authenticated）。所以啟用後要補上明確 policy 來「開放」需要的存取。
 - 連那些「只有後端會碰」的表也要 `enable row level security`：service_role 本來就繞過 RLS，但啟用它能確保萬一前端拿到表名也讀不到——這是縱深防禦。
 - policy 按操作分開寫（select／insert／update／delete），語意清楚也好稽核。
-- **效能鐵則**（細節見 `performance-pitfalls.md`）：
+- **效能鐵則**（細節見 `performance.md`）：
   - 每條 policy 都寫 `to <role>`，不要靠預設 `public`（會連 service_role 都檢查）。
   - policy 內出現 `auth.uid()` / `auth.jwt()` / `current_setting(...)` 一律包成 `(select ...)`，否則 Postgres 會 per-row 重算，列數一多就爆。
   - 同一 (role, action) 不要疊多條 permissive policy；合併條件或改用 restrictive。
-
-## 啟用 RLS
-
-```sql
-alter table public.<table> enable row level security;
-```
 
 ## 常見 policy 樣板
 
@@ -45,7 +39,7 @@ create policy "update_own"
 
 `using` 控制「能看到／能動哪些既有列」，`with check` 控制「寫入後的列是否合法」。insert 用 `with check`，update 兩者都要。
 
-注意三個寫法細節（少一個都會踩坑，見 `performance-pitfalls.md`）：
+注意三個寫法細節（少一個都會踩坑，見 `performance.md`）：
 
 - `to authenticated`：明確指定目標 role，避免預設 `public` 連 service_role 都檢查。
 - `(select auth.uid())`：把 auth function 包成子查詢，Postgres 才會當 initplan 算一次而不是 per-row。

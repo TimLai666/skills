@@ -9,7 +9,7 @@ allowed-tools:
   - Grep
   - AskUserQuestion
 metadata:
-  version: "1.2.0"
+  version: "1.2.4"
 ---
 
 ## 前置
@@ -86,14 +86,7 @@ claude mcp add insforge --scope project \
 
 ## 欄位命名慣例
 
-用 Supabase / InsForge 生態系標準名稱：
-
-- `id` — `uuid default gen_random_uuid()` 或 `bigint generated always as identity`
-- `created_at timestamptz not null default now()`
-- `updated_at timestamptz not null default now()` — 由 `moddatetime` trigger 維護
-- `deleted_at timestamptz`（可為 null）
-
-禁止用 `update_time`、`is_deleted`、`removed`、`modified`。
+依 `db-engineering`（鐵則 9 與 `references/data-conventions.md`）：`id`／`created_at`／`updated_at`／`deleted_at` 標準欄位、`moddatetime` trigger、禁止自創名稱。
 
 ---
 
@@ -111,7 +104,7 @@ claude mcp add insforge --scope project \
 - `assets/gitignore.snippet` — 該忽略的項目
 - `assets/starter-migrations/0001_init_extensions.sql` — Supabase extensions
 - `assets/starter-migrations/0002_profiles.sql` — auth.users 擴充表
-- `assets/starter-migrations/example_table.sql` — 業務表範本（完整套用 BaaS 鐘則）
+- `assets/starter-migrations/example_table.sql` — 業務表範本（完整套用 BaaS 鐵則）
 
 ## 收尾自我檢查
 
