@@ -2,7 +2,7 @@
 
 Tweaks是這個skill裡很核心的能力——讓使用者不改程式碼就能即時切換variations/調整參數。
 
-**跨 agent 環境適配**：某些 design-agent 原生環境（如 Claude.ai Artifacts）依賴 host 的 postMessage 把 tweak 值回寫原始碼做持久化。本 skill 採用**純前端 localStorage 方案**——效果一致（重新整理保留狀態），但持久化發生在瀏覽器 localStorage 而不是原始碼檔案。這個方案在任何 agent 環境（Claude Code / Codex / Cursor / Trae / etc.）都能工作。
+**跨 agent 環境相容**：某些 design-agent 原生環境（如 Claude.ai Artifacts）依賴 host 的 postMessage 把 tweak 值回寫原始碼做持久化。本 skill 採用**純前端 localStorage 方案**——效果一致（重新整理保留狀態），但持久化發生在瀏覽器 localStorage 而不是原始碼檔案。這個方案在任何 agent 環境（Claude Code / Codex / Cursor / Trae / etc.）都能工作。
 
 ## 何時加 Tweaks
 
@@ -10,7 +10,7 @@ Tweaks是這個skill裡很核心的能力——讓使用者不改程式碼就能
 - 設計有多個variations需要對比時
 - 使用者沒明說，但你主觀判斷**加幾個有啟發性的tweaks能幫使用者看到可能性**
 
-預設推薦：**每個設計都加2-3個tweaks**（顏色主題/字號/layout變體）即使使用者沒要求——讓使用者看到可能性空間是設計服務的一部分。
+預設推薦：**每個設計都加2-3個tweaks**（顏色主題/字級/layout變體）即使使用者沒要求——讓使用者看到可能性空間是設計服務的一部分。
 
 ## 實現方式（純前端版）
 
@@ -103,9 +103,9 @@ function TweaksPanel() {
             />
           </label>
 
-          {/* 字號slider */}
+          {/* 字級slider */}
           <label style={{ display: 'block', marginBottom: 12 }}>
-            <div style={{ marginBottom: 4, color: '#666' }}>字號 ({tweaks.fontSize}px)</div>
+            <div style={{ marginBottom: 4, color: '#666' }}>字級 ({tweaks.fontSize}px)</div>
             <input 
               type="range" 
               min={12} max={24} step={1}
@@ -129,7 +129,7 @@ function TweaksPanel() {
             </select>
           </label>
 
-          {/* 暗黑模式toggle */}
+          {/* 深色模式toggle */}
           <label style={{ 
             display: 'flex', 
             alignItems: 'center',
@@ -141,7 +141,7 @@ function TweaksPanel() {
               checked={tweaks.dark}
               onChange={e => update({ dark: e.target.checked })}
             />
-            <span>暗黑模式</span>
+            <span>深色模式</span>
           </label>
 
           <button onClick={reset} style={{
@@ -212,11 +212,11 @@ button.cta {
 
 ### 通用
 - 主色（color picker）
-- 字號（slider 12-24px）
+- 字級（slider 12-24px）
 - 字型（select：display font vs body font）
-- 暗黑模式（toggle）
+- 深色模式（toggle）
 
-### 幻燈片deck
+### 投影片deck
 - 主題（light/dark/brand）
 - 背景樣式（solid/gradient/image）
 - 字型對比（更裝飾 vs 更克制）
@@ -254,7 +254,7 @@ button.cta {
 
 ### 3. 預設值是完成設計
 
-Tweaks是**錦上添花**。預設值必須本身就是一個完整、可釋出的設計。使用者關閉Tweaks面板後看到的就是產出。
+Tweaks是**錦上添花**。預設值必須本身就是一個完整、可發布的設計。使用者關閉Tweaks面板後看到的就是產出。
 
 ### 4. 合理分組
 
@@ -262,7 +262,7 @@ Tweaks是**錦上添花**。預設值必須本身就是一個完整、可釋出�
 
 ```
 ---- 視覺 ----
-主色 | 字號 | 暗黑模式
+主色 | 字級 | 深色模式
 
 ---- 佈局 ----
 密度 | 側欄位置
@@ -298,7 +298,7 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 → 給localStorage key加project name：`design-tweaks-[projectName]`。
 
 **我想讓tweak之間有聯動關係**
-→ 在`update`里加邏輯：
+→ 在`update`裡加邏輯：
 
 ```jsx
 const update = (patch) => {

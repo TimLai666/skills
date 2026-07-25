@@ -8,7 +8,7 @@
 
 - **`<Stage>`**：整個動畫的容器，自動提供auto-scale（fit viewport）+ scrubber + play/pause/loop控制
 - **`<Sprite start end>`**：時間片段。一個Sprite只在`start`到`end`這段時間內顯示。內部可以通過`useSprite()` hook讀取自己的本地進度`t` (0→1)
-- **`useTime()`**：讀當前全域性時間（秒）
+- **`useTime()`**：讀當前全域時間（秒）
 - **`Easing.easeInOut` / `Easing.easeOut` / ...**：緩動函式
 - **`interpolate(t, from, to, easing?)`**：根據t插值
 
@@ -157,7 +157,7 @@ function Scene() {
 | `easeInOut` | 慢→快→慢 | 位置變化 |
 | **`expoOut`** ⭐ | **指數緩出** | **Anthropic 級主 easing**（物理重量感）|
 | **`overshoot`** ⭐ | **彈性回彈** | **Toggle / 按鈕彈出 / 強調互動** |
-| `spring` | 彈簧 | 互動反饋、幾何體歸位 |
+| `spring` | 彈簧 | 互動回饋、幾何體歸位 |
 | `anticipation` | 先反向再正向 | 強調動作 |
 
 **預設主 easing 用 `expoOut`**（不是 `easeOut`）—— 見 `animation-best-practices.md` §2。

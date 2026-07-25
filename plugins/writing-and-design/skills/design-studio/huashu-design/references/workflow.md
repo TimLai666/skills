@@ -37,12 +37,12 @@
 ### 3. Fidelity和Scope
 
 - 多高保真？線框圖 / 半成品 / 真實data的full hi-fi？
-- 覆蓋多少flow？一屏 / 一個flow / 整個產品？
+- 覆蓋多少flow？單一畫面 / 一個flow / 整個產品？
 - 有沒有具體的「必須包含」元素？
 
 ### 4. Tweaks
 
-- 希望能即時調整哪些參數？（顏色/字號/間距/layout/文案/feature flag）
+- 希望能即時調整哪些參數？（顏色/字級/間距/layout/文案/feature flag）
 - 使用者自己要不要在做完後繼續調？
 
 ### 5. 問題專屬（至少4個）
@@ -50,7 +50,7 @@
 針對具體任務問4+個細節。例如：
 
 **做landing page**：
-- 目標轉化動作是什麼？
+- 目標轉換動作是什麼？
 - 主要受眾？
 - 競品參考？
 - 文案誰提供？
@@ -72,7 +72,7 @@
 遇到新任務時，可以抄這個結構在對話裡問：
 
 ```markdown
-開始前想跟你對齊幾個問題，一次列齊你批量回答就行：
+開始前想跟你對齊幾個問題，一次列齊你批次回答就行：
 
 **Design Context**
 1. 有設計系統/UI kit/品牌規範嗎？如果有在哪？
@@ -85,7 +85,7 @@
 
 **Fidelity**
 6. 保真度：線框 / 半成品 / 帶真資料full hi-fi？
-7. Scope：一屏 / 一整個flow / 整個產品？
+7. Scope：單一畫面 / 一整個flow / 整個產品？
 
 **Tweaks**
 8. 希望做完後能即時調哪些參數？
@@ -102,7 +102,7 @@
 
 ### Pass 1：Assumptions + Placeholders（5-15分鐘）
 
-HTML檔案頭部先寫你的**assumptions+reasoning comments**，像junior給manager彙報：
+HTML檔案頭部先寫你的**assumptions+reasoning comments**，像junior給manager報告：
 
 ```html
 <!--
@@ -127,21 +127,21 @@ HTML檔案頭部先寫你的**assumptions+reasoning comments**，像junior給man
 </section>
 ```
 
-**儲存 → show使用者 → 等反饋再走下一步**。
+**儲存 → show使用者 → 等回饋再走下一步**。
 
 ### Pass 2：真實元件+Variations（主力工作量）
 
 使用者批准方向後，開始填充。這時：
 - 寫React元件替換placeholder
 - 做variations（用design_canvas或Tweaks）
-- 如果是幻燈片/動畫，用starter components起手
+- 如果是投影片/動畫，用starter components起手
 
 **做到一半再show一次**——不要等全做完。設計方向錯了，晚show等於白做。
 
 ### Pass 3：細節打磨
 
 使用者滿意整體後，打磨：
-- 字號/間距/對比度微調
+- 字級/間距/對比度微調
 - 動畫timing
 - 邊界case
 - Tweaks面板完善
@@ -171,7 +171,7 @@ HTML檔案頭部先寫你的**assumptions+reasoning comments**，像junior給man
 → 做完整原型，用Tweaks切換。例如做登入頁，"佈局"是tweak的一個選項：
 - 左文案右表單
 - 頂部logo+中央表單
-- 背景全屏圖+浮層表單
+- 背景滿版圖+浮層表單
 
 使用者開關Tweaks就能切換，不需要開啟多個HTML檔案。
 
@@ -185,7 +185,7 @@ HTML檔案頭部先寫你的**assumptions+reasoning comments**，像junior給man
 - Layout：對稱 / 非對稱 / 不規則grid / full-bleed / 窄欄
 - Density：稀疏呼吸 / 中等 / 資訊密集
 - 互動：極簡hover / 豐富micro-interaction / 誇張大動畫
-- 材質：flat / 有陰影層次 / 紋理 / noise / 漸變
+- 材質：flat / 有陰影層次 / 紋理 / noise / 漸層
 
 ## 遇到不確定的情況
 
@@ -199,7 +199,7 @@ HTML檔案頭部先寫你的**assumptions+reasoning comments**，像junior給man
 交付時，summary **極短**：
 
 ```markdown
-✅ 幻燈片已完成（10張），帶Tweaks可切換"夜/日模式"。
+✅ 投影片已完成（10張），帶Tweaks可切換"夜/日模式"。
 
 注意：
 - 第4頁的資料是假的，等你提供真資料我替換

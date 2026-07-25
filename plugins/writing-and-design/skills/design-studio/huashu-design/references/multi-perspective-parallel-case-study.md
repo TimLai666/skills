@@ -7,7 +7,7 @@
 
 ## 背景
 
-使用者要求「為 huashu-md-html v2.0 製作 30 秒升級宣傳片」時，主執行緒先產出了 v5 基線（Anthropic / Penguin Classics 出版社品位）。但使用者認為可以做得更好，給了 critical instruction：
+使用者要求「為 huashu-md-html v2.0 製作 30 秒升級宣傳片」時，主執行緒先產出了 v5 基線（Anthropic / Penguin Classics 出版社品味）。但使用者認為可以做得更好，給了 critical instruction：
 
 > 「呼叫不同的 subagent 分別再去生成 6 個全然不同的表達方式和視覺設計的版本。你可以試試啟用不同的導演和藝術家。然後全都完成後，再評判審校。」
 
@@ -23,7 +23,7 @@
 
 | 視角 | 流派 | 美學錨點 | 跟其他視角的差異 |
 |------|------|---------|----------------|
-| **v5 基線** | 現代出版社 | Anthropic 赤陶橙 + Penguin Classics 襯線 + Vignelli grid | 安全的「品位」選擇 |
+| **v5 基線** | 現代出版社 | Anthropic 赤陶橙 + Penguin Classics 襯線 + Vignelli grid | 安全的「品味」選擇 |
 | **v5a Wes Anderson** | 電影章節美學 | The French Dispatch 雜誌感 + 1960 Olivetti 工業目錄 | 對稱構圖 + 章節卡片 + 裝飾邊框 |
 | **v5b Saul Bass** | 60s 影片標題藝術 | cut-paper + Trajan caps + 流動幾何 | 剪紙 silhouette + 大字 + 強對角線 |
 | **v5c 王家衛** | 港式新浪潮 | 《花樣年華》《2046》 letterboxing + 中文襯線 | 慢拍 + 霧化光暈 + 中文為主 |
@@ -72,7 +72,7 @@ Agent({ subagent_type: "general-purpose", run_in_background: true, name: "v5b-ba
 // ... 6 個
 ```
 
-後台執行，預期 30-60 分鐘。
+背景執行，預期 30-60 分鐘。
 
 ### Step 3 · 等待期間的 idle work
 
@@ -149,7 +149,7 @@ use case 分配（按平台和受眾）：
 
 ### 洞察 1 · 「先寫萬字 director's notes」方法論**完全 reproducible**
 
-6 個 subagent 都按 5 大部分結構產出了 4000-12000 字的完整 spec，且實施 HTML 時都達到了 marketing-ready 質量。這證明方法論本身不依賴單一執行者的天賦——**只要 brief 給得清楚，多個獨立執行者能產出一致的高質量結果**。
+6 個 subagent 都按 5 大部分結構產出了 4000-12000 字的完整 spec，且實施 HTML 時都達到了 marketing-ready 品質。這證明方法論本身不依賴單一執行者的天賦——**只要 brief 給得清楚，多個獨立執行者能產出一致的高品質結果**。
 
 ### 洞察 2 · 「視角」必須具體到「作品 + 年份」
 
@@ -164,11 +164,11 @@ use case 分配（按平台和受眾）：
 
 ### 洞察 3 · 反 AI slop 的「風格強化版本」是關鍵
 
-通用 anti-slop（紫漸變 / emoji / SVG 人物）適用所有版本。但**每個風格還要寫「專屬 anti-slop」**：
+通用 anti-slop（紫漸層 / emoji / SVG 人物）適用所有版本。但**每個風格還要寫「專屬 anti-slop」**：
 
 - Bass: 不用 Helvetica（太乾淨，Bass 是粗獷）
 - Vignelli: 不用圓角（所有 corner 90°）
-- Hara: 不用任何漸變 + 不用 sans display
+- Hara: 不用任何漸層 + 不用 sans display
 - Kusama: 不用現代 SaaS look
 - Anderson: 不用 cyber 配色
 - WKW: 不用 Inter（WKW 用襯線）
@@ -195,7 +195,7 @@ use case 分配（按平台和受眾）：
 
 subagent 完成需要 12-15 分鐘。這段時間主執行緒絕不該空閒：
 
-- **修主版本 bug**（使用者已經反饋的）
+- **修主版本 bug**（使用者已經回饋的）
 - **寫 review framework**（等審校時填）
 - **沉澱方法論到 skill**（如這份 case study）
 - **準備 final summary**（使用者回來一目瞭然）
@@ -221,7 +221,7 @@ subagent 完成需要 12-15 分鐘。這段時間主執行緒絕不該空閒：
 ## 完整方法論流程圖
 
 ```
-使用者 brief（含質量預期）
+使用者 brief（含品質預期）
        ↓
 [主執行緒] 寫 v5 基線 director's notes（萬字級 5 大部分）
        ↓

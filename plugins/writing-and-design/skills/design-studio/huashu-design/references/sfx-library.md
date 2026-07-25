@@ -1,12 +1,12 @@
 # SFX Library · huashu-design
 
-> 全部由 ElevenLabs Sound Generation API 生成，蘋果釋出會級音質。
+> 全部由 ElevenLabs Sound Generation API 生成，蘋果發表會級音質。
 > 產品級 SFX 資產庫，覆蓋花叔動畫/演示/產品 Demo 全場景。
 
 **資產位置**：`assets/sfx/<category>/<name>.mp3`
 **總數**：37 個 SFX（30 批次生成 + 7 個 v7b 保留）
 **生成模型**：ElevenLabs Sound Generation API（prompt_influence 0.4）
-**音質**：44.1kHz MP3，蘋果釋出會級清晰度，無額外混響
+**音質**：44.1kHz MP3，蘋果發表會級清晰度，無額外混響
 
 ---
 
@@ -46,8 +46,8 @@ assets/sfx/
 | `sfx/ui/click.mp3` | 0.5s | 標準 UI 點選（v7b 保留） | crisp modern interface click |
 | `sfx/ui/click-soft.mp3` | 0.5s | 柔和 UI click（次要按鈕/連結） | soft gentle button click, mid pitched |
 | `sfx/ui/focus.mp3` | 0.5s | 元素聚焦/選中（v7b 保留） | subtle focus tone, element highlight |
-| `sfx/ui/hover-subtle.mp3` | 0.5s | 懸停提示（微秒級反饋） | barely audible tick, air whisper |
-| `sfx/ui/tap-finger.mp3` | 0.5s | 移動端 tap（iOS 介面） | finger tap on touchscreen, muted thud |
+| `sfx/ui/hover-subtle.mp3` | 0.5s | 懸停提示（微秒級回饋） | barely audible tick, air whisper |
+| `sfx/ui/tap-finger.mp3` | 0.5s | 行動裝置 tap（iOS 介面） | finger tap on touchscreen, muted thud |
 | `sfx/ui/toggle-on.mp3` | 0.5s | 開關開啟 | ios toggle switch flip, satisfying click |
 
 ### 🌊 Transition（過渡）
@@ -69,7 +69,7 @@ assets/sfx/
 | `sfx/container/stack-collapse.mp3` | 0.8s | 堆疊合攏（列表聚合） | cards stacking, paper taps collapsing |
 | `sfx/container/modal-open.mp3` | 0.6s | 模態框開啟 | modal popping open, whoosh + thud |
 
-### 🔔 Feedback（通知/反饋）
+### 🔔 Feedback（通知/回饋）
 
 | 檔案 | 時長 | 用途 | Prompt 要點 |
 |---|---|---|---|
@@ -139,13 +139,13 @@ whoosh-fast (0.6s, 鋪墊) → logo-reveal-v2 (1.5s, 落點) → sparkle (0.8s, 
 ```
 簡版：`whoosh → logo-reveal`（直接 v7b 兩件套）。
 
-### 📱 UI 互動演示（移動端）
+### 📱 UI 互動演示（行動裝置）
 ```
 tap-finger (0.5s, 點選) → slide-in (0.6s, 面板滑入) → toggle-on (0.5s, 開關)
 ```
 完成後：`success-chime` 或 `notification-pop`。
 
-### 📊 資料視覺化/儀表盤
+### 📊 資料視覺化/儀表板
 ```
 loading-tick (0.5s, 節拍) × N → complete-done (0.8s, 資料到位) → achievement (1.5s, 驚豔落點)
 ```
@@ -191,7 +191,7 @@ ffmpeg -i video.mp4 \
 1. **有 tactile 動作**（打字/點選/滑動）→ `keyboard/` or `ui/`
 2. **元素進場/出場** → `transition/`
 3. **容器層操作**（卡片/模態） → `container/`
-4. **狀態反饋**（成功/失敗/通知） → `feedback/`
+4. **狀態回饋**（成功/失敗/通知） → `feedback/`
 5. **進度/時間流逝** → `progress/`
 6. **品牌落點/重要時刻** → `impact/`
 7. **AI 魔法/變換** → `magic/`
@@ -223,4 +223,4 @@ ffmpeg -i video.mp4 \
 
 ## 詳見
 - 音訊雙軌制與 ffmpeg 拼接：`apple-gallery-showcase.md`
-- 原始生成指令碼：`/tmp/gen_sfx_batch.sh`（一次性批次生成器）
+- 原始生成腳本：`/tmp/gen_sfx_batch.sh`（一次性批次生成器）

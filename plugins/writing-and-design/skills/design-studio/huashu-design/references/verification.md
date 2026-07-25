@@ -21,10 +21,10 @@ open -a "Google Chrome" "/path/to/your/design.html"
 HTML檔案裡最常見的問題是JS報錯導致白屏。用Playwright跑一遍：
 
 ```bash
-python ~/.claude/skills/huashu-design/scripts/verify.py path/to/design.html
+python huashu-design/scripts/verify.py path/to/design.html  # 路徑相對本 skill 的 huashu-design/ 目錄
 ```
 
-這個指令碼會：
+這個腳本會：
 1. 用headless chromium開啟HTML
 2. 截圖儲存到專案目錄
 3. 抓取控制台錯誤
@@ -42,13 +42,13 @@ python verify.py design.html --viewports 1920x1080,1440x900,768x1024,375x667
 
 ### 4. 互動檢查
 
-Tweaks、動畫、按鈕切換——預設的靜態截圖看不到。**建議讓使用者自己開瀏覽器點一遍**，或者用Playwright錄屏：
+Tweaks、動畫、按鈕切換——預設的靜態截圖看不到。**建議讓使用者自己開瀏覽器點一遍**，或者用Playwright錄影：
 
 ```python
 page.video.record('interaction.mp4')
 ```
 
-### 5. 幻燈片逐頁檢查
+### 5. 投影片逐頁檢查
 
 Deck類HTML，一張張截：
 
@@ -72,7 +72,7 @@ pip install playwright
 playwright install chromium
 ```
 
-如果使用者已經全域性安裝 Playwright，直接用即可。
+如果使用者已經全域安裝 Playwright，直接用即可。
 
 ## 截圖最佳實踐
 
@@ -147,7 +147,7 @@ open screenshot.png
 
 ### 佈局錯位
 
-- 檢查`box-sizing: border-box`是否全域性應用
+- 檢查`box-sizing: border-box`是否全域套用
 - 檢查`*  margin: 0; padding: 0`reset
 - Chrome DevTools裡開啟gridlines看實際佈局
 
@@ -157,13 +157,13 @@ open screenshot.png
 
 - 看起來對但interaction有bug
 - 靜態截圖好但scroll時錯位
-- 寬屏好看但窄屏崩
+- 寬螢幕好看但窄螢幕跑版
 - Dark mode忘了測
 - Tweaks切換後某些元件沒響應
 
 **最後1分鐘的驗證可以省1小時的返工**。
 
-## 常用驗證指令碼命令
+## 常用驗證腳本命令
 
 ```bash
 # 基礎：開啟+截圖+抓錯

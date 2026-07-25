@@ -20,7 +20,7 @@
 
 **讀程式碼抄exact values**：hex codes、spacing scale、font stack、border radius。不要憑記憶重畫。
 
-### 3. 使用者已釋出的產品
+### 3. 使用者已上線的產品
 如果使用者有上線的產品但沒給程式碼，用Playwright或讓使用者提供截圖。
 
 ```bash
@@ -31,7 +31,7 @@ npx playwright screenshot https://example.com screenshot.png --viewport-size=192
 讓你看到真實的視覺vocabulary。
 
 ### 4. 品牌指南/Logo/已有素材
-使用者可能有：Logo檔案、品牌色規範、營銷物料、slide模板。這些都是context。
+使用者可能有：Logo檔案、品牌色規範、行銷素材、slide模板。這些都是context。
 
 ### 5. 競品參考
 使用者說"像XX網站那樣"——讓他提供URL或截圖。**不要**憑你訓練資料裡的模糊印象做。
@@ -121,7 +121,7 @@ npx playwright screenshot https://example.com screenshot.png --viewport-size=192
 
 ## 憑空做設計（沒Context時的 fallback）
 
-**強烈警告**：這種情況下的產出質量會顯著下降。明確告訴使用者。
+**強烈警告**：這種情況下的產出品質會顯著下降。明確告訴使用者。
 
 ```markdown
 你沒有design context，我就只能基於通用直覺做。
@@ -151,7 +151,7 @@ npx playwright screenshot https://example.com screenshot.png --viewport-size=192
 
 ### 3. 選有特點的字型配對
 
-不要用Inter/Roboto。建議組合（從Google Fonts白嫖）：
+不要用Inter/Roboto。建議組合（從Google Fonts免費取用）：
 - Instrument Serif + Geist Sans
 - Cormorant Garamond + Inter Tight
 - Bricolage Grotesque + Söhne（付費）
@@ -206,7 +206,7 @@ Focus在：
 
 ## 最後的提醒
 
-**一個專案的設計質量上限，由你拿到的context質量決定**。
+**一個專案的設計品質上限，由你拿到的context品質決定**。
 
 花10分鐘收集context，比花1小時憑空畫hi-fi更有價值。
 

@@ -21,20 +21,20 @@
 
 | 格式 | 規格 | 適合場景 | 典型大小（30s） |
 |---|---|---|---|
-| MP4 25fps | 1920×1080 · H.264 · CRF 18 | 公眾號嵌入、影片號、YouTube | 1-2 MB |
+| MP4 25fps | 1920×1080 · H.264 · CRF 18 | 公眾號嵌入、視頻號、YouTube | 1-2 MB |
 | MP4 60fps | 1920×1080 · minterpolate 插幀 · H.264 · CRF 18 | 高幀率展示、B站、作品集 | 1.5-3 MB |
 | GIF | 960×540 · 15fps · palette 最佳化 | Twitter/X、README、Slack 預覽 | 2-4 MB |
 
 ## 工具鏈
 
-兩個指令碼在 `scripts/`：
+這些腳本在 `scripts/`：
 
 ### 1. `render-video.js` — HTML → MP4
 
-錄一個 25fps 的 MP4 基礎版本。依賴全域性 playwright。
+錄一個 25fps 的 MP4 基礎版本。依賴全域安裝的 playwright。
 
 ```bash
-NODE_PATH=$(npm root -g) node /path/to/claude-design/scripts/render-video.js <html檔案>
+NODE_PATH=$(npm root -g) node <skill根目錄>/scripts/render-video.js <html檔案>
 ```
 
 可選參數：
@@ -57,11 +57,11 @@ bash add-music.sh <input.mp4> [--mood=<name>] [--music=<path>] [--out=<path>]
 
 | `--mood=` | 風格 | 適配場景 |
 |-----------|------|---------|
-| `tech`（預設） | Apple Silicon / 蘋果釋出會，極簡合成器+鋼琴 | 產品釋出、AI工具、Skill 宣傳 |
+| `tech`（預設） | Apple Silicon / 蘋果發表會，極簡合成器+鋼琴 | 產品發布、AI工具、Skill 宣傳 |
 | `ad` | upbeat 現代電子，有 build + drop | 社交媒體廣告、產品預告、促銷片 |
-| `educational` | 溫暖明亮、輕吉他/電鋼琴，inviting | 科普、教程介紹、課程預告 |
+| `educational` | 溫暖明亮、輕吉他/電鋼琴，inviting | 科普、教學介紹、課程預告 |
 | `educational-alt` | 同類備選，換一首試試 | 同上 |
-| `tutorial` | lo-fi 環境音，幾乎無存在感 | 軟體演示、程式設計教程、長演示 |
+| `tutorial` | lo-fi 環境音，幾乎無存在感 | 軟體演示、程式設計教學、長演示 |
 | `tutorial-alt` | 同類備選 | 同上 |
 
 **行為**：
@@ -73,7 +73,7 @@ bash add-music.sh <input.mp4> [--mood=<name>] [--music=<path>] [--out=<path>]
 
 **典型流水線**（動畫匯出三件套 + 配樂）：
 ```bash
-node render-video.js animation.html                        # 錄屏
+node render-video.js animation.html                        # 錄影
 bash convert-formats.sh animation.mp4                      # 派生 60fps + GIF
 bash add-music.sh animation-60fps.mp4                      # 加預設 tech BGM
 # 或針對不同場景：
@@ -86,11 +86,11 @@ bash add-music.sh product-promo.mp4 --mood=ad --out=promo-final.mp4
 從已有 MP4 生成 60fps 版本和 GIF。
 
 ```bash
-bash /path/to/claude-design/scripts/convert-formats.sh <input.mp4> [gif_width] [--minterpolate]
+bash <skill根目錄>/scripts/convert-formats.sh <input.mp4> [gif_width] [--minterpolate]
 ```
 
 輸出（與輸入同目錄）：
-- `<name>-60fps.mp4` — 預設用 `fps=60` 幀複製（相容性廣）；加 `--minterpolate` 啟用高質量插幀
+- `<name>-60fps.mp4` — 預設用 `fps=60` 幀複製（相容性廣）；加 `--minterpolate` 啟用高品質插幀
 - `<name>.gif` — palette 最佳化的 GIF（預設 960 寬，可改）
 
 **60fps 模式選擇**：
@@ -107,7 +107,7 @@ bash /path/to/claude-design/scripts/convert-formats.sh <input.mp4> [gif_width] [
 - 1280 —— 更清晰但檔案更大
 - 600 —— Twitter/X 優先載入
 
-### 4. `render-video-seek.js` — 真 60fps / 確定性渲染（推薦高質量交付）
+### 4. `render-video-seek.js` — 真 60fps / 確定性渲染（推薦高品質交付）
 
 `render-video.js` 的 recordVideo 路徑有三個固有限制：幀率被 Chromium compositor 鎖死 25fps、開頭有載入黑幀需 trim、60fps 只能靠事後 minterpolate 插幀（有 ghosting + macOS QuickTime 相容 bug，見 `animation-pitfalls.md §14`）。需要**真 60fps、確定性輸出、或交付 B站/作品集**時，改用 seek 渲染。
 
@@ -121,14 +121,14 @@ NODE_PATH=$(npm root -g) node /path/to/claude-design/scripts/render-video-seek.j
 
 正面解決 recordVideo 三死結：
 - **真原生任意幀率**：`--fps=60` 出真 60fps（每幀都是真實 seek 畫面），不再經 `convert-formats.sh` 的 minterpolate 插幀，繞開 ghosting + macOS 相容 bug
-- **無開頭黑幀**：不錄屏，根本沒有載入期黑幀，不需要 `--trim` / `--fontwait`
+- **無開頭黑幀**：不走錄影，根本沒有載入期黑幀，不需要 `--trim` / `--fontwait`
 - **確定性**：seek 到時間戳截圖，同輸入同輸出，不受機器負載/丟幀影響
 
-**適用邊界（重要）**：只支援走 Stage 時鐘的動畫——`assets/animations.jsx` 的 `<Stage>` 或 `narration_stage.jsx` 的 `<NarrationStage>`，它們會響應 `window.__seekRender` 凍結自驅時鐘並暴露 `window.__seek(t)`。純 CSS `@keyframes` / Lottie / 手寫非 Stage 動畫不吃 `__seek`，這類繼續用 `render-video.js`（指令碼檢測不到 `__seek` 會報錯並提示）。
+**適用邊界（重要）**：只支援走 Stage 時鐘的動畫——`assets/animations.jsx` 的 `<Stage>` 或 `narration_stage.jsx` 的 `<NarrationStage>`，它們會響應 `window.__seekRender` 凍結自驅時鐘並暴露 `window.__seek(t)`。純 CSS `@keyframes` / Lottie / 手寫非 Stage 動畫不吃 `__seek`，這類繼續用 `render-video.js`（腳本檢測不到 `__seek` 會報錯並提示）。
 
-**代價**：逐幀截圖，長影片總耗時可能比 recordVideo 即時錄更久（靠 `--concurrency` 多 worker 緩解）；大量臨時 PNG 佔盤，渲染前建議關其他大記憶體 App。
+**代價**：逐幀截圖，長影片總耗時可能比 recordVideo 即時錄更久（靠 `--concurrency` 多 worker 緩解）；大量臨時 PNG 佔磁碟空間，渲染前建議關其他大記憶體 App。
 
-**二選一策略**：預設仍用 `render-video.js`（零風險、覆蓋所有動畫類型）；需要真 60fps / 確定性 / 高質量交付、且動畫走 Stage 時鐘時，用 `render-video-seek.js`。帶解說的長動畫用 `render-narration.sh --seek` 一鍵走 seek 渲染 + 混音。
+**二選一策略**：預設仍用 `render-video.js`（零風險、覆蓋所有動畫類型）；需要真 60fps / 確定性 / 高品質交付、且動畫走 Stage 時鐘時，用 `render-video-seek.js`。帶解說的長動畫用 `render-narration.sh --seek` 一鍵走 seek 渲染 + 混音。
 
 ## 完整流程（標準推薦）
 
@@ -198,7 +198,7 @@ GIF 只能 256 色。一次 pass 的 GIF 會把全動畫色彩壓到 256 色通�
 - [ ] Duration 參數與 HTML 裡的實際動畫時長匹配
 - [ ] HTML 中 Stage 檢測 `window.__recording` 強制 loop=false（手寫 Stage 必查；用 `assets/animations.jsx` 自帶）
 - [ ] 結尾 Sprite 的 `fadeOut={0}`（影片末幀不淡出）
-- [ ] 含「Created by Huashu-Design」水印（僅動畫場景必加；第三方品牌作品加「非官方出品 · 」字首。詳見 GUIDE.md §「Skill 推廣水印」）
+- [ ] 含「Created by Huashu-Design」浮水印（僅動畫場景必加；第三方品牌作品加「非官方出品 · 」前綴。詳見 GUIDE.md §「Skill 推廣浮水印」）
 
 ## 交付時附帶的說明
 
@@ -227,13 +227,13 @@ GIF 只能 256 色。一次 pass 的 GIF 會把全動畫色彩壓到 256 色通�
 | 「太大了」 | MP4：提高 CRF 到 23-28；GIF：降解析度到 600 或 fps 到 10 |
 | 「GIF 太糊」 | 提高 `gif_width` 到 1280；或者建議用 MP4 代替（微信朋友圈也支援） |
 | 「要直式 9:16」 | 改 HTML 源的 `--width=1080 --height=1920`，重新錄 |
-| 「加水印」 | ffmpeg 加 `-vf "drawtext=..."` 或 `overlay=` 一個 PNG |
+| 「加浮水印」 | ffmpeg 加 `-vf "drawtext=..."` 或 `overlay=` 一個 PNG |
 | 「要透明背景」 | MP4 不支援 alpha；用 WebM VP9 + alpha 或 APNG |
 | 「要無損」 | CRF 改 0 + preset veryslow（檔案會大 10 倍） |
 
-## Skill 推廣水印模板（僅動畫匯出用）
+## Skill 推廣浮水印模板（僅動畫匯出用）
 
-GUIDE.md 規定動畫 MP4/GIF 預設帶水印，模板如下（深底改用 `rgba(255,255,255,0.35)`；第三方品牌動畫字首「非官方出品 · 」）：
+GUIDE.md 規定動畫 MP4/GIF 預設帶浮水印，模板如下（深底改用 `rgba(255,255,255,0.35)`；第三方品牌動畫前綴「非官方出品 · 」）：
 
 ```jsx
 <div style={{

@@ -1,6 +1,6 @@
 # Typography：排印推理系統
 
-> **這不是字型清單，是配對與排版的推理規則。** `design-styles.md` 已經給了 40 種風格各自的字型名；本文回答的是「為什麼這樣配」「拿到任意內容怎麼推匯出字號/行長/字重」。目標：同一個風格標籤，落到不同內容上，能推匯出不同的排印結果，而不是每次都抄同一套字號。
+> **這不是字型清單，是配對與排版的推理規則。** `design-styles.md` 已經給了 40 種風格各自的字型名；本文回答的是「為什麼這樣配」「拿到任意內容怎麼推導出字級/行長/字重」。目標：同一個風格標籤，落到不同內容上，能推導出不同的排印結果，而不是每次都抄同一套字級。
 >
 > 前置紀律不變：有 design context 先 lift 使用者自己的字型（見 `design-context.md`），本文的一切只在「使用者沒有字型規範」時啟用。
 
@@ -8,25 +8,25 @@
 
 拿到內容後按這個順序推，每一步都由上一步決定，不許跳到「直接選個好看的字型」：
 
-1. **內容類型** → 長文閱讀 / 資料密集 / 營銷大字 / UI 介面，決定音階比例和正文字號
+1. **內容類型** → 長文閱讀 / 資料密集 / 行銷大字 / UI 介面，決定音階比例和正文字級
 2. **語言構成** → 純中文 / 中西混排 / 純西文，決定 fallback 鏈寫法和行高基準
 3. **風格溫度**（對齊 `design-styles.md` 的安靜/中性/大膽三檔）→ 決定字型配對的對比度來源
 4. **最後才是字型名** → 從下面第 3 章配對錶選，或從風格庫對應條目取
 
 為什麼：先選字型名的做法，會讓「內容是什麼」對排印零影響，這正是千人一面的病根。
 
-## 1. 字號音階（modular scale）
+## 1. 字級音階（modular scale）
 
-字號不是拍腦袋，是從正文字號乘一個固定比例逐級推出來的。比例決定頁面的「戲劇性」：
+字級不是拍腦袋，是從正文字級乘一個固定比例逐級推出來的。比例決定頁面的「戲劇性」：
 
 | 比例 | 名字 | 性格 | 適用 |
 |------|------|------|------|
 | 1.2 | 小三度 | 平緩、層級多而不吵 | dashboard、文件站、資訊密集 UI |
-| 1.25 | 大三度 | 通用、安全 | 大多數網頁、產品落地頁 |
-| 1.333 | 純四度 | 標題明顯跳出 | editorial 長文、營銷頁、報告 |
-| 1.5 | 純五度 | 戲劇性、層級極少 | 大字報、slides、hero 一屏一句 |
+| 1.25 | 大三度 | 通用、安全 | 大多數網頁、產品 landing page |
+| 1.333 | 純四度 | 標題明顯跳出 | editorial 長文、行銷頁、報告 |
+| 1.5 | 純五度 | 戲劇性、層級極少 | 大字報、slides、hero 一個畫面一句 |
 
-**推導規則**：正文定 16-18px（中文正文建議 17-18px，漢字筆畫密、同字號比西文顯擠），然後按比例上推標題、下推 caption。層級超過 5 檔就是失控，砍掉。
+**推導規則**：正文定 16-18px（中文正文建議 17-18px，漢字筆畫密、同字級比西文顯擠），然後按比例上推標題、下推 caption。層級超過 5 檔就是失控，砍掉。
 
 | 檔位 | 1.25 比例下的參考值 | 用途 |
 |------|--------------------|------|
@@ -38,7 +38,7 @@
 | h1 | ≈1.95x | 頁面標題 |
 | display | 3x-8x，脫離音階自由發揮 | hero 巨字，由版面而非音階決定 |
 
-**流式字號寫法**（display 檔必用，避免大屏死板小屏溢位）：
+**流式字級寫法**（display 檔必用，避免大螢幕死板小螢幕溢位）：
 
 ```css
 /* clamp(最小值, 首選值, 最大值)：首選值 = 基礎rem + 視口係數 */
@@ -48,7 +48,7 @@ h1 { font-size: clamp(2rem, 1.2rem + 3.5vw, 4.5rem); }
 body { font-size: clamp(1rem, 0.95rem + 0.3vw, 1.125rem); }
 ```
 
-為什麼 display 脫離音階：hero 巨字是版面元素不是文本層級，它的尺寸由「佔視口幾成」決定，用 vw 推導比用音階推導更合理。
+為什麼 display 脫離音階：hero 巨字是版面元素不是文字層級，它的尺寸由「佔視口幾成」決定，用 vw 推導比用音階推導更合理。
 
 ## 2. 行長與行高
 
@@ -57,7 +57,7 @@ body { font-size: clamp(1rem, 0.95rem + 0.3vw, 1.125rem); }
 | 語言 | 舒適區 | CSS 實現 |
 |------|--------|----------|
 | 西文正文 | 45-75 字元，最佳 66 | `max-width: 65ch` |
-| 中文正文 | 一行 22-38 字，最佳 28-32 字 | `max-width: 36em`（em 隨字號縮放） |
+| 中文正文 | 一行 22-38 字，最佳 28-32 字 | `max-width: 36em`（em 隨字級縮放） |
 | 圖注/側欄 | 更短，中文 15-20 字 | 窄容器天然限制 |
 
 為什麼中文更短：漢字是無空格的緻密方塊字，同寬度下承載的資訊量明顯高於西文，同樣的眼跳次數中文讀進更多內容，行太長回行時找不到下一行開頭。
@@ -75,43 +75,43 @@ body { font-size: clamp(1rem, 0.95rem + 0.3vw, 1.125rem); }
 
 中文全線比西文高 0.2 左右：漢字是滿格方塊，沒有西文小寫字母之間的天然空隙，行距不足會糊成一片。
 
-### text-wrap（2024+ 瀏覽器都支援了，白拿的排印質量）
+### text-wrap（2024+ 瀏覽器都支援了，白拿的排印品質）
 
 ```css
 h1, h2, h3 { text-wrap: balance; }  /* 標題多行時各行長度均衡，消滅孤字行 */
 p { text-wrap: pretty; }            /* 正文消滅行尾孤詞（西文效果明顯，中文輕微） */
 ```
 
-balance 只用於 ≤4 行的標題（演算法限制 6 行且有效能成本）；pretty 全域性給正文無副作用。
+balance 只用於 ≤4 行的標題（演算法限制 6 行且有效能成本）；pretty 全域給正文無副作用。
 
 ## 3. 十組開源字型配對（西文）
 
 配對的三種對比度來源，配之前先想清楚用哪種：
 
-- **形式對比**：襯線 display x 無襯線 body（最經典，但要 x-height 咬合，否則視覺字號跳）
+- **形式對比**：襯線 display x 無襯線 body（最經典，但要 x-height 咬合，否則視覺字級跳）
 - **同族咬合**：superfamily 同一設計骨架（零風險，代價是平淡）
 - **時代對比**：古典字形 x 現代字形（譜系差 200 年以上才有張力，差 50 年只顯得亂）
 
 | # | 配對（display + body） | 配對邏輯 | 溫度 | 獲取 |
 |---|------------------------|----------|------|------|
-| 1 | Newsreader + Geist | 形式對比：屏顯最佳化的過渡襯線，x-height 高、與 Geist 咬合好；**Fraunces 的正牌平替** | 安靜 | Google Fonts / Vercel 官方倉庫 |
+| 1 | Newsreader + Geist | 形式對比：為螢幕顯示最佳化的過渡襯線，x-height 高、與 Geist 咬合好；**Fraunces 的正牌平替** | 安靜 | Google Fonts / Vercel 官方倉庫 |
 | 2 | Source Serif 4 + Source Sans 3 | 同族咬合：Adobe 同設計系統，字高字重節奏完全對齊，報告和文件零翻車 | 安靜 | Google Fonts |
-| 3 | EB Garamond + IBM Plex Sans | 時代對比：16 世紀法國老襯線 x 2017 理性 grotesque，差 400 年的張力；注意 Garamond x-height 低，同行混用需字號補償（+8% 是經驗起點，系統解法用 `font-size-adjust`，見第 4 章） | 安靜·文氣 | Google Fonts |
-| 4 | Lora + Hanken Grotesk | 形式對比：Lora 筆刷感襯線中等反差，屏顯耐看；Hanken 是 Söhne 氣質的開源近親 | 中性 | Google Fonts |
+| 3 | EB Garamond + IBM Plex Sans | 時代對比：16 世紀法國老襯線 x 2017 理性 grotesque，差 400 年的張力；注意 Garamond x-height 低，同行混用需字級補償（+8% 是經驗起點，系統解法用 `font-size-adjust`，見第 4 章） | 安靜·文氣 | Google Fonts |
+| 4 | Lora + Hanken Grotesk | 形式對比：Lora 筆刷感襯線中等反差，螢幕顯示耐看；Hanken 是 Söhne 氣質的開源近親 | 中性 | Google Fonts |
 | 5 | Instrument Serif + Geist | 形式對比：只有 400 一檔字重，天生 display-only，正文必須交給 sans。⚠️ 正在被 AI 工具用爛的路上，2026 年慎用於「想顯得獨特」的場合 | 中性 | Google Fonts |
 | 6 | Schibsted Grotesk + Source Serif 4 | 反轉結構：grotesque 當 display、襯線當正文，媒體感；**Space Grotesk 氾濫後的平替**（挪威 Schibsted 報業定製開源，帶新聞血統） | 中性 | Google Fonts |
-| 7 | Bricolage Grotesque + Newsreader | 形式對比：Bricolage 的 ink trap 和不規則細節在大字號才顯現，天生 display；配安靜襯線正文形成粗野 x 文雅 | 大膽 | Google Fonts |
+| 7 | Bricolage Grotesque + Newsreader | 形式對比：Bricolage 的 ink trap 和不規則細節在大字級才顯現，天生 display；配安靜襯線正文形成粗野 x 文雅 | 大膽 | Google Fonts |
 | 8 | Archivo（Expanded/Black）+ Inter | 大字報結構：Archivo 寬體黑重壓場，Inter 只當 14-16px 正文工蜂（這是 Inter 的正確用法，見反模式） | 大膽 | Google Fonts |
-| 9 | Cormorant Garamond + Work Sans | 高反差奢侈感：Cormorant 筆畫極細，**必須 ≥40px 才成立**，小字號筆畫會斷；適合時尚/太空圖錄風 | 大膽 | Google Fonts |
+| 9 | Cormorant Garamond + Work Sans | 高反差奢侈感：Cormorant 筆畫極細，**必須 ≥40px 才成立**，小字級筆畫會斷；適合時尚/太空圖錄風 | 大膽 | Google Fonts |
 | 10 | Geist Mono / JetBrains Mono + Geist | 等寬當主角：命令列感、工程感；等寬只用於標籤/編號/程式碼，整段正文用等寬是災難（行長膨脹 30%） | 中性·技術 | Vercel / JetBrains 官方，均 OFL |
 
 **已被用爛名單**（AI 生成頁面的指紋，用了等於自曝）：
 
 | 爛大街 | 為什麼爛 | 平替 |
 |--------|----------|------|
-| Fraunces 當 display | 2023-2025 所有 AI 設計工具的預設「有品位」選項 | Newsreader、Libre Caslon Text |
-| Inter 當 display | Inter 是為 UI 小字設計的，大字號下勻質無表情 | Archivo、Anton、Schibsted Grotesk |
-| Space Grotesk | 「科技感」的偷懶答案，氾濫於加密/AI 落地頁 | Schibsted Grotesk、Familjen Grotesk |
+| Fraunces 當 display | 2023-2025 所有 AI 設計工具的預設「有品味」選項 | Newsreader、Libre Caslon Text |
+| Inter 當 display | Inter 是為 UI 小字設計的，大字級下勻質無表情 | Archivo、Anton、Schibsted Grotesk |
+| Space Grotesk | 「科技感」的偷懶答案，氾濫於加密/AI landing page | Schibsted Grotesk、Familjen Grotesk |
 | Playfair Display | 「優雅」的偷懶答案，婚禮請柬既視感 | Cormorant（更極端）、DM Serif Display（更憨） |
 
 ## 4. 中文排印（本文最重的一章）
@@ -123,9 +123,9 @@ balance 只用於 ≤4 行的標題（演算法限制 6 行且有效能成本）
 | 字型 | 類別 | 氣質 | 溫度 | 獲取 |
 |------|------|------|------|------|
 | 思源宋體（Noto Serif SC） | 宋體 | 出版正統、7 字重齊全，Heavy 可當 display | 安靜-中性 | Google Fonts，OFL |
-| 思源黑體（Noto Sans SC） | 黑體 | 中文界的 Inter：可靠、無表情，當預設正文沒錯但沒個性 | 全溫度兜底 | Google Fonts，OFL |
+| 思源黑體（Noto Sans SC） | 黑體 | 中文界的 Inter：可靠、無表情，當預設正文沒錯但沒個性 | 全溫度保底 | Google Fonts，OFL |
 | 霞鶩文楷 | 楷體 | 手寫溫度、親切，適合文藝/教育/個人部落格正文與引文 | 安靜·暖 | GitHub lxgw/LxgwWenKai，OFL |
-| 霞鶩新晰黑 | 黑體 | 比思源黑更瘦更透氣的屏顯黑，正文久讀不累 | 安靜 | GitHub lxgw/LxgwNeoXiHei |
+| 霞鶩新晰黑 | 黑體 | 比思源黑更瘦更透氣的螢幕顯示黑體，正文久讀不累 | 安靜 | GitHub lxgw/LxgwNeoXiHei |
 | 得意黑 Smiley Sans | 斜黑體 | **中文世界罕見的原生斜體**，運動感、標題專用；正文用它會暈 | 大膽 | GitHub atelier-anchor/smiley-sans，OFL |
 | 匯文明朝體 | 舊字形明朝 | 老印刷鉛字氣、復古出版，適合書封/文化類 display | 中性-大膽·復古 | 貓啃網/GitHub，免費商用 |
 | 京華老宋體 | 老宋 | 筆畫方硬的標題宋，報頭感 | 大膽·復古 | 貓啃網，免費商用 |
@@ -140,7 +140,7 @@ balance 只用於 ≤4 行的標題（演算法限制 6 行且有效能成本）
 **fallback 鏈是第一槓杆**：中文字型自帶的西文字元普遍難看（思源黑的拉丁字母呆板），把西文字型放在前面，拉丁字元和數字被它接住，漢字自動落到後面的中文字型：
 
 ```css
-/* 西文在前，中文在後，系統中文兜底，泛型收尾 */
+/* 西文在前，中文在後，系統中文保底，泛型收尾 */
 font-family: "Geist", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
 /* 襯線同理 */
 font-family: "Newsreader", "Noto Serif SC", "Songti SC", serif;
@@ -148,7 +148,7 @@ font-family: "Newsreader", "Noto Serif SC", "Songti SC", serif;
 
 為什麼這個順序：font-family 是逐字元匹配的，西文字型不含 CJK 碼位，漢字自然穿透到中文字型。反過來寫（中文在前）西文字元全被中文字型吃掉，等於白配。
 
-**字號補償**：同字號下西文小寫視覺偏小（x-height 只佔字身一半，漢字佔滿）。兩種解法：
+**字級補償**：同字級下西文小寫視覺偏小（x-height 只佔字身一半，漢字佔滿）。兩種解法：
 
 ```css
 /* 解法一：font-size-adjust 讓 fallback 字型按 x-height 歸一（Chrome 127+/FF/Safari 17+） */
@@ -160,7 +160,7 @@ font-family: "Newsreader", "Noto Serif SC", "Songti SC", serif;
 
 **數字規則**：數字一律走西文字型（fallback 鏈已保證），資料表格必須加 `font-variant-numeric: tabular-nums`，否則 1 和 8 寬度不同，列會抖。
 
-**中英之間不加空格**：這是本倉庫規範（花叔明確不用盤古之白），靠 fallback 鏈的字型本身留白，不靠手動敲空格。
+**中英之間不加空格**：這是本 skill 規範（花叔明確不用盤古之白），靠 fallback 鏈的字型本身留白，不靠手動敲空格。
 
 ### 4.3 中文沒有斜體
 
@@ -169,17 +169,17 @@ font-family: "Newsreader", "Noto Serif SC", "Songti SC", serif;
 | 西文習慣 | 中文替代 | CSS |
 |----------|----------|-----|
 | italic 強調 | 換字重 | `font-weight: 600`（前提：字型真有這檔字重） |
-| italic 書名/引用 | 底色高亮 | `background: linear-gradient(transparent 60%, #FFE9A8 60%)` 熒光筆式 |
+| italic 書名/引用 | 底色高亮 | `background: linear-gradient(transparent 60%, #FFE9A8 60%)` 螢光筆式 |
 | italic 引文塊 | 換字型 | 引文整段換霞鶩文楷，楷體本身就是中文的「引用語氣」 |
 | italic 專名 | 顏色/著重號 | `text-emphasis: dot`（著重號，中文原生強調，支援度已可用） |
 
-保險絲：`font-synthesis: none;` 全域性禁掉合成斜體和合成加粗，寧可不強調也不接受變形字。
+保險絲：`font-synthesis: none;` 全域禁掉合成斜體和合成加粗，寧可不強調也不接受變形字。
 
 ### 4.4 標點規範
 
 | 規則 | 做法 | 為什麼 |
 |------|------|--------|
-| 引號 | 直角引號「」『』，不用彎引號 "" | 彎引號在中文字型裡是全形佔位但形狀是西文的，視覺漂浮；「」是本倉庫硬規範 |
+| 引號 | 直角引號「」『』，不用彎引號 "" | 彎引號在中文字型裡是全形佔位但形狀是西文的，視覺漂浮；「」是本 skill 硬規範 |
 | 避頭尾 | `line-break: strict;` | 禁止句號逗號出現在行首、開引號出現在行尾，這是中文排版的底線 |
 | 標點懸掛 | `hanging-punctuation: first allow-end;`（僅 Safari）；跨瀏覽器用 `text-indent: -0.5em` 處理段首開引號 | 段首的開引號不懸掛會讓首行看起來縮進了半格，視覺左邊緣不齊 |
 | 連續標點擠壓 | `font-feature-settings: "halt";`（行尾擠壓）或 `"palt"`（全比例寬度，需配合 letter-spacing） | 全形標點連排（如「）。」）會出現一個半字寬的空洞，halt 收窄它 |
@@ -190,7 +190,7 @@ font-family: "Newsreader", "Noto Serif SC", "Songti SC", serif;
 |------|------|--------|
 | 正文 | 0 至 0.05em | 微加字距提升透氣度；超過 0.05em 詞的完形被打散，讀速下降 |
 | 標題（24-48px） | 0 | 漢字方塊字距天然均勻，不需要西文式 tracking 調整 |
-| display 巨字（>60px） | -0.02em 至 0 | 大字號下字面之間的空隙被放大，微收更緊湊；再負就筆畫相撞 |
+| display 巨字（>60px） | -0.02em 至 0 | 大字級下字面之間的空隙被放大，微收更緊湊；再負就筆畫相撞 |
 | 全大寫西文小標籤 | 0.08-0.15em | 唯一需要大正字距的場景，且只對西文大寫生效 |
 
 **中文永遠不要用西文那套「display 收 -0.05em」**：漢字是滿格設計，負字距直接筆畫打架。
@@ -200,8 +200,8 @@ font-family: "Newsreader", "Noto Serif SC", "Songti SC", serif;
 中文沒有西文那種 Ultra Thin 到 Black 的 display 字型生態，大字的戲劇性要靠推理製造：
 
 - **字重對比是主武器**：思源宋 Heavy 900 壓 Light 300，同一字型兩個極端字重同屏，比換字型更有張力且零載入成本
-- **筆畫密度決定可用字號下限**：筆畫細/反差大的字型（宋體細橫、Cormorant 式）只在大字號成立；小於 24px 細筆畫開始斷筆，正文必須回到黑體/中等筆畫
-- **反向也成立**：筆畫重的字（黑體 Black、老宋）在超大字號下墨量過大，「一」和「灥」墨量差被放大，密度不均的標題考慮換低一檔字重
+- **筆畫密度決定可用字級下限**：筆畫細/反差大的字型（宋體細橫、Cormorant 式）只在大字級成立；小於 24px 細筆畫開始斷筆，正文必須回到黑體/中等筆畫
+- **反向也成立**：筆畫重的字（黑體 Black、老宋）在超大字級下墨量過大，「一」和「灥」墨量差被放大，密度不均的標題考慮換低一檔字重
 - **豎排是中文獨有的 display 武器**：`writing-mode: vertical-rl` 做書脊式標題、詩詞、目錄，西文做不到；注意豎排裡的西文和數字用 `text-orientation: upright` 或 `text-combine-upright: all`（兩位數字合體直立）
 
 ## 5. 反模式清單
@@ -211,10 +211,10 @@ font-family: "Newsreader", "Noto Serif SC", "Songti SC", serif;
 | 全場 Inter（display+body 一把梭） | Inter 是 UI 小字工具，當 display 勻質無表情；這是「AI 生成頁面」的頭號指紋 |
 | 中文交給 `sans-serif` 系統預設 | Windows 落到中易宋體/雅黑、macOS 落到蘋方，同一頁面跨裝置完全兩張臉，等於沒做設計 |
 | faux italic / faux bold | 瀏覽器合成變形：斜體扭曲漢字，合成加粗把筆畫糊成墨團；用 `font-synthesis: none` 斷根 |
-| 大標題字距過鬆 | 西文 display 需要收緊（大字號空隙被放大），AI 常反著來加 +0.05em，標題鬆垮像臨時佔位 |
-| 行長失控（無 max-width） | 大屏上一行 60 個漢字，讀者回行必迷路；可讀性問題裡行長失控排第一，比字型選錯傷害大 |
-| 字號檔位 >6 檔 | 層級貶值，讀者分不清什麼重要；音階的意義就是強制克制 |
-| 只有 400/700 兩檔字重 | 層級全靠字號撐，頁面平；variable font 時代 300-900 都是免費的表達維度 |
+| 大標題字距過鬆 | 西文 display 需要收緊（大字級空隙被放大），AI 常反著來加 +0.05em，標題鬆垮像臨時佔位 |
+| 行長失控（無 max-width） | 大螢幕上一行 60 個漢字，讀者回行必迷路；可讀性問題裡行長失控排第一，比字型選錯傷害大 |
+| 字級檔位 >6 檔 | 層級貶值，讀者分不清什麼重要；音階的意義就是強制克制 |
+| 只有 400/700 兩檔字重 | 層級全靠字級撐，頁面平；variable font 時代 300-900 都是免費的表達維度 |
 | 表格/資料不用 tabular-nums | 數字寬度不等，列左右抖動，資料可信感直接打折 |
 | 中文正文用 display 字型（得意黑/老宋整段排） | display 字型的個性在正文裡變成閱讀阻力，200 字後就累 |
 | 中西混排中文字型放 fallback 鏈最前 | 拉丁字元全被中文字型自帶的難看西文吃掉，配好的西文體永遠輪不到出場 |

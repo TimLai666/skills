@@ -2,7 +2,7 @@
 
 > 高規格視覺作品（≥ 20 秒、含品牌敘事、含 slogan reveal、可能上 X / 公眾號 / B 站推廣）的標準工作流。
 >
-> 觸發條件：任務是「產品升級宣傳片 / 品牌 launch film / launch trailer / superbowl-tier ad / brand campaign / hero animation video」，且**使用者對質量有明確預期**（如「超級碗品質感」「10x 細節」「Apple 級別」）。
+> 觸發條件：任務是「產品升級宣傳片 / 品牌 launch film / launch trailer / superbowl-tier ad / brand campaign / hero animation video」，且**使用者對品質有明確預期**（如「超級碗品質感」「10x 細節」「Apple 級別」）。
 >
 > 反觸發：不要在「快速做個動畫 demo」「簡單 motion graphic」「單個圖示動畫」時用這條流程——會過度工程化。
 
@@ -13,9 +13,9 @@
 實戰教訓（2026-05-11 huashu-md-html v2.0 專案）：
 
 第一輪直接動手寫 HTML，產出的是「程式設計師視角的動畫」——每個 capability 平均用力、節奏勻速、slogan 撞在一起、缺少敘事弧。
-第二輪接到使用者「停下，先按蘋果導演視角寫 1 萬字分鏡指令碼」的指令，寫了 v5-director-notes.md（11500 字、13 鏡 shot-by-shot spec），然後按指令碼實施——一次過、每幀 pause 都耐看、節奏起伏有 climax。
+第二輪接到使用者「停下，先按蘋果導演視角寫 1 萬字分鏡腳本」的指令，寫了 v5-director-notes.md（11500 字、13 鏡 shot-by-shot spec），然後按腳本實施——一次過、每幀 pause 都耐看、節奏起伏有 climax。
 
-**核心差異**：寫指令碼是 think，寫 HTML 是 execute。先 think 透了，execute 就是機械翻譯。先 execute，每個 shot 都是臨場決策，必然亂。
+**核心差異**：寫腳本是 think，寫 HTML 是 execute。先 think 透了，execute 就是機械翻譯。先 execute，每個 shot 都是臨場決策，必然亂。
 
 寫 director's notes 不是「裝」，是把所有視覺決策**在動手之前**沉澱成文件——每一鏡都已經在腦裡 visualize 過、reasoning 過、和上下文 trace 過。HTML 實施時不需要再做創意決策，只需要忠實翻譯。
 
@@ -35,7 +35,7 @@
 
 ## 3. Director's Notes 的 5 大部分結構
 
-萬字（10000-12000 字中文 / 等量英文）director's notes 必須包含這 5 大部分。**任一部分缺失都屬於不完整，質量會受影響**。
+萬字（10000-12000 字中文 / 等量英文）director's notes 必須包含這 5 大部分。**任一部分缺失都屬於不完整，品質會受影響**。
 
 ### Part I · Director's Statement（創作論，約 1500-2000 字）
 
@@ -56,7 +56,7 @@
 必含子節：
 
 - **完整色板**：至少 8-10 色，每色含 HEX + 功能定義 + 佔畫面比例上限
-- **字體系統**：至少 6 個字號層級，每層級含字型名 + weight + size + letter-spacing + 用途
+- **字體系統**：至少 6 個字級層級，每層級含字型名 + weight + size + letter-spacing + 用途
 - **網格系統**：畫布尺寸 + 外邊距 + column grid + baseline grid + 關鍵安全區 + 黃金分割錨點
 - **動畫系統**：easing 庫（4 條以內）+ duration 字典 + stagger 法則 + scene 過渡規則
 - **Chrome 元素**：貫穿全片的小細節（counter / chip / ticker / watermark / texture），每個含位置 + 入退場時機
@@ -77,7 +77,7 @@
 
 **關鍵決策**：climax 不一定在末尾。30s 片子 climax 通常在 22-25s（不是 29s）——最後幾秒是 resolution / decay，不是 peak。這條規則違反必然讓作品「虎頭蛇尾」。
 
-### Part IV · Shot-by-Shot Storyboard（分鏡指令碼，約 5000-7000 字 · 佔 60% 篇幅）
+### Part IV · Shot-by-Shot Storyboard（分鏡腳本，約 5000-7000 字 · 佔 60% 篇幅）
 
 每鏡含 10 個欄位（缺一不可）：
 
@@ -86,7 +86,7 @@ SHOT NN · NAME
 [TIMECODE]    起止時間 + 時長
 [FUNCTION]    這一鏡在故事弧中的功能（一句話）
 [VISUAL]      畫面構圖 + 元素位置 + 運動方向
-[TYPE]        排版 spec（字型 / 字號 / 字距 / 行高 / 顏色 / 對齊）
+[TYPE]        排版 spec（字型 / 字級 / 字距 / 行高 / 顏色 / 對齊）
 [ANIM]        每元素 in/out 時機 + easing + duration + stagger + delay
 [AUDIO]       music beat + SFX cue（每鏡對應 BGM 節奏 + 必含 SFX 時間表）
 [CHROME]      四角元素狀態（哪些 chrome 在 / 哪些 fade in/out / 哪個 pulse）
@@ -138,7 +138,7 @@ trace 不上的決策就是裝飾，刪掉。
 
 **4.4 寫 anti-slop 比寫 do-this 更重要**
 
-「這部片不做的事」清單（紫漸變 / emoji / Lorem ipsum / Inter display / SVG 畫人物 / 圓角卡 + 左 border accent）比「這部片做的事」清單更能保護質量。
+「這部片不做的事」清單（紫漸層 / emoji / Lorem ipsum / Inter display / SVG 畫人物 / 圓角卡 + 左 border accent）比「這部片做的事」清單更能保護品質。
 
 正向決策無窮多，負向 checklist 是有限的——但負向 checklist 一旦違反就是 slop。
 
@@ -209,7 +209,7 @@ done
 實戰配置（2026-05-11 huashu-md-html 專案，並行 6 個版本）：
 
 ```
-v5  · 基線（Anthropic / Penguin Classics 出版社品位）
+v5  · 基線（Anthropic / Penguin Classics 出版社品味）
 v5a · Wes Anderson（對稱 + 復古 + 章節卡片）
 v5b · Saul Bass（剪紙 + 60s 大字 + 幾何切割）
 v5c · 王家衛（中文襯線 + 慢動作 + 懷舊）
@@ -225,12 +225,12 @@ v5f · 草間彌生 Yayoi Kusama（圓點 + 重複 + 單一強色）
 - 統一任務清單（director-notes.md + animation.html + keyframes/ + README.md）
 - 統一約束（30s / 1920×1080 / file:// / Google Fonts）
 
-並行啟動 + 後台執行，約 30-60 分鐘出 6 套完整版本。
+並行啟動 + 背景執行，約 30-60 分鐘出 6 套完整版本。
 
 完成後審校對比：
 1. 各版本核心美學決策表
 2. 關鍵幀並排對比（每版同時刻一幀）
-3. 投票：哪個最貼合用戶的真實需求
+3. 投票：哪個最貼近使用者的真實需求
 
 **關鍵**：不要讓 subagent 之間相互參考——它們必須獨立產出，否則就會撞到「平均值」。每個 subagent 的指令裡要明說「不要重複 v5 的美學」。
 
@@ -243,7 +243,7 @@ v5f · 草間彌生 Yayoi Kusama（圓點 + 重複 + 單一強色）
 | 「做個 SaaS 升級宣傳片」 | ✅ 觸發 | 預設走完整流程 |
 | 「Apple 級別 / 超級碗品質感的影片」 | ✅ 觸發 + 升級 | 強力推薦多視角並行 |
 | 「30 秒品牌 launch film」 | ✅ 觸發 | |
-| 「這個專案 1 萬字指令碼再做動畫」 | ✅ 觸發 | 使用者明確指明 |
+| 「這個專案 1 萬字腳本再做動畫」 | ✅ 觸發 | 使用者明確指明 |
 | 「簡單 motion graphic，logo 轉一下」 | ❌ 不觸發 | 用 animations.md 標準流程 |
 | 「做個 onboarding 動畫 demo」 | ❌ 不觸發 | 用 animations.md |
 | 「教程影片帶配音」 | ❌ 不觸發 | 走 voiceover-pipeline.md |

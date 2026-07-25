@@ -1,6 +1,6 @@
 # Cinematic Patterns · Workflow Demo 的 Best Practice
 
-> 從「PPT 動畫」升級到「釋出會級 cinematic」的 5 個關鍵 pattern。
+> 從「PPT 動畫」升級到「發表會級 cinematic」的 5 個關鍵 pattern。
 > 蒸餾自 2026-04 「聊聊 skill」 deck 的兩個 cinematic demo（Nuwa workflow + Darwin workflow），實測可復現。
 
 ---
@@ -11,8 +11,8 @@
 
 | 範式 | 長什麼樣 | 後果 |
 |---|---|---|
-| **PPT 動畫**（差） | step 1 fade in → step 2 fade in → step 3 fade in，4 個 box 同屏排列 | 觀眾感覺「就是一個 PPT 加了 fade 效果」，沒有 wow moment |
-| **Cinematic**（好） | scene-based，一次只 focus 一件事，scene 之間是 dissolve / focus pull / morph | 觀眾感覺「這是一個產品釋出會片段」，會想截圖分享 |
+| **PPT 動畫**（差） | step 1 fade in → step 2 fade in → step 3 fade in，4 個 box 同一畫面排列 | 觀眾感覺「就是一個 PPT 加了 fade 效果」，沒有 wow moment |
+| **Cinematic**（好） | scene-based，一次只 focus 一件事，scene 之間是 dissolve / focus pull / morph | 觀眾感覺「這是一個產品發表會片段」，會想截圖分享 |
 
 差異的根源**不是動畫技術**，是**敘事範式**。本文件講怎麼從前者升級到後者。
 
@@ -22,7 +22,7 @@
 
 ### Pattern A · Dashboard + Cinematic Overlay 雙層結構
 
-**問題**：單純的 cinematic 預設是黑屏 + 一個 ▶ 按鈕，使用者翻到這頁如果沒點，什麼都看不到。
+**問題**：單純的 cinematic 預設是黑畫面 + 一個 ▶ 按鈕，使用者翻到這頁如果沒點，什麼都看不到。
 
 **解決**：
 ```
@@ -48,7 +48,7 @@ POINT ▶ 觸發 (overlay 浮上來)：22 秒 cinematic
 
 **問題**：把動畫拆成「step 1 顯示 → step 2 顯示 → ...」就是 PPT 思維。
 
-**解決**：拆成 5 個 scene，每個 scene 是**獨立的鏡頭**，全屏只 focus 一件事：
+**解決**：拆成 5 個 scene，每個 scene 是**獨立的鏡頭**，整個畫面只 focus 一件事：
 
 | Scene 類型 | 職責 | 時長 |
 |---|---|---|
@@ -64,7 +64,7 @@ POINT ▶ 觸發 (overlay 浮上來)：22 秒 cinematic
 - 22 秒剛好夠「鉤住 → 展開 → 收束 → 留下印象」
 
 **實現要點**：
-- `T = { DURATION: 22.0, s1_in: [0, 0.7], s2_in: [3.8, 4.6], ... }` 全域性時間軸
+- `T = { DURATION: 22.0, s1_in: [0, 0.7], s2_in: [3.8, 4.6], ... }` 全域時間軸
 - 單個 `requestAnimationFrame(render)` 跑所有 scene 的 opacity / transform 計算
 - 不要用 setTimeout 鏈（容易斷掉、難除錯）
 - Easing 必用 `expoOut` / `easeOut` / cubic-bezier，**禁止 linear**
@@ -87,7 +87,7 @@ POINT ▶ 觸發 (overlay 浮上來)：22 秒 cinematic
 | 視覺運動 | 漂浮 / 輻射 / pentagon | 迴圈 / 上升 / 對比 |
 | Scene 2 | 3D Orbit · 8 張檔案在透視橢圓漂浮 | Spin Loop · token 沿 6 節點圓環跑 5 圈 |
 | Scene 3 | Pentagon · 5 token 從中央輻射 | v1 vs v5 · 並列 diff（紅版 vs 金版） |
-| Scene 4 | SKILL.md typewriter | Hill-Climb · 全屏曲線繪製 |
+| Scene 4 | SKILL.md typewriter | Hill-Climb · 全畫面曲線繪製 |
 | Scene 5 hero | 「21 分鐘」serif italic 大字 | 旋轉齒輪 ⚙ + 「KEPT +1.1」金色 tag |
 
 **判斷標準**：蓋住文案，只看視覺，能不能區分這是哪個 demo？區分不了就是偷懶。
@@ -98,11 +98,11 @@ POINT ▶ 觸發 (overlay 浮上來)：22 秒 cinematic
 
 **問題**：3D orbit / gallery 裡需要素材碎片漂浮，emoji（📚🎤）醜且無品牌、SVG 手畫書脊永遠不像真書。
 
-**解決**：用 `huashu-gpt-image` 跑一張 4×2 grid 大圖（8 件主題相關物品 · 白底 · 60px breathing space · unified style），用 `extract_grid.py --mode bbox` 摳成 8 張獨立透明 PNG。
+**解決**：用 `huashu-gpt-image` 跑一張 4×2 grid 大圖（8 件主題相關物品 · 白底 · 60px breathing space · unified style），用 `extract_grid.py --mode bbox` 去背成 8 張獨立透明 PNG。
 
 **Prompt 要點**（詳細 prompt patterns 見 `huashu-gpt-image` skill）：
 - IP 錨定（"1960s Caltech archive aesthetic" / "Hearthstone-style consistent treatment"）
-- 白底（便於摳圖，灰底氛圍好但摳透明背景困難）
+- 白底（便於去背，灰底氛圍好但去背困難）
 - 4×2 不要 5×5（避免末行壓縮 bug）
 - Persona finishing（"You are a Wired magazine curator preparing an exhibition photo"）
 
@@ -215,7 +215,7 @@ iframe.addEventListener('load', () => {
   doc.addEventListener('keydown', (e) => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: e.key, ... }));
   });
-  // 點選後焦點拽回父視窗
+  // 點選後焦點拉回父視窗
   doc.addEventListener('click', () => setTimeout(() => window.focus(), 0));
 });
 ```
@@ -236,12 +236,12 @@ iframe.addEventListener('load', () => {
 
 | ❌ 反 pattern | ✅ 正 pattern |
 |---|---|
-| 預設 = 黑屏 ▶ overlay | 預設 = 靜態 dashboard，▶ 是輔助 |
-| 4 個 step 橫排同屏 fade in | 5 個 scene 全屏切換，每場只 focus 一件事 |
+| 預設 = 黑畫面 ▶ overlay | 預設 = 靜態 dashboard，▶ 是輔助 |
+| 4 個 step 橫排同一畫面 fade in | 5 個 scene 全畫面切換，每場只 focus 一件事 |
 | 複用模板換文案做不同 demo | 每個 demo 獨立視覺語言（蓋文案能區分） |
-| emoji / SVG 手畫當素材 | gpt-image-2 大圖 + extract_grid 摳圖 |
+| emoji / SVG 手畫當素材 | gpt-image-2 大圖 + extract_grid 去背 |
 | 無 BGM 無 SFX | BGM + 11 SFX cues 雙軌制 |
-| 用 setTimeout 鏈 schedule | requestAnimationFrame + 全域性時間軸 T 物件 |
+| 用 setTimeout 鏈 schedule | requestAnimationFrame + 全域時間軸 T 物件 |
 | linear 動畫 | Expo / cubic-bezier easing |
 | 沒有 dev 工具 | `?seek=N` + `?autoplay=1` + REPLAY 按鈕 |
 | iframe 內的按鈕被父 click zone 吞 | click zone 加 top/bottom margin 給按鈕讓位 |

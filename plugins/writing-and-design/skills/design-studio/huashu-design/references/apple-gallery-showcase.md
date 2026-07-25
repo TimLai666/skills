@@ -1,18 +1,18 @@
 # Apple Gallery Showcase · 畫廊展示牆動畫風格
 
 > 靈感來源：Claude Design 官網 hero 影片 + 蘋果產品頁「作品牆」式陳列
-> 實戰出處：huashu-design 釋出 hero v5
-> 適用場景：**產品釋出 hero 動畫、skill 能力演示、作品集展示**——任何需要把「多件高質量產出」同時展陳並引導觀眾注意力的場景
+> 實戰出處：huashu-design 發布 hero v5
+> 適用場景：**產品發布 hero 動畫、skill 能力演示、作品集展示**——任何需要把「多件高品質產出」同時展陳並引導觀眾注意力的場景
 
 ---
 
 ## 觸發判斷：什麼時候用這個風格
 
 **適合**：
-- 有10張以上真實產出要同屏展示（PPT、App、網頁、資訊圖）
+- 有10張以上真實產出要同一畫面展示（PPT、App、網頁、資訊圖）
 - 觀眾是專業受眾（開發者、設計師、產品經理），對「質感」敏感
-- 希望傳遞的氣質是「克制、展覽式、高階、有空間感」
-- 需要焦點和全域性同時存在（看細節但不失整體）
+- 希望傳遞的氣質是「克制、展覽式、高級、有空間感」
+- 需要焦點和整體同時存在（看細節但不失整體）
 
 **不適合**：
 - 單產品聚焦（用 frontend-design 的產品 hero 模板）
@@ -203,7 +203,7 @@ card.style.filter = `brightness(${1 - 0.3 * focusIntensity})`;
 ```
 
 **清晰度鐵律**：
-- Focus overlay 的 `<img>` 必須 `src` 直連原圖，**不要複用 gallery 裡的壓縮縮略**
+- Focus overlay 的 `<img>` 必須 `src` 直連原圖，**不要複用 gallery 裡的壓縮縮圖**
 - 提前 preload 所有原圖到 `new Image()[]` 陣列
 - overlay 自身 `width/height` 按幀計算，瀏覽器每幀 resample 原圖
 
@@ -323,7 +323,7 @@ requestAnimationFrame(function tick(now) {
 | 看起來像 PPT 模板 | 卡片沒有 shadow / hairline | 加上兩層 box-shadow + 1px border |
 | 傾斜感廉價 | 只用了 rotateY 沒加 rotateZ | 加 ±2-3deg rotateZ 打破工整 |
 | Pan 感覺「卡頓」 | 用了 setTimeout 或 CSS keyframes 迴圈 | 用 rAF + sin/cos 連續函式 |
-| Focus 時字看不清 | 複用了 gallery 瓦片的低分圖 | 獨立 overlay + 原圖 src 直連 |
+| Focus 時字看不清 | 複用了 gallery 瓦片的低解析度圖 | 獨立 overlay + 原圖 src 直連 |
 | 背景太空 | 純色 `#F5F5F7` | 疊加 SVG fractalNoise 0.5 opacity |
 | 字型太"網際網路" | 只有 Inter | 加 Serif（中英各一）+ mono 三棧 |
 
@@ -335,4 +335,4 @@ requestAnimationFrame(function tick(now) {
 - 原始靈感：claude.ai/design hero 影片
 - 參考審美：Apple 產品頁、Dribbble shot 集合頁
 
-遇到「多件高質量產出要陳列」的動畫需求，直接從此檔案 copy 骨架，換內容 + 調 timing 即可。
+遇到「多件高品質產出要陳列」的動畫需求，直接從此檔案 copy 骨架，換內容 + 調 timing 即可。

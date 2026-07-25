@@ -1,7 +1,7 @@
 # 音訊設計規則 · huashu-design
 
 > 所有動畫 demo 的音訊應用配方。和 `sfx-library.md`（資產清單）配套使用。
-> 實戰錘鍊：huashu-design 釋出 hero v1-v9 迭代 · Anthropic 三支官方片子的 Gemini 深度拆解 · 8000+ 次 A/B 對比
+> 實戰錘鍊：huashu-design 發布 hero v1-v9 迭代 · Anthropic 三支官方片子的 Gemini 深度拆解 · 8000+ 次 A/B 對比
 
 ---
 
@@ -14,7 +14,7 @@
 | **SFX（節拍層）** | 標記每個視覺 beat | 0.2-2 秒短促 | **強同步**（幀級對齊） | **高頻 800Hz+** |
 | **BGM（氛圍底）** | 情緒鋪底、聲場 | 連續 20-60 秒 | 弱同步（段落級） | **中低頻 <4kHz** |
 
-**只做BGM的動畫是殘廢的**——觀眾潛意識感知到「畫在動但沒聲音響應」，廉價感的根源就在這裡。
+**只做BGM的動畫是半成品**——觀眾潛意識感知到「畫在動但沒聲音響應」，廉價感的根源就在這裡。
 
 ---
 
@@ -60,7 +60,7 @@ Anthropic 的秘訣不是「SFX 音量大」，是**頻段分層**：
 **啟發式**：
 - 產品性格冷靜/專注 → SFX 密度低（0-3個/10s），BGM 為主
 - 產品性格活潑/資訊多 → SFX 密度高（6-9個/10s），SFX 驅動節奏
-- **不要填滿每個視覺 beat**——留白比密集更高階。**刪掉 30-50% 的 cue 會讓剩下的更有戲劇性**。
+- **不要填滿每個視覺 beat**——留白比密集更高級。**刪掉 30-50% 的 cue 會讓剩下的更有戲劇性**。
 
 ### Cue 選擇優先順序
 每個視覺 beat 不都要配 SFX。按這個優先順序選：
@@ -73,7 +73,7 @@ Anthropic 的秘訣不是「SFX 音量大」，是**頻段分層**：
 
 **P1 推薦配**：
 - 元素入場/離場（modal / card）
-- 完成/成功反饋
+- 完成/成功回饋
 - AI 生成開始/結束
 - 重大過渡（scene 切換）
 
@@ -95,15 +95,15 @@ huashu-design skill 自帶 6 首 BGM（`assets/bgm-*.mp3`）：
 
 ```
 動畫性格是什麼？
-├─ 產品釋出 / 技術演示 → bgm-tech.mp3（minimal synth + piano）
-├─ 教程講解 / 工具使用 → bgm-tutorial.mp3（warm, instructional）
+├─ 產品發布 / 技術演示 → bgm-tech.mp3（minimal synth + piano）
+├─ 教學講解 / 工具使用 → bgm-tutorial.mp3（warm, instructional）
 ├─ 教育學習 / 原理解釋 → bgm-educational.mp3（curious, thoughtful）
-├─ 營銷廣告 / 品牌宣傳 → bgm-ad.mp3（upbeat, promotional）
+├─ 行銷廣告 / 品牌宣傳 → bgm-ad.mp3（upbeat, promotional）
 └─ 同類風格需要變體 → bgm-*-alt.mp3（各自替代版）
 ```
 
 ### 無 BGM 的場景（值得考慮）
-參考 Anthropic Code Desktop（ref-2）：**0 SFX + 純 Lo-fi BGM** 也能很高階。
+參考 Anthropic Code Desktop（ref-2）：**0 SFX + 純 Lo-fi BGM** 也能很高級。
 
 **何時選無BGM**：
 - 動畫時長 <10s（BGM 建立不起來）
@@ -115,7 +115,7 @@ huashu-design skill 自帶 6 首 BGM（`assets/bgm-*.mp3`）：
 
 ## 場景配方（開箱即用）
 
-### 配方 A · 產品釋出 hero（huashu-design v9 同款）
+### 配方 A · 產品發布 hero（huashu-design v9 同款）
 ```
 時長：25 秒
 BGM：bgm-tech.mp3 · 45% · 頻段 <4kHz
@@ -221,22 +221,22 @@ ffmpeg -y -i video.mp4 -i sfx-track.mp3 -i bgm.mp3 \
 
 ---
 
-## 和視覺的聯動（高階）
+## 和視覺的聯動（進階）
 
 ### SFX 音色要和視覺風格匹配
 - 暖米/紙張感視覺 → SFX 用**木質/柔和**音色（Morse, paper snap, soft click）
-- 冷黑科技視覺 → SFX 用**金屬/數字**音色（beep, pulse, glitch）
+- 冷黑科技視覺 → SFX 用**金屬/數位**音色（beep, pulse, glitch）
 - 手繪/童趣視覺 → SFX 用**卡通/誇張**音色（boing, pop, zap）
 
 我們當前 `apple-gallery-showcase.md` 的暖米底色 → 搭配 `keyboard/type.mp3`（mechanical）+ `container/card-snap.mp3`（soft）+ `impact/logo-reveal-v2.mp3`（cinematic bass）
 
 ### SFX 可以引導視覺節奏
-高階技巧：**先設計 SFX 時間軸，然後調整視覺動畫去對齊 SFX**（不是反過來）。
-因為 SFX 每個 cue 都是一個「鐘錶 tick」，視覺動畫適配 SFX 節奏會非常穩——反之 SFX 去追視覺，常常 ±1 幀對不上就有違和感。
+進階技巧：**先設計 SFX 時間軸，然後調整視覺動畫去對齊 SFX**（不是反過來）。
+因為 SFX 每個 cue 都是一個「鐘錶 tick」，視覺動畫配合 SFX 節奏會非常穩——反之 SFX 去追視覺，常常 ±1 幀對不上就有違和感。
 
 ---
 
-## 質量檢查清單（釋出前自檢）
+## 品質檢查清單（發布前自檢）
 
 - [ ] 響度差：SFX peak - BGM peak = -6 到 -8 dB？
 - [ ] 頻段：BGM lowpass 4kHz + SFX highpass 800Hz？

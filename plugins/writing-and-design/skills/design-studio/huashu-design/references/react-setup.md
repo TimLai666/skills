@@ -26,7 +26,7 @@
 └── styles.css               # 額外CSS（可選）
 ```
 
-HTML里加載方式：
+HTML 裡的載入方式：
 
 ```html
 <!-- 先React+Babel -->
@@ -60,7 +60,7 @@ const styles = { button: {...}, card: {...} };
 const styles = { container: {...}, header: {...} };
 ```
 
-**正確**：每個元件檔案的styles用唯一字首。
+**正確**：每個元件檔案的styles用唯一前綴。
 
 ```jsx
 // terminal.jsx
@@ -81,7 +81,7 @@ const sidebarStyles = {
 <div style={{ padding: 16, background: '#111' }}>...</div>
 ```
 
-這條是**非協商**的。每次寫`const styles = {...}`都必須replace成specific命名，否則多元件載入時全棧報錯。
+這條是**非協商**的。每次寫`const styles = {...}`都必須replace成specific命名，否則多元件載入時整批報錯。
 
 ### 規矩2：Scope 不共享，需手動export
 
@@ -132,7 +132,7 @@ Demo場景推薦。寫一個假helper，返回預設的response：
 window.claude = {
   async complete(prompt) {
     await new Promise(r => setTimeout(r, 800)); // 模擬延遲
-    return "這是一個mock響應。真部署時請替換為真API。";
+    return "這是一個mock回應。真部署時請替換為真API。";
   }
 };
 ```
@@ -171,7 +171,7 @@ window.claude = {
 
 ### 選項 C：用 agent 側的 LLM 能力生成 mock 資料
 
-如果只是本地演示用，可以在當前 agent 會話裡臨時呼叫該 agent 的 LLM 能力（或使用者裝的 multi-model 類 skill）先生成 mock 響應資料，再硬編碼寫進 HTML。這樣 HTML 執行時完全不依賴任何 API。
+如果只是本地演示用，可以在當前 agent 會話裡臨時呼叫該 agent 的 LLM 能力（或使用者裝的 multi-model 類 skill）先生成 mock 回應資料，再硬編碼寫進 HTML。這樣 HTML 執行時完全不依賴任何 API。
 
 ## 典型 HTML 起手模板
 
@@ -179,7 +179,7 @@ window.claude = {
 
 ```html
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">

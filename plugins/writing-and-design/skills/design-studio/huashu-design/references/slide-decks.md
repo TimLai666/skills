@@ -1,16 +1,16 @@
-# Slide Decks：HTML幻燈片製作規範
+# Slide Decks：HTML投影片製作規範
 
-做幻燈片是設計工作的高頻場景。這份文件說明怎麼做好HTML幻燈片——從架構選型、單頁設計，到 PDF/PPTX 匯出的完整路徑。
+做投影片是設計工作的高頻場景。這份文件說明怎麼做好HTML投影片——從架構選型、單頁設計，到 PDF/PPTX 匯出的完整路徑。
 
 **本 skill 的能力覆蓋**：
-- **HTML 演示版（基礎產物，永遠預設必做）** → 每頁獨立 HTML + `assets/deck_index.html` 聚合，瀏覽器裡鍵盤翻頁、全屏演講
+- **HTML 演示版（基礎產物，永遠預設必做）** → 每頁獨立 HTML + `assets/deck_index.html` 聚合，瀏覽器裡鍵盤翻頁、全螢幕演講
 - HTML → PDF 匯出 → `scripts/export_deck_pdf.mjs` / `scripts/export_deck_stage_pdf.mjs`
 - HTML → 可編輯 PPTX 匯出 → `references/editable-pptx.md` + `scripts/html2pptx.js` + `scripts/export_deck_pptx.mjs`（要求 HTML 按 4 條硬約束寫）
 
-> **⚠️ HTML 是基礎，PDF/PPTX 是衍生物。** 不管最終交付什麼格式，都**必須**先做 HTML 聚合演示版（`index.html` + `slides/*.html`），它是幻燈片作品的「源」。PDF/PPTX 是從 HTML 一行命令匯出的快照。
+> **⚠️ HTML 是基礎，PDF/PPTX 是衍生物。** 不管最終交付什麼格式，都**必須**先做 HTML 聚合演示版（`index.html` + `slides/*.html`），它是投影片作品的「源」。PDF/PPTX 是從 HTML 一行命令匯出的快照。
 >
 > **為什麼 HTML 優先**：
-> - 演講/演示現場最好用（投影儀 / 共享螢幕直接全屏，鍵盤翻頁，不依賴 Keynote/PPT 軟體）
+> - 演講/演示現場最好用（投影儀 / 共享螢幕直接全螢幕，鍵盤翻頁，不依賴 Keynote/PPT 軟體）
 > - 開發過程中每頁可單獨雙擊開啟驗證，不用每次重新跑匯出
 > - 是 PDF/PPTX 匯出的唯一上游（避免「匯出後才發現要改 HTML 又要重出」的死迴圈）
 > - 交付物可以是「HTML + PDF」或「HTML + PPTX」雙份，接收方愛用哪個用哪個
@@ -37,7 +37,7 @@
    │
    └── 還要可編輯 PPTX（同事要改文字）    → 從第一行 HTML 就按 4 條硬約束寫
                                               跑 export_deck_pptx.mjs 一鍵出
-                                              犧牲漸變 / web component / 複雜 SVG
+                                              犧牲漸層 / web component / 複雜 SVG
 ```
 
 ### 開工話術（抄走即用）
@@ -47,7 +47,7 @@
 > 你需要哪個匯出格式？
 > - **只要 HTML**（演講/存檔）→ 視覺完全自由
 > - **還要 PDF** → 同上，加一條匯出命令
-> - **還要可編輯 PPTX**（同事會在 PPT 裡改文字）→ 我必須從第一行 HTML 就按 4 條硬約束寫，會犧牲一些視覺能力（無漸變、無 web component、無複雜 SVG）。
+> - **還要可編輯 PPTX**（同事會在 PPT 裡改文字）→ 我必須從第一行 HTML 就按 4 條硬約束寫，會犧牲一些視覺能力（無漸層、無 web component、無複雜 SVG）。
 
 ### 為什麼「要 PPTX 就得從頭走 4 條硬約束」
 
@@ -59,18 +59,18 @@ PPTX 可編輯的前提是 `html2pptx.js` 能把 DOM 逐元素翻譯為 PowerPoi
 4. `<div>` 不能用 `background-image`（用 `<img>` 標籤）
 5. 不用 CSS gradient、不用 web component、不用複雜 SVG 裝飾
 
-**本 skill 預設的 HTML 視覺自由度高**——大量 span、巢狀 flex、複雜 SVG、web component（如 `<deck-stage>`）、CSS 漸變——**幾乎沒有一條能天然過 html2pptx 的約束**（實測視覺驅動的 HTML 直接上 html2pptx，pass 率 < 30%）。
+**本 skill 預設的 HTML 視覺自由度高**——大量 span、巢狀 flex、複雜 SVG、web component（如 `<deck-stage>`）、CSS 漸層——**幾乎沒有一條能天然過 html2pptx 的約束**（實測視覺驅動的 HTML 直接上 html2pptx，pass 率 < 30%）。
 
 ### 兩條真實路徑的代價對比（2026-04-20 真實踩坑）
 
 | 路徑 | 做法 | 結果 | 代價 |
 |------|------|------|------|
 | ❌ **先自由寫 HTML，事後補救 PPTX** | 單檔案 deck-stage + 大量 SVG/span 裝飾 | 要可編輯 PPTX 只剩兩條路：<br>A. 手寫 pptxgenjs 幾百行 hardcode 座標<br>B. 重寫 17 頁 HTML 成 Path A 格式 | 2-3 小時返工，且手寫版**維護成本永續**（HTML 改一個字，PPTX 要再人肉同步） |
-| ✅ **從第一步按 Path A 約束寫** | 每頁獨立 HTML + 4 條硬約束 + 960×540pt | 一條命令匯出 100% 可編輯 PPTX，同時也能瀏覽器全屏演講（Path A HTML 就是瀏覽器可播放的標準 HTML） | 寫 HTML 時多花 5 分鐘想「文字怎麼包進 `<p>`」，零返工 |
+| ✅ **從第一步按 Path A 約束寫** | 每頁獨立 HTML + 4 條硬約束 + 960×540pt | 一條命令匯出 100% 可編輯 PPTX，同時也能瀏覽器全螢幕演講（Path A HTML 就是瀏覽器可播放的標準 HTML） | 寫 HTML 時多花 5 分鐘想「文字怎麼包進 `<p>`」，零返工 |
 
 ### 混合交付怎麼辦
 
-使用者說「我要 HTML 演講 **和** 可編輯 PPTX」——**這不是混合**，是 PPTX 需求覆蓋 HTML 需求。按 Path A 寫出來的 HTML 本身就能瀏覽器全屏演講（加個 `deck_index.html` 拼接器就行）。**沒有額外代價。**
+使用者說「我要 HTML 演講 **和** 可編輯 PPTX」——**這不是混合**，是 PPTX 需求覆蓋 HTML 需求。按 Path A 寫出來的 HTML 本身就能瀏覽器全螢幕演講（加個 `deck_index.html` 拼接器就行）。**沒有額外代價。**
 
 使用者說「我要 PPTX **和** 動畫 / web component」——**這是真矛盾**。告訴使用者：要可編輯 PPTX 就得犧牲這些視覺能力。讓他做取捨，不要偷偷做手寫 pptxgenjs 方案（會變成永續維護債）。
 
@@ -79,10 +79,10 @@ PPTX 可編輯的前提是 `html2pptx.js` 能把 DOM 逐元素翻譯為 PowerPoi
 極個別情況：HTML 已經寫好了才發現要 PPTX。推薦走 **fallback 流程**（完整說明見 `references/editable-pptx.md` 末尾「Fallback：已有視覺稿但使用者堅持要 editable PPTX」）：
 
 1. **首選：改出 PDF**（視覺 100% 保留，跨平台，接收方能看能印）—— 如果接收方實際需求是「演講/存檔」，PDF 就是最佳交付物
-2. **次選：AI 以視覺稿為藍本，重寫一版 editable HTML** → 匯出 editable PPTX —— 保留色彩/佈局/文案的設計決策，犧牲漸變、web component、複雜 SVG 等視覺能力
+2. **次選：AI 以視覺稿為藍本，重寫一版 editable HTML** → 匯出 editable PPTX —— 保留色彩/佈局/文案的設計決策，犧牲漸層、web component、複雜 SVG 等視覺能力
 3. **不推薦：手寫 pptxgenjs 重建**——位置、字型、對齊都要手調，維護成本高，且後續 HTML 改一個字都得再人肉同步一次
 
-永遠把選擇告訴使用者，讓他決定。**永遠不要第一反應就開始手寫 pptxgenjs**——那是最後的兜底手段。
+永遠把選擇告訴使用者，讓他決定。**永遠不要第一反應就開始手寫 pptxgenjs**——那是最後的保底手段。
 
 ---
 
@@ -102,9 +102,9 @@ PPTX 可編輯的前提是 `html2pptx.js` 能把 DOM 逐元素翻譯為 PowerPoi
 | Deck 類型 | 推薦 showcase 頁組合 |
 |-----------|---------------------|
 | B2B brochure / 產品宣發 | 封面 + 內容頁（理念/情感頁） |
-| 品牌釋出 | 封面 + 產品特色頁 |
-| 資料包告 | 資料大圖頁 + 分析結論頁 |
-| 教程課件 | 章節封頁 + 具體知識點頁 |
+| 品牌發布 | 封面 + 產品特色頁 |
+| 資料報告 | 資料大圖頁 + 分析結論頁 |
+| 教學教材 | 章節封頁 + 具體知識點頁 |
 
 ---
 
@@ -137,7 +137,7 @@ PPTX 可編輯的前提是 `html2pptx.js` 能把 DOM 逐元素翻譯為 PowerPoi
 
 ### 樣式約定（直接抄走）
 
-- **H1**：中文 Noto Serif SC 900，字號 80-140px 看資訊量，重點詞單獨上品牌主色（不要全文堆色）
+- **H1**：中文 Noto Serif SC 900，字級 80-140px 看資訊量，重點詞單獨上品牌主色（不要全文堆色）
 - **英文副**：Lora italic 26-46px，品牌簽名詞（如 "AI team"）粗體 + 主色斜體
 - **正文**：Noto Serif SC 17-21px，line-height 1.75-1.85
 - **accent 高亮**：正文裡用主色加粗標註關鍵詞，每頁不超過 3 處（過多就失去錨點作用）
@@ -172,9 +172,9 @@ Chromium 預設不帶彩色 emoji 字型，`page.pdf()` 或 `page.screenshot()` 
 
 ### 2. `export_deck_pdf.mjs` 報錯 `Cannot find package 'playwright'`
 
-原因：ESM 模組解析從指令碼所在位置向上找 `node_modules`。指令碼在 `~/.claude/skills/huashu-design/scripts/`，那裡沒依賴。
+原因：ESM 模組解析從腳本所在位置向上找 `node_modules`。腳本在 `~/.claude/skills/huashu-design/scripts/`，那裡沒依賴。
 
-**對策**：把指令碼複製到 deck 專案目錄（例如 `brochure/build-pdf.mjs`），在專案根跑 `npm install playwright pdf-lib`，然後 `node build-pdf.mjs --slides slides --out output/deck.pdf`。
+**對策**：把腳本複製到 deck 專案目錄（例如 `brochure/build-pdf.mjs`），在專案根跑 `npm install playwright pdf-lib`，然後 `node build-pdf.mjs --slides slides --out output/deck.pdf`。
 
 ### 3. Google Fonts 沒載入完就截圖 → 中文顯示為系統預設黑體
 
@@ -190,14 +190,14 @@ moxt philosophy 頁第一版用 2×2 = 4 段 + 底部 3 信條 = 7 塊內容，�
 
 ## 🛑 先定架構：單檔案 還是 多檔案？
 
-**這個選擇是做幻燈片的第一步，錯了會反覆踩坑。先讀完這一節再動手。**
+**這個選擇是做投影片的第一步，錯了會反覆踩坑。先讀完這一節再動手。**
 
 ### 兩種架構對比
 
 | 維度 | 單檔案 + `deck_stage.js` | **多檔案 + `deck_index.html` 拼接器** |
 |------|--------------------------|--------------------------------------|
 | 程式碼結構 | 一個 HTML，所有 slide 是 `<section>` | 每頁獨立 HTML，`index.html` 用 iframe 拼接 |
-| CSS 作用域 | ❌ 全域性，一頁的樣式可能影響所有頁 | ✅ 天然隔離，iframe 各自一片天 |
+| CSS 作用域 | ❌ 全域，一頁的樣式可能影響所有頁 | ✅ 天然隔離，iframe 各自一片天 |
 | 驗證粒度 | ❌ 要 JS goTo 才能切到某頁 | ✅ 單頁檔案雙擊就能在瀏覽器看 |
 | 並行開發 | ❌ 一個檔案，多 agent 改會衝突 | ✅ 多 agent 可並行做不同頁，零衝突 merge |
 | 除錯難度 | ❌ 一處 CSS 出錯，全 deck 翻車 | ✅ 一頁出錯隻影響自己 |
@@ -210,7 +210,7 @@ moxt philosophy 頁第一版用 2×2 = 4 段 + 底部 3 信條 = 7 塊內容，�
 ```
 │ 問：deck 預計有多少頁？
 ├── ≤10 頁、需要 in-deck 動畫或跨頁互動、pitch deck → 單檔案
-└── ≥10 頁、學術講座、課件、長 deck、多 agent 並行 → 多檔案（推薦）
+└── ≥10 頁、學術講座、教材、長 deck、多 agent 並行 → 多檔案（推薦）
 ```
 
 **預設走多檔案路徑**。它不是「備選」，是**長 deck 和團隊協作的主路徑**。原因：單檔案架構的每一個優勢（鍵盤導航、列印、scale）多檔案都有，而多檔案的作用域隔離和可驗證性是單檔案補不回來的。
@@ -224,7 +224,7 @@ moxt philosophy 頁第一版用 2×2 = 4 段 + 底部 3 信條 = 7 塊內容，�
 3. **localStorage + hash 導航競態**：重新整理後不是跳到 hash 位置，而是停在 localStorage 記錄的舊位置。
 4. **驗證成本高**：必須 `page.evaluate(d => d.goTo(n))` 才能截某頁，比直接 `goto(file://.../slides/05-X.html)` 慢一倍，還常報錯。
 
-全部根因是**單一全域性名稱空間**——多檔案架構從物理層面把這些問題消除了。
+全部根因是**單一全域名稱空間**——多檔案架構從物理層面把這些問題消除了。
 
 ---
 
@@ -236,7 +236,7 @@ moxt philosophy 頁第一版用 2×2 = 4 段 + 底部 3 信條 = 7 塊內容，�
 我的Deck/
 ├── index.html              # 從 assets/deck_index.html 複製來，改 MANIFEST
 ├── shared/
-│   ├── tokens.css          # 共享設計 token（色板/字號/常用 chrome）
+│   ├── tokens.css          # 共享設計 token（色板/字級/常用 chrome）
 │   └── fonts.html          # <link> 引入 Google Fonts（每頁 include）
 └── slides/
     ├── 01-cover.html       # 每個檔案都是完整 1920×1080 HTML
@@ -249,7 +249,7 @@ moxt philosophy 頁第一版用 2×2 = 4 段 + 底部 3 信條 = 7 塊內容，�
 
 ```html
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <title>P05 · Chapter Title</title>
@@ -273,7 +273,7 @@ moxt philosophy 頁第一版用 2×2 = 4 段 + 底部 3 信條 = 7 塊內容，�
 **關鍵約束**：
 - `<body>` 就是畫布，直接在上面佈局。不要包 `<section>` 或其他 wrapper。
 - `width: 1920px; height: 1080px` 由 `shared/tokens.css` 裡的 `body` 規則鎖定。
-- 引 `shared/tokens.css` 共享設計 token（色板、字號、page-header/footer 等）。
+- 引 `shared/tokens.css` 共享設計 token（色板、字級、page-header/footer 等）。
 - 字型 `<link>` 每頁自己寫（fonts 單獨 import 不貴，且保證每頁獨立可開啟）。
 
 ### 拼接器：`deck_index.html`
@@ -295,12 +295,12 @@ window.DECK_MANIFEST = [
 
 開啟 deck 預設進**概覽**，使用者未指定時按秒數隨機：**網格 grid 60% / 無限畫廊 gallery 40%**（可用 URL `?ov=grid|gallery` 或 `window.DECK_OVERVIEW='grid'|'gallery'` 固定）。
 
-- **網格 grid（預設主力）**：用 **iframe 渲染真實子頁面**（清晰、所見即所得、無需縮圖）。**自適應**：能一屏放下→對角傾斜居中鋪滿；頁多放不下→卡片保持舒適大小、**豎向滾動**（絕不把幾十頁硬塞一屏縮成郵票）。
+- **網格 grid（預設主力）**：用 **iframe 渲染真實子頁面**（清晰、所見即所得、無需縮圖）。**自適應**：能一個畫面放下→對角傾斜居中鋪滿；頁多放不下→卡片保持舒適大小、**垂直捲動**（絕不把幾十頁硬塞進一個畫面縮成郵票）。
 - **無限畫廊 gallery**：所有頁**無縫無限平鋪 + 緩慢漂移 + 輕微呼吸縮放**，一個 tile 含全部頁（洗牌排布，看完所有頁才重複）。瓦片多，**必須用 `<img>` 縮圖**扛效能（見下），沒 thumb 時回退 iframe。
 
 🛑 **三條來自實戰的硬約束（改這個檔案前必讀，否則會重蹈覆轍）**：
 1. **概覽牆絕不用 `transform-style: preserve-3d` 做卡片牆**。preserve-3d 的 3D 場景裡瀏覽器對「往後退的卡片」（頂排）命中測試不可靠 → 頂排點不到、中排時好時壞。**正解**：整牆作**單個被 3D 傾斜的平面**（不開 preserve-3d），所有卡片共面，點選反投影到一個平面 → 可靠。hover 用 2D `scale` 不用 `translateZ`。
-2. **任意頁數都要自適應**：固定列數 + 給整牆寫死強傾斜，頁一多就溢位塌角/透視失真。必須按頁數+視口算列數、行多則傾斜變平、一屏放不下就滾動。
+2. **任意頁數都要自適應**：固定列數 + 給整牆寫死強傾斜，頁一多就溢位塌角/透視失真。必須按頁數+視口算列數、行多則傾斜變平、一個畫面放不下就捲動。
 3. **縮圖解析度別太低**：畫廊縮圖 < 1000px，hover 放大後發虛。預設 1600px。
 
 **為畫廊生成縮圖**：用 `scripts/gen_deck_thumbs.mjs`（playwright 截每頁 + sharp 降取樣）：
@@ -328,11 +328,11 @@ Playwright 截圖也是直接 `goto(file://.../slides/05-personas.html)`，不�
 
 只放**真正跨頁共用**的東西：
 
-- CSS 變數（色板、字號階、間距階）
+- CSS 變數（色板、字級階、間距階）
 - `body { width: 1920px; height: 1080px; }` 這樣的 canvas 鎖定
 - `.page-header` / `.page-footer` 這種每頁都用一模一樣的 chrome
 
-**不要**把單頁的佈局 class 塞進來——那會退化回單檔案架構的全域性汙染問題。
+**不要**把單頁的佈局 class 塞進來——那會退化回單檔案架構的全域汙染問題。
 
 ---
 
@@ -378,7 +378,7 @@ Playwright 截圖也是直接 `goto(file://.../slides/05-personas.html)`，不�
 <!-- ✅ 也可：script 在 head 但加 defer -->
 <head><script src="deck_stage.js" defer></script></head>
 
-<!-- ✅ 也可：module 指令碼天然 defer -->
+<!-- ✅ 也可：module 腳本天然 defer -->
 <head><script src="deck_stage.js" type="module"></script></head>
 ```
 
@@ -455,7 +455,7 @@ deck-stage > section.active {
 
 ```html
 <deck-stage width="1080" height="1920">
-  <!-- 9:16 豎版 -->
+  <!-- 9:16 直式 -->
 </deck-stage>
 ```
 
@@ -541,7 +541,7 @@ Deck系統：
 - 正文最小 **24px**，理想 28-36px
 - 標題 **60-120px**
 - Hero 字 **180-240px**
-- 幻燈片是給 10 米外看的，字要夠大
+- 投影片是給 10 米外看的，字要夠大
 
 ### 4. 視覺節奏
 
@@ -549,7 +549,7 @@ Deck 需要 **intentional variety**：
 
 - 顏色節奏：大部分白底 + 偶爾彩色 section divider + 偶爾 dark 片段
 - 密度節奏：幾張 text-heavy 的 + 幾張 image-heavy 的 + 幾張 quote 留白
-- 字號節奏：正常標題 + 偶爾巨型 hero 文字
+- 字級節奏：正常標題 + 偶爾巨型 hero 文字
 
 **不要每張 slide 長一樣**——那是 PPT 模板，不是設計。
 
@@ -577,9 +577,9 @@ Deck 需要 **intentional variety**：
 
 ---
 
-## 匯出為 PPTX / PDF（自助指令碼）
+## 匯出為 PPTX / PDF（自助腳本）
 
-HTML 優先是第一公民。但使用者經常需要 PPTX/PDF 交付。提供兩個通用指令碼，**任何多檔案 deck 都能用**，位於 `scripts/` 下：
+HTML 優先是第一公民。但使用者經常需要 PPTX/PDF 交付。提供兩個通用腳本，**任何多檔案 deck 都能用**，位於 `scripts/` 下：
 
 ### `export_deck_pdf.mjs` — 匯出向量 PDF（多檔案架構）
 
@@ -599,7 +599,7 @@ node scripts/export_deck_pdf.mjs --slides <slides-dir> --out deck.pdf
 
 ### `export_deck_stage_pdf.mjs` — 單檔案 deck-stage 架構專用 ⚠️
 
-**什麼時候用**：deck 是單 HTML 檔案 + `<deck-stage>` web component 包裹 N 個 `<section>`（即路徑 B 架構）。此時 `export_deck_pdf.mjs` 那套「每個 HTML 一次 `page.pdf()`」走不通，需要走這個專用指令碼。
+**什麼時候用**：deck 是單 HTML 檔案 + `<deck-stage>` web component 包裹 N 個 `<section>`（即路徑 B 架構）。此時 `export_deck_pdf.mjs` 那套「每個 HTML 一次 `page.pdf()`」走不通，需要走這個專用腳本。
 
 ```bash
 node scripts/export_deck_stage_pdf.mjs --html deck.html --out deck.pdf
@@ -613,7 +613,7 @@ node scripts/export_deck_stage_pdf.mjs --html deck.html --out deck.pdf
 
 3. **absolute 子元素跑到下一頁**：即使成功讓所有 section 渲染出來，section 本身若 `position: static`，其 absolute 定位的 `cover-footer`/`slide-footer` 會相對 initial containing block 定位——當 section 被 print 強制為 1080px 高度，absolute footer 可能被推到下一頁（表現為 PDF 比 section 數量多 1 頁，多出來的那頁只含 footer 孤兒）。
 
-**修復策略**（指令碼已實現）：
+**修復策略**（腳本已實現）：
 
 ```js
 // 開啟 HTML 後，用 page.evaluate 把 section 從 deck-stage slot 中提出來，
@@ -655,21 +655,21 @@ await page.pdf({ width: '1920px', height: '1080px', printBackground: true, prefe
 ### `export_deck_pptx.mjs` — 匯出可編輯 PPTX
 
 ```bash
-# 唯一模式：文本框原生可編輯（字型會回落到系統字型）
+# 唯一模式：文字框原生可編輯（字型會回落到系統字型）
 node scripts/export_deck_pptx.mjs --slides <dir> --out deck.pptx
 ```
 
-工作原理：`html2pptx` 逐元素讀 computedStyle 把 DOM 翻譯成 PowerPoint 物件（text frame / shape / picture）。文字變成真文本框，PPT 裡雙擊即可編輯。
+工作原理：`html2pptx` 逐元素讀 computedStyle 把 DOM 翻譯成 PowerPoint 物件（text frame / shape / picture）。文字變成真文字框，PPT 裡雙擊即可編輯。
 
 **硬性約束**（HTML 必須滿足，否則該頁 skip，詳細說明見 `references/editable-pptx.md`）：
-- 所有文字必須在 `<p>`/`<h1>`-`<h6>`/`<ul>`/`<ol>` 裡（禁止裸文本 div）
+- 所有文字必須在 `<p>`/`<h1>`-`<h6>`/`<ul>`/`<ol>` 裡（禁止裸文字 div）
 - `<p>`/`<h*>` 標籤自身不能有 background/border/shadow（放外層 div）
 - 不用 `::before`/`::after` 插入裝飾文字（偽元素提不出來）
 - inline 元素（span/em/strong）不能有 margin
 - 不用 CSS gradient（不可渲染）
 - div 不用 `background-image`（用 `<img>`）
 
-指令碼已內建**自動前處理器**——把 "葉子 div 裡的裸文本" 自動包成 `<p>`（保留 class）。這解決了最常見的違規（裸文本）。但其他違規（p 上有 border、span 上有 margin 等）仍需 HTML 源頭合規。
+腳本已內建**自動前處理器**——把 "葉子 div 裡的裸文字" 自動包成 `<p>`（保留 class）。這解決了最常見的違規（裸文字）。但其他違規（p 上有 border、span 上有 margin 等）仍需 HTML 源頭合規。
 
 **字型回落 caveat**：
 - Playwright 用 webfont 測量 text-box 尺寸；PowerPoint/Keynote 用本機字型渲染

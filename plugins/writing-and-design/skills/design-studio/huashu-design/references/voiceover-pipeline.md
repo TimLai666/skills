@@ -1,7 +1,7 @@
 # Voiceover Pipeline · 解說驅動動畫
 
 > 把動畫從「無聲畫面 + 後期配音」升級為「**先有解說詞，再按音訊實測時長驅動畫面**」的工作流。
-> 適用：5-20 分鐘概念解說影片、教程影片、長篇知識科普。
+> 適用：5-20 分鐘概念解說影片、教學影片、長篇知識科普。
 >
 > 配套 `references/animation-best-practices.md` 使用——本檔案管 **怎麼把解說和畫面對上**，
 > animation-best-practices 管 **每一幀畫面怎麼動**。
@@ -14,7 +14,7 @@
 
 ### 第一條 · 整片是一個連續的運動敘事，不是一組獨立場景
 
-PowerPoint 是 7 張幻燈片。我們做的是 **1 段持續 X 分鐘的電影**。
+PowerPoint 是 7 張投影片。我們做的是 **1 段持續 X 分鐘的電影**。
 
 **身份切換**：
 - ❌ 你不是「在做 7 個 scene 的內容」
@@ -23,7 +23,7 @@ PowerPoint 是 7 張幻燈片。我們做的是 **1 段持續 X 分鐘的電影*
 **視覺骨架 = 一個或幾個貫穿全片的 hero element**：
 - 它從 t=0 出現，到結束才離場
 - 每個 cue 是它的**狀態變化**（位置 / 大小 / 顏色 / 透視 / 形態），不是「換一個新元素」
-- scene 邊界在劇本里有，**在畫面裡不應該有**——觀眾看不出"這是第 3 個 scene"，只看到一段連續的運動
+- scene 邊界在劇本裡有，**在畫面裡不應該有**——觀眾看不出"這是第 3 個 scene"，只看到一段連續的運動
 
 **反例（本 skill v1 實戰踩坑 · 2026-05-10）**：
 - 7 個 `<Scene>` 各自獨立 layout，scene 切換 = 整頁 opacity 1→0 切到下一頁
@@ -179,7 +179,7 @@ const App = () => (
     ┌─────────────────┐      ┌──────────────────┐
     │ HTML 動畫       │      │ 錄製 MP4 + 混音  │
     │ (NarrationStage)│      │ render-narration │
-    │ 實播帶 audio 同步│      │ → 最終釋出 MP4   │
+    │ 實播帶 audio 同步│      │ → 最終發布 MP4   │
     └─────────────────┘      └──────────────────┘
        交付形態 1                交付形態 2
 ```
@@ -210,7 +210,7 @@ LLM 全稱 Large Language Model，[[cue:bigmodel]]它是一個有幾千億參數
 
 **規則**：
 - 段標題 `## scene-id` 是英文/數字 + 連字元（如 `## what-is`、`## scene-1`）
-- `[[cue:xx]]` 標在**關鍵句中間**——指令碼執行時會在該位置切割文本，cue 之後那一刻就是畫面的觸發點
+- `[[cue:xx]]` 標在**關鍵句中間**——腳本執行時會在該位置切割文字，cue 之後那一刻就是畫面的觸發點
 - cue id 在動畫 HTML 裡用 `<Cue id="xx">` 監聽
 - 寫解說時**關注節奏 + 短句**，長句 TTS 出來會平淡
 
@@ -231,11 +231,11 @@ LLM 全稱 Large Language Model，[[cue:bigmodel]]它是一個有幾千億參數
       end: number,
       duration: number,
       audio: 'audio/<id>.mp3',  // 該段單獨音訊（合併前的子段已 concat）
-      text: string,             // 已剝離 [[cue:xx]] 標記的整段文本
+      text: string,             // 已剝離 [[cue:xx]] 標記的整段文字
       // chunks 是字幕顯示的源——每個 chunk 是被 cue 切開的子段，含 TTS 實測時間窗
       chunks: [
         {
-          text: string,            // 子段文本
+          text: string,            // 子段文字
           start: number,           // 段內相對時間
           end: number,
           absoluteStart: number,   // 整軌絕對時間（對齊 voiceover.mp3）
@@ -254,7 +254,7 @@ LLM 全稱 Large Language Model，[[cue:bigmodel]]它是一個有幾千億參數
 }
 ```
 
-`absoluteTime` 和 `absoluteStart/End` 都是**真實測出來的**——pipeline 把段內文本按 cue 切成子段分別 TTS，時間 = 累加前面子段的實測時長。**不是按字元數線性估算的近似值**。
+`absoluteTime` 和 `absoluteStart/End` 都是**真實測出來的**——pipeline 把段內文字按 cue 切成子段分別 TTS，時間 = 累加前面子段的實測時長。**不是按字元數線性估算的近似值**。
 
 ## 字幕（Subtitles）
 
@@ -266,7 +266,7 @@ LLM 全稱 Large Language Model，[[cue:bigmodel]]它是一個有幾千億參數
 const { NarrationStage, Subtitles } = NarrationStageLib;
 <NarrationStage timeline={TIMELINE} audioSrc="...">
   {/* 你的 hero / scene 內容 */}
-  <Subtitles />  {/* ← 自動從 timeline.scenes[].chunks 取活動文本 */}
+  <Subtitles />  {/* ← 自動從 timeline.scenes[].chunks 取活動文字 */}
 </NarrationStage>
 ```
 
@@ -276,7 +276,7 @@ const { NarrationStage, Subtitles } = NarrationStageLib;
 |---|---|---|
 | 背景 | **無背景**（不要黑色橫條不要 backdrop-blur）| 半透明黑底 + blur = 字幕條壓住畫面 = PPT 感 |
 | 字色 | **淺底用深墨 `#1a1a1a` + 白光暈**；深底用白字 + 黑光暈 | 淺底白字+黑描邊 = 字糊 |
-| 字號 | 32px（1080p 影片）| <24px 看不清，>40px 搶主視覺 |
+| 字級 | 32px（1080p 影片）| <24px 看不清，>40px 搶主視覺 |
 | 字型 | `PingFang SC` / `Noto Sans SC`（無襯線，B 站標準）| 襯線字型 = 像電影字幕 |
 | 位置 | bottom: 90px（不貼邊）| 貼底邊顯得廉價 |
 | 單行長度 | **≤ 12-13 字**（中英混合時英文按 0.5 字算）| >15 字一行手機端讀不完 |
@@ -291,7 +291,7 @@ splitChunkToLines(text, maxLen = 13)
 // 1. 強標點切句（。！？\n）
 // 2. 每句 ≤ maxLen 直接保留
 // 3. 否則按弱標點（，、；：）切片，合併到 ≤ maxLen
-// 4. 兜底硬切（罕見）
+// 4. 保底硬切（罕見）
 // 中英混合：英文/數字按 0.5 字算視覺寬度
 ```
 
@@ -324,7 +324,7 @@ const { NarrationStage, Scene, Cue, useNarration } = NarrationStageLib;
 
 **Hooks**：
 - `useNarration()` 返回 `{ time, scene, sceneTime, isCueTriggered, cueProgress }`
-- 在自定義元件裡直接讀，不需要傳 props
+- 在自訂元件裡直接讀，不需要傳 props
 
 **Scene 元件**：
 - 預設只在 `scene.id === id` 時掛載
@@ -340,11 +340,11 @@ NarrationStage 自動檢測 `window.__recording`：
 - **實播模式**（預設）：跟隨 audio 元素的 currentTime，使用者暫停/拖動 seek 都能同步
 - **錄影片模式**（render-video.js 設定 `window.__recording = true`）：rAF wall-clock 自驅動從 0 開始，暴露 `window.__seek(t)` 給 render-video.js 復位
 
-## 三個指令碼
+## 工具腳本
 
-| 指令碼 | 輸入 | 輸出 |
+| 腳本 | 輸入 | 輸出 |
 |---|---|---|
-| `scripts/tts-doubao.mjs` | 單段文本 | 單個 mp3 + 實測時長 |
+| `scripts/tts-doubao.mjs` | 單段文字 | 單個 mp3 + 實測時長 |
 | `scripts/narrate-pipeline.mjs` | 解說稿 .md | voiceover.mp3 + timeline.json |
 | `scripts/mix-voiceover.sh` | 影片 + voiceover.mp3 [+ BGM] | 帶音訊的 MP4 |
 | `scripts/render-narration.sh` | 解說 HTML + timeline.json | 最終 MP4（錄製 + 混音一條龍）|
@@ -373,23 +373,23 @@ DOUBAO_TTS_VOICE_ID=zh_female_xiaohe_uranus_bigtts
 
 1. **寫解說稿**：解說稿是原始碼。先把整段口播寫完整，標段標題 `## scene-id`，關鍵句前加 `[[cue:xx]]`
 2. **跑 narrate-pipeline**：`node scripts/narrate-pipeline.mjs --script script.md --out-dir _narration`
-3. **聽整段 voiceover.mp3**：節奏不對回去改稿。**這一步決定整片質量上限**
+3. **聽整段 voiceover.mp3**：節奏不對回去改稿。**這一步決定整片品質上限**
 4. **🛑 設計前先回答鐵律**：hero element 是什麼？它在每段是什麼狀態？跨場景怎麼 morph？答不上不要寫程式碼
 5. **寫動畫 HTML**：用 NarrationStage + 一個或幾個 hero element 跨 scene 演戲
 6. **實播預覽**：瀏覽器開啟 HTML，點 ▶ Play，聽畫面+解說同步
 7. **第一觀眾自檢**：用上面「自檢 · 第一觀眾反應」表打分。失敗回到 Step 4 重做
 8. **錄影片**：`bash scripts/render-narration.sh demo.html --timeline=_narration/timeline.json`（自動錄無聲 MP4 + 混入 voiceover）
 9. **可選 BGM**：在 render-narration 加 `--bgm-mood=educational`（或 tech / tutorial 等）
-10. **交付**：瀏覽器 HTML（即時演示用）+ 最終 MP4（釋出用）
+10. **交付**：瀏覽器 HTML（即時演示用）+ 最終 MP4（發布用）
 
 ## 異常處理
 
 | 問題 | 解決 |
 |---|---|
 | TTS API 報錯 | 檢查 .env 裡 `DOUBAO_TTS_API_KEY`，或 `DOUBAO_APP_ID` + `DOUBAO_ACCESS_KEY` 是否正確 |
-| 某段音訊明顯比指令碼長/短 | 該段文本里有奇怪標點或 emoji，TTS 解析異常 → 改稿 |
+| 某段音訊明顯比解說稿長/短 | 該段文字裡有奇怪標點或 emoji，TTS 解析異常 → 改稿 |
 | cue absoluteTime 不準 | 段內子段拼接時 ffmpeg 有問題 → 檢查 mp3 編碼一致性 |
-| 錄影片結果有黑屏 | render-video.js 沒拿到 `window.__ready` 訊號 → 檢查 NarrationStage 是否正常掛載 |
+| 錄影片結果出現黑畫面 | render-video.js 沒拿到 `window.__ready` 訊號 → 檢查 NarrationStage 是否正常掛載 |
 | 錄影片畫面卡頓 | 動畫裡有重 layout（大量 box-shadow / blur）→ 簡化或預合成 |
 | 實播音畫不同步 | audio 元素載入延遲 → 加 `preload="auto"` 或本地預載入 |
 
@@ -397,7 +397,7 @@ DOUBAO_TTS_VOICE_ID=zh_female_xiaohe_uranus_bigtts
 
 - **<60s 短動畫**：直接做無聲動畫 + 後期配音（add-music.sh + 一段單獨 TTS）即可，不需要 timeline 驅動
 - **純 BGM 影片**：用 `add-music.sh` 加預設 BGM
-- **真人錄音替換 TTS**：把 `voiceover.mp3` 替換成真人錄音，timeline 自己手寫或用 ffprobe 測段時長 + 工具指令碼生成 → 流程其餘部分通用
+- **真人錄音替換 TTS**：把 `voiceover.mp3` 替換成真人錄音，timeline 自己手寫或用 ffprobe 測段時長 + 工具腳本生成 → 流程其餘部分通用
 
 ---
 

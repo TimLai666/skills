@@ -5,11 +5,11 @@ description: >-
   animations, prototypes, infographics, branding. Every session produces or
   evolves a DESIGN.md (Google format). Routes to cinematic-ui or huashu-design
   engines based on task. This skill MUST be used for any design task. MUST
-  trigger on: 設計, design, 原型, prototype, PPT, 幻燈片, slides, 動畫, animation, 簡報,
+  trigger on: 設計, design, 原型, prototype, PPT, 投影片, slides, 動畫, animation, 簡報,
   deck, landing page, website, UI, mockup, MP4, GIF, infographic, branding,
   logo, 評審, critique, film-inspired, cinematic.
 metadata:
-  version: "1.10.0"
+  version: "1.10.1"
 ---
 
 # Design Studio

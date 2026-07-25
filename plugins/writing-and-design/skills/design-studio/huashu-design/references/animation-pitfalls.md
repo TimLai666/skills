@@ -53,7 +53,7 @@
   ```css
   .grid { grid-template-columns: 80px repeat(var(--cols), 1fr); }
   ```
-- 方案 B：用 `grid-auto-flow: column` 讓瀏覽器自動擴充套件
+- 方案 B：用 `grid-auto-flow: column` 讓瀏覽器自動擴展
 - **停用「固定數字 +  JS 常量」的組合**，N 改了 CSS 不會同步更新
 
 ## 4. 過渡斷層 —— 場景切換要連續
@@ -119,35 +119,35 @@
 - 想要 60fps？用 ffmpeg `minterpolate` 後處理，不指望瀏覽器源幀率
 - 想要 GIF？兩階段 palette（`palettegen` + `paletteuse`），對 30s 1080p 動畫能壓到 3MB
 
-參見 `video-export.md` 獲取完整指令碼呼叫方式。
+參見 `video-export.md` 獲取完整腳本呼叫方式。
 
 ## 8. 批次匯出 —— tmp 目錄必須帶 PID 防併發衝突
 
 **踩的坑**：用 `render-video.js` 3 個程序並行錄 3 個 HTML。因為 TMP_DIR 只用 `Date.now()` 命名，3 個程序同毫秒啟動時共用同一個 tmp 目錄。最先完成的程序清理 tmp，另外兩個讀目錄時 `ENOENT`，全部崩潰。
 
 **規則**：
-- 任何多程序可能共用的臨時目錄，命名必須帶 **PID 或隨機字尾**：
+- 任何多程序可能共用的臨時目錄，命名必須帶 **PID 或隨機後綴**：
   ```js
   const TMP_DIR = path.join(DIR, '.video-tmp-' + Date.now() + '-' + process.pid);
   ```
-- 如果確實想多檔案並行，用 shell 的 `&` + `wait` 而不是在一個 node 腳本里 fork
+- 如果確實想多檔案並行，用 shell 的 `&` + `wait` 而不是在一個 node 腳本裡 fork
 - 批次錄多個 HTML 時，保守做法：**序列**執行（2 個以內可並行，3 個以上老實排隊）
 
-## 9. 錄屏裡有進度條/重播按鈕 —— Chrome 元素汙染影片
+## 9. 錄影裡有進度條/重播按鈕 —— Chrome 元素汙染影片
 
 **踩的坑**：動畫 HTML 加了 `.progress` 進度條、`.replay` 重播按鈕、`.counter` 時間戳，方便人類除錯播放。錄成 MP4 交付時這些元素出現在影片底部，像把開發者工具截進去了一樣。
 
 **規則**：
 - HTML 裡給人類用的「chrome 元素」（progress bar / replay button / footer / masthead / counter / phase labels）和影片內容本體分開管理
-- **約定 class 名** `.no-record`：任何帶這個 class 的元素，錄屏指令碼自動隱藏
-- 指令碼端（`render-video.js`）預設注入 CSS 隱藏常見 chrome class 名：
+- **約定 class 名** `.no-record`：任何帶這個 class 的元素，錄影腳本自動隱藏
+- 腳本端（`render-video.js`）預設注入 CSS 隱藏常見 chrome class 名：
   ```
   .progress .counter .phases .replay .masthead .footer .no-record [data-role="chrome"]
   ```
 - 用 Playwright 的 `addInitScript` 注入（會在每次 navigate 前生效，reload 也穩）
 - 想看原樣 HTML（帶 chrome）時加 `--keep-chrome` flag
 
-## 10. 錄屏開頭幾秒動畫重複 —— Warmup 幀洩漏
+## 10. 錄影開頭幾秒動畫重複 —— Warmup 幀洩漏
 
 **踩的坑**：`render-video.js` 的舊流程 `goto → wait fonts 1.5s → reload → wait duration`。錄製從 context 建立就開始，warmup 階段動畫已經播了一段，reload 後從 0 重啟。結果影片前幾秒是「動畫中段 + 切換 + 動畫從 0 開始」，重複感強。
 
@@ -190,7 +190,7 @@
 | 它屬於什麼 | 處理 |
 |------------|------|
 | 某一幕的敘事內容 | OK，留著 |
-| 全域性 chrome（控制/除錯用） | 加 `.no-record` class，匯出時隱藏 |
+| 全域 chrome（控制/除錯用） | 加 `.no-record` class，匯出時隱藏 |
 | **既不屬於任何幕，又不是 chrome** | **刪**。這就是無主之物，必然是 filler slop |
 
 **自檢（交付前 3 秒）**：截一張靜態圖，問自己——
@@ -201,7 +201,7 @@
 
 **反例**：底部畫 `00:42 ──── PROJECT NAME`、畫面右下角畫"CH 03 / 06"章節計數、畫面邊緣畫版本號"v0.3.1"——都是偽 chrome filler。
 
-## 12. 錄屏前置空白 + 錄屏起點偏移 —— `__ready` × tick × lastTick 三聯陷阱
+## 12. 錄影前置空白 + 錄影起點偏移 —— `__ready` × tick × lastTick 三聯陷阱
 
 **踩的坑（A · 前置空白）**：60 秒動畫匯出 MP4，前 2-3 秒是空白頁面。`ffmpeg --trim=0.3` 剪不掉。
 
@@ -209,12 +209,12 @@
 
 **根因**（兩個坑共享一個根因）：
 
-Playwright `recordVideo` 從 `newContext()` 那一刻就開始寫 WebM，此時 Babel/React/字型載入共耗時 L 秒（2-6s）。錄屏指令碼等 `window.__ready = true` 作為「動畫從這裡開始」的錨點——它和動畫 `time = 0` 必須嚴格 pair。有兩種常見錯法：
+Playwright `recordVideo` 從 `newContext()` 那一刻就開始寫 WebM，此時 Babel/React/字型載入共耗時 L 秒（2-6s）。錄影腳本等 `window.__ready = true` 作為「動畫從這裡開始」的錨點——它和動畫 `time = 0` 必須嚴格 pair。有兩種常見錯法：
 
 | 錯法 | 症狀 |
 |------|------|
-| `__ready` 在 `useEffect` 或同步 setup 階段設（在 tick 第一幀之前） | 錄屏指令碼以為動畫開始了，實際 WebM 還在錄空白頁 → **前置空白** |
-| tick 的 `lastTick = performance.now()` 在**指令碼頂層**初始化 | 字型載入 L 秒被算進首幀 `dt`，`time` 瞬間跳到 L → 錄屏全程滯後 L 秒 → **起點偏移** |
+| `__ready` 在 `useEffect` 或同步 setup 階段設（在 tick 第一幀之前） | 錄影腳本以為動畫開始了，實際 WebM 還在錄空白頁 → **前置空白** |
+| tick 的 `lastTick = performance.now()` 在**腳本頂層**初始化 | 字型載入 L 秒被算進首幀 `dt`，`time` 瞬間跳到 L → 錄影全程滯後 L 秒 → **起點偏移** |
 
 **✅ 正確的完整 starter tick 模板**（手寫動畫必須用這個骨架）：
 
@@ -229,7 +229,7 @@ const fired = new Set();
 function tick(now) {
   if (lastTick === null) {
     lastTick = now;
-    window.__ready = true;   // ✅ pair：「錄屏起點」與「動畫 t=0」同一幀
+    window.__ready = true;   // ✅ pair：「錄影起點」與「動畫 t=0」同一幀
     render(0);               // 再渲一次確保 DOM 就緒（此時字型已 ready）
     requestAnimationFrame(tick);
     return;
@@ -265,13 +265,13 @@ window.__seek = (t) => { fired.clear(); time = t; lastTick = null; render(t); };
 
 | 環節 | 為什麼必須這樣 |
 |------|-------------|
-| `lastTick = null` + 首幀 `return` | 避免「指令碼載入到 tick 首次執行」的 L 秒被算進動畫時間 |
+| `lastTick = null` + 首幀 `return` | 避免「腳本載入到 tick 首次執行」的 L 秒被算進動畫時間 |
 | `playing = false` 預設 | 字型載入期間 `tick` 即使執行也不推進 time，避免渲染錯位 |
-| `__ready` 在 tick 首幀設 | 錄屏指令碼此刻開始計時，對應的畫面是動畫真正的 t=0 |
+| `__ready` 在 tick 首幀設 | 錄影腳本此刻開始計時，對應的畫面是動畫真正的 t=0 |
 | `document.fonts.ready.then(...)` 裡才啟動 tick | 規避字型 fallback 寬度測量、避免首幀字型跳變 |
 | `window.__seek` 存在 | 讓 `render-video.js` 可以主動矯正——第二道防線 |
 
-**錄屏指令碼端的對應防禦**：
+**錄影腳本端的對應防禦**：
 1. `addInitScript` 注入 `window.__recording = true`（先於 page goto）
 2. `waitForFunction(() => window.__ready === true)`，記錄此刻偏移作為 ffmpeg trim
 3. **額外**：`__ready` 之後主動 `page.evaluate(() => window.__seek && window.__seek(0))`，把 HTML 可能的 time 偏差強制歸零——這是第二道防線，對付不嚴格遵守 starter 模板的 HTML
@@ -289,11 +289,11 @@ ffmpeg -i video.mp4 -ss $DURATION-0.1 -vframes 1 frame-end.png
 
 **踩的坑**：動畫 Stage 預設 `loop=true`（瀏覽器裡方便看效果）。`render-video.js` 錄完 duration 秒還多等 300ms 緩衝才停止，這 300ms 讓 Stage 進入下一迴圈。ffmpeg `-t DURATION` 擷取時，最後 0.5-1s 落入下一迴圈——影片結尾突然回到第一幀（Scene 1），觀眾以為影片出 bug。
 
-**根因**：錄製指令碼和 HTML 之間沒有"我在錄製"的握手協議。HTML 不知道自己被錄，依然按瀏覽器互動場景迴圈。
+**根因**：錄製腳本和 HTML 之間沒有"我在錄製"的握手協議。HTML 不知道自己被錄，依然按瀏覽器互動場景迴圈。
 
 **規則**：
 
-1. **錄製指令碼**：在 `addInitScript` 裡注入 `window.__recording = true`（先於 page goto）：
+1. **錄製腳本**：在 `addInitScript` 裡注入 `window.__recording = true`（先於 page goto）：
    ```js
    await recordCtx.addInitScript(() => { window.__recording = true; });
    ```
@@ -321,11 +321,11 @@ ffmpeg -i video.mp4 -ss $DURATION-0.1 -vframes 1 frame-end.png
 **規則**：
 
 - 預設 60fps 用簡單 `fps=60` filter（幀複製），相容性廣（QuickTime/Safari/Chrome/VLC 都能開）
-- 高質量插幀用 `--minterpolate` flag 顯式啟用——但**必須本地測過**目標播放器再交付
+- 高品質插幀用 `--minterpolate` flag 顯式啟用——但**必須本地測過**目標播放器再交付
 - 60fps 標籤價值是**上傳平台的演算法識別**（Bilibili / YouTube 上 60fps 標記會優先推流），實際感知流暢度對 CSS 動畫來說提升微弱
 - 加 `-profile:v high -level 4.0` 提升 H.264 通用相容性
 
-**`convert-formats.sh` 已預設改成相容模式**。如果你需要插幀高質量，加 `--minterpolate` flag：
+**`convert-formats.sh` 已預設改成相容模式**。如果你需要插幀高品質，加 `--minterpolate` flag：
 ```bash
 bash convert-formats.sh input.mp4 --minterpolate
 ```
@@ -334,7 +334,7 @@ bash convert-formats.sh input.mp4 --minterpolate
 
 **踩的坑**：動畫 HTML 裡用 `<script type="text/babel" src="animations.jsx"></script>` 外部載入引擎。本機雙擊開啟（`file://` 協議）→ Babel Standalone 走 XHR 拉 `.jsx` → Chrome 報 `Cross origin requests are only supported for protocol schemes: http, https, chrome, chrome-extension...` → 整頁黑屏，不報 `pageerror` 只報 console error，很容易當"動畫沒觸發"誤診。
 
-啟 HTTP server 也未必救得了——本機有全域性代理時 `localhost` 也會走代理，返回 502 / 連線失敗。
+啟 HTTP server 也未必救得了——本機有全域代理時 `localhost` 也會走代理，返回 502 / 連線失敗。
 
 **規則**：
 
@@ -347,11 +347,11 @@ bash convert-formats.sh input.mp4 --minterpolate
 
 ## 16. 跨 scene 反色上下文 —— 畫面內元素不要硬編碼顏色
 
-**踩的坑**：做多場景動畫時，`ChapterLabel` / `SceneNumber` / `Watermark` 等**跨 scene 都出現**的元素，在元件裡寫死 `color: '#1A1A1A'`（深色文字）。前 4 個 scene 淺底 OK，到第 5 個黑底 scene 時"05"和水印直接消失——不報錯、不觸發任何檢查、關鍵資訊隱形。
+**踩的坑**：做多場景動畫時，`ChapterLabel` / `SceneNumber` / `Watermark` 等**跨 scene 都出現**的元素，在元件裡寫死 `color: '#1A1A1A'`（深色文字）。前 4 個 scene 淺底 OK，到第 5 個黑底 scene 時"05"和浮水印直接消失——不報錯、不觸發任何檢查、關鍵資訊隱形。
 
 **規則**：
 
-- **跨多 scene 複用的畫面內元素**（chapter 標籤 / scene 編號 / 時間碼 / 水印 / 版權條）**禁止硬編碼顏色值**
+- **跨多 scene 複用的畫面內元素**（chapter 標籤 / scene 編號 / 時間碼 / 浮水印 / 版權條）**禁止硬編碼顏色值**
 - 改用三種方式之一：
   1. **`currentColor` 繼承**：元素只寫 `color: currentColor`，父 scene 容器設 `color: 計算值`
   2. **invert prop**：元件接受 `<ChapterLabel invert />` 手動切換深淺
@@ -362,7 +362,7 @@ bash convert-formats.sh input.mp4 --minterpolate
 
 ## 17. 離線/無 CDN 的真·自包含 —— React/Babel 全內聯，且引擎也要 transpile
 
-**踩的坑（2026-05 覓遊宣傳動畫）**：動畫 HTML 用 `<script src="https://unpkg.com/react...">` + `<script src=".../@babel/standalone">` 走 CDN。本機有全域性代理，Playwright 錄製時 chromium 連 unpkg / Google Fonts 全部 `net::ERR_CONNECTION_CLOSED`：
+**踩的坑（2026-05 覓遊宣傳動畫）**：動畫 HTML 用 `<script src="https://unpkg.com/react...">` + `<script src=".../@babel/standalone">` 走 CDN。本機有全域代理，Playwright 錄製時 chromium 連 unpkg / Google Fonts 全部 `net::ERR_CONNECTION_CLOSED`：
 
 1. React/ReactDOM 沒載入 → `window.React undefined`
 2. Babel 沒載入 → `<script type="text/babel">` 裡的 JSX 當普通 JS 跑 → `Unexpected token '<'`
@@ -375,7 +375,7 @@ bash convert-formats.sh input.mp4 --minterpolate
 - **構建期 Babel 預編譯，執行期不帶 Babel**：用 `@babel/standalone`（下載一次，僅構建用）在 node 裡 `Babel.transform(src,{presets:['react']}).code`，把 JSX → `React.createElement`。**app 和 `animations.jsx` 引擎兩段都要過 transform**——引擎含 JSX，漏了它必報 `Unexpected token '<'`
 - **字型改系統字型**：Google Fonts CDN 同樣會被代理掐斷。中文動畫用 `'PingFang SC'`（sans）/ `'Songti SC'`（serif）系統字型，不依賴網路。`document.fonts.ready` 對系統字型立即 resolve，錄製不卡
 - **base64 內聯圖片素材**：`<img src="png/x.png">` 相對路徑在 `file://` 能渲染，但要真便攜（移動檔案不丟圖）就 base64 data URL 內聯；背景大圖先轉 JPEG 壓一下再 base64
-- **構建模板化**：HTML 模板留 `__REACT__/__REACTDOM__/__ASSETS__/__ENGINE__` token + 一段 `type="text/jsx-source"` 的 app 原始碼，node 構建指令碼讀 token 注入（vendor 原樣、引擎+app 過 Babel）→ 寫出最終單檔案。改動畫只改模板重跑構建
+- **構建模板化**：HTML 模板留 `__REACT__/__REACTDOM__/__ASSETS__/__ENGINE__` token + 一段 `type="text/jsx-source"` 的 app 原始碼，node 構建腳本讀 token 注入（vendor 原樣、引擎+app 過 Babel）→ 寫出最終單檔案。改動畫只改模板重跑構建
 
 **驗證**：Playwright `page.evaluate(()=>({React:typeof window.React, Animations:typeof window.Animations}))`——兩個都該是 `object`。任一 `undefined` → 對應 `<script>` 拋了錯（多半是沒 transpile 的 JSX）。
 
@@ -394,9 +394,9 @@ bash convert-formats.sh input.mp4 --minterpolate
 - [ ] 動畫 tick 第一幀同步設 `window.__ready = true`？（用 animations.jsx 自帶；手寫 HTML 自己加）
 - [ ] Stage 檢測 `window.__recording` 強制 loop=false？（手寫 HTML 必加）
 - [ ] 結尾 Sprite 的 `fadeOut` 設為 0（影片末尾停清晰幀）？
-- [ ] 60fps MP4 預設用幀複製模式（相容性），高質量插幀才加 `--minterpolate`？
+- [ ] 60fps MP4 預設用幀複製模式（相容性），高品質插幀才加 `--minterpolate`？
 - [ ] 匯出後抽第 0 幀 + 末幀驗證是動畫初始/最終狀態？
 - [ ] 涉及具體品牌（Stripe/Anthropic/Lovart/...）：走完了「品牌資產協議」（SKILL.md §1.a 五步）？有沒有寫 `brand-spec.md`？
 - [ ] 單檔案交付的 HTML：`animations.jsx` 是內聯的，不是 `src="..."`？（file:// 下 external .jsx 會 CORS 黑屏）
-- [ ] 跨 scene 出現的元素（chapter 標籤/水印/scene 編號）沒有硬編碼顏色？在每個 scene 底色下都可見？
+- [ ] 跨 scene 出現的元素（chapter 標籤/浮水印/scene 編號）沒有硬編碼顏色？在每個 scene 底色下都可見？
 - [ ] 要離線/真自包含：React+ReactDOM 本地內聯、**app 和 `animations.jsx` 引擎都過 Babel transpile**、字型用系統字型？（見坑 #17；引擎含 JSX，漏 transpile 必報 `Unexpected token '<'`）

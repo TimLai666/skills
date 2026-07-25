@@ -62,13 +62,13 @@ Anthropic 把「赤陶橙 + 襯線 + 幾何抽象」做成了 AI 公司的反 sl
 
 **Penguin Classics（1947 起，Romek Marber 1961 grid 之後）**
 
-Penguin 教會我**typography 的勇敢**。一本書的封面可以是大字號襯線 + 一條黑橫線 + 沒有插圖——讀者反而會停下來。
+Penguin 教會我**typography 的勇敢**。一本書的封面可以是大字級襯線 + 一條黑橫線 + 沒有插圖——讀者反而會停下來。
 
 第 25-29 秒的 slogan reveal 借這個語言：**ONE SOURCE.** 和 **SIX FORMS.** 不是「裝飾文字」，它們就是畫面本身。
 
 **Pentagram (Paula Scher / Michael Bierut)**
 
-Pentagram 的招牌是**資訊建築**——文字和文字之間的距離、文字和邊界的距離、文字層級之間的字號比，都不是「憑直覺」，是數學。
+Pentagram 的招牌是**資訊建築**——文字和文字之間的距離、文字和邊界的距離、文字層級之間的字級比，都不是「憑直覺」，是數學。
 
 我們的網格系統（Part II.3）來自這一傳統。
 
@@ -100,7 +100,7 @@ Vignelli 的 8 字格言：「If you can design one thing, you can design everyt
 **次受眾 B · 聽說過 huashu-md-html 但沒用的 AI Native 創作者（約 25%）**
 
 他們關心的是「這個 skill 跟我有什麼關係」。我們對他們的承諾：30 秒之內，你必須意識到——
-- 你寫文章 / 做調研 / 做白皮書時，**md 應該是你的 source of truth**
+- 你寫文章 / 做調查 / 做白皮書時，**md 應該是你的 source of truth**
 - 6 種下遊格式，一次命令解決
 
 → Shot 04（any → md）要讓他們看到 PDF/DOCX/PPTX/XLSX/HTML 一起被 md 吸收——這是「源頭思維」的視覺具象化。
@@ -108,10 +108,10 @@ Vignelli 的 8 字格言：「If you can design one thing, you can design everyt
 **外受眾 C · 完全不熟悉的設計師 / 編輯 / 出版人（約 15%）**
 
 他們看到的是一支「漂亮的科技短片」，不一定 follow up。我們對他們的承諾：30 秒之內，你必須留下印象——
-- 這家做的東西**有出版社品位**
+- 這家做的東西**有出版社品味**
 - 跟你過去看到的 AI 工具不一樣
 
-→ 整支片的反 AI slop 自檢（Part II.7）就是為他們做的。任何紫漸變、emoji 圖示、SVG 手畫人物——一律不出現。
+→ 整支片的反 AI slop 自檢（Part II.7）就是為他們做的。任何紫漸層、emoji 圖示、SVG 手畫人物——一律不出現。
 
 ## 1.4 節奏哲學
 
@@ -133,7 +133,7 @@ Vignelli 的 8 字格言：「If you can design one thing, you can design everyt
 
 | 不做 | 原因 |
 |------|------|
-| 不用紫漸變 | 訓練語料裡「科技感」的萬能公式，2026 年看是 cyber slop |
+| 不用紫漸層 | 訓練語料裡「科技感」的萬能公式，2026 年看是 cyber slop |
 | 不用 emoji 作圖示 | 「不專業就用 emoji 湊」的病 |
 | 不畫 SVG 人物 / 手 / 抽象人形 | AI 畫的 SVG 人物永遠五官錯位、比例詭異 |
 | 不用 Inter/Roboto/Arial 作 display | 太常見，撞 system fonts |
@@ -164,9 +164,9 @@ Vignelli 的 8 字格言：「If you can design one thing, you can design everyt
 Ivory paper    #FAFAF6    主底色（象牙白，一抹溫度）         60-70%
 Mist           #F2EDE4    次級背景層（card 陰影下的微暗）    < 15%
 Mica           #E6E1D6    細線 / 分隔符 / 卡片邊框          < 5%
-Smoke          #6B6B6B    次級文本 / metadata             < 5%
+Smoke          #6B6B6B    次級文字 / metadata             < 5%
 Cinder         #3D3530    次級深色（深褐黑，不是純黑）       < 10%
-Ink            #1A1A1A    主黑 / 主文本                    20-25%
+Ink            #1A1A1A    主黑 / 主文字                    20-25%
 Charred        #2A2620    極深褐黑（封面卡專用）            < 5%
 Terracotta     #C2410C    主 accent（Anthropic 調）         5-8%
 Terra Hot      #E55D21    高光 variant（僅 NEW 標籤亮起一瞬）< 1%
@@ -176,12 +176,12 @@ Terra Deep     #8B2D08    陰影 variant（赤陶橙投影）         < 1%
 **鐵律**：
 - 任何一鏡不出現以上 10 色之外的顏色。**沒有「這一鏡臨時加點冷灰」**。
 - 赤陶橙系（Terracotta + variants）三色合計佔畫面 < 10%，否則視覺過載。
-- 任何文本只能用 4 色之一：Ink / Cinder / Smoke / Terracotta。
+- 任何文字只能用 4 色之一：Ink / Cinder / Smoke / Terracotta。
 
 ## 2.2 字體系統
 
 ```
-字號層級        字型                  weight    用途                       字距 (em)
+字級層級        字型                  weight    用途                       字距 (em)
 ────────────────────────────────────────────────────────────────────────────────────
 Display XXL    Newsreader            700       slogan 頂字（200px）         -0.035
 Display XL     Newsreader            700       capability number（48px）   -0.020
@@ -391,7 +391,7 @@ final stamp / sign-off       29.0-29.5   ink stamp           -14dB
 □  沒有 SVG 畫的人物 / 抽象人形
 □  沒有未在 Part II.1 色板裡的顏色
 □  沒有 Inter / Roboto / Arial 作為 display
-□  字距、行高、字號都來自 Part II.2 字體系統（沒有「憑手感」加的值）
+□  字距、行高、字級都來自 Part II.2 字體系統（沒有「憑手感」加的值）
 □  vertical position 是 8 的倍數（除了刻意的視覺理由）
 □  赤陶橙在本鏡佔畫面 < 10%
 □  這一鏡有至少一處「pause 暫停時值得截圖」的細節（120% 簽名）
@@ -498,7 +498,7 @@ SHOT NN · NAME
 
 構圖：完全空。這是 Kenya Hara 意義上的「白」——不是「還沒畫」，是「內容本身」。
 
-**[TYPE]** 無文本。
+**[TYPE]** 無文字。
 
 **[ANIM]**
 
@@ -516,7 +516,7 @@ SHOT NN · NAME
 **[ANTI-SLOP]**
 
 - ✅ 沒有 logo、沒有「Loading...」、沒有任何品牌前置
-- ✅ 沒有漸變、沒有 effects
+- ✅ 沒有漸層、沒有 effects
 - ✅ 這一鏡的「pause-and-look」signature：畫面有質感（paper texture）但絕不搶戲
 
 **[WHY]**
@@ -635,7 +635,7 @@ cursor 是寫作的最小單位。從一個 cursor 開始，是「原始碼」�
 - ✅ morph 不是「淡出 + 淡入」的廉價 transition，是真正的字元變形（含 ghost 殘影疊加）
 - ✅ 句點是 hero 的「簽名細節」（120% 做到的那個）：Terracotta 句點小如指甲，但是這部片的視覺錨點，**所有後面的鏡頭裡這個句點都保留為 hero 標識**
 - ✅ accent rule 不是裝飾，是 hero 的 base line——它在 Shot 11 的 slogan 那裡會再次出現，建立首尾呼應
-- ✅ pause-and-look signature：480px Newsreader 'md' 的字距 -0.04em 讓 m 和 d 之間幾乎貼合但不接觸，這是 Newsreader 這個字型在大字號時的招牌質感
+- ✅ pause-and-look signature：480px Newsreader 'md' 的字距 -0.04em 讓 m 和 d 之間幾乎貼合但不接觸，這是 Newsreader 這個字型在大字級時的招牌質感
 
 **[WHY]**
 
@@ -770,7 +770,7 @@ md 字元與 destination card 之間用一條 terracotta 細線連線，從 md �
 **[TYPE]**
 
 - 見 visual description 內嵌
-- label「md → html」字號 14px， Mono Bold，Terracotta，letter-spacing 0.14em
+- label「md → html」字級 14px， Mono Bold，Terracotta，letter-spacing 0.14em
 - destination card 頂部 chapter title 是 Newsreader 600, 32px, Ink
 - destination card 底部小印 mono 10px Smoke 0.18em
 
@@ -804,7 +804,7 @@ md 字元與 destination card 之間用一條 terracotta 細線連線，從 md �
 - ✅ destination card 的「On Markdown」essay 內容是真的可讀的英文哲學小段，不是 Lorem ipsum
 - ✅ 「article.html · TUFTE THEME」這個小印是「pause 時能讀出來的細節簽名」
 - ✅ 沒用任何 glow 或 particle 來「強調」md → html 的轉換——靠 typography 和構圖自己講清楚
-- ✅ arrow line 不是 dashed 或 dotted（避免「網頁教程」感），是 1.5px 實線 Terracotta
+- ✅ arrow line 不是 dashed 或 dotted（避免「網頁教學」感），是 1.5px 實線 Terracotta
 - ✅ pause-and-look signature：destination card 頂部的「AN ESSAY · 2026」副標用了 Newsreader 的 small caps OpenType feature，0.18em 字距——是這一鏡的 120% 細節
 
 **[WHY]**
@@ -906,7 +906,7 @@ arrow direction 反向：從右側 destination card 向左 md 字元方向（短
 
 ## SHOT 07 · "PUBLISHER GRADE · DOCX" (md → docx)
 
-**[TIMECODE]** 14.50 — 17.50s (3.0s) `|` **FUNCTION** CAPABILITY 04。出版社品位 docx。建立「md 不只是給程式設計師的」論點。
+**[TIMECODE]** 14.50 — 17.50s (3.0s) `|` **FUNCTION** CAPABILITY 04。出版社品味 docx。建立「md 不只是給程式設計師的」論點。
 
 **[VISUAL]**
 
@@ -936,7 +936,7 @@ destination card 設計：**出版社級 docx 章節首頁**（高密度資訊�
 
 **特別細節**：
 - 頂部右上角的「page header」（書名 italic 灰色 mono）是真實出版社 docx 的細節簽名
-- 「CHAPTER · 01」字首讓觀眾一眼意識到「這是一本書的一頁，不是一篇文章」
+- 「CHAPTER · 01」前綴讓觀眾一眼意識到「這是一本書的一頁，不是一篇文章」
 - terracotta full-width rule（不是細線，而是 3px 粗 rule）是出版社章節首頁的招牌
 - 底部 page number「— 1 —」前後的破折號是 Newsreader 的 em-dash，不是 hyphen
 
@@ -997,7 +997,7 @@ cross-dissolve 進入。這一鏡的視覺強度**顯著高於** SHOT 05-07—�
 
 視覺差異點：
 1. **NEW 標籤**：top-left 在 capability counter 旁邊亮起一個 Terracotta 矩形框，內含「★ NEW」字元（JetBrains Mono Bold 13px, Terracotta, letter-spacing 0.22em，4px Terracotta border, 6px×12px padding）
-2. **destination 不是單一卡片，是兩張 PDF fan 出來**：A4 在後面（輕微 +5° 旋轉），大32開（176×240mm，國內紙質書規格）在前面（輕微 -3° 旋轉），形成「兩個 page-size 都支援」的視覺
+2. **destination 不是單一卡片，是兩張 PDF fan 出來**：A4 在後面（輕微 +5° 旋轉），大32開（176×240mm，中文紙本書規格）在前面（輕微 -3° 旋轉），形成「兩個 page-size 都支援」的視覺
 3. **每張 PDF 上有「印刷裁切標記」（crop marks）**——四角各一個 L 型小線，2px 粗，Smoke 色——這是真正印廠 PDF 的細節
 4. arrow + label 配色全部用 Terracotta（不是 Ink），整體配色更暖
 
@@ -1067,7 +1067,7 @@ PDF B（大32開，前面）：
 - A: `CAPABILITY · 05`, 第五個 dot 實心
 - A 旁邊新增 NEW 標籤
 - B: ON, 此時 version chip 旁的橙點同步 pulse（強調「v2.0 新增」）
-- C: 進度點 ● 滑到「md→pdf」位置, 這個位置的文字字號加大 0.5px 強調
+- C: 進度點 ● 滑到「md→pdf」位置, 這個位置的文字字級加大 0.5px 強調
 - D: ON
 - E: ON
 
@@ -1077,7 +1077,7 @@ PDF B（大32開，前面）：
 - ✅ 兩張 PDF 不是「疊在一起」的廉價 stacking，是 fan + 旋轉（暗示「開啟看」的物理動作）
 - ✅ crop marks 是真正印廠術語的視覺表達，pause 時能看到「啊這是 print-ready」
 - ✅ 沒用 glow 或 particle 來強調「NEW」——靠 typography 和 SFX 自己說話
-- ✅ pause-and-look signature：PDF B 頂部的「大32開 · 176×240mm」中英混排，是花叔生態對國內紙質書規格的尊重
+- ✅ pause-and-look signature：PDF B 頂部的「大32開 · 176×240mm」中英混排，是花叔生態對中文紙本書規格的尊重
 
 **[WHY]**
 
@@ -1125,7 +1125,7 @@ destination card 設計：**Apple Books 風的 EPUB reader frame**（強調「�
 
 **關鍵視覺差異**：
 - 整體 frame 是「macOS app 視窗」感（三個圓點 + 圓角 22px）
-- 中間是「開啟的電子書」cover area（Charred 底 + 出版社品位的 typography）
+- 中間是「開啟的電子書」cover area（Charred 底 + 出版社品味的 typography）
 - 底部是「Apple Books · 1 of 24」reader chrome
 - 整張 card 給人「我在 Apple Books 裡讀這本書」的現實感
 
@@ -1150,7 +1150,7 @@ destination card 設計：**Apple Books 風的 EPUB reader frame**（強調「�
 
 - BGM: percussion 持續，但 at 22.00s 整體 BGM swell +3dB（為 SHOT 10 的 convergence build-up）
 - **SFX: chime: NEW (06) at 20.70s（double chime + soft glow，比 SHOT 08 高半個音, -14dB）**——半音差讓兩個 NEW 鏡頭形成 musical relationship
-- SFX: window chrome subtle "click" at 21.20s（macOS 窗口出現感, -24dB）
+- SFX: window chrome subtle "click" at 21.20s（macOS 視窗出現感, -24dB）
 - SFX: page turn rustle at 21.40s
 
 **[CHROME]**
@@ -1167,7 +1167,7 @@ destination card 設計：**Apple Books 風的 EPUB reader frame**（強調「�
 - ✅ 不畫 Kindle 或 Apple Books 的真 logo（避免 IP 風險）；用 macOS 視窗 chrome 暗示「閱讀器」即可
 - ✅ 沒用 e-ink 灰色濾鏡（避免 Kindle slop）
 - ✅ 「Apple Books · 1 of 24」chrome 是真實出版資料感（24 章節，第 1 章）
-- ✅ pause-and-look signature：書名 「On / Markdown」**斷行**——Newsreader 在 30px 大字號下的換行設計，致敬 Penguin Classics 封面排版
+- ✅ pause-and-look signature：書名 「On / Markdown」**斷行**——Newsreader 在 30px 大字級下的換行設計，致敬 Penguin Classics 封面排版
 
 **[WHY]**
 
@@ -1303,7 +1303,7 @@ ONE SOURCE.
 **[CHROME]**
 
 - A: OFF (已退場)
-- B: ON, 但**重要變化**：version chip 此時 cross-dissolve 成新形態——在右上角的同位置，但 chip 的尺寸略大，字號 18px（之前 16px），更突出。同時 Terracotta dot 的 pulse amplitude × 2（強調「v2.0 升級時刻」）
+- B: ON, 但**重要變化**：version chip 此時 cross-dissolve 成新形態——在右上角的同位置，但 chip 的尺寸略大，字級 18px（之前 16px），更突出。同時 Terracotta dot 的 pulse amplitude × 2（強調「v2.0 升級時刻」）
 - C: OFF (已退場)
 - D: ON
 - E: ON
@@ -1315,7 +1315,7 @@ ONE SOURCE.
 
 - ✅ slogan 不是「整詞 fade-in」（廉價），是 letter-by-letter stagger（電影級）
 - ✅ 單字元的 stagger 時間 30ms 是經過計算的——足夠看到 cascade，但不會拖慢節奏（如果 60ms 就會顯慢）
-- ✅ 字號 168px 是經過 layout 驗證的——再大會撞 SIX FORMS.（SHOT 12），再小則氣勢不夠
+- ✅ 字級 168px 是經過 layout 驗證的——再大會撞 SIX FORMS.（SHOT 12），再小則氣勢不夠
 - ✅ pause-and-look signature：「ONE SOURCE.」末尾的「.」是 Terracotta（不是 Ink），呼應 hero md 字元的 Terracotta dot——首尾品牌簽名一致
 
 **[WHY]**
@@ -1415,7 +1415,7 @@ md 是原始碼，萬物是產物。
 
 - ✅ ONE SOURCE. 是 Ink, SIX FORMS. 是 Terracotta——分別代表「源」和「物」的色彩對比，不是裝飾用色
 - ✅ 6 pills 中 NEW 那兩個 background 是 #FFF7F0（極淡 mist tint），不是「橙色填充」——克制
-- ✅ NEW mini badge 在 pill 的右上角 -8/-10px 突出位置，但只有 9px 字號——細節簽名的標準位置
+- ✅ NEW mini badge 在 pill 的右上角 -8/-10px 突出位置，但只有 9px 字級——細節簽名的標準位置
 - ✅ 副標用「，」中文逗號 + 句號「。」——是中文排版的尊重
 - ✅ 這一幀（28.30s）是這支片的「marketing 用最完整一幀」——可以截圖作為 thumbnail / X 海報 / 公眾號封面圖，所有資訊都在一幀裡：slogan + 6 capability + 副標 + 品牌印章 + version
 
