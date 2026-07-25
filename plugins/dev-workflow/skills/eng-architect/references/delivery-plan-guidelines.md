@@ -1,6 +1,6 @@
 # Delivery Plan Guidelines
 
-Use `delivery-plan.md` as the convergence entry point. A new agent should be able to read it first and know what state the project is in, what is blocked, and which OpenSpec change to pick up next.
+Use `delivery-plan.md` as the convergence entry point. A new agent should be able to read it first and know what state the project is in, what is blocked, and which ticket to pick up next.
 
 ## Required Sections
 
@@ -15,7 +15,7 @@ Use headings close to this shape:
 ## Milestones
 ## Current Blockers
 ## Next Verifiable Output
-## Next OpenSpec Change
+## Next Ticket
 ## Decision Log
 ## Source Links
 ## Handoff Notes
@@ -48,13 +48,14 @@ Use headings close to this shape:
 - Name the next artifact, behavior, or proof point that can be checked.
 - Prefer outputs such as a merged capability, validated proposal, passing scenario, or reviewed document.
 
-### `Next OpenSpec Change`
-- Name exactly one next change id.
+### `Next Ticket`
+- Name exactly one next ticket id.
 - This is the default pickup point for the next agent.
+- In OpenSpec mode the ticket id is the change id.
 
 ### `Decision Log`
 - Record key decisions that affect implementation or sequencing.
-- Use fields: `decision`, `rationale`, `timestamp`, `impacted_change_ids`.
+- Use fields: `decision`, `rationale`, `timestamp`, `impacted_ticket_ids`.
 - Record deltas only; do not duplicate unchanged history.
 
 ### `Source Links`
@@ -73,7 +74,7 @@ Update `delivery-plan.md` when:
 - a milestone status changes
 - the next verifiable output changes
 - a blocker appears or clears
-- the recommended next OpenSpec change changes
+- the recommended next ticket changes
 - a logged decision changes sequencing or scope
 - source links needed for continuity change
 - a handoff is about to occur
@@ -81,7 +82,7 @@ Update `delivery-plan.md` when:
 ## Quality Checks
 
 - A new agent can answer "where are we, what is blocked, what do I do next?" after one scan.
-- The file points to the next OpenSpec change directly.
+- The file points to the next ticket directly.
 - Milestone status is current and tied to verifiable signals.
 - Critical decisions are recoverable from `Decision Log` plus `Source Links`.
 - The file is shorter than the chat history it replaces.

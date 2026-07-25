@@ -6,7 +6,7 @@ Convergence is not a one-time setup. Re-sync the control surface whenever the pr
 
 After each milestone, blocker, or handoff:
 1. Update `delivery-plan.md`
-2. Confirm the next OpenSpec change
+2. Confirm the next ticket
 3. Update `AGENTS.md` if operating rules changed
 4. Leave `CLAUDE.md` alone unless its pointer is wrong
 
@@ -16,7 +16,7 @@ Every handoff should include:
 - current phase
 - blocker status
 - next verifiable output
-- next OpenSpec change
+- next ticket
 - decision delta since previous handoff
 - source links for critical context
 - any changed operating rule
@@ -27,7 +27,7 @@ When blocked:
 - record the blocker in `delivery-plan.md`
 - state what dependency is missing
 - state what can still proceed
-- state whether the next OpenSpec change should change
+- state whether the next ticket should change
 
 Do not leave blockers implicit in chat history.
 
@@ -35,7 +35,7 @@ Do not leave blockers implicit in chat history.
 
 Before handing off, confirm:
 - the plan reflects the latest state
-- the named next change still matches reality
+- the named next ticket still matches reality
 - the next output is checkable
 - no critical rule exists only in ephemeral chat context
 - no critical decision exists only in chat memory without Decision Log and Source Links
@@ -45,6 +45,6 @@ Before handing off, confirm:
 Re-run the loop immediately if:
 - two agents disagree on what comes next
 - the repo has progress but no updated handoff artifact
-- the active change no longer matches the stage objective
+- the active ticket no longer matches the stage objective
 - a new blocker invalidates the prior next step
-- proposal-to-milestone traceability is missing
+- ticket-to-milestone traceability is missing
