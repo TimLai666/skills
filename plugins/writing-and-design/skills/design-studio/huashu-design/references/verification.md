@@ -1,69 +1,69 @@
-# Verification：输出验证流程
+# Verification：輸出驗證流程
 
-一些 design-agent 原生环境（如 Claude.ai Artifacts）有内置的 `fork_verifier_agent` 起 subagent 用 iframe 截图检查。大部分 agent 环境（Claude Code / Codex / Cursor / Trae / 等）里没有这个内置能力——用 Playwright 手动做就能覆盖相同的验证场景。
+一些 design-agent 原生環境（如 Claude.ai Artifacts）有內建的 `fork_verifier_agent` 起 subagent 用 iframe 截圖檢查。大部分 agent 環境（Claude Code / Codex / Cursor / Trae / 等）裡沒有這個內建能力——用 Playwright 手動做就能覆蓋相同的驗證場景。
 
-## 验证清单
+## 驗證清單
 
-每次产出HTML后，按这个清单做一遍：
+每次產出HTML後，按這個清單做一遍：
 
-### 1. 浏览器渲染检查（必做）
+### 1. 瀏覽器渲染檢查（必做）
 
-最基础：**HTML能不能打开**？在macOS上：
+最基礎：**HTML能不能開啟**？在macOS上：
 
 ```bash
 open -a "Google Chrome" "/path/to/your/design.html"
 ```
 
-或者用Playwright截图（下一节）。
+或者用Playwright截圖（下一節）。
 
-### 2. 控制台错误检查
+### 2. 控制台錯誤檢查
 
-HTML文件里最常见的问题是JS报错导致白屏。用Playwright跑一遍：
+HTML檔案裡最常見的問題是JS報錯導致白屏。用Playwright跑一遍：
 
 ```bash
 python ~/.claude/skills/huashu-design/scripts/verify.py path/to/design.html
 ```
 
-这个脚本会：
-1. 用headless chromium打开HTML
-2. 截图保存到项目目录
-3. 抓取控制台错误
-4. 报告status
+這個指令碼會：
+1. 用headless chromium開啟HTML
+2. 截圖儲存到專案目錄
+3. 抓取控制台錯誤
+4. 報告status
 
-详见`scripts/verify.py`。
+詳見`scripts/verify.py`。
 
-### 3. 多视口检查
+### 3. 多視口檢查
 
-如果是响应式设计，抓多个viewport：
+如果是響應式設計，抓多個viewport：
 
 ```bash
 python verify.py design.html --viewports 1920x1080,1440x900,768x1024,375x667
 ```
 
-### 4. 交互检查
+### 4. 互動檢查
 
-Tweaks、动画、按钮切换——默认的静态截图看不到。**建议让用户自己开浏览器点一遍**，或者用Playwright录屏：
+Tweaks、動畫、按鈕切換——預設的靜態截圖看不到。**建議讓使用者自己開瀏覽器點一遍**，或者用Playwright錄屏：
 
 ```python
 page.video.record('interaction.mp4')
 ```
 
-### 5. 幻灯片逐页检查
+### 5. 幻燈片逐頁檢查
 
-Deck类HTML，一张张截：
+Deck類HTML，一張張截：
 
 ```bash
-python verify.py deck.html --slides 10  # 截前10张
+python verify.py deck.html --slides 10  # 截前10張
 ```
 
-生成 `deck-slide-01.png`、`deck-slide-02.png`... 方便快速浏览。
+生成 `deck-slide-01.png`、`deck-slide-02.png`... 方便快速瀏覽。
 
 ## Playwright Setup
 
 首次使用需要：
 
 ```bash
-# 如果还没装
+# 如果還沒裝
 npm install -g playwright
 npx playwright install chromium
 
@@ -72,11 +72,11 @@ pip install playwright
 playwright install chromium
 ```
 
-如果用户已经全局安装 Playwright，直接用即可。
+如果使用者已經全域性安裝 Playwright，直接用即可。
 
-## 截图最佳实践
+## 截圖最佳實踐
 
-### 截完整页面
+### 截完整頁面
 
 ```python
 page.screenshot(path='full.png', full_page=True)
@@ -85,7 +85,7 @@ page.screenshot(path='full.png', full_page=True)
 ### 截viewport
 
 ```python
-page.screenshot(path='viewport.png')  # 默认只截可见区域
+page.screenshot(path='viewport.png')  # 預設只截可見區域
 ```
 
 ### 截特定元素
@@ -95,78 +95,78 @@ element = page.query_selector('.hero-section')
 element.screenshot(path='hero.png')
 ```
 
-### 高清截图
+### 高畫質截圖
 
 ```python
 page = browser.new_page(device_scale_factor=2)  # retina
 ```
 
-### 等动画结束再截
+### 等動畫結束再截
 
 ```python
-page.wait_for_timeout(2000)  # 等2秒让动画settle
+page.wait_for_timeout(2000)  # 等2秒讓動畫settle
 page.screenshot(...)
 ```
 
-## 把截图发给用户
+## 把截圖發給使用者
 
-### 本地截图直接打开
+### 本地截圖直接開啟
 
 ```bash
 open screenshot.png
 ```
 
-用户会在自己的 Preview/Figma/VSCode/浏览器 里看。
+使用者會在自己的 Preview/Figma/VSCode/瀏覽器 裡看。
 
-### 上传图床分享链接
+### 上傳圖床分享連結
 
-如果需要给远程协作者看（比如 Slack/飞书/微信），让用户用自己的图床工具或 MCP 上传截图，拿到一个永久链接，可以粘贴到任何地方。
+如果需要給遠端協作者看（比如 Slack/飛書/微信），讓使用者用自己的圖床工具或 MCP 上傳截圖，拿到一個永久連結，可以貼上到任何地方。
 
-## 验证出错时
+## 驗證出錯時
 
-### 页面白屏
+### 頁面白屏
 
-控制台一定有错。先检查：
+控制台一定有錯。先檢查：
 
-1. React+Babel script tag的integrity hash对不对（见`react-setup.md`）
-2. 是不是`const styles = {...}`命名冲突
-3. 跨文件的组件有没有export到`window`
-4. JSX语法错误（babel.min.js不报错，换babel.js非压缩版）
+1. React+Babel script tag的integrity hash對不對（見`react-setup.md`）
+2. 是不是`const styles = {...}`命名衝突
+3. 跨檔案的元件有沒有export到`window`
+4. JSX語法錯誤（babel.min.js不報錯，換babel.js非壓縮版）
 
-### 动画卡
+### 動畫卡
 
-- 用Chrome DevTools Performance tab录一段
-- 找layout thrashing（频繁的reflow）
-- 动效优先用`transform`和`opacity`（GPU加速）
+- 用Chrome DevTools Performance tab錄一段
+- 找layout thrashing（頻繁的reflow）
+- 動效優先用`transform`和`opacity`（GPU加速）
 
-### 字体不对
+### 字型不對
 
-- 检查`@font-face`的url是否可访问
-- 检查fallback字体
-- 中文字体加载慢：先显示fallback，加载完再切换
+- 檢查`@font-face`的url是否可訪問
+- 檢查fallback字型
+- 中文字型載入慢：先顯示fallback，載入完再切換
 
-### 布局错位
+### 佈局錯位
 
-- 检查`box-sizing: border-box`是否全局应用
-- 检查`*  margin: 0; padding: 0`reset
-- Chrome DevTools里打开gridlines看实际布局
+- 檢查`box-sizing: border-box`是否全域性應用
+- 檢查`*  margin: 0; padding: 0`reset
+- Chrome DevTools裡開啟gridlines看實際佈局
 
-## 验证=设计师的第二双眼
+## 驗證=設計師的第二雙眼
 
-**永远要自己过一遍**。AI写代码时经常出现：
+**永遠要自己過一遍**。AI寫程式碼時經常出現：
 
-- 看起来对但interaction有bug
-- 静态截图好但scroll时错位
-- 宽屏好看但窄屏崩
-- Dark mode忘了测
-- Tweaks切换后某些组件没响应
+- 看起來對但interaction有bug
+- 靜態截圖好但scroll時錯位
+- 寬屏好看但窄屏崩
+- Dark mode忘了測
+- Tweaks切換後某些元件沒響應
 
-**最后1分钟的验证可以省1小时的返工**。
+**最後1分鐘的驗證可以省1小時的返工**。
 
-## 常用验证脚本命令
+## 常用驗證指令碼命令
 
 ```bash
-# 基础：打开+截图+抓错
+# 基礎：開啟+截圖+抓錯
 python verify.py design.html
 
 # 多viewport
@@ -175,9 +175,9 @@ python verify.py design.html --viewports 1920x1080,375x667
 # 多slide
 python verify.py deck.html --slides 10
 
-# 输出到指定目录
+# 輸出到指定目錄
 python verify.py design.html --output ./screenshots/
 
-# headless=false，打开真实浏览器给你看
+# headless=false，開啟真實瀏覽器給你看
 python verify.py design.html --show
 ```

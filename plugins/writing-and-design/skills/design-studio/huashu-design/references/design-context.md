@@ -1,106 +1,106 @@
-# Design Context：从已有上下文出发
+# Design Context：從已有上下文出發
 
-**这是这个skill最重要的one thing。**
+**這是這個skill最重要的one thing。**
 
-好的hi-fi设计一定是从已有design context长出来的。**凭空做hi-fi是last resort，一定会产出generic的作品**。所以每次设计任务开始，先问：有没有可以参考的东西？
+好的hi-fi設計一定是從已有design context長出來的。**憑空做hi-fi是last resort，一定會產出generic的作品**。所以每次設計任務開始，先問：有沒有可以參考的東西？
 
-## 什么是Design Context
+## 什麼是Design Context
 
-按优先级从高到低：
+按優先順序從高到低：
 
-### 1. 用户的Design System/UI Kit
-用户自己产品已有的组件库、色彩token、字型规范、icon系统。**最完美的情况**。
+### 1. 使用者的Design System/UI Kit
+使用者自己產品已有的元件庫、色彩token、字型規範、icon系統。**最完美的情況**。
 
-### 2. 用户的Codebase
-如果用户给了代码库，里面就有活生生的组件实现。Read那些组件文件：
+### 2. 使用者的Codebase
+如果使用者給了程式碼庫，裡面就有活生生的元件實現。Read那些元件檔案：
 - `theme.ts` / `colors.ts` / `tokens.css` / `_variables.scss`
-- 具体的组件（Button.tsx、Card.tsx）
+- 具體的元件（Button.tsx、Card.tsx）
 - Layout scaffold（App.tsx、MainLayout.tsx）
 - Global stylesheets
 
-**读代码抄exact values**：hex codes、spacing scale、font stack、border radius。不要凭记忆重画。
+**讀程式碼抄exact values**：hex codes、spacing scale、font stack、border radius。不要憑記憶重畫。
 
-### 3. 用户已发布的产品
-如果用户有上线的产品但没给代码，用Playwright或让用户提供截图。
+### 3. 使用者已釋出的產品
+如果使用者有上線的產品但沒給程式碼，用Playwright或讓使用者提供截圖。
 
 ```bash
-# 用Playwright截图一个公开URL
+# 用Playwright截圖一個公開URL
 npx playwright screenshot https://example.com screenshot.png --viewport-size=1920,1080
 ```
 
-让你看到真实的视觉vocabulary。
+讓你看到真實的視覺vocabulary。
 
 ### 4. 品牌指南/Logo/已有素材
-用户可能有：Logo文件、品牌色规范、营销物料、slide模板。这些都是context。
+使用者可能有：Logo檔案、品牌色規範、營銷物料、slide模板。這些都是context。
 
-### 5. 竞品参考
-用户说"像XX网站那样"——让他提供URL或截图。**不要**凭你训练数据里的模糊印象做。
+### 5. 競品參考
+使用者說"像XX網站那樣"——讓他提供URL或截圖。**不要**憑你訓練資料裡的模糊印象做。
 
 ### 6. 已知的design system（fallback）
-如果以上都没有，用公认的设计系统作为base：
+如果以上都沒有，用公認的設計系統作為base：
 - Apple HIG
 - Material Design 3
 - Radix Colors（配色）
-- shadcn/ui（组件）
-- Tailwind默认palette
+- shadcn/ui（元件）
+- Tailwind預設palette
 
-明确告诉用户你用的什么，让他知道这是起点不是定稿。
+明確告訴使用者你用的什麼，讓他知道這是起點不是定稿。
 
-## 获取Context的流程
+## 獲取Context的流程
 
-### Step 1：问用户
+### Step 1：問使用者
 
-任务开始时的必问清单（来自`workflow.md`）：
+任務開始時的必問清單（來自`workflow.md`）：
 
 ```markdown
-1. 你有现成的design system/UI kit/组件库吗？在哪？
-2. 有品牌指南、色彩/字体规范吗？
-3. 可以给我现有产品的截图或URL吗？
-4. 有codebase我可以读吗？
+1. 你有現成的design system/UI kit/元件庫嗎？在哪？
+2. 有品牌指南、色彩/字型規範嗎？
+3. 可以給我現有產品的截圖或URL嗎？
+4. 有codebase我可以讀嗎？
 ```
 
-### Step 2：用户说"没有"时，帮他找
+### Step 2：使用者說"沒有"時，幫他找
 
-别直接放弃。尝试：
+別直接放棄。嘗試：
 
 ```markdown
-让我看看有没有线索：
-- 你之前的项目有相关设计吗？
-- 公司的marketing网站用什么色彩/字型？
-- 你产品的Logo什么风格？能给我一张吗？
-- 有什么你欣赏的产品作为参考？
+讓我看看有沒有線索：
+- 你之前的專案有相關設計嗎？
+- 公司的marketing網站用什麼色彩/字型？
+- 你產品的Logo什麼風格？能給我一張嗎？
+- 有什麼你欣賞的產品作為參考？
 ```
 
 ### Step 3：Read所有能找到的context
 
-如果用户给了codebase路径，你读：
-1. **先list文件结构**：找style/theme/component相关的文件
-2. **读theme/token文件**：lift具体的hex/px values
-3. **读2-3个代表性组件**：看视觉vocabulary（hover state、shadow、border、padding node pattern）
-4. **读global stylesheet**：基础重置、font loading
-5. **如果有Figma链接/截图**：看图，但**更相信代码**
+如果使用者給了codebase路徑，你讀：
+1. **先list檔案結構**：找style/theme/component相關的檔案
+2. **讀theme/token檔案**：lift具體的hex/px values
+3. **讀2-3個代表性元件**：看視覺vocabulary（hover state、shadow、border、padding node pattern）
+4. **讀global stylesheet**：基礎重置、font loading
+5. **如果有Figma連結/截圖**：看圖，但**更相信程式碼**
 
-**重要**：**不要**看了一眼就凭印象做。读下来有30+个具体values才真的lift到了。
+**重要**：**不要**看了一眼就憑印象做。讀下來有30+個具體values才真的lift到了。
 
-### Step 4：Vocalize你要用的系统
+### Step 4：Vocalize你要用的系統
 
-看完context后，告诉用户你要用的系统：
+看完context後，告訴使用者你要用的系統：
 
 ```markdown
-根据你的codebase和产品截图，我提炼的设计系统：
+根據你的codebase和產品截圖，我提煉的設計系統：
 
 **色彩**
-- Primary: #C27558（从tokens.css）
+- Primary: #C27558（從tokens.css）
 - Background: #FDF9F0
 - Text: #1A1A1A
 - Muted: #6B6B6B
 
 **字型**
-- Display: Instrument Serif（从global.css的@font-face）
+- Display: Instrument Serif（從global.css的@font-face）
 - Body: Geist Sans
 - Mono: JetBrains Mono
 
-**Spacing**（来自你的scale系统）
+**Spacing**（來自你的scale系統）
 - 4, 8, 12, 16, 24, 32, 48, 64
 
 **Shadow pattern**
@@ -108,31 +108,31 @@ npx playwright screenshot https://example.com screenshot.png --viewport-size=192
 - `0 10px 40px rgba(0,0,0,0.1)`（elevated modal）
 
 **Border-radius**
-- 小组件 4px，卡片 12px，按钮 8px
+- 小元件 4px，卡片 12px，按鈕 8px
 
 **component vocabulary**
-- Button：filled primary，outlined secondary，ghost tertiary，全部圆角8px
-- Card：白色背景，subtle shadow，无border
+- Button：filled primary，outlined secondary，ghost tertiary，全部圓角8px
+- Card：白色背景，subtle shadow，無border
 
-我按这套系统开始做。确认没问题？
+我按這套系統開始做。確認沒問題？
 ```
 
-用户确认后再动手。
+使用者確認後再動手。
 
-## 凭空做设计（没Context时的 fallback）
+## 憑空做設計（沒Context時的 fallback）
 
-**强烈警告**：这种情况下的产出质量会显著下降。明确告诉用户。
+**強烈警告**：這種情況下的產出質量會顯著下降。明確告訴使用者。
 
 ```markdown
-你没有design context，我就只能基于通用直觉做。
-产出会是"看起来OK但缺乏独特性"的东西。
-你愿意继续，还是先补一些参考材料？
+你沒有design context，我就只能基於通用直覺做。
+產出會是"看起來OK但缺乏獨特性"的東西。
+你願意繼續，還是先補一些參考材料？
 ```
 
-用户执意要你做，按这个顺序做决策：
+使用者執意要你做，按這個順序做決策：
 
-### 1. 选一个aesthetic direction
-不要给generic结果。挑一个明确方向：
+### 1. 選一個aesthetic direction
+不要給generic結果。挑一個明確方向：
 - brutally minimal
 - editorial/magazine
 - brutalist/raw
@@ -142,25 +142,25 @@ npx playwright screenshot https://example.com screenshot.png --viewport-size=192
 - retro-futuristic
 - soft/pastel
 
-告诉用户你选了哪个。
+告訴使用者你選了哪個。
 
-### 2. 选一个known design system作为骨架
+### 2. 選一個known design system作為骨架
 - 用Radix Colors做配色（https://www.radix-ui.com/colors）
-- 用shadcn/ui做组件vocabulary（https://ui.shadcn.com）
-- 用Tailwind spacing scale（4的倍数）
+- 用shadcn/ui做元件vocabulary（https://ui.shadcn.com）
+- 用Tailwind spacing scale（4的倍數）
 
-### 3. 选有特点的字体配对
+### 3. 選有特點的字型配對
 
-不要用Inter/Roboto。建议组合（从Google Fonts白嫖）：
+不要用Inter/Roboto。建議組合（從Google Fonts白嫖）：
 - Instrument Serif + Geist Sans
 - Cormorant Garamond + Inter Tight
-- Bricolage Grotesque + Söhne（付费）
-- Fraunces + Work Sans（注意Fraunces已经被AI用烂）
+- Bricolage Grotesque + Söhne（付費）
+- Fraunces + Work Sans（注意Fraunces已經被AI用爛）
 - JetBrains Mono + Geist Sans（technical feel）
 
-### 4. 每个关键决策都有reasoning
+### 4. 每個關鍵決策都有reasoning
 
-不要默默选。在HTML的comment里写：
+不要默默選。在HTML的comment裡寫：
 
 ```html
 <!--
@@ -173,41 +173,41 @@ Design decisions:
 -->
 ```
 
-## Import策略（用户给了codebase）
+## Import策略（使用者給了codebase）
 
-如果用户说"import这个codebase做参考"：
+如果使用者說"import這個codebase做參考"：
 
-### 小型（<50文件）
-全部Read，把context内化。
+### 小型（<50檔案）
+全部Read，把context內化。
 
-### 中型（50-500文件）
+### 中型（50-500檔案）
 Focus在：
 - `src/components/` 或 `components/`
-- 所有styles/tokens/theme相关的文件
-- 2-3个代表性的整页组件（Home.tsx、Dashboard.tsx）
+- 所有styles/tokens/theme相關的檔案
+- 2-3個代表性的整頁元件（Home.tsx、Dashboard.tsx）
 
-### 大型（>500文件）
-让用户指明focus：
-- "我要做settings页面" → 读现有的settings相关
-- "我要做一个新的feature" → 读整体shell + 最接近的参考
-- 不求全，求准
+### 大型（>500檔案）
+讓使用者指明focus：
+- "我要做settings頁面" → 讀現有的settings相關
+- "我要做一個新的feature" → 讀整體shell + 最接近的參考
+- 不求全，求準
 
-## 和Figma/设计稿的配合
+## 和Figma/設計稿的配合
 
-如果用户给了Figma链接：
+如果使用者給了Figma連結：
 
-- **不要**期望你能直接"转Figma为HTML"——那需要额外工具
-- Figma链接通常不公开可访问
-- 让用户：导出为**截图**发给你 + 告诉你具体的color/spacing values
+- **不要**期望你能直接"轉Figma為HTML"——那需要額外工具
+- Figma連結通常不公開可訪問
+- 讓使用者：匯出為**截圖**發給你 + 告訴你具體的color/spacing values
 
-如果只给了Figma截图，告诉用户：
-- 我能看到视觉，但取不到精确values
-- 关键数字（hex、px）请告诉我，或者export as code（Figma支持）
+如果只給了Figma截圖，告訴使用者：
+- 我能看到視覺，但取不到精確values
+- 關鍵數字（hex、px）請告訴我，或者export as code（Figma支援）
 
-## 最后的提醒
+## 最後的提醒
 
-**一个项目的设计质量上限，由你拿到的context质量决定**。
+**一個專案的設計質量上限，由你拿到的context質量決定**。
 
-花10分钟收集context，比花1小时凭空画hi-fi更有价值。
+花10分鐘收集context，比花1小時憑空畫hi-fi更有價值。
 
-**遇到没context的情况，优先问用户要，而不是硬上**。
+**遇到沒context的情況，優先問使用者要，而不是硬上**。

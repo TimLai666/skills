@@ -12,11 +12,11 @@ AI slop = the visual lowest common denominator from training data. It's not ugly
 |---------|--------------|-----------|
 | Aggressive purple gradients | The universal "tech feel" formula across SaaS/AI/web3 | Brand actually uses it (e.g. Linear) |
 | Emoji as icons | The "not professional enough, add emoji" disease | Brand uses it (e.g. Notion), children's audience |
-| Rounded cards + left color border accent | 2020-2024 Material/Tailwind烂大街 combo | User explicitly requests it |
+| Rounded cards + left color border accent | 2020-2024 Material/Tailwind爛大街 combo | User explicitly requests it |
 | SVG-drawn imagery (faces/scenes) | AI SVG faces always have wrong proportions | Almost never — use real images or honest placeholders |
-| CSS silhouettes / SVG hand-drawn代替真实产品图 | Generic "tech animation" — black + orange accent + rounded bars, zero brand recognition | Use real product images from brand protocol; honest placeholder as last resort |
+| CSS silhouettes / SVG hand-drawn代替真實產品圖 | Generic "tech animation" — black + orange accent + rounded bars, zero brand recognition | Use real product images from brand protocol; honest placeholder as last resort |
 | Inter/Roboto/Arial/system fonts as display | Too common, reader can't tell if this is a designed product or a demo | Brand spec explicitly uses them |
-| GitHub-dark lazy fix: uniform deep blue `#0D1117` + generic cyan/purple neon glow | One specific combo that's烂大街 in SaaS/AI landing pages — not all dark is banned | Developer tool product where brand actually goes this direction |
+| GitHub-dark lazy fix: uniform deep blue `#0D1117` + generic cyan/purple neon glow | One specific combo that's爛大街 in SaaS/AI landing pages — not all dark is banned | Developer tool product where brand actually goes this direction |
 
 ## AI Tells (Forbidden Patterns)
 

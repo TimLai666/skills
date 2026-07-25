@@ -20,11 +20,11 @@ Logo / product images / UI screenshots matter more than brand color values.
 
 | Step | Action | Fallback |
 |------|--------|----------|
-| 1. Ask | One complete asset list (logo / product images / UI screenshots / palette / fonts /禁区) | — |
+| 1. Ask | One complete asset list (logo / product images / UI screenshots / palette / fonts /禁區) | — |
 | 2. Search official channels | brand.com/brand, brand.<brand>.com, <brand>.com/press, Wikimedia | — |
 | 3. Download assets | Three fallback paths per asset type (SVG → official HTML → product screenshots) | Try next path immediately on failure |
 | 4. Verify + extract | Grep color values, cross-check logo/image authenticity | — |
-| 5. Freeze as `docs/design/brand-spec.md` | Template covering all asset paths (logo / product images / UI / palette / typeface /禁区 / tone) | — |
+| 5. Freeze as `docs/design/brand-spec.md` | Template covering all asset paths (logo / product images / UI / palette / typeface /禁區 / tone) | — |
 
 ## Self-Check Gate
 

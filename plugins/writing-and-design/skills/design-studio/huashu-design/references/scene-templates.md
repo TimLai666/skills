@@ -1,27 +1,27 @@
-# 场景模板库：按输出类型组织
+# 場景模板庫：按輸出類型組織
 
-> 与 design-styles.md 的「提示词DNA」组合使用。
-> 公式：`[风格提示词DNA] + [场景模板] + [具体内容描述]`
+> 與 design-styles.md 的「提示詞DNA」組合使用。
+> 公式：`[風格提示詞DNA] + [場景模板] + [具體內容描述]`
 
 ---
 
-## 1. 公众号封面 / 文章题图
+## 1. 公眾號封面 / 文章題圖
 
-**规格**：
-- 封面图：2.35:1（900×383px 或 1200×510px）
-- 正文插图：16:9（1200×675px）或 4:3（1200×900px）
+**規格**：
+- 封面圖：2.35:1（900×383px 或 1200×510px）
+- 正文插圖：16:9（1200×675px）或 4:3（1200×900px）
 
-**关键设计要素**：
-- 视觉冲击力优先（用户在信息流中快速扫过）
-- 文字极少或无文字（公众号标题会覆盖在上面）
-- 色彩饱和度适中（微信阅读环境偏白）
-- 避免过度细节（缩略图也要可辨识）
+**關鍵設計要素**：
+- 視覺衝擊力優先（使用者在資訊流中快速掃過）
+- 文字極少或無文字（公眾號標題會覆蓋在上面）
+- 色彩飽和度適中（微信閱讀環境偏白）
+- 避免過度細節（縮圖也要可辨識）
 
-**推荐风格**：01 Pentagram / 11 Build / 12 Sagmeister / 18 Kenya Hara / 07 Field.io
+**推薦風格**：01 Pentagram / 11 Build / 12 Sagmeister / 18 Kenya Hara / 07 Field.io
 
-**场景提示词模板**：
+**場景提示詞模板**：
 ```
-[风格DNA插入此处]
+[風格DNA插入此處]
 - Article cover image for WeChat subscription
 - Landscape format, 2.35:1 aspect ratio
 - Bold visual impact, minimal or no text
@@ -32,24 +32,24 @@
 
 ---
 
-## 2. 正文配图 / 概念插画
+## 2. 正文配圖 / 概念插畫
 
-**规格**：
+**規格**：
 - 16:9（1200×675px）最通用
-- 1:1（800×800px）适合强调
-- 4:3（1200×900px）适合信息密集
+- 1:1（800×800px）適合強調
+- 4:3（1200×900px）適合資訊密集
 
-**关键设计要素**：
-- 服务于文章论点，不是装饰
-- 与上下文形成视觉节奏
-- 简洁表达一个核心概念
-- AI生成优先，HTML截图仅在精确数据表格时用
+**關鍵設計要素**：
+- 服務於文章論點，不是裝飾
+- 與上下文形成視覺節奏
+- 簡潔表達一個核心概念
+- AI生成優先，HTML截圖僅在精確資料表格時用
 
-**推荐风格**：根据文章调性选择，常用 01/04/10/17/18
+**推薦風格**：根據文章調性選擇，常用 01/04/10/17/18
 
-**场景提示词模板**：
+**場景提示詞模板**：
 ```
-[风格DNA插入此处]
+[風格DNA插入此處]
 - Article illustration, concept visualization
 - [16:9 / 1:1 / 4:3] aspect ratio
 - Single clear concept: [描述核心概念]
@@ -59,24 +59,24 @@
 
 ---
 
-## 3. 信息图 / 数据可视化
+## 3. 資訊圖 / 資料視覺化
 
-**规格**：
-- 竖版长图：1080×1920px（手机阅读）
-- 横版：1920×1080px（文章内嵌）
-- 方形：1080×1080px（社交媒体）
+**規格**：
+- 豎版長圖：1080×1920px（手機閱讀）
+- 橫版：1920×1080px（文章內嵌）
+- 方形：1080×1080px（社交媒體）
 
-**关键设计要素**：
-- 信息层级清晰（标题 → 核心数据 → 细节）
-- 数据准确，不编造
-- 视觉引导线（用户阅读路径）
-- 适当使用图标/图表辅助理解
+**關鍵設計要素**：
+- 資訊層級清晰（標題 → 核心資料 → 細節）
+- 資料準確，不編造
+- 視覺引導線（使用者閱讀路徑）
+- 適當使用圖示/圖表輔助理解
 
-**推荐风格**：04 Fathom / 10 Müller-Brockmann / 02 Stamen / 17 Takram
+**推薦風格**：04 Fathom / 10 Müller-Brockmann / 02 Stamen / 17 Takram
 
-**场景提示词模板**：
+**場景提示詞模板**：
 ```
-[风格DNA插入此处]
+[風格DNA插入此處]
 - Infographic / data visualization
 - [Vertical 1080x1920 / Horizontal 1920x1080 / Square 1080x1080]
 - Clear information hierarchy: title → key data → details
@@ -89,22 +89,22 @@
 
 ## 4. PPT / Keynote 演示
 
-**规格**：
-- 标准：16:9（1920×1080px）
-- 宽屏：16:10（1920×1200px）
+**規格**：
+- 標準：16:9（1920×1080px）
+- 寬屏：16:10（1920×1200px）
 
-**关键设计要素**：
-- 每页一个核心信息（不堆砌）
-- 字号层级明确（标题40pt+ / 正文24pt+ / 注释16pt+）
-- 大量留白，投影时更清晰
-- 图文比例至少 60:40
-- 一致的视觉系统（颜色、字体、间距）
+**關鍵設計要素**：
+- 每頁一個核心資訊（不堆砌）
+- 字號層級明確（標題40pt+ / 正文24pt+ / 註釋16pt+）
+- 大量留白，投影時更清晰
+- 圖文比例至少 60:40
+- 一致的視覺系統（顏色、字型、間距）
 
-**推荐风格**：01 Pentagram / 10 Müller-Brockmann / 11 Build / 18 Kenya Hara / 04 Fathom
+**推薦風格**：01 Pentagram / 10 Müller-Brockmann / 11 Build / 18 Kenya Hara / 04 Fathom
 
-**场景提示词模板**：
+**場景提示詞模板**：
 ```
-[风格DNA插入此处]
+[風格DNA插入此處]
 - Presentation slide design, 16:9
 - One core message per slide
 - Clear type hierarchy (title 40pt+, body 24pt+)
@@ -115,25 +115,25 @@
 
 ---
 
-## 5. PDF 白皮书 / 技术报告
+## 5. PDF 白皮書 / 技術報告
 
-**规格**：
-- A4 纵向（210×297mm / 595×842pt）
-- Letter 纵向（216×279mm / 612×792pt）
+**規格**：
+- A4 縱向（210×297mm / 595×842pt）
+- Letter 縱向（216×279mm / 612×792pt）
 
-**关键设计要素**：
-- 长文阅读优化（行宽66字符、行高1.5-1.8）
-- 清晰的章节导航系统
-- 页眉/页脚/页码的统一设计
-- 图表与正文的优雅共存
-- 引用/注释系统
-- 封面页设计精致
+**關鍵設計要素**：
+- 長文閱讀最佳化（行寬66字元、行高1.5-1.8）
+- 清晰的章節導航系統
+- 頁首/頁尾/頁碼的統一設計
+- 圖表與正文的優雅共存
+- 引用/註釋系統
+- 封面頁設計精緻
 
-**推荐风格**：10 Müller-Brockmann / 04 Fathom / 03 Information Architects / 17 Takram / 19 Irma Boom
+**推薦風格**：10 Müller-Brockmann / 04 Fathom / 03 Information Architects / 17 Takram / 19 Irma Boom
 
-**场景提示词模板**：
+**場景提示詞模板**：
 ```
-[风格DNA插入此处]
+[風格DNA插入此處]
 - PDF document / white paper design
 - A4 portrait format (210×297mm)
 - Long-form reading optimized (66 char line width, 1.5 line height)
@@ -145,24 +145,24 @@
 
 ---
 
-## 6. 落地页 / 产品官网
+## 6. 落地頁 / 產品官網
 
-**规格**：
-- Desktop: 1440px 宽度设计（响应至320px）
+**規格**：
+- Desktop: 1440px 寬度設計（響應至320px）
 - 首屏高度：100vh
 
-**关键设计要素**：
-- 首屏5秒内传达核心价值
-- 清晰的CTA（行动按钮）
-- 滚动叙事结构（问题→方案→证明→行动）
-- 移动端适配
-- 加载速度
+**關鍵設計要素**：
+- 首屏5秒內傳達核心價值
+- 清晰的CTA（行動按鈕）
+- 滾動敘事結構（問題→方案→證明→行動）
+- 移動端適配
+- 載入速度
 
-**推荐风格**：05 Locomotive / 01 Pentagram / 11 Build / 08 Resn / 06 Active Theory
+**推薦風格**：05 Locomotive / 01 Pentagram / 11 Build / 08 Resn / 06 Active Theory
 
-**场景提示词模板**：
+**場景提示詞模板**：
 ```
-[风格DNA插入此处]
+[風格DNA插入此處]
 - Landing page / product website
 - Desktop 1440px width, responsive
 - Hero section 100vh, core value in 5 seconds
@@ -173,24 +173,24 @@
 
 ---
 
-## 7. App UI / 原型界面
+## 7. App UI / 原型介面
 
-**规格**：
+**規格**：
 - iOS: 390×844pt（iPhone 15）
 - Android: 360×800dp
 - 平板: 1024×1366pt（iPad Pro）
 
-**关键设计要素**：
-- 触摸友好（最小点击区44×44pt）
-- 系统设计语言一致性
-- 状态栏/导航栏/Tab栏的标准处理
-- 信息密度适中（移动端不宜过密）
+**關鍵設計要素**：
+- 觸控友好（最小點選區44×44pt）
+- 系統設計語言一致性
+- 狀態列/導航欄/Tab欄的標準處理
+- 資訊密度適中（移動端不宜過密）
 
-**推荐风格**：17 Takram / 11 Build / 03 Information Architects / 01 Pentagram
+**推薦風格**：17 Takram / 11 Build / 03 Information Architects / 01 Pentagram
 
-**场景提示词模板**：
+**場景提示詞模板**：
 ```
-[风格DNA插入此处]
+[風格DNA插入此處]
 - Mobile app UI design
 - iOS [390×844pt] / Android [360×800dp]
 - Touch-friendly (44pt minimum tap targets)
@@ -201,24 +201,24 @@
 
 ---
 
-## 8. 小红书配图
+## 8. 小紅書配圖
 
-**规格**：
-- 竖版：3:4（1080×1440px）最佳
+**規格**：
+- 豎版：3:4（1080×1440px）最佳
 - 方形：1:1（1080×1080px）
-- 首图决定点击率
+- 首圖決定點選率
 
-**关键设计要素**：
-- 视觉吸引力第一（在瀑布流中竞争）
-- 可以有少量文字（但不超过画面20%）
-- 色彩鲜明但不俗
-- 生活感/质感/氛围感
+**關鍵設計要素**：
+- 視覺吸引力第一（在瀑布流中競爭）
+- 可以有少量文字（但不超過畫面20%）
+- 色彩鮮明但不俗
+- 生活感/質感/氛圍感
 
-**推荐风格**：12 Sagmeister / 11 Build / 20 Neo Shen / 09 Experimental Jetset
+**推薦風格**：12 Sagmeister / 11 Build / 20 Neo Shen / 09 Experimental Jetset
 
-**场景提示词模板**：
+**場景提示詞模板**：
 ```
-[风格DNA插入此处]
+[風格DNA插入此處]
 - Social media image for Xiaohongshu (RED)
 - Vertical 3:4 (1080×1440px)
 - Eye-catching in waterfall feed
@@ -229,12 +229,12 @@
 
 ---
 
-## 组合示例
+## 組合示例
 
-**场景**：公众号封面，介绍一款AI编程工具，想要专业但有温度
+**場景**：公眾號封面，介紹一款AI程式設計工具，想要專業但有溫度
 
-**Step 1**：选风格 → 17 Takram（专业+温度）
-**Step 2**：取Takram提示词DNA + 公众号封面模板
+**Step 1**：選風格 → 17 Takram（專業+溫度）
+**Step 2**：取Takram提示詞DNA + 公眾號封面模板
 
 ```
 Takram Japanese speculative design:

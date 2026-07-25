@@ -1,175 +1,175 @@
-# Launch Film 工作流：先写万字 director's notes，再做动画
+# Launch Film 工作流：先寫萬字 director's notes，再做動畫
 
-> 高规格视觉作品（≥ 20 秒、含品牌叙事、含 slogan reveal、可能上 X / 公众号 / B 站推广）的标准工作流。
+> 高規格視覺作品（≥ 20 秒、含品牌敘事、含 slogan reveal、可能上 X / 公眾號 / B 站推廣）的標準工作流。
 >
-> 触发条件：任务是「产品升级宣传片 / 品牌 launch film / launch trailer / superbowl-tier ad / brand campaign / hero animation video」，且**用户对质量有明确预期**（如「超级碗品质感」「10x 细节」「Apple 级别」）。
+> 觸發條件：任務是「產品升級宣傳片 / 品牌 launch film / launch trailer / superbowl-tier ad / brand campaign / hero animation video」，且**使用者對質量有明確預期**（如「超級碗品質感」「10x 細節」「Apple 級別」）。
 >
-> 反触发：不要在「快速做个动画 demo」「简单 motion graphic」「单个图标动画」时用这条流程——会过度工程化。
+> 反觸發：不要在「快速做個動畫 demo」「簡單 motion graphic」「單個圖示動畫」時用這條流程——會過度工程化。
 
 ---
 
-## 1. 为什么先写 director's notes
+## 1. 為什麼先寫 director's notes
 
-实战教训（2026-05-11 huashu-md-html v2.0 项目）：
+實戰教訓（2026-05-11 huashu-md-html v2.0 專案）：
 
-第一轮直接动手写 HTML，产出的是「程序员视角的动画」——每个 capability 平均用力、节奏匀速、slogan 撞在一起、缺少叙事弧。
-第二轮接到用户「停下，先按苹果导演视角写 1 万字分镜脚本」的指令，写了 v5-director-notes.md（11500 字、13 镜 shot-by-shot spec），然后按脚本实施——一次过、每帧 pause 都耐看、节奏起伏有 climax。
+第一輪直接動手寫 HTML，產出的是「程式設計師視角的動畫」——每個 capability 平均用力、節奏勻速、slogan 撞在一起、缺少敘事弧。
+第二輪接到使用者「停下，先按蘋果導演視角寫 1 萬字分鏡指令碼」的指令，寫了 v5-director-notes.md（11500 字、13 鏡 shot-by-shot spec），然後按指令碼實施——一次過、每幀 pause 都耐看、節奏起伏有 climax。
 
-**核心差异**：写脚本是 think，写 HTML 是 execute。先 think 透了，execute 就是机械翻译。先 execute，每个 shot 都是临场决策，必然乱。
+**核心差異**：寫指令碼是 think，寫 HTML 是 execute。先 think 透了，execute 就是機械翻譯。先 execute，每個 shot 都是臨場決策，必然亂。
 
-写 director's notes 不是「装」，是把所有视觉决策**在动手之前**沉淀成文档——每一镜都已经在脑里 visualize 过、reasoning 过、和上下文 trace 过。HTML 实施时不需要再做创意决策，只需要忠实翻译。
-
----
-
-## 2. 触发判断（先问自己 3 个问题）
-
-启动 launch film 工作流前问：
-
-1. **这支片承担品牌叙事吗？**（有 thesis / slogan reveal / 升级仪式感）—— 是 → 走 director's notes 流程
-2. **观众会暂停看吗？**（可能截图、做 X 海报、做封面、慢速 review）—— 是 → 每帧要耐看
-3. **客户/用户有「我希望像 XXX 那样」的参照？**（Apple / Anthropic / Nike / Penguin / 某导演）—— 是 → 必须明确视觉语境
-
-任一为「是」就走流程。三个都「否」就跳过，直接用 [animations.md](animations.md) 的标准流程。
+寫 director's notes 不是「裝」，是把所有視覺決策**在動手之前**沉澱成文件——每一鏡都已經在腦裡 visualize 過、reasoning 過、和上下文 trace 過。HTML 實施時不需要再做創意決策，只需要忠實翻譯。
 
 ---
 
-## 3. Director's Notes 的 5 大部分结构
+## 2. 觸發判斷（先問自己 3 個問題）
 
-万字（10000-12000 字中文 / 等量英文）director's notes 必须包含这 5 大部分。**任一部分缺失都属于不完整，质量会受影响**。
+啟動 launch film 工作流前問：
 
-### Part I · Director's Statement（创作论，约 1500-2000 字）
+1. **這支片承擔品牌敘事嗎？**（有 thesis / slogan reveal / 升級儀式感）—— 是 → 走 director's notes 流程
+2. **觀眾會暫停看嗎？**（可能截圖、做 X 海報、做封面、慢速 review）—— 是 → 每幀要耐看
+3. **客戶/使用者有「我希望像 XXX 那樣」的參照？**（Apple / Anthropic / Nike / Penguin / 某導演）—— 是 → 必須明確視覺語境
 
-回答 5 个问题：
+任一為「是」就走流程。三個都「否」就跳過，直接用 [animations.md](animations.md) 的標準流程。
 
-1. **这部片不是什么？**（明确排除——如「这不是功能介绍片」「不是 demo」）
-2. **核心 thesis 一行**——观众看完只记一句话是哪句？
-3. **跟谁的语境对话？**——列出 5-8 个视觉参照（导演 / 设计师 / 品牌 / 摄影师 / 作品名 + 年份），说明每个参照学了什么
-4. **三类观众画像 + 对每类的承诺**：主受众 / 次受众 / 外受众，各对应一段
-5. **节奏哲学**——慢拍 / 加速 / 顶峰 / 缓收的曲线说明 + emotional climax 在第几秒（**不一定是最后一秒**）
+---
 
-最后加一段 anti-slop checklist：**这部片不做的事**（具体列出，不模糊）。
+## 3. Director's Notes 的 5 大部分結構
 
-### Part II · Visual System（视觉系统全谱，约 1500-2500 字）
+萬字（10000-12000 字中文 / 等量英文）director's notes 必須包含這 5 大部分。**任一部分缺失都屬於不完整，質量會受影響**。
 
-这是工程化的视觉 spec。完整后任何执行者拿到都能产出一致的视觉。
+### Part I · Director's Statement（創作論，約 1500-2000 字）
 
-必含子节：
+回答 5 個問題：
 
-- **完整色板**：至少 8-10 色，每色含 HEX + 功能定义 + 占画面比例上限
-- **字体系统**：至少 6 个字号层级，每层级含字体名 + weight + size + letter-spacing + 用途
-- **网格系统**：画布尺寸 + 外边距 + column grid + baseline grid + 关键安全区 + 黄金分割锚点
-- **动画系统**：easing 库（4 条以内）+ duration 字典 + stagger 法则 + scene 过渡规则
-- **Chrome 元素**：贯穿全片的小细节（counter / chip / ticker / watermark / texture），每个含位置 + 入退场时机
-- **音频系统**：BGM 30 秒走向曲线（分层）+ SFX 字典（10+ cues 含时间码 + 音量 + 频段隔离）
-- **反 AI slop checklist**：per-shot 自检表（10-15 项）
+1. **這部片不是什麼？**（明確排除——如「這不是功能介紹片」「不是 demo」）
+2. **核心 thesis 一行**——觀眾看完只記一句話是哪句？
+3. **跟誰的語境對話？**——列出 5-8 個視覺參照（導演 / 設計師 / 品牌 / 攝影師 / 作品名 + 年份），說明每個參照學了什麼
+4. **三類觀眾畫像 + 對每類的承諾**：主受眾 / 次受眾 / 外受眾，各對應一段
+5. **節奏哲學**——慢拍 / 加速 / 頂峰 / 緩收的曲線說明 + emotional climax 在第幾秒（**不一定是最後一秒**）
 
-铁律：**所有视觉决策都从 Visual System 推导，不要在 shot list 里临时发明新值**。
+最後加一段 anti-slop checklist：**這部片不做的事**（具體列出，不模糊）。
 
-### Part III · Story Arc（故事弧，约 500-800 字）
+### Part II · Visual System（視覺系統全譜，約 1500-2500 字）
 
-三幕结构 + 情绪曲线：
+這是工程化的視覺 spec。完整後任何執行者拿到都能產出一致的視覺。
 
-- **Act I · SETUP**（0 → 第 1/5 时长，e.g. 0-6s for 30s）：观众进入，问题被提出
-- **Act II · ESCALATION**（中间 2/3）：答案展开，主题铺陈
-- **Act III · PAYOFF**（最后 1/4）：升华、slogan reveal、品牌印章
+必含子節：
 
-含 ASCII 情绪曲线图 + emotional climax 时刻标记。
+- **完整色板**：至少 8-10 色，每色含 HEX + 功能定義 + 佔畫面比例上限
+- **字體系統**：至少 6 個字號層級，每層級含字型名 + weight + size + letter-spacing + 用途
+- **網格系統**：畫布尺寸 + 外邊距 + column grid + baseline grid + 關鍵安全區 + 黃金分割錨點
+- **動畫系統**：easing 庫（4 條以內）+ duration 字典 + stagger 法則 + scene 過渡規則
+- **Chrome 元素**：貫穿全片的小細節（counter / chip / ticker / watermark / texture），每個含位置 + 入退場時機
+- **音訊系統**：BGM 30 秒走向曲線（分層）+ SFX 字典（10+ cues 含時間碼 + 音量 + 頻段隔離）
+- **反 AI slop checklist**：per-shot 自檢表（10-15 項）
 
-**关键决策**：climax 不一定在末尾。30s 片子 climax 通常在 22-25s（不是 29s）——最后几秒是 resolution / decay，不是 peak。这条规则违反必然让作品「虎头蛇尾」。
+鐵律：**所有視覺決策都從 Visual System 推導，不要在 shot list 裡臨時發明新值**。
 
-### Part IV · Shot-by-Shot Storyboard（分镜脚本，约 5000-7000 字 · 占 60% 篇幅）
+### Part III · Story Arc（故事弧，約 500-800 字）
 
-每镜含 10 个字段（缺一不可）：
+三幕結構 + 情緒曲線：
+
+- **Act I · SETUP**（0 → 第 1/5 時長，e.g. 0-6s for 30s）：觀眾進入，問題被提出
+- **Act II · ESCALATION**（中間 2/3）：答案展開，主題鋪陳
+- **Act III · PAYOFF**（最後 1/4）：昇華、slogan reveal、品牌印章
+
+含 ASCII 情緒曲線圖 + emotional climax 時刻標記。
+
+**關鍵決策**：climax 不一定在末尾。30s 片子 climax 通常在 22-25s（不是 29s）——最後幾秒是 resolution / decay，不是 peak。這條規則違反必然讓作品「虎頭蛇尾」。
+
+### Part IV · Shot-by-Shot Storyboard（分鏡指令碼，約 5000-7000 字 · 佔 60% 篇幅）
+
+每鏡含 10 個欄位（缺一不可）：
 
 ```
 SHOT NN · NAME
-[TIMECODE]    起止时间 + 时长
-[FUNCTION]    这一镜在故事弧中的功能（一句话）
-[VISUAL]      画面构图 + 元素位置 + 运动方向
-[TYPE]        排版 spec（字体 / 字号 / 字距 / 行高 / 颜色 / 对齐）
-[ANIM]        每元素 in/out 时机 + easing + duration + stagger + delay
-[AUDIO]       music beat + SFX cue（每镜对应 BGM 节奏 + 必含 SFX 时间表）
-[CHROME]      四角元素状态（哪些 chrome 在 / 哪些 fade in/out / 哪个 pulse）
-[ANTI-SLOP]   这一镜通过了哪些自检项 + 有什么 120% 细节签名
-[WHY]         承接上一镜的逻辑 + 推进下一镜的钩子
+[TIMECODE]    起止時間 + 時長
+[FUNCTION]    這一鏡在故事弧中的功能（一句話）
+[VISUAL]      畫面構圖 + 元素位置 + 運動方向
+[TYPE]        排版 spec（字型 / 字號 / 字距 / 行高 / 顏色 / 對齊）
+[ANIM]        每元素 in/out 時機 + easing + duration + stagger + delay
+[AUDIO]       music beat + SFX cue（每鏡對應 BGM 節奏 + 必含 SFX 時間表）
+[CHROME]      四角元素狀態（哪些 chrome 在 / 哪些 fade in/out / 哪個 pulse）
+[ANTI-SLOP]   這一鏡通過了哪些自檢項 + 有什麼 120% 細節簽名
+[WHY]         承接上一鏡的邏輯 + 推進下一鏡的鉤子
 ```
 
-**字段平均 30-80 字 → 每镜 400-700 字 → 12-15 镜 → 5000-7000 字**。
+**欄位平均 30-80 字 → 每鏡 400-700 字 → 12-15 鏡 → 5000-7000 字**。
 
-实战经验：写完 storyboard 后**自己读一遍**——任意一镜删掉，整支片是否还成立？如果可以删，那镜就是多余的，删掉。
+實戰經驗：寫完 storyboard 後**自己讀一遍**——任意一鏡刪掉，整支片是否還成立？如果可以刪，那鏡就是多餘的，刪掉。
 
-### Part V · Production Manifest（制作清单，约 800-1200 字）
+### Part V · Production Manifest（製作清單，約 800-1200 字）
 
-工程交付清单：
+工程交付清單：
 
-- 字体加载 URL（含 preconnect）
-- CSS 变量（直接可粘贴）
-- BGM 来源选择标准 + Suno/Udio prompt 关键词 + 备选库
-- SFX 字典（按时间码逐 cue 列出文件路径 + 音量）
-- **关键帧验证计划**：12-15 张 pause-and-check 关键帧时间码，每帧验证项列出（fonts / positions / chrome state）
-- 录制参数（fps / codec / bitrate / preset）
-- ffmpeg 音频混合命令（含 audio stream 验证）
-- 交付物清单（mp4 / mp4-60fps / gif / poster.png / silent.mp4 / shot-list.csv）
-- 全链路时间估算（小时级精度）
+- 字型載入 URL（含 preconnect）
+- CSS 變數（直接可貼上）
+- BGM 來源選擇標準 + Suno/Udio prompt 關鍵詞 + 備選庫
+- SFX 字典（按時間碼逐 cue 列出檔案路徑 + 音量）
+- **關鍵幀驗證計劃**：12-15 張 pause-and-check 關鍵幀時間碼，每幀驗證項列出（fonts / positions / chrome state）
+- 錄製參數（fps / codec / bitrate / preset）
+- ffmpeg 音訊混合命令（含 audio stream 驗證）
+- 交付物清單（mp4 / mp4-60fps / gif / poster.png / silent.mp4 / shot-list.csv）
+- 全鏈路時間估算（小時級精度）
 
 ---
 
-## 4. 写 director's notes 的 5 条建议
+## 4. 寫 director's notes 的 5 條建議
 
-**4.1 用导演的口吻，不用 PM 的口吻**
+**4.1 用導演的口吻，不用 PM 的口吻**
 
 ❌「This shot displays the product features.」
 ✅「This is the hero shot — if the audience pauses anywhere, I want it to be here.」
 
-导演笔记是给执行者读的，但也是给未来的自己读的。第一人称 + judgment 表达比 description 表达留更多决策线索。
+導演筆記是給執行者讀的，但也是給未來的自己讀的。第一人稱 + judgment 表達比 description 表達留更多決策線索。
 
-**4.2 引用具体作品（含年份），不只是流派名**
+**4.2 引用具體作品（含年份），不只是流派名**
 
 ❌「Apple-inspired」
-✅「Apple 'Designed by Apple in California' (2013, dir. Mark Romanek) — 学的是慢拍 + 衬线 + 大白底」
+✅「Apple 'Designed by Apple in California' (2013, dir. Mark Romanek) — 學的是慢拍 + 襯線 + 大白底」
 
-引用具体作品的好处：(a) 任何观众都能上网搜到对照 (b) 你逼自己想清楚学的是什么具体技术 (c) 防止「灵感模糊」。
+引用具體作品的好處：(a) 任何觀眾都能上網搜到對照 (b) 你逼自己想清楚學的是什麼具體技術 (c) 防止「靈感模糊」。
 
-**4.3 每个决策都 trace 回 first principle**
+**4.3 每個決策都 trace 回 first principle**
 
-整支片有一句 first principle（如 "Markdown is the new typewriter."）。每个具体决策——配色 / 字体 / 节奏 / chrome——都要能 trace 回这句话。
+整支片有一句 first principle（如 "Markdown is the new typewriter."）。每個具體決策——配色 / 字型 / 節奏 / chrome——都要能 trace 回這句話。
 
-trace 不上的决策就是装饰，删掉。
+trace 不上的決策就是裝飾，刪掉。
 
-**4.4 写 anti-slop 比写 do-this 更重要**
+**4.4 寫 anti-slop 比寫 do-this 更重要**
 
-「这部片不做的事」清单（紫渐变 / emoji / Lorem ipsum / Inter display / SVG 画人物 / 圆角卡 + 左 border accent）比「这部片做的事」清单更能保护质量。
+「這部片不做的事」清單（紫漸變 / emoji / Lorem ipsum / Inter display / SVG 畫人物 / 圓角卡 + 左 border accent）比「這部片做的事」清單更能保護質量。
 
-正向决策无穷多，负向 checklist 是有限的——但负向 checklist 一旦违反就是 slop。
+正向決策無窮多，負向 checklist 是有限的——但負向 checklist 一旦違反就是 slop。
 
-**4.5 写完不要立即实施——隔 30 分钟再读一遍**
+**4.5 寫完不要立即實施——隔 30 分鐘再讀一遍**
 
-写作时大脑在「生产模式」，看不见 inconsistency。隔 30 分钟读自己写的 storyboard，会发现：
-- 某两镜功能重复（删一个）
-- 某镜叙事跳跃太大（加过渡）
-- emotional climax 位置错（移动）
-- chrome 元素和 shot 数量不匹配（重新对齐）
+寫作時大腦在「生產模式」，看不見 inconsistency。隔 30 分鐘讀自己寫的 storyboard，會發現：
+- 某兩鏡功能重複（刪一個）
+- 某鏡敘事跳躍太大（加過渡）
+- emotional climax 位置錯（移動）
+- chrome 元素和 shot 數量不匹配（重新對齊）
 
-这 30 分钟省下的是后期 2 小时的返工。
-
----
-
-## 5. Director's Notes → HTML 实施流程
-
-写完 director's notes 后，HTML 实施步骤：
-
-1. **复用 starter components**（`assets/animations.jsx` 的 Stage/Sprite/Easing/interpolate）— 不重新发明
-2. **CSS 变量直接从 Visual System Part II 粘贴** — 不在 HTML 里临时改色
-3. **按 Sprite start/end 时间轴对照 Part IV 时间码** — 不擅自加镜
-4. **chrome 元素抽成独立组件**（ChromeA/B/C/D），用 useTime() 驱动状态切换
-5. **destination cards 内容必须真实可读**（不是 fake bar lines）—— 这是 v5 项目里最被反复提及的 120% 细节签名
-6. **每写完一镜就立即截关键帧验证**（用 `?t=NN` URL 参数 + Playwright），不要写完全片再统一验证
+這 30 分鐘省下的是後期 2 小時的返工。
 
 ---
 
-## 6. 关键帧验证流程
+## 5. Director's Notes → HTML 實施流程
 
-URL 参数实现（必须在 Stage 组件加）：
+寫完 director's notes 後，HTML 實施步驟：
+
+1. **複用 starter components**（`assets/animations.jsx` 的 Stage/Sprite/Easing/interpolate）— 不重新發明
+2. **CSS 變數直接從 Visual System Part II 貼上** — 不在 HTML 裡臨時改色
+3. **按 Sprite start/end 時間軸對照 Part IV 時間碼** — 不擅自加鏡
+4. **chrome 元素抽成獨立元件**（ChromeA/B/C/D），用 useTime() 驅動狀態切換
+5. **destination cards 內容必須真實可讀**（不是 fake bar lines）—— 這是 v5 專案裡最被反覆提及的 120% 細節簽名
+6. **每寫完一鏡就立即截關鍵幀驗證**（用 `?t=NN` URL 參數 + Playwright），不要寫完全片再統一驗證
+
+---
+
+## 6. 關鍵幀驗證流程
+
+URL 參數實現（必須在 Stage 元件加）：
 
 ```js
 const urlMatch = window.location.search.match(/[?&]t=([\d.]+)/);
@@ -178,9 +178,9 @@ const [time, setTime] = useState(frozenTime != null ? frozenTime : 0);
 const [playing, setPlaying] = useState(frozenTime == null);
 ```
 
-→ 这样 `file:///path/animation.html?t=14.5` 直接 freeze 在 14.5 秒。
+→ 這樣 `file:///path/animation.html?t=14.5` 直接 freeze 在 14.5 秒。
 
-批量截图：
+批次截圖：
 
 ```bash
 for t in 0.5 2.5 4.9 7.0 10.5 13.5 16.5 19.0 21.5 23.4 25.5 28.0 29.9; do
@@ -192,102 +192,102 @@ for t in 0.5 2.5 4.9 7.0 10.5 13.5 16.5 19.0 21.5 23.4 25.5 28.0 29.9; do
 done
 ```
 
-每张截图必须验证：
-- [ ] 元素无溢出 1920×1080 canvas
-- [ ] 字距、行高 visually correct（不挤、不散）
-- [ ] 关键 typography 细节（句点颜色 / em-dash / italic / small caps）可识别
-- [ ] chrome 元素位置 + 状态正确
-- [ ] 反 AI slop checklist 通过
-- [ ] 「pause 时值得看」的 120% 细节存在
+每張截圖必須驗證：
+- [ ] 元素無溢位 1920×1080 canvas
+- [ ] 字距、行高 visually correct（不擠、不散）
+- [ ] 關鍵 typography 細節（句點顏色 / em-dash / italic / small caps）可識別
+- [ ] chrome 元素位置 + 狀態正確
+- [ ] 反 AI slop checklist 通過
+- [ ] 「pause 時值得看」的 120% 細節存在
 
 ---
 
-## 7. 多视角并行策略（advanced）
+## 7. 多視角並行策略（advanced）
 
-复杂项目（如 launch film 选不出方向 / 想看多个美学差异 / 客户没拍板风格）可以**启动多个 subagent 并行做不同导演视角的版本**。
+複雜專案（如 launch film 選不出方向 / 想看多個美學差異 / 客戶沒拍板風格）可以**啟動多個 subagent 並行做不同導演視角的版本**。
 
-实战配置（2026-05-11 huashu-md-html 项目，并行 6 个版本）：
+實戰配置（2026-05-11 huashu-md-html 專案，並行 6 個版本）：
 
 ```
-v5  · 基线（Anthropic / Penguin Classics 出版社品位）
-v5a · Wes Anderson（对称 + 复古 + 章节卡片）
-v5b · Saul Bass（剪纸 + 60s 大字 + 几何切割）
-v5c · 王家卫（中文衬线 + 慢动作 + 怀旧）
-v5d · Massimo Vignelli（现代主义 grid + 红黑）
-v5e · 原研哉 Kenya Hara（极简日式 + 留白）
-v5f · 草间彌生 Yayoi Kusama（圆点 + 重复 + 单一强色）
+v5  · 基線（Anthropic / Penguin Classics 出版社品位）
+v5a · Wes Anderson（對稱 + 復古 + 章節卡片）
+v5b · Saul Bass（剪紙 + 60s 大字 + 幾何切割）
+v5c · 王家衛（中文襯線 + 慢動作 + 懷舊）
+v5d · Massimo Vignelli（現代主義 grid + 紅黑）
+v5e · 原研哉 Kenya Hara（極簡日式 + 留白）
+v5f · 草間彌生 Yayoi Kusama（圓點 + 重複 + 單一強色）
 ```
 
-每个 subagent 接到独立 brief：
-- 项目背景（同一份）
-- 必读参考（同一份 v5-director-notes.md 作为方法论模板）
-- **指定的艺术家 DNA**（色板 / 字体 / 视觉语言 / 节奏 / 招牌元素 / 反 slop 强化版本，每条 30-50 字）
-- 统一任务清单（director-notes.md + animation.html + keyframes/ + README.md）
-- 统一约束（30s / 1920×1080 / file:// / Google Fonts）
+每個 subagent 接到獨立 brief：
+- 專案背景（同一份）
+- 必讀參考（同一份 v5-director-notes.md 作為方法論模板）
+- **指定的藝術家 DNA**（色板 / 字型 / 視覺語言 / 節奏 / 招牌元素 / 反 slop 強化版本，每條 30-50 字）
+- 統一任務清單（director-notes.md + animation.html + keyframes/ + README.md）
+- 統一約束（30s / 1920×1080 / file:// / Google Fonts）
 
-并行启动 + 后台运行，约 30-60 分钟出 6 套完整版本。
+並行啟動 + 後台執行，約 30-60 分鐘出 6 套完整版本。
 
-完成后审校对比：
-1. 各版本核心美学决策表
-2. 关键帧并排对比（每版同时刻一帧）
-3. 投票：哪个最贴合用户的真实需求
+完成後審校對比：
+1. 各版本核心美學決策表
+2. 關鍵幀並排對比（每版同時刻一幀）
+3. 投票：哪個最貼合用戶的真實需求
 
-**关键**：不要让 subagent 之间相互参考——它们必须独立产出，否则就会撞到「平均值」。每个 subagent 的指令里要明说「不要重复 v5 的美学」。
+**關鍵**：不要讓 subagent 之間相互參考——它們必須獨立產出，否則就會撞到「平均值」。每個 subagent 的指令裡要明說「不要重複 v5 的美學」。
 
 ---
 
-## 8. 触发的几种典型场景
+## 8. 觸發的幾種典型場景
 
-| 用户场景 | 是否触发 | 备注 |
+| 使用者場景 | 是否觸發 | 備註 |
 |---------|---------|------|
-| 「做个 SaaS 升级宣传片」 | ✅ 触发 | 默认走完整流程 |
-| 「Apple 级别 / 超级碗品质感的视频」 | ✅ 触发 + 升级 | 强力推荐多视角并行 |
-| 「30 秒品牌 launch film」 | ✅ 触发 | |
-| 「这个项目 1 万字脚本再做动画」 | ✅ 触发 | 用户明确指明 |
-| 「简单 motion graphic，logo 转一下」 | ❌ 不触发 | 用 animations.md 标准流程 |
-| 「做个 onboarding 动画 demo」 | ❌ 不触发 | 用 animations.md |
-| 「教程视频带配音」 | ❌ 不触发 | 走 voiceover-pipeline.md |
-| 「单个 hero animation」 | ⚠️ 看复杂度 | 如果是高规格 hero，触发；普通 hero 用 hero-animation-case-study.md |
+| 「做個 SaaS 升級宣傳片」 | ✅ 觸發 | 預設走完整流程 |
+| 「Apple 級別 / 超級碗品質感的影片」 | ✅ 觸發 + 升級 | 強力推薦多視角並行 |
+| 「30 秒品牌 launch film」 | ✅ 觸發 | |
+| 「這個專案 1 萬字指令碼再做動畫」 | ✅ 觸發 | 使用者明確指明 |
+| 「簡單 motion graphic，logo 轉一下」 | ❌ 不觸發 | 用 animations.md 標準流程 |
+| 「做個 onboarding 動畫 demo」 | ❌ 不觸發 | 用 animations.md |
+| 「教程影片帶配音」 | ❌ 不觸發 | 走 voiceover-pipeline.md |
+| 「單個 hero animation」 | ⚠️ 看複雜度 | 如果是高規格 hero，觸發；普通 hero 用 hero-animation-case-study.md |
 
 ---
 
-## 9. 参考样本
+## 9. 參考樣本
 
-完整 director's notes 参考样本（self-contained，本 skill 内）：
+完整 director's notes 參考樣本（self-contained，本 skill 內）：
 
-`assets/director-notes-samples/launch-film-30s-sample.md`（约 78KB · 11500 字 · 13 镜 · 5 大部分齐全）
+`assets/director-notes-samples/launch-film-30s-sample.md`（約 78KB · 11500 字 · 13 鏡 · 5 大部分齊全）
 
-原始项目位置（含对应实施 HTML + 关键帧）：
+原始專案位置（含對應實施 HTML + 關鍵幀）：
 
-- v5-director-notes.md（director's notes，作者本地，未随仓库分发）
-- v5-six-forms.html（HTML 实施，作者本地，未随仓库分发）
-- v5-keyframes/（关键帧验证截图，作者本地，未随仓库分发）
+- v5-director-notes.md（director's notes，作者本地，未隨倉庫分發）
+- v5-six-forms.html（HTML 實施，作者本地，未隨倉庫分發）
+- v5-keyframes/（關鍵幀驗證截圖，作者本地，未隨倉庫分發）
 
-写新项目时强烈建议**先 Read 这份样本**，理解工作量和细节密度，再决定要不要全套走流程。
-
----
-
-## 10. 反模式（不要这样做）
-
-❌ **写 1000 字的精简版 director's notes 就动手**
-→ 精简版必然漏 Visual System 的某个子项，导致 HTML 实施时不停回头补 spec。要做就做万字级，要省就直接跳过。
-
-❌ **storyboard 只写 5-8 镜**
-→ 30 秒片至少 12-15 镜（每镜 2-3 秒）。镜少 = 节奏匀速 = 没 climax。
-
-❌ **director's notes 写完就交付，不做实施**
-→ 文档不是交付物，动画才是。文档 + 动画一起交付，文档作为「设计依据」附录。
-
-❌ **多视角并行时让 subagent 看其他版本**
-→ 各 subagent 必须独立，否则趋同。审校阶段才对比。
-
-❌ **跳过关键帧验证直接录 MP4**
-→ 必然返工。关键帧验证是最便宜的 quality gate。
-
-❌ **把动画细节决策推迟到「等我录的时候再想」**
-→ 录制阶段是机械执行，不能做创意决策。所有决策必须在 director's notes 写死。
+寫新專案時強烈建議**先 Read 這份樣本**，理解工作量和細節密度，再決定要不要全套走流程。
 
 ---
 
-*最后修订：2026-05-11*
-*真实案例：huashu-md-html v2.0 launch film（v5-director-notes.md）*
+## 10. 反模式（不要這樣做）
+
+❌ **寫 1000 字的精簡版 director's notes 就動手**
+→ 精簡版必然漏 Visual System 的某個子項，導致 HTML 實施時不停回頭補 spec。要做就做萬字級，要省就直接跳過。
+
+❌ **storyboard 只寫 5-8 鏡**
+→ 30 秒片至少 12-15 鏡（每鏡 2-3 秒）。鏡少 = 節奏勻速 = 沒 climax。
+
+❌ **director's notes 寫完就交付，不做實施**
+→ 文件不是交付物，動畫才是。文件 + 動畫一起交付，文件作為「設計依據」附錄。
+
+❌ **多視角並行時讓 subagent 看其他版本**
+→ 各 subagent 必須獨立，否則趨同。審校階段才對比。
+
+❌ **跳過關鍵幀驗證直接錄 MP4**
+→ 必然返工。關鍵幀驗證是最便宜的 quality gate。
+
+❌ **把動畫細節決策推遲到「等我錄的時候再想」**
+→ 錄製階段是機械執行，不能做創意決策。所有決策必須在 director's notes 寫死。
+
+---
+
+*最後修訂：2026-05-11*
+*真實案例：huashu-md-html v2.0 launch film（v5-director-notes.md）*

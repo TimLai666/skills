@@ -9,7 +9,7 @@ description: >-
   deck, landing page, website, UI, mockup, MP4, GIF, infographic, branding,
   logo, 評審, critique, film-inspired, cinematic.
 metadata:
-  version: "1.9.0"
+  version: "1.9.1"
 ---
 
 # Design Studio
