@@ -41,37 +41,7 @@
 
 ### 資料表
 
-```sql
-create table public.request_log (
-  id            bigint generated always as identity primary key,
-  created_at    timestamptz not null default now(),
-  request_id    text,                  -- UUID per request，跨服務串
-  method        text not null,         -- GET/POST/PATCH/DELETE
-  path          text not null,         -- /api/admin/orders/:id
-  status        int,                   -- HTTP status code
-  latency_ms    int,
-  source        text not null,         -- 'liff' | 'admin' | 'service' | 'public' | 'webhook'
-  actor_id      uuid,
-  actor_email   text,                  -- snapshot；不靠 join auth.users
-  actor_kind    text,                  -- 'user' | 'service' | 'anon'
-  ip            inet,
-  user_agent    text,
-  error_message text,                  -- status >= 400 時填
-  metadata      jsonb not null default '{}'::jsonb
-);
-
-create index request_log_created_at_idx on public.request_log (created_at);
-create index request_log_actor_idx      on public.request_log (actor_id) where actor_id is not null;
-create index request_log_status_idx     on public.request_log (status);
-create index request_log_path_idx       on public.request_log (path);
-
-alter table public.request_log enable row level security;
-
-create policy "request_log_admin_read"
-  on public.request_log for select
-  to authenticated
-  using (public.is_admin());
-```
+表結構（含索引、RLS）直接用 `assets/starter-migrations/0004_request_log.sql`——起手式 migration，欄位註解完整，不在此重複。
 
 ### Middleware 範例
 
@@ -120,80 +90,6 @@ func RequestLog(db *supabase.Client) gin.HandlerFunc {
     }()
   }
 }
-```
-
-**Node / Express**:
-
-```js
-import { randomUUID } from 'crypto'
-
-export function requestLog(supabase) {
-  return (req, res, next) => {
-    if (req.path === '/healthz' || req.path === '/') return next()
-
-    const start = Date.now()
-    const reqID = randomUUID()
-    req.requestId = reqID
-    res.setHeader('X-Request-ID', reqID)
-
-    res.on('finish', () => {
-      const payload = {
-        request_id: reqID,
-        method: req.method,
-        path: req.route?.path || req.path,            // 路由模板
-        status: res.statusCode,
-        latency_ms: Date.now() - start,
-        source: deriveSource(req.path, req.adminKind),
-        actor_id: req.adminUserId || null,
-        actor_email: req.adminUserEmail || null,
-        actor_kind: req.adminKind || 'anon',
-        ip: realClientIP(req),                  // ★ 不是 req.ip！見下方「IP 與 reverse proxy」
-        user_agent: req.get('user-agent'),
-      }
-      // 不 await：log 失敗不影響業務
-      supabase.from('request_log').insert(payload).then(({ error }) => {
-        if (error) console.error('[request_log]', error)
-      })
-    })
-
-    next()
-  }
-}
-```
-
-**Python / FastAPI**:
-
-```python
-import uuid, time, asyncio
-from fastapi import Request
-
-async def request_log_middleware(request: Request, call_next):
-    if request.url.path in ("/", "/healthz"):
-        return await call_next(request)
-
-    start = time.perf_counter()
-    req_id = str(uuid.uuid4())
-    request.state.request_id = req_id
-
-    response = await call_next(request)
-    response.headers["X-Request-ID"] = req_id
-
-    payload = {
-        "request_id": req_id,
-        "method": request.method,
-        "path": request.scope.get("route").path if request.scope.get("route") else request.url.path,
-        "status": response.status_code,
-        "latency_ms": int((time.perf_counter() - start) * 1000),
-        "source": derive_source(request.url.path, getattr(request.state, "admin_kind", None)),
-        "actor_id": getattr(request.state, "admin_user_id", None),
-        "actor_email": getattr(request.state, "admin_user_email", None),
-        "actor_kind": getattr(request.state, "admin_kind", "anon"),
-        "ip": real_client_ip(request),                       # ★ 不是 request.client.host！見下方
-        "user_agent": request.headers.get("user-agent"),
-    }
-    # fire-and-forget
-    asyncio.create_task(write_request_log(payload))
-    return response
 ```
 
 ### 重要設計細節
@@ -259,36 +155,6 @@ func realClientIP(c *gin.Context) string {
   }
   return c.ClientIP()
 }
-```
-
-**Node / Express**:
-
-```js
-function realClientIP(req) {
-  const cf = req.get('cf-connecting-ip')
-  if (cf) return cf.trim()
-  const xff = req.get('x-forwarded-for')
-  if (xff) return xff.split(',')[0].trim()
-  const xreal = req.get('x-real-ip')
-  if (xreal) return xreal.trim()
-  return req.ip
-}
-```
-
-**Python / FastAPI**:
-
-```python
-def real_client_ip(request: Request) -> str | None:
-    cf = request.headers.get("cf-connecting-ip")
-    if cf:
-        return cf.strip()
-    xff = request.headers.get("x-forwarded-for")
-    if xff:
-        return xff.split(",")[0].strip()
-    xreal = request.headers.get("x-real-ip")
-    if xreal:
-        return xreal.strip()
-    return request.client.host if request.client else None
 ```
 
 ### 安全：headers 可以偽造
@@ -371,7 +237,7 @@ select cron.schedule(
 | 規模 / 性質 | Tier 1 | Tier 2 | Tier 3 | Tier 4 | 備註 |
 |---|---|---|---|---|---|
 | 個人練習 / hackathon | ✅ | optional | — | — | trigger 就夠 |
-| 小型本地商家 / 早期 MVP | ✅ | ✅（簡化版） | 看 Supabase auth log 即可 | ⚠️ 業務 log 保留期符合法規即可 | 我們專案落這格 |
+| 小型本地商家 / 早期 MVP | ✅ | ✅（簡化版） | 看 Supabase auth log 即可 | ⚠️ 業務 log 保留期符合法規即可 | 小型專案典型落點 |
 | B2C SaaS 中小型 | ✅ | ✅ | ✅（Datadog / Sentry）| 開始考慮 | 加異常告警 |
 | 上市 / 金融 / 醫療 | ✅ | ✅ | ✅（完整 SIEM）| ✅（WORM / Glacier）| 加雜湊鏈 / partition |
 

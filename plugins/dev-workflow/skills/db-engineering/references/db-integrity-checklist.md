@@ -31,16 +31,7 @@
 
 採「優先軟刪」的專案，**parent 表幾乎永遠不會被硬刪**——所以 cascade 在程式面不會觸發。但 Dashboard 手動刪、cron 清過期軟刪、未來 GDPR 個資抹除流程都會繞過軟刪直接硬刪。這時 cascade 就會吃掉 children。
 
-**建議**：軟刪表的 children FK 預設用 `RESTRICT`，強制硬刪 parent 前要刻意先處理 children。這跟軟刪精神一致——「想丟資料？請刻意。」
-
-```sql
--- 改現有 FK 的範例：把 CASCADE 改 RESTRICT
-alter table public.order_items
-  drop constraint order_items_order_id_fkey;
-alter table public.order_items
-  add constraint order_items_order_id_fkey
-  foreign key (order_id) references public.orders(id) on delete restrict;
-```
+**建議**：軟刪表的 children FK 預設用 `RESTRICT`，強制硬刪 parent 前要刻意先處理 children。這跟軟刪精神一致——「想丟資料？請刻意。」（FK 的 `on delete` 不能原地改，要 `drop constraint` 後重新 `add`。）
 
 ### auth.users 的特殊狀況
 
@@ -325,11 +316,9 @@ from pg_policies where schemaname='public';
 ### 效能（見 `performance-pitfalls.md`）
 
 - [ ] FK 有索引；常用 filter / order 欄位有索引（軟刪表用 partial）。
-- [ ] RLS policy 用 `(select auth.uid())`、寫 `to <role>`、同 (role, action) 不疊。
-- [ ] PostgREST `select=` 明列欄位、不同用途有不同 repo function。
-- [ ] 沒有 `for ... { db.X() }` 迴圈；批次寫入用 array body。
+- [ ] 沒有 `for ... { db.X() }` 迴圈；集合寫入用批次。
 - [ ] HTTP client 有 timeout、connection pool 調好。
-- [ ] `get_advisors(type=performance)` 沒新 WARN。
+- [ ] 用 Supabase／PostgREST 時：RLS 與查詢寫法另過 `postgrest-baas-builder` 的 `references/performance.md` 清單。
 
 ### 完整性（本檔）
 
@@ -340,6 +329,6 @@ from pg_policies where schemaname='public';
 - [ ] schema 變更不留 orphan：刪欄位前確認 app code 沒在用；新欄位有寫入路徑。
 - [ ] **業務子表（訂單／合約／出貨…）對父表的關聯欄位過 D 段判斷**：壽命超過 audit 保留期 + 要熱路徑顯示 → snapshot 成子表欄位；不靠 audit_log 還原。
 - [ ] snapshot 欄位有 `comment on column` 標註目的；應用層讀取時優先讀 snapshot、有 drift 偵測。
-- [ ] `get_advisors(type=security)` 沒新 WARN。
+- [ ] 用 Supabase 時：`get_advisors(type=security)` 沒新 WARN。
 
 兩份清單缺一不可。效能問題會慢，完整性問題會丟資料——後者修不回來。

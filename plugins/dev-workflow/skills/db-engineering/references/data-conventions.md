@@ -58,25 +58,9 @@ create trigger set_updated_at
 
 刪除預設用軟刪：把 `deleted_at` 設成現在時間，而不是真的把列移除。
 
-### 軟刪一筆資料
+軟刪＝`update ... set deleted_at = now()`；所有「正常」查詢都要過濾 `deleted_at is null`。兩種方式讓「排除已刪」更不容易漏：
 
-```sql
-update public.notes
-set deleted_at = now()
-where id = $1;
-```
-
-### 查詢時排除已刪資料
-
-所有「正常」查詢都要過濾掉軟刪的列：
-
-```sql
-select * from public.notes where deleted_at is null;
-```
-
-兩種方式讓「排除已刪」更不容易漏：
-
-1. **RLS policy** 的 `using` 條件加 `deleted_at is null`（見 `rls.md`）——一般使用者根本看不到已刪列。
+1. **RLS policy** 的 `using` 條件加 `deleted_at is null`（見 `postgrest-baas-builder` 的 `references/rls.md`）——一般使用者根本看不到已刪列。
 2. 建一個 view 只露出未刪資料，應用層查 view：
 
 ```sql
@@ -96,7 +80,7 @@ create index notes_owner_active_idx
 
 ### 結構性禁止硬刪
 
-要真正落實「優先軟刪」，在 RLS 層**不給 authenticated 角色 delete policy**——這樣前端就算想硬刪也被擋下，只能透過 `UPDATE deleted_at` 軟刪。詳見 `rls.md`。
+要真正落實「優先軟刪」，在 RLS 層**不給 authenticated 角色 delete policy**——這樣前端就算想硬刪也被擋下，只能透過 `UPDATE deleted_at` 軟刪。詳見 `postgrest-baas-builder` 的 `references/rls.md`。
 
 ## 什麼時候才硬刪
 

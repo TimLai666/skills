@@ -9,13 +9,7 @@ allowed-tools:
   - Grep
   - AskUserQuestion
 metadata:
-  version: "1.1.0"
----
-
-## Auto-trigger
-
-**任何與資料庫相關的工作都要先載入這個 skill。** 包括但不限于：建表、改 schema、寫 migration、設計 API 的 DB 層、查效能問題、處理外鍵/CASCADE、做 backup、設定 dev/prod 分離。不論你用的是 Supabase、自架 Postgres、MySQL、MongoDB 或其他，只要動到 DB 就先讀這個。
-
+  version: "1.2.0"
 ---
 
 ## 十一條鐵則（不可妥協）
@@ -42,7 +36,7 @@ metadata:
    - 常用 filter / order 欄位也補索引
    - 軟刪表用 partial index
    - 絕不在 `for` 迴圈內呼叫 DB（用批次查詢）
-   - 後端共用 long-lived HTTP client，調好 connection pool，設 timeout
+   - 後端共用 long-lived DB 連線或 client，調好 connection pool，設 timeout
 
 8. **完整性在設計期就守住** — 效能問題會慢，**完整性問題會丟資料且修不回來**：
    - 每條 FK 明確標 `on delete`
@@ -76,13 +70,12 @@ metadata:
 
 每次結構改動都走這個迴圈：
 
-1. 若涉及 schema 設計、表拆分、欄位歸屬或關係調整，先釐清業務規則與函數相依，畫出 ER model，確認 entity、relationship、cardinality、candidate key 與外鍵邊界。
-2. 依 ER model 做無損拆分，預設以 BCNF 為目標。若因已量測的效能瓶頸與業務需求選擇 3NF，必須記錄原因、查詢或 workload 證據、完整性取捨與回歸驗證，且不得低於 3NF。
-3. 產生新 migration 檔（帶時間戳）。
-4. 寫 SQL。新建表時務必同時：加 `created_at/updated_at/deleted_at`、掛 `updated_at` trigger。
-5. 本機跑 migration 驗證。
-6. `git add` 並 commit — migration 檔一定要進版控。
-7. migration 一旦 commit 就視為不可變。要再改，寫**新的** migration。
+1. 涉及表拆分、欄位歸屬或關係調整時，依鐵則 11 畫 ER model 再做無損拆分。
+2. 產生新 migration 檔（帶時間戳）。
+3. 寫 SQL。新建表時務必同時：加 `created_at/updated_at/deleted_at`、掛 `updated_at` trigger。
+4. 本機跑 migration 驗證。
+5. `git add` 並 commit — migration 檔一定要進版控。
+6. migration 一旦 commit 就視為不可變。要再改，寫**新的** migration。
 
 ### C. 推上正式環境
 
@@ -118,13 +111,12 @@ metadata:
 
 - [ ] dev / prod 是兩個不同資料庫實例，金鑰 / URL 完全分離。
 - [ ] 啟動指令與連線預設 development。
-- [ ] 每一個結構改動都有對應 migration 檔，且已 git add。
-- [ ] 沒有任何「改了資料庫但沒留 migration」的情況。
+- [ ] 每一個結構改動都有對應 migration 檔且已 git add；沒有任何改了資料庫卻沒留 migration 的情況。
 - [ ] 刪除走軟刪（`deleted_at`）；硬刪只在明確且必要時使用。
 - [ ] 欄位用 `created_at/updated_at/deleted_at` 標準名稱。
 - [ ] 每個 FK 欄位都有索引。
 - [ ] 沒有「`for ... { db.X() }`」迴圈內 DB 呼叫。
-- [ ] 後端共用 long-lived HTTP client，調好 connection pool，設 timeout。
+- [ ] 後端共用 long-lived DB 連線或 client，調好 connection pool，設 timeout。
 - [ ] 每條 FK 都明確標 `on delete`；軟刪表的 children 用 `RESTRICT`。
 - [ ] 每張新表都掛 audit trigger；外部服務呼叫有對應紀錄表。
 - [ ] log 表的 FK 顯示用欄位有 snapshot，不靠 join 父表。

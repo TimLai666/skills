@@ -9,7 +9,7 @@ allowed-tools:
   - Grep
   - AskUserQuestion
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 ## 前置
@@ -100,6 +100,7 @@ claude mcp add insforge --scope project \
 ## 參考檔案
 
 - `references/rls.md` — RLS policy 樣板（擁有者制、公開讀、軟刪感知、service_role）
+- `references/performance.md` — Supabase／PostgREST 效能地雷：RLS initplan、`select=`、`count=exact`、`getSession()` 快取、JWKS 驗章、冷啟動。寫 policy 或查詢前必讀
 - `references/auth.md` — Supabase Auth、profiles 擴充表、JWT 驗證
 - `references/insforge.md` — InsForge API endpoint mapping、admin key、適配清單
 - `references/self-hosted-on-zeabur.md` — 自架 Supabase on Zeabur checklist
