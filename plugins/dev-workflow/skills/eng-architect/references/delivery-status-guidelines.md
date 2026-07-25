@@ -1,13 +1,13 @@
-# Delivery Plan Guidelines
+# Delivery Status Guidelines
 
-Use `delivery-plan.md` as the convergence entry point. A new agent should be able to read it first and know what state the project is in, what is blocked, and which ticket to pick up next.
+Use `delivery-status.md` as the convergence entry point. A new agent should be able to read it first and know what state the project is in, what is blocked, and which ticket to pick up next.
 
 ## Required Sections
 
 Use headings close to this shape:
 
 ```md
-# Delivery Plan
+# Delivery Status
 
 ## Current Phase
 ## Stage Objective
@@ -69,7 +69,7 @@ Use headings close to this shape:
 
 ## Update Cadence
 
-Update `delivery-plan.md` when:
+Update `delivery-status.md` when:
 - the phase changes
 - a milestone status changes
 - the next verifiable output changes

@@ -5,7 +5,7 @@ Convergence is not a one-time setup. Re-sync the control surface whenever the pr
 ## Update Loop
 
 After each milestone, blocker, or handoff:
-1. Update `delivery-plan.md`
+1. Update `delivery-status.md`
 2. Confirm the next ticket
 3. Update `AGENTS.md` if operating rules changed
 4. Leave `CLAUDE.md` alone unless its pointer is wrong
@@ -24,7 +24,7 @@ Every handoff should include:
 ## Blocker Handling
 
 When blocked:
-- record the blocker in `delivery-plan.md`
+- record the blocker in `delivery-status.md`
 - state what dependency is missing
 - state what can still proceed
 - state whether the next ticket should change

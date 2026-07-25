@@ -88,7 +88,7 @@ This is a location `dev-task-loop` can be pointed at when it asks where the back
 
 When the project has an `openspec/` directory and the `openspec` CLI is available, one ticket is one change — never one task, or you get a change per line item. The ticket's acceptance criteria become the change's requirements and scenarios; the ordering inside one ticket belongs in its `tasks.md`.
 
-OpenSpec has no dependency relationship *between* changes — its dependency graph runs between the artifacts inside a single change. So the blocking edges live in `delivery-plan.md`: map each change to one milestone id and let the milestone order carry the sequence. Do not invent a `blocked by` field inside the change; nothing validates it and it will drift.
+OpenSpec has no dependency relationship *between* changes — its dependency graph runs between the artifacts inside a single change. So the blocking edges live in `delivery-status.md`: map each change to one milestone id and let the milestone order carry the sequence. Do not invent a `blocked by` field inside the change; nothing validates it and it will drift.
 
 The foundation rule is ours, not OpenSpec's. OpenSpec deliberately treats changes as parallel and gate-free, and will not stop anyone from starting a change whose foundation is unbuilt. We simply do not start it.
 

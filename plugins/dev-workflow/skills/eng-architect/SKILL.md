@@ -1,6 +1,6 @@
 ---
 name: eng-architect
-description: "Design architecture, then cut the work into tickets. This skill MUST be used before implementation of a non-trivial feature begins, and MUST be used when a plan or spec has to become tickets. SHOULD be used whenever the user is unsure how to split modules. Tickets MUST be cut by what someone can do and MUST NOT be one per technical layer, so this skill MUST NOT be replaced by an ad hoc task list. Produces architecture diagrams, error maps, tickets with blocking edges, and convergence artifacts (ENG.md, delivery-plan.md, AGENTS.md). Triggers on: 技術方案, 架構設計, 怎麼切模組, 拆任務, 切票, 拆成 ticket, 排開發順序, eng planning, architecture design, break into tickets, 技術規劃, 這個功能技術上怎麼做, design review, UI review, AI slop scan"
+description: "Design architecture, then cut the work into tickets. This skill MUST be used before implementation of a non-trivial feature begins, and MUST be used when a plan or spec has to become tickets. SHOULD be used whenever the user is unsure how to split modules. Tickets MUST be cut by what someone can do and MUST NOT be one per technical layer, so this skill MUST NOT be replaced by an ad hoc task list. Produces architecture diagrams, error maps, tickets with blocking edges, and convergence artifacts (ENG.md, delivery-status.md, AGENTS.md). Triggers on: 技術方案, 架構設計, 怎麼切模組, 拆任務, 切票, 拆成 ticket, 排開發順序, eng planning, architecture design, break into tickets, 技術規劃, 這個功能技術上怎麼做, design review, UI review, AI slop scan"
 allowed-tools:
   - Bash
   - Read
@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.9.0"
+  version: "1.10.0"
 ---
 
 ## Command routing
@@ -38,9 +38,11 @@ _DIR="$_ROOT/docs/plans"
 DESIGN=$(find "$_DIR" -maxdepth 1 -name "*-$_BRANCH-*-plan.md" -type f -exec ls -t {} + 2>/dev/null | head -1)
 [ -z "$DESIGN" ] && DESIGN=$(find "$_DIR" -maxdepth 1 -name '*-plan.md' -type f -exec ls -t {} + 2>/dev/null | head -1)
 [ -z "$DESIGN" ] && [ -n "$_ROOT" ] && DESIGN=$(find "$_ROOT" -name '*-plan.md' -type f \
+  ! -name 'delivery-plan.md' \
   -not -path '*/.git/*' -not -path '*/node_modules/*' -exec ls -t {} + 2>/dev/null | head -1)
 [ -n "$DESIGN" ] && echo "PLAN_DOC: $DESIGN" || echo "PLAN_DOC: none"
 _R="${_ROOT:-.}"
+[ -f "$_R/delivery-plan.md" ] && echo "LEGACY_STATUS_FILE: delivery-plan.md"
 [ -f "$_R/ENG.md" ] && echo "ENG_MD: exists" || echo "ENG_MD: none"
 [ -d "$_R/openspec" ] && echo "OPENSPEC_DIR: exists" || echo "OPENSPEC_DIR: none"
 command -v openspec >/dev/null 2>&1 && echo "OPENSPEC_CLI: yes" || echo "OPENSPEC_CLI: no"
@@ -60,6 +62,8 @@ Read the plan document if it exists. Read all existing architecture docs before 
 `ARCHITECTURE.md` is a convention some projects happen to carry; read it when present. Nothing in this toolchain writes it, so its absence means nothing.
 
 `plan-grilling` defaults to `docs/plans/` but writes wherever the user asked it to, which is why the last glob sweeps the whole repo. It matches on the `*-plan.md` filename, not the directory.
+
+The sweep excludes `delivery-plan.md`, which is what this skill's status file used to be called. The name was wrong twice over: it ends in `-plan.md`, so the sweep would pick up the status file and read a status report as the feature list, and "plan" invites exactly the roadmap content the file is forbidden to hold. It is `delivery-status.md` now. On `LEGACY_STATUS_FILE`, tell the user and `git mv` it before Step 5a writes anything, or the run leaves two status files disagreeing.
 
 **Stack.** The `STACK:` lines answer this for an existing repo — take them and do not ask. Only when nothing is detected, which means a project with no code yet, ask the user once for the language, framework, database and deployment target, with a recommendation. Their answer constrains every flow drawn in Step 1, so it cannot wait until something needs it.
 
@@ -251,23 +255,23 @@ Check for existing artifacts:
 
 ```bash
 _ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-[ -f "$_ROOT/delivery-plan.md" ] && echo "DELIVERY_PLAN: exists" || echo "DELIVERY_PLAN: missing"
+[ -f "$_ROOT/delivery-status.md" ] && echo "DELIVERY_PLAN: exists" || echo "DELIVERY_PLAN: missing"
 [ -f "$_ROOT/AGENTS.md" ] && echo "AGENTS_MD: exists" || echo "AGENTS_MD: missing"
 [ -f "$_ROOT/CLAUDE.md" ] && echo "CLAUDE_MD: exists" || echo "CLAUDE_MD: missing"
-head -40 "$_ROOT/delivery-plan.md" 2>/dev/null
+head -40 "$_ROOT/delivery-status.md" 2>/dev/null
 head -20 "$_ROOT/AGENTS.md" 2>/dev/null
 ```
 
 All three live at the repo root, alongside `ENG.md`. Anchor the check to the root rather than the current directory — a run started from a subdirectory would otherwise report `missing` and create a second copy.
 
-#### 5a — Create or update `delivery-plan.md`
+#### 5a — Create or update `delivery-status.md`
 
-Read [references/delivery-plan-guidelines.md](./references/delivery-plan-guidelines.md) before writing.
+Read [references/delivery-status-guidelines.md](./references/delivery-status-guidelines.md) before writing.
 
 Required sections:
 
 ```md
-# Delivery Plan
+# Delivery Status
 
 ## Current Phase
 ## Stage Objective
@@ -299,7 +303,7 @@ Cut by what someone can do, not by which layer the code sits in. Each ticket is 
 Tickets land where the Preamble established:
 
 - **Plain markdown** — one file per ticket under `docs/tickets/`, numbered in dependency order. Point `dev-task-loop` at that directory when it asks where the backlog lives.
-- **OpenSpec** — one ticket is one change, never one task. Map each change to one milestone id in `delivery-plan.md`; that milestone order carries the blocking edges, because OpenSpec has none between changes. Use the `openspec` skill for CLI commands, delta syntax, validation and archive flow if it is installed; if it is not, say so and fall back to plain markdown rather than hand-rolling the directory layout.
+- **OpenSpec** — one ticket is one change, never one task. Map each change to one milestone id in `delivery-status.md`; that milestone order carries the blocking edges, because OpenSpec has none between changes. Use the `openspec` skill for CLI commands, delta syntax, validation and archive flow if it is installed; if it is not, say so and fall back to plain markdown rather than hand-rolling the directory layout.
 
 Either way the ordering lives on the tickets, not in `ENG.md`.
 
@@ -320,7 +324,7 @@ The artifact registry is what gives `ENG.md` a reader. `CLAUDE.md` sends every a
 ## Required artifacts
 - `ENG.md` — architecture, test seam strategy, standing assumptions, migration sequence.
   Read it before changing architecture, picking a test seam, or writing a migration.
-- `delivery-plan.md` — current phase, blockers, next verifiable output, next ticket.
+- `delivery-status.md` — current phase, blockers, next verifiable output, next ticket.
   Read it first on arrival; it says where the project is.
 - `docs/tickets/` (or `openspec/changes/`) — the tickets and their blocking edges.
   Pick up anything whose blockers are all done.
@@ -347,7 +351,7 @@ Read `AGENTS.md` before doing any project work. Treat it as the project operatin
 
 | Artifact | Must contain | Must not become |
 |---|---|---|
-| `delivery-plan.md` | phase, blockers, next output, next ticket | roadmap copy or changelog dump |
+| `delivery-status.md` | phase, blockers, next output, next ticket | roadmap copy or changelog dump |
 | Tickets | one user-visible slice each, with its blocking edges | one ticket per layer, or one per phase |
 | `ENG.md` | what holds across tickets: architecture, seams, assumptions, migration order | a second copy of anything that lives on a ticket |
 | `AGENTS.md` | shared operating rules any agent can follow | a personal note file |
@@ -372,7 +376,7 @@ Before handing off to another agent:
 - [ ] State next ticket
 - [ ] State decision delta since previous handoff
 - [ ] Include source links for critical context
-- [ ] Confirm `delivery-plan.md` was updated
+- [ ] Confirm `delivery-status.md` was updated
 - [ ] Confirm `AGENTS.md` is current
 - [ ] Confirm `CLAUDE.md` points to `AGENTS.md`
 
