@@ -54,7 +54,7 @@ Use this whenever the same user has already used this skill to create one or mor
 
 ## Operating Model
 
-Use four strict phases. Do not skip forward. Keep each phase's output in its own markdown file under `docs/design/` in the working project — see "Where Process Files Go" in the parent `design-studio/GUIDE.md`. Bare filenames below resolve against that directory.
+Use four strict phases. Do not skip forward. Keep each phase's output in its own markdown file under `docs/design/` in the working project — see "Where Process Files Go" in the parent `design-studio/SKILL.md`. Bare filenames below resolve against that directory.
 
 1. Phase 1: decisions
 2. Phase 2: storyboard
@@ -251,10 +251,10 @@ Write `slide-spec.md` containing:
    - 4-token color palette enforced
    - Verdict boxes on every decision slide
    - Footer with slide counter on all non-cover slides
-4. Run QA pipeline:
+4. Run QA pipeline (requires LibreOffice for `soffice` and poppler for `pdftoppm`):
    ```bash
    node deck.js
-   python scripts/office/soffice.py --headless --convert-to pdf output.pptx
+   soffice --headless --convert-to pdf output.pptx
    rm -f slide-*.jpg && pdftoppm -jpeg -r 150 output.pdf slide
    ```
 5. Visually inspect every slide image. Look for:
@@ -263,7 +263,7 @@ Write `slide-spec.md` containing:
    - Sidebar rotated text bleed (acceptable in LibreOffice preview; verify spec is correct)
    - Slides missing structure or accent layer
 6. Fix all issues, re-render, re-inspect. Do not declare done until one full clean pass.
-7. Copy final file to `/mnt/user-data/outputs/` and call `present_files`.
+7. Deliver the final `.pptx` to the user the way the current environment expects (file path, download, or attachment).
 
 ### PPTX Anti-Patterns
 

@@ -1,7 +1,5 @@
 # Protocol: Premium Utilitarian Minimalism UI Architect
 
-> Curated from [leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill) (MIT).
-
 ## 1. Protocol Overview
 Name: Premium Utilitarian Minimalism & Editorial UI
 Description: An advanced frontend engineering directive for generating highly refined, ultra-minimalist, "document-style" web interfaces analogous to top-tier workspace platforms. This protocol strictly enforces a high-contrast warm monochrome palette, bespoke typographic hierarchies, meticulous structural macro-whitespace, bento-grid layouts, and an ultra-flat component architecture with deliberate muted pastel accents. It actively rejects standard generic SaaS design trends.

@@ -1,6 +1,6 @@
 # Redesign Protocol (Shared)
 
-Curated from [leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill) (MIT). Misclassifying the mode is the single biggest source of bad redesign output — run this before touching anything that already exists.
+Misclassifying the mode is the single biggest source of bad redesign output — run this before touching anything that already exists.
 
 ## Detect the mode (first action)
 

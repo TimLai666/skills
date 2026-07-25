@@ -1,7 +1,5 @@
 # 品牌識別板（Brand Identity Board）· 從零打造品牌識別
 
-> Curated from [leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill) (MIT) 的 brandkit，改寫對接本 skill 的生圖與 HTML 流程。
->
 > **適用邊界**：本檔管「**新品牌從零做識別**」——logo 概念、識別系統、單張品牌識別板。品牌**已存在**（有 logo、有官網）一律走 `shared/brand-asset.md` 資產協議，MUST NOT 用本檔重新發明人家的 logo。
 
 ## 產出物是什麼

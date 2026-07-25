@@ -48,7 +48,7 @@
 **硬流程（開工前執行，優先於 clarifying questions）**：
 1. `WebSearch` 產品名 + 最新時間詞（"2026 latest"、"launch date"、"release"、"specs"）
 2. 讀 1-3 條權威結果，確認：**存在性 / 發布狀態 / 最新版本號 / 關鍵規格**
-3. 把事實寫進專案的 `docs/design/product-facts.md`（見工作流 Step 2），不靠記憶。本 skill 的過程檔一律放 `docs/design/`，只有 `DESIGN.md` 留在專案根目錄，詳見母 skill `design-studio/GUIDE.md` 的「Where Process Files Go」
+3. 把事實寫進專案的 `docs/design/product-facts.md`（見工作流 Step 2），不靠記憶。本 skill 的過程檔一律放 `docs/design/`，只有 `DESIGN.md` 留在專案根目錄，詳見母 skill `design-studio/SKILL.md` 的「Where Process Files Go」
 4. 搜不到或結果模糊 → 問使用者，而不是自行假設
 
 **反例**（2026-04-20 實測）：使用者要「大疆 Pocket 4 發布動畫」，我憑記憶斷言「還沒發布」做了概念剪影——真相是 4 天前已發布、官方物料俱在。**成本對比：WebSearch 10 秒 << 返工 2 小時**。

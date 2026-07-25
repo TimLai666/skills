@@ -17,7 +17,7 @@
 
 ## 三軸校準（翻庫之前先定強度）
 
-壓縮自 [leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill)（MIT）的 dial 概念。沒有 design context、要從庫裡推方向時，先從 brief 讀出三個軸的檔位再去選半區和溫度——三軸管「多強」，溫度體系管「哪種氣質」：
+沒有 design context、要從庫裡推方向時，先從 brief 讀出三個軸的檔位再去選半區和溫度——三軸管「多強」，溫度體系管「哪種氣質」：
 
 - **變異度**（版面離安全預設多遠）：低＝對稱網格、居中；中＝錯位重疊、混合圖片比例；高＝masonry、fractional grid、大偏置留白。高檔位在 `<768px` 一律塌回單列。
 - **動態強度**：低＝只有 hover/active；中＝transform/opacity 過渡＋載入級聯；高＝scroll-driven 編排（CSS `animation-timeline` 或 GSAP ScrollTrigger；**硬禁 `window.addEventListener('scroll')`**）。

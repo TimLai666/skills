@@ -20,7 +20,7 @@ AI slop = the visual lowest common denominator from training data. It's not ugly
 
 ## AI Tells (Forbidden Patterns)
 
-Curated from [leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill) (MIT). Empirical signatures of LLM-generated design — hard bans as default moves. A brief, brand spec, or chosen style direction may deliberately override a specific tell: a default reach is the tell; a documented choice is design.
+Empirical signatures of LLM-generated design — hard bans as default moves. Override a specific tell only when the brief or brand spec calls for it, or the documented style direction explicitly features that device — and record the override in `DESIGN.md`. A default reach is the tell; a recorded choice is design.
 
 **Visual & type**
 - No neon / outer glows by default — inner borders or subtle tinted shadows instead
@@ -62,11 +62,3 @@ Curated from [leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill) (MI
 ## Judgment Boundary
 
 "Brand actually uses it" is the strongest exception. If brand spec says purple gradient, use it — it's brand signature, not slop.
-
-## Anti-Slop Detector
-
-After build, run:
-```bash
-npx impeccable detect <output-dir-or-file>
-```
-Fix all flagged issues before declaring done.

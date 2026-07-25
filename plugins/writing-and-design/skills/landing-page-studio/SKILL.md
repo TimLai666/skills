@@ -9,7 +9,7 @@ description: >-
   comes from the design-studio style library; this skill owns conversion
   structure, autonomous iteration, and delivery contracts.
 metadata:
-  version: "2.0.0"
+  version: "2.0.1"
 ---
 
 # Landing Page Studio
@@ -134,7 +134,7 @@ metadata:
 
 ## Asset Rules
 
-1. 圖片來源只允許 Unsplash/Pexels
+1. 任務涉及真實品牌時，依 design-studio 的 `shared/brand-asset.md` 優先使用品牌真實資產；其餘圖片只允許 Unsplash/Pexels
 2. 不可使用 placeholder
 3. Hero 必須加遮罩保證文字可讀
 4. 輸出 `asset_sources` 必須含 attribution

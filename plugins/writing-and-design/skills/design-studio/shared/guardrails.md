@@ -1,6 +1,6 @@
 # Performance, Accessibility & Dark Mode Guardrails (Shared)
 
-Curated from [leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill) (MIT). These bind every route at build time — not only at final verification.
+These bind every route at build time — not only at final verification.
 
 ## Motion & Performance
 
@@ -17,7 +17,7 @@ Curated from [leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill) (MI
 
 ## Dark Mode (dual-mode by default)
 
-- Design **both modes from the start** for any consumer-facing page. Skip only when the brief is print-emulating editorial or the user says so.
+- Design **both modes from the start** for any consumer-facing web page. Skip only when the brief is print-emulating editorial, the user says so, or the chosen film/style language commits to a single mode (record it in `DESIGN.md`). Single-theme exhibits — decks, animations, prototypes, brand boards — default to one theme unless the brief says otherwise.
 - Pick ONE token strategy per project and stick to it: Tailwind `dark:` variants, or CSS semantic variables (`--surface`, `--text-primary`…) swapped under `[data-theme="dark"]` / `prefers-color-scheme`.
 - The brief and brand decide the actual colors. Enforced here: WCAG AA contrast (AAA for hero copy), hierarchy parity across modes, the brand color stays recognisable, no pure `#000000` / `#ffffff` — off-black and off-white keep depth.
 - Default to system preference; add a manual toggle if either mode would lose key brand expression.

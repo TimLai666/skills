@@ -1,6 +1,6 @@
 # Layout, States & Content Hard Rules (Shared)
 
-Curated from [leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill) (MIT). Mechanical quality floors — failing any of these is shipping broken work, not a style choice.
+Mechanical quality floors — failing any of these is shipping broken work, not a style choice. Each rule binds where its subject exists: output with no nav, hero, or form simply skips those clauses.
 
 ## Interactive states & forms
 
