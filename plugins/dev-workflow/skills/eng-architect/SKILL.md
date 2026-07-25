@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.10.2"
+  version: "1.10.4"
 ---
 
 ## Command routing
@@ -163,19 +163,7 @@ Runs once, after every feature has been through Step 1.
 
 #### 2a — Architecture diagram
 
-Assemble the per-feature flows into one picture: entry points, data flow, state transitions, service boundaries, trust boundaries, storage.
-
-```text
-[Browser] --POST /api/payment--> [PaymentController]
-                                   validate inputs
-                                   [PaymentService] --> [Stripe API]
-                                   [DB: payments] success/failure
-                                   [EmailWorker] --> [Email]
-                             (async)
-
-Trust boundary: everything right of [PaymentController] is internal
-State machine: pending -> processing -> succeeded | failed | refunded
-```
+Assemble the per-feature flows into one picture: entry points, data flow, state transitions, service boundaries, trust boundaries, storage. Same notation as 1a, all features on one canvas.
 
 Ask the user to confirm or adjust. Record the decision.
 
@@ -406,17 +394,6 @@ A `DESIGN.md` found here is **input, not output**. It is `design-studio`'s desig
 
 If a prior `DESIGN-REVIEW.md` exists, read its score history and open slop flags before scoring. A dimension that scored 4 last time and 4 again means the fix never landed — say so, rather than reporting it as a fresh finding.
 
-### What AI design slop looks like
-
-- generic hero sections with gradient backgrounds and floating 3D icons
-- every section a full-width card with shadow on shadow on shadow
-- labels like "Submit" instead of the specific action
-- empty states that say "No data found" instead of guiding the user forward
-- everything the same visual weight
-- inconsistent spacing
-- modals for things that should be inline
-- tables with 8+ equally wide columns
-
 ### Step 1 — Rate each dimension
 
 For each of the 10 dimensions, give a score from 0 to 10 and describe what a 10 would look like:
@@ -440,7 +417,9 @@ Flag any present:
 - labels: "Submit", "OK", "Cancel"
 - empty states with no CTA or guidance
 - errors like "An error occurred" or "Something went wrong"
-- spacing off the 4px grid
+- spacing off the 4px grid, or inconsistent between similar elements
+- generic hero sections with gradient backgrounds and floating 3D icons
+- every section a full-width card, shadow stacked on shadow
 - cards nested inside cards inside cards
 - gradient on gradient color schemes
 - no hierarchy
