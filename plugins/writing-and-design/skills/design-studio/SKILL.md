@@ -9,7 +9,7 @@ description: >-
   deck, landing page, website, UI, mockup, MP4, GIF, infographic, branding,
   logo, 評審, critique, film-inspired, cinematic.
 metadata:
-  version: "1.4.0"
+  version: "1.5.0"
 ---
 
 # Design Studio
@@ -129,29 +129,18 @@ After reading DESIGN.md (or deciding to create one), route to the right engine:
 
 **Ambiguous**: Ask one question: "Do you have a film or director in mind as visual reference, or want me to recommend directions?"
 
-## Shared Rules (Read Before Any Route)
+## Session Flow (this file drives every session)
 
-- `shared/anti-slop.md` — AI slop avoidance
-- `shared/brand-asset.md` — Brand asset 5-step protocol
-- `shared/verification.md` — Quality checks before delivery
+1. **Context** — Read `DESIGN.md` if it exists (lifecycle table above); otherwise copy `shared/DESIGN-template.md`.
+2. **Shared rules** — Read `shared/anti-slop.md`, `shared/brand-asset.md`, `shared/verification.md`. They bind every route.
+3. **Route** — Pick the engine from the Route Decision table, then read **only** that engine's GUIDE and run its workflow:
+   - **Cinematic** → `cinematic-ui/GUIDE.md` — director + film → cinematic grammar → web structure, in 4 phases: decisions → storyboard → compiled-spec → build. Best for landing pages, brand websites, editorial layouts. References: `cinematic-ui/references/` (200 directors, hero archetypes, compositions, color grades).
+   - **Practical** → `huashu-design/GUIDE.md` — task router → brand protocol → Fallback advisor → Junior Designer. Best for prototypes, presentations, animations, reviews, infographics. References: `huashu-design/references/` (40 styles, animation pitfalls, slide decks, critique guide).
 
-## Design Session Workflow
-
-1. **Check for DESIGN.md** in project root. If exists → read it. This is your design context.
-2. **Route** to cinematic-ui or huashu-design based on task.
-3. **During design**: Extract tokens (colors, typography, spacing, components) from decisions and write them into DESIGN.md.
-4. **After delivery**: Ensure DESIGN.md is complete and accurate. It should reflect the final design, not just the initial plan.
-5. **On revisit**: Read DESIGN.md first. Expand, don't restart.
-
-## Sub-Skill Details
-
-### Cinematic → `cinematic-ui/GUIDE.md`
-
-Director + film → cinematic grammar → web structure. 4 phases: decisions → storyboard → compiled-spec → build. Best for: landing pages, brand websites, editorial layouts. References: `cinematic-ui/references/` (200 directors, hero archetypes, compositions, color grades).
-
-### Practical → `huashu-design/GUIDE.md`
-
-Task router → brand protocol → Fallback advisor → Junior Designer. Best for: prototypes, presentations, animations, reviews, infographics. References: `huashu-design/references/` (40 styles, animation pitfalls, slide decks, critique guide).
+   A GUIDE is an execution manual, not a separate skill: it runs inside this session, under the shared rules and the `DESIGN.md` context already loaded. This file stays in charge of steps 4–6.
+4. **During design** — Extract tokens (colors, typography, spacing, components) from decisions into `DESIGN.md`.
+5. **Before delivery** — Run `shared/verification.md`; make `DESIGN.md` reflect the final design, not the initial plan.
+6. **On revisit** — Read `DESIGN.md` first. Expand, don't restart.
 
 ## Hybrid Tasks
 
