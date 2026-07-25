@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.10.1"
+  version: "1.10.2"
 ---
 
 ## Command routing
@@ -322,13 +322,17 @@ The artifact registry is what gives `ENG.md` a reader. `CLAUDE.md` sends every a
 
 ```md
 ## Required artifacts
-- `ENG.md` — architecture, test seam strategy, standing assumptions, migration sequence.
+- `ENG.md` — the project's standing technical decisions.
   Read it before changing architecture, picking a test seam, or writing a migration.
-- `delivery-status.md` — current phase, blockers, next verifiable output, next ticket.
-  Read it first on arrival; it says where the project is.
+- `delivery-status.md` — where the project currently stands.
+  Read it first on arrival.
 - `docs/tickets/` (or `openspec/changes/`) — the tickets and their blocking edges.
   Pick up anything whose blockers are all done.
 ```
+
+Each entry carries the trigger, not the file's table of contents. Restating an artifact's sections here means editing that list in two places forever; the trigger is the part that only exists here.
+
+Keep the `ENG.md` entry even though `delivery-status.md` already links it. They answer different questions — one says where the file is, the other says when reading it is not optional — and an agent that picks up a single ticket never opens the status file at all.
 
 **`AGENTS.md` is shared. Own your sections, leave the rest alone.** Other skills maintain their own sections in the same file and none of them announce themselves here:
 
