@@ -1,6 +1,6 @@
 # App / iOS 原型专属守则 · 完整操作手册
 
-> 从 SKILL.md 下沉的完整版。SKILL.md 保留 7 条硬规则速查，本文件是每条规则的展开：架构选型、取图渠道与代码、AppPhone JSX 骨架、ios_frame 三步用法、品位锚点全表。
+> 从 GUIDE.md 下沉的完整版。GUIDE.md 保留 7 条硬规则速查，本文件是每条规则的展开：架构选型、取图渠道与代码、AppPhone JSX 骨架、ios_frame 三步用法、品位锚点全表。
 
 
 做 iOS/Android/移动 app 原型时（触发：「app 原型」「iOS mockup」「移动应用」「做个 app」），下面四条**覆盖**通用 placeholder 原则——app 原型是 demo 现场，静态摆拍和米白占位卡没有说服力。
@@ -135,7 +135,7 @@ Screen 组件接 callback props（`onTabChange`、`onOpen`、`onClose`、`onTogg
 **用法（严格三步）**：
 
 ```jsx
-// 步骤 1: Read 本 skill 的 assets/ios_frame.jsx（相对本 SKILL.md 的路径）
+// 步骤 1: Read 本 skill 的 assets/ios_frame.jsx（相对本 GUIDE.md 的路径）
 // 步骤 2: 把整个 iosFrameStyles 常量 + IosFrame 组件贴进你的 <script type="text/babel">
 // 步骤 3: 你自己的屏组件包在 <IosFrame>...</IosFrame> 里，不碰 island/status bar/home indicator
 <IosFrame time="9:41" battery={85}>

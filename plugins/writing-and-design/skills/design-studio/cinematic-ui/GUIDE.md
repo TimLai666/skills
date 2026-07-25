@@ -1,33 +1,4 @@
----
-name: cinematic-ui
-description: 'Design and build film-inspired visual work — websites AND PowerPoint presentations (.pptx). Use this skill when the user wants a visually distinctive, high-quality website or presentation that goes beyond generic templates — whether they mention film, cinema, directors, or simply ask for something with strong visual direction, editorial feel, or premium aesthetics. Also use when the user asks to redesign a presentation, deck, or 簡報 with a cinematic or editorial visual system, or uses /cinematic-ui before any slide-related request.'
----
-
 # Cinematic Layout
-
-## Primary Platforms
-
-This skill is built and maintained for **Claude Code** and **OpenAI Codex** as the two primary runtimes.
-
-**Claude Code**
-- Invoke with `/cinematic-ui`.
-- Project memory and Claude-specific notes live in [`CLAUDE.md`](CLAUDE.md).
-- Install path (Windows): `C:\Users\<your-user>\.claude\skills\cinematic-layout`
-- Install path (macOS / Linux): `~/.claude/skills/cinematic-ui`
-
-**OpenAI Codex / ChatGPT**
-- Codex-specific context lives in [`CODEX.md`](CODEX.md).
-- Install path: `$CODEX_HOME/skills/cinematic-ui`
-
-Additional compatibility files:
-
-- [`GEMINI.md`](GEMINI.md) — Gemini / Antigravity-style workflows
-- [`AGENTS.md`](AGENTS.md) — shared cross-tool reference
-- [`.github/copilot-instructions.md`](.github/copilot-instructions.md) — GitHub Copilot
-- [`.cursor/rules/cinematic-ui.mdc`](.cursor/rules/cinematic-ui.mdc) — Cursor (auto-loaded on clone)
-- [`.windsurf/rules/cinematic-ui.md`](.windsurf/rules/cinematic-ui.md) — Windsurf (auto-loaded on clone)
-
----
 
 Design the site like a film production, not like a generic landing page.
 Treat this as a research-and-translation skill plus a design-library skill. Its job is to study film references, extract usable cinematic signals, then turn those signals into page narrative, section structure, motion direction, and implementable web specs.
@@ -83,7 +54,7 @@ Use this whenever the same user has already used this skill to create one or mor
 
 ## Operating Model
 
-Use four strict phases. Do not skip forward. Keep each phase's output in its own markdown file under `docs/design/` in the working project — see "Where Process Files Go" in the parent `design-studio/SKILL.md`. Bare filenames below resolve against that directory.
+Use four strict phases. Do not skip forward. Keep each phase's output in its own markdown file under `docs/design/` in the working project — see "Where Process Files Go" in the parent `design-studio/GUIDE.md`. Bare filenames below resolve against that directory.
 
 1. Phase 1: decisions
 2. Phase 2: storyboard
@@ -115,7 +86,7 @@ Read [references/output-templates.md](references/output-templates.md) before cre
 
 ## Progressive Loading
 
-Keep `SKILL.md` lean. Load only the references needed for the current phase.
+Keep `GUIDE.md` lean. Load only the references needed for the current phase.
 
 ### Always read first
 

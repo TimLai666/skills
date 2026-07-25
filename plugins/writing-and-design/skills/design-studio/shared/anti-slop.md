@@ -18,6 +18,39 @@ AI slop = the visual lowest common denominator from training data. It's not ugly
 | Inter/Roboto/Arial/system fonts as display | Too common, reader can't tell if this is a designed product or a demo | Brand spec explicitly uses them |
 | GitHub-dark lazy fix: uniform deep blue `#0D1117` + generic cyan/purple neon glow | One specific combo that's烂大街 in SaaS/AI landing pages — not all dark is banned | Developer tool product where brand actually goes this direction |
 
+## AI Tells (Forbidden Patterns)
+
+Curated from [leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill) (MIT). Empirical signatures of LLM-generated design — hard bans unless the brief explicitly asks for one.
+
+**Visual & type**
+- No neon / outer glows by default — inner borders or subtle tinted shadows instead
+- No gradient text-fill on large headers; no custom mouse cursors
+- No oversized screaming H1 — control hierarchy with weight and color, not raw scale
+- Serif for editorial / luxury only, never on dashboards
+- No `<br>`-broken italicized headline splits as a default move
+- No em-dash (`—`) as a design element; use plain hyphens in copy
+
+**Layout micro-labels**
+- No version labels as hero eyebrows (`V0.6`, `BETA`, `EARLY ACCESS`) unless the brief is about launch status
+- No section-number eyebrows (`00 / INDEX`, `001 · Capabilities`) — name the topic in plain language
+- No `01 / 4` pagination on tiles; no `Scroll · 001` cues; no rotated vertical text as agency flourish
+- Middle-dot (`·`) rationed: max 1 per metadata line, never the default separator
+- No decorative colored status dots on every list / nav / badge — dots only for real semantic state
+- No crosshair / hairline grid lines drawn purely as decoration
+
+**Content & data (the "Jane Doe" effect)**
+- No generic names ("John Doe", "Sarah Chan") — creative, locale-appropriate names
+- No egg / generic-user-icon avatars — believable photo placeholders
+- No fake-perfect numbers (`99.99%`, `50%`) — organic messy data (`47.2%`)
+- No startup-slop brand names ("Acme", "Nexus", "SmartFlow") — invent contextual names that sound real
+- No filler verbs ("Elevate", "Seamless", "Unleash", "Next-Gen") — concrete verbs only
+- No "Quietly in use at" social-proof headers; no poetic section labels ("From the field") — plain functional labels
+
+**Fake previews & assets**
+- No div-based fake product UI (fake terminal / dashboard / task list) to simulate a screenshot — real or generated images, or none
+- No fake version footers inside mock screenshots (`v0.6.2-rc.1`, `last sync 4s ago`)
+- No broken Unsplash hotlinks — `https://picsum.photos/seed/{descriptive}/{w}/{h}`, generated images, or real assets
+
 ## What to Do Instead
 
 - `text-wrap: pretty` + CSS Grid + advanced CSS: typography details are the "taste tax" AI can't fake

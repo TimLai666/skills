@@ -4,12 +4,12 @@ description: >-
   Unified design skill for ALL design work — websites, apps, presentations,
   animations, prototypes, infographics, branding. Every session produces or
   evolves a DESIGN.md (Google format). Routes to cinematic-ui or huashu-design
-  sub-skills based on task. This skill MUST be used for any design task. MUST
+  engines based on task. This skill MUST be used for any design task. MUST
   trigger on: 設計, design, 原型, prototype, PPT, 幻燈片, slides, 動畫, animation, 簡報,
   deck, landing page, website, UI, mockup, MP4, GIF, infographic, branding,
   logo, 評審, critique, film-inspired, cinematic.
 metadata:
-  version: "1.2.0"
+  version: "1.4.0"
 ---
 
 # Design Studio
@@ -115,16 +115,16 @@ After reading DESIGN.md (or deciding to create one), route to the right engine:
 
 | Signal | Engine | Sub-skill |
 |--------|--------|-----------|
-| Director, film, cinema, editorial feel | **Cinematic** | `cinematic-ui/SKILL.md` |
-| High-end static website with visual narrative | **Cinematic** | `cinematic-ui/SKILL.md` |
-| Prototype, mockup, interactive demo | **Practical** | `huashu-design/SKILL.md` |
-| PPT, slides, deck, 簡報 | **Practical** | `huashu-design/SKILL.md` |
-| Animation, motion, MP4, GIF | **Practical** | `huashu-design/SKILL.md` |
-| Expert review, critique, scoring | **Practical** | `huashu-design/SKILL.md` |
-| Infographic, data visualization | **Practical** | `huashu-design/SKILL.md` |
-| App/iOS/Android prototype | **Practical** | `huashu-design/SKILL.md` |
-| Quick design variants (3 directions) | **Practical** | `huashu-design/SKILL.md` |
-| Ambiguous / "make something good" | **Practical** (Fallback advisor) | `huashu-design/SKILL.md` |
+| Director, film, cinema, editorial feel | **Cinematic** | `cinematic-ui/GUIDE.md` |
+| High-end static website with visual narrative | **Cinematic** | `cinematic-ui/GUIDE.md` |
+| Prototype, mockup, interactive demo | **Practical** | `huashu-design/GUIDE.md` |
+| PPT, slides, deck, 簡報 | **Practical** | `huashu-design/GUIDE.md` |
+| Animation, motion, MP4, GIF | **Practical** | `huashu-design/GUIDE.md` |
+| Expert review, critique, scoring | **Practical** | `huashu-design/GUIDE.md` |
+| Infographic, data visualization | **Practical** | `huashu-design/GUIDE.md` |
+| App/iOS/Android prototype | **Practical** | `huashu-design/GUIDE.md` |
+| Quick design variants (3 directions) | **Practical** | `huashu-design/GUIDE.md` |
+| Ambiguous / "make something good" | **Practical** (Fallback advisor) | `huashu-design/GUIDE.md` |
 | Brand materials with specific brand | **Either** — use shared brand protocol | Depends on output type |
 
 **Ambiguous**: Ask one question: "Do you have a film or director in mind as visual reference, or want me to recommend directions?"
@@ -145,11 +145,11 @@ After reading DESIGN.md (or deciding to create one), route to the right engine:
 
 ## Sub-Skill Details
 
-### Cinematic → `cinematic-ui/SKILL.md`
+### Cinematic → `cinematic-ui/GUIDE.md`
 
 Director + film → cinematic grammar → web structure. 4 phases: decisions → storyboard → compiled-spec → build. Best for: landing pages, brand websites, editorial layouts. References: `cinematic-ui/references/` (200 directors, hero archetypes, compositions, color grades).
 
-### Practical → `huashu-design/SKILL.md`
+### Practical → `huashu-design/GUIDE.md`
 
 Task router → brand protocol → Fallback advisor → Junior Designer. Best for: prototypes, presentations, animations, reviews, infographics. References: `huashu-design/references/` (40 styles, animation pitfalls, slide decks, critique guide).
 
