@@ -1,5 +1,7 @@
 ﻿# Quality Gates
 
+> 除本檔數值門檻外，產出同時要通過 design-studio 的 `shared/hard-rules.md`（版面／狀態／內容硬規則）與 `shared/verification.md`（交付前 QA）。
+
 ## Performance and Accessibility Thresholds
 
 最低門檻：

@@ -1,5 +1,7 @@
 ﻿# Animation System and Fallbacks
 
+> 動效與效能底線依 design-studio 的 `shared/guardrails.md`（只動 transform/opacity、reduced-motion 強制、blur/grain 限制）。本檔管 LP 的動畫分層與降級矩陣。
+
 ## Required Animation Categories
 
 至少覆蓋 4 類：

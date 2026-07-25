@@ -7,7 +7,7 @@
 | brand_theme | string | yes | 品牌名稱與主題描述 |
 | value_props | string[3] | yes | 三個核心價值主張 |
 | primary_cta | string | yes | 主 CTA 文案 |
-| style_variant | string | yes | A-L 或 custom |
+| style_direction | string | yes* | 視覺方向；缺席時先走 design-studio 風格選型取得，不硬擋 |
 | output_mode | string | yes | single-file-html / react-project |
 | variant_mode | string | no | single (default) / batch |
 | autonomy_mode | string | no | multi-iteration (default) / single-pass |
@@ -24,7 +24,7 @@
 - `brand_theme`
 - `value_props`
 - `primary_cta`
-- `style_variant`
+- `style_direction`（缺席時先走 design-studio 風格選型，取得方向後再生成）
 - `output_mode`
 
 且 `value_props` 長度必須為 3。

@@ -52,7 +52,7 @@ export default function App() {
         <div className="hero-glow pointer-events-none absolute -top-10 right-0 h-64 w-64 rounded-full bg-cyan-300/20 blur-3xl" />
         <div className="relative mx-auto max-w-6xl">
           <motion.p data-reveal className="mb-3 inline-flex rounded-full border border-cyan-300/70 px-3 py-1 text-xs uppercase tracking-[0.18em] text-cyan-200">
-            {{style_variant_label}}
+            {{style_direction_label}}
           </motion.p>
           <h1 data-reveal className="max-w-3xl font-display text-4xl leading-tight md:text-6xl">
             {{hero_title}}

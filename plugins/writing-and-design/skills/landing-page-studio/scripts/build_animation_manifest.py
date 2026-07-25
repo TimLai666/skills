@@ -29,7 +29,7 @@ def _load_payload(args: argparse.Namespace) -> Dict[str, Any]:
 
 
 def build_manifest(payload: Dict[str, Any]) -> Dict[str, Any]:
-    style_variant = payload.get("style_variant", "A")
+    style_direction = payload.get("style_direction", "")
     animation_level = payload.get("animation_level", "high")
     motion_preference = payload.get("motion_preference", "respect-reduced-motion")
     webgl_supported = bool(payload.get("webgl_supported", True))
@@ -97,7 +97,7 @@ def build_manifest(payload: Dict[str, Any]) -> Dict[str, Any]:
         ]
     )
 
-    if style_variant in {"C", "I", "L"} and not reduce:
+    if animation_level == "high" and not reduce:
         manifest.append(
             {
                 "id": "border_beam",
@@ -121,7 +121,7 @@ def build_manifest(payload: Dict[str, Any]) -> Dict[str, Any]:
         notes = ["full animation profile enabled"]
 
     return {
-        "style_variant": style_variant,
+        "style_direction": style_direction,
         "animation_level": animation_level,
         "manifest_count": len(manifest),
         "animation_manifest": manifest,

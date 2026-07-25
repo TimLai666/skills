@@ -5,10 +5,11 @@ description: >-
   modern visual effects, including SVG/WebGL animation, autonomous
   multi-iteration optimization, and dual output modes (single-file HTML or
   React project). MUST trigger on requests like landing page, LP, hero section
-  build, animated marketing page, conversion page redesign, or style variants
-  A-L/custom.
+  build, animated marketing page, or conversion page redesign. Visual style
+  comes from the design-studio style library; this skill owns conversion
+  structure, autonomous iteration, and delivery contracts.
 metadata:
-  version: "1.1.0"
+  version: "2.0.0"
 ---
 
 # Landing Page Studio
@@ -25,6 +26,14 @@ metadata:
 4. Progressive Enhancement：低效能或 reduced motion 自動降級
 5. 品質門檻驗收（視覺與性能雙門檻）
 
+## 前置（開工前必讀）
+
+本 skill 是疊在 `design-studio` 上的**轉換層**：視覺與品質底線由 design-studio 供給，本 skill 只管轉換結構、輸入契約、自主迭代與交付格式。
+
+1. 讀 design-studio 的 `shared/anti-slop.md`、`shared/hard-rules.md`、`shared/guardrails.md`——它們對本 skill 的所有產出生效。
+2. 遵守 DESIGN.md 公約：專案有 `DESIGN.md` 就先讀並沿用 token；交付後把本次的色彩／字體／間距 token 寫回去。
+3. 風格方向（`style_direction`）從 design-studio 的風格庫取得：`huashu-design/references/design-styles.md`（三軸校準 → 40 風格 → 深度風格包）。使用者沒給方向時，用該庫的三方向推薦流程讓使用者選，不要自己發明色板。
+
 ## Input Contract
 
 輸入物件型別：`LandingPageInput`
@@ -34,7 +43,7 @@ metadata:
 - `brand_theme`: `string`
 - `value_props`: `string[3]`
 - `primary_cta`: `string`
-- `style_variant`: `A|B|C|D|E|F|G|H|I|J|K|L|custom`
+- `style_direction`: `string`（視覺方向，依前置第 3 點從 design-studio 風格庫選定）
 - `output_mode`: `single-file-html|react-project`
 
 選填欄位：
@@ -54,7 +63,7 @@ metadata:
 - `brand_theme`
 - `value_props`
 - `primary_cta`
-- `style_variant`
+- `style_direction`（例外：缺席時不硬擋，先走前置第 3 點的 design-studio 風格選型取得方向）
 - `output_mode`
 
 `MissingDataOutput` 必須包含：
@@ -108,15 +117,7 @@ metadata:
 
 ## Style System
 
-支援 A-L 共 12 套預設風格，細節見：
-
-- [02-style-presets-12.md](./references/02-style-presets-12.md)
-
-若 `style_variant=custom`：
-
-- 先抽取視覺關鍵詞（tone、contrast、material、motion）
-- 映射到最接近的預設風格作為基底
-- 僅在偏離需求時覆寫局部 token
+風格系統整個交給 design-studio：三軸校準定強度 → 40 風格庫選方向 → 深度風格包拿完整協議 → 色彩推導協議產生本專案專屬色值（不抄庫裡的示例 hex）。本 skill 不維護自己的風格 preset。
 
 ## Animation System
 
@@ -168,6 +169,7 @@ metadata:
 
 ## Execution Checklist
 
+0. 完成「前置」三件事（shared 規則、DESIGN.md、風格方向）
 1. 先跑 intake 驗證
 2. 再選擇輸出模式
 3. 產生候選稿與動畫策略
@@ -177,4 +179,4 @@ metadata:
 
 ## Suggested Prompt
 
-`Use $landing-page-studio with style_variant=C, output_mode=single-file-html, autonomy_mode=multi-iteration, animation_level=high, and motion_preference=respect-reduced-motion.`
+`Use $landing-page-studio with style_direction from the design-studio style library, output_mode=single-file-html, autonomy_mode=multi-iteration, animation_level=high, and motion_preference=respect-reduced-motion.`

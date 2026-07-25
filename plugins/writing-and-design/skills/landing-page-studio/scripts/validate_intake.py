@@ -12,11 +12,10 @@ REQUIRED_FIELDS = [
     "brand_theme",
     "value_props",
     "primary_cta",
-    "style_variant",
+    "style_direction",
     "output_mode",
 ]
 
-ALLOWED_STYLES = set(list("ABCDEFGHIJKL") + ["custom"])
 ALLOWED_OUTPUT_MODES = {"single-file-html", "react-project"}
 ALLOWED_VARIANT_MODES = {"single", "batch"}
 ALLOWED_AUTONOMY_MODES = {"single-pass", "multi-iteration"}
@@ -66,7 +65,7 @@ def _missing_output(missing: List[str], extra_reasons: Dict[str, str]) -> Dict[s
         "brand_theme": "決定視覺語言與文案語氣",
         "value_props": "決定核心轉換訊息與三卡區塊內容",
         "primary_cta": "決定行動路徑與按鈕文案",
-        "style_variant": "決定色彩、字體與動畫策略",
+        "style_direction": "決定視覺方向；未定時先走 design-studio 風格庫（三軸校準＋40 風格＋深度風格包）選定",
         "output_mode": "決定輸出格式與專案結構",
     }
     why_needed.update(extra_reasons)
@@ -93,13 +92,6 @@ def validate_intake(payload: Dict[str, Any]) -> Dict[str, Any]:
 
     if missing:
         return _missing_output(missing, reasons)
-
-    style = str(data["style_variant"])
-    if style not in ALLOWED_STYLES:
-        return _missing_output(
-            ["style_variant"],
-            {"style_variant": "style_variant 必須是 A-L 或 custom。"},
-        )
 
     output_mode = data["output_mode"]
     if output_mode not in ALLOWED_OUTPUT_MODES:

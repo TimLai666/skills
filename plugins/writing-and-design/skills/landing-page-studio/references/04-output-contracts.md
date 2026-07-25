@@ -7,7 +7,7 @@
   "brand_theme": "沐石・湯宿：頂級溫泉飯店",
   "value_props": ["尊榮至上", "極致品味", "絕對私密"],
   "primary_cta": "立即預訂",
-  "style_variant": "B",
+  "style_direction": "暖單色編輯部極簡",
   "output_mode": "single-file-html",
   "variant_mode": "single",
   "autonomy_mode": "multi-iteration",
