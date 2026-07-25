@@ -9,36 +9,20 @@ allowed-tools:
   - Grep
   - AskUserQuestion
 metadata:
-  version: "1.2.0"
----
-
-## Auto-trigger
-
-When the user says something is ready, wants to deploy, or asks if it can ship, activate immediately.
-
+  version: "1.2.7"
 ---
 
 ## Preamble
 
 ```bash
 _BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
-_REPO=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")
 _BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||')
 [ -z "$_BASE" ] && git rev-parse --verify origin/main >/dev/null 2>&1 && _BASE="main"
 [ -z "$_BASE" ] && git rev-parse --verify origin/master >/dev/null 2>&1 && _BASE="master"
 _BASE="${_BASE:-main}"
 echo "BRANCH: $_BRANCH"
 echo "BASE: $_BASE"
-echo "REPO: $_REPO"
-_REMOTE=$(git remote get-url origin 2>/dev/null || echo "")
-echo "$_REMOTE" | grep -q "github.com" && echo "PLATFORM=github"
-echo "$_REMOTE" | grep -q "gitlab" && echo "PLATFORM=gitlab"
 which gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1 && echo "GH_CLI=true" || echo "GH_CLI=false"
-git fetch origin $_BASE --quiet 2>/dev/null || true
-git diff origin/$_BASE --stat 2>/dev/null | tail -3
-git log origin/$_BASE..HEAD --oneline 2>/dev/null
-DIFF_LINES=$(git diff origin/$_BASE --stat 2>/dev/null | tail -1 | grep -oE '[0-9]+ insertion' | grep -oE '[0-9]+' || echo "0")
-echo "DIFF_LINES: $DIFF_LINES"
 [ -f delivery-plan.md ] && echo "DELIVERY_PLAN: exists" || echo "DELIVERY_PLAN: missing"
 [ -f delivery-plan.md ] && head -20 delivery-plan.md
 ```
@@ -69,6 +53,7 @@ If it doesn't match, ask the user whether to update delivery-plan.md before ship
 ## Step 2 — Sync with base
 
 ```bash
+_BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'); _BASE="${_BASE:-main}"
 git fetch origin $_BASE
 git merge origin/$_BASE --no-edit
 ```
@@ -79,16 +64,7 @@ If merge conflicts: show each conflict and ask whether to keep mine, keep theirs
 
 ## Step 3 — Run tests
 
-Detect and run:
-
-```bash
-[ -f package.json ] && npm test 2>&1 | tee /tmp/mystack_tests.txt
-[ -f Gemfile ] && bundle exec rspec 2>&1 | tee /tmp/mystack_tests.txt
-[ -f go.mod ] && go test ./... 2>&1 | tee /tmp/mystack_tests.txt
-[ -f Cargo.toml ] && cargo test 2>&1 | tee /tmp/mystack_tests.txt
-[ -f requirements.txt ] && python -m pytest 2>&1 | tee /tmp/mystack_tests.txt
-[ -f pyproject.toml ] && python -m pytest 2>&1 | tee /tmp/mystack_tests.txt
-```
+Run the project's full test suite.
 
 Test failure triage:
 - in-branch failure → stop, fix before shipping
@@ -100,10 +76,6 @@ Test failure triage:
 
 Goal: 100% of new code paths have at least one test.
 
-```bash
-find . -name "*.test.*" -o -name "*.spec.*" -o -name "*_test.*" -o -name "*_spec.*" | grep -v node_modules | wc -l
-```
-
 For each changed file, search for corresponding test coverage. Rate:
 - **strong** — behavior + edge cases + error paths
 - **medium** — happy path only
@@ -112,22 +84,18 @@ For each changed file, search for corresponding test coverage. Rate:
 
 ---
 
-## Step 5 — Pre-landing check (if no prior review)
+## Step 5 — Pre-landing review (if no prior review)
 
-If no code review has been run on this branch, do a lightweight inline check:
-- SQL injection
-- race conditions
-- auth boundaries
-- missing error handling
-- obvious security issues
-
-If critical issues found: fix or get approval before pushing.
+If no code review has been run on this branch, run the **diff-inspector** skill on the outgoing diff. If P0 issues are found: fix or get user approval before pushing.
 
 ---
 
 ## Step 6 — Push and open PR
 
+Before pushing, scan the outgoing diff for secrets (keys, tokens, credentials, connection strings). If found, stop and tell the user — do not push.
+
 ```bash
+_BRANCH=$(git branch --show-current)
 git push origin $_BRANCH
 ```
 
@@ -173,7 +141,6 @@ PR 已建立。接下來你可以：
   或等 GitHub 通知
 
 部署完成後建議跑：
-  diff-inspector              確認 production 狀態
   project-memory              記下這次學到的
 ```
 
