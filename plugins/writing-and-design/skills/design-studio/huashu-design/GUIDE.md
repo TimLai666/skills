@@ -23,6 +23,7 @@
 | 任務訊號 | 入口 |
 |---------|------|
 | 提到具體品牌/產品名 | 核心原則#0 事實驗證 → §1.a 資產協議 → 標準流程 |
+| 新品牌從零做識別/logo 概念/brand kit | `references/brand-identity-board.md`（策略先行 → logo 概念法 → 識別板）；品牌已存在則回上一行資產協議 |
 | 沒給風格參考（最常見） | Fallback 顧問模式 Phase 1-5 → 回標準流程 Step 2 |
 | 投影片/PPT | 標準流程 + Step 1 deck 交付鏈 + 「技術紅線」架構選型 |
 | 動畫/匯出 MP4/GIF | 標準流程 + Step 9；動手前必讀 `references/animation-pitfalls.md` |
@@ -446,6 +447,7 @@
 | 沒有design context怎麼辦 | `references/design-context.md`（薄 fallback） 或 `references/design-styles.md`（厚 fallback：HTML 原生 40 種風格庫，網頁 20+PPT 20，按溫度分級） |
 | **需求模糊要推薦風格方向** | `references/design-styles.md`（40 種 HTML 原生風格庫，含還原度/溫度/開源字型）+ `assets/showcases/INDEX.md`（預製截圖畫廊） |
 | **按輸出類型查場景模板**（封面/PPT/資訊圖） | `references/scene-templates.md` |
+| **新品牌從零做識別**（logo 概念/識別系統/品牌識別板）| `references/brand-identity-board.md`（策略先行表+五種 logo 概念法+3×3/2×3 版型+生圖 prompt 結構）；既有品牌走 §1.a 資產協議 |
 | 輸出完後驗證 | `references/verification.md` + `scripts/verify.py` |
 | **設計評審/打分**（設計完成後可選） | `references/critique-guide.md`（5 維度評分+常見問題清單） |
 | **動畫匯出MP4/GIF/加BGM** | `references/video-export.md` + `scripts/render-video.js`（預設25fps）/ `scripts/render-video-seek.js`（真60fps·確定性·無黑幀，走Stage時鐘時用）+ `scripts/convert-formats.sh` + `scripts/add-music.sh` |
