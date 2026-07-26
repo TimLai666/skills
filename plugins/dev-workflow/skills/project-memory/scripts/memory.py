@@ -141,6 +141,32 @@ def render(entries, corrupt, path, header, expand_all=False):
     return "\n".join(out)
 
 
+def add_reminder():
+    """Closing prompt appended to `load`.
+
+    `load` runs far more often than `add`: starting work is a moment an agent
+    can detect, while "something was learned" is a judgement with no moment
+    attached to it. Hanging the reminder off the one call that reliably happens
+    is what gives the write half a moment of its own. It has to restate the
+    command and the bar, because by the time it matters SKILL.md is tens of
+    turns back in the context.
+    """
+    return (
+        "\n---\n"
+        "BEFORE THIS SESSION ENDS — record what was learned here, without waiting to be asked:\n"
+        "  python3 %s add --type <pattern|pitfall|preference|architecture|tool> \\\n"
+        "    --key <describes-the-lesson> --insight '<one sentence>' \\\n"
+        "    --confidence <7-10> --source '<agent-or-skill-name>'\n"
+        "Draft every field yourself from what actually happened and write it. Do not ask\n"
+        "permission first and do not interview the user field by field; report what you\n"
+        "recorded once it is in. A wrong entry is cheap: re-add the same key and the older\n"
+        "one stops showing.\n"
+        "Bar: confidence 7+, specific to this project, actually encountered.\n"
+        "\"Nothing worth recording\" is a valid answer — say it out loud rather than\n"
+        "skipping the decision in silence." % os.path.abspath(__file__)
+    )
+
+
 def cmd_load(args):
     path = store_path()
     entries, corrupt = read_all(path)
@@ -150,6 +176,10 @@ def cmd_load(args):
         return 0
     print(render(entries, corrupt, path,
                  "# Project memory — %d learning(s)" % len(entries), expand_all=args.all))
+    # --json is machine output and --all is the export path that SKILL.md pastes
+    # into AGENTS.md; a prompt aimed at the current session belongs in neither.
+    if not args.all:
+        print(add_reminder())
     return 0
 
 

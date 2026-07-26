@@ -107,7 +107,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | `eng-architect` | 想設計技術架構、畫 architecture diagram、做 error map，並把工作切成一張張票：依使用者功能垂直切、標出彼此的擋路關係、共用基礎先做，再產出 ENG.md 與 delivery-status.md 等協作 artifact。 |
 | `diff-inspector` | 想在合併前審查 diff：scope drift check、critical code review、specialist 並行掃描、adversarial review。 |
 | `test-and-fix` | 想跑測試、根據 diff 自動找出 affected routes、修復後加回歸測試。 |
-| `ship-it` | 想準備 PR、sync base、跑測試、開 PR，上線後提醒你 CI/deploy 監控方式。 |
+| `ship-it` | 想準備 PR、sync base、跑測試、開 PR，提醒你 CI/deploy 監控方式，收尾把這次學到的記進 project-memory。 |
 | `project-memory` | 想記錄專案教訓、踩過的雷、學到的 pattern，支援搜尋與匯出。 |
 | `investigate` | 想先調查根因、驗證假設、再修復，不要先修再問。 |
 | `software-engineering-guidelines` | 任何軟體規劃、架構、實作、重構、review、測試前先載入：想清楚再做、最小變更、精準手術、每次變更都有測試，大改動採 TDD、目標驅動。 |

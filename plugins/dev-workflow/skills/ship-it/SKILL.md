@@ -9,7 +9,7 @@ allowed-tools:
   - Grep
   - AskUserQuestion
 metadata:
-  version: "1.2.7"
+  version: "1.3.0"
 ---
 
 ## Preamble
@@ -139,14 +139,28 @@ PR 已建立。接下來你可以：
   gh pr checks --watch        盯 CI 狀態
   gh run watch                盯部署進度
   或等 GitHub 通知
-
-部署完成後建議跑：
-  project-memory              記下這次學到的
 ```
 
 ---
 
-## Step 8 — Ship report
+## Step 8 — Record what this ship taught
+
+Run the **project-memory** skill now, not after deployment. Shipping is the
+wrap-up checkpoint that skill names, and it is the last point where the session
+still holds why things went the way they did.
+
+Decide out loud whether this branch taught anything worth keeping, then write it
+without asking permission first. "Nothing this time" is a valid answer, but say
+it rather than passing over the step in silence.
+
+The earlier steps are where the candidates usually are: a test that failed in
+Step 3 for a reason nobody would guess from the code, a gap Step 4 or Step 5 kept
+finding, a Step 2 conflict that came from how the project is laid out rather than
+from bad luck.
+
+---
+
+## Step 9 — Ship report
 
 ```text
 ## Ship Report [branch] [date]
@@ -155,6 +169,7 @@ Tests: N passed, N failed
 Coverage: [summary]
 Pre-landing review: [SKIPPED / N issues found, N fixed]
 PR: [URL or "ready — push manually"]
+Learnings recorded: [key(s) written to project-memory, or "none this time"]
 
 Status: shipped
 ```

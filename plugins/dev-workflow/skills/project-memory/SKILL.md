@@ -1,6 +1,6 @@
 ---
 name: project-memory
-description: "Shared cross-agent project memory — pitfalls, patterns and preferences recorded once and readable by any agent that installs this skill. This skill MUST be invoked before starting work in an existing project, to load what was already learned there. MUST also be invoked on the triggers below to record something new, and SHOULD be invoked whenever the user states something worth remembering about how this project behaves. Triggers on: 記一下, 之前踩過什麼雷, 學到什麼, 有什麼教訓, remember this, lesson learned, project learnings, 記錄一下, 之前遇過的, 把這個記起來"
+description: "Shared cross-agent project memory — pitfalls, patterns and preferences recorded once and readable by any agent that installs this skill. This skill MUST be invoked before starting work in an existing project, to load what was already learned there, and MUST be invoked again as that work wraps up, to record what this session learned before it ends. MUST also be invoked on the triggers below to record something new, and SHOULD be invoked whenever the user states something worth remembering about how this project behaves. MUST NOT be used for task lists or open bugs, which belong in the issue tracker or AGENTS.md. Triggers on: 記一下, 之前踩過什麼雷, 學到什麼, 有什麼教訓, remember this, lesson learned, project learnings, 記錄一下, 之前遇過的, 把這個記起來"
 allowed-tools:
   - Bash
   - Read
@@ -8,7 +8,7 @@ allowed-tools:
   - Edit
   - AskUserQuestion
 metadata:
-  version: "1.6.1"
+  version: "1.7.0"
 ---
 
 ## Why this store and not the agent's own memory
@@ -29,8 +29,13 @@ Two situations, both mandatory.
 
 1. **Starting work in a project** — run `load` before reading code or making
    changes. Do this without being asked.
-2. **Something was learned** — the user hits a pitfall, discovers a pattern,
-   states a preference, or says 記一下 / remember this. Run `add`.
+2. **Work wraps up, or the moment something is learned** — whichever comes
+   first. The user hits a pitfall, discovers a pattern, states a preference, or
+   says 記一下 / remember this. Run `add`.
+
+The end of a session is a checkpoint, not a courtesy: decide out loud whether
+anything is worth keeping, and answer "nothing this time" when that is true.
+Skipping the decision in silence is how this store loses most of its entries.
 
 ---
 
@@ -89,11 +94,21 @@ project; carry on. Damaged lines are skipped and reported rather than aborting.
 
 `--all` expands everything, for when you want to read the whole store.
 
+`load` closes with a reminder to record what this session learns. That is
+deliberate. `load` fires far more reliably than `add`, because starting work is
+a moment an agent can detect while "something was learned" is a judgement with
+no moment attached to it, so the write half borrows a moment from the read half.
+`--json` and `--all` skip the reminder, being machine output and export.
+
 ---
 
 ## Add
 
-Ask for whatever the user has not already given, one question at a time:
+Draft all four fields yourself from what actually happened and write the entry.
+Do not ask permission first, and do not walk the user through the fields one
+question at a time. Every question at this point is another reason the entry
+never gets written, and a wrong entry is cheap to fix: re-add the same key and
+`load` shows only the newest. Report what you recorded once it is in.
 
 1. **Type** — `architecture` and `preference` are project-wide and always load in
    full; `pitfall`, `pattern` and `tool` are situational and load as keys only.
