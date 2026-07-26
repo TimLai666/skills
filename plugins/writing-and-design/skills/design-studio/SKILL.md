@@ -9,7 +9,7 @@ description: >-
   deck, landing page, website, UI, mockup, MP4, GIF, infographic, branding,
   logo, 評審, critique, film-inspired, cinematic.
 metadata:
-  version: "1.11.2"
+  version: "1.12.0"
 ---
 
 # Design Studio
@@ -128,6 +128,7 @@ After reading DESIGN.md (or deciding to create one), route to the right engine:
 | Brand materials with specific brand | **Either** — use shared brand protocol | Depends on output type |
 | New brand identity from scratch (logo concepting, brand-kit board) | **Practical** | `huashu-design/GUIDE.md` → `huashu-design/references/brand-identity-board.md` |
 | High-conversion LP (explicit CTA / value props / conversion goal) | **Hand off** | `landing-page-studio` skill — it reads this skill's shared rules and style library, then runs its own conversion workflow |
+| Web-based deck — live presenting, presenter mode, deploy to a URL (not an editable PPTX) | **Hand off** | `open-slide-studio` skill — this skill supplies DESIGN.md and the style direction; it owns the open-slide workspace, authoring hand-off, and delivery |
 
 **Ambiguous**: Ask one question: "Do you have a film or director in mind as visual reference, or want me to recommend directions?"
 

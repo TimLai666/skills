@@ -1,6 +1,6 @@
 # Agent Skills
 
-61 個 agent skills，分成 10 個 plugins，這個 repo 同時是 Claude Code plugin marketplace。
+62 個 agent skills，分成 10 個 plugins，這個 repo 同時是 Claude Code plugin marketplace。
 
 ## 安裝方式
 
@@ -97,6 +97,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | `commercial-proposal-writing` | 想寫或改提案、合作方案、募資 deck、商業計畫。 |
 | `landing-page-studio` | 想產出偏高轉換導向的 landing page、hero section、行銷頁面。 |
 | `design-studio` | 所有設計事務的統一入口：網站、App、簡報、動畫、資訊圖、品牌設計。每次設計會產出或擴充 `DESIGN.md`（Google 格式設計系統檔）。支援電影感（cinematic-ui）與實操快速（huashu-design）雙引擎。 |
+| `open-slide-studio` | 想把簡報做成可放映、可部署成網址的網頁簡報（open-slide 框架），視覺由 design-studio 供給；要可編輯 .pptx 仍走 design-studio。 |
 | `human-writing` | 想要產出文案、文章、內容重寫或其他寫作支援。 |
 
 ### `dev-workflow` — 開發流程與工程支援

@@ -36,7 +36,7 @@
     {
       "name": "writing-and-design",
       "source": "./plugins/writing-and-design",
-      "description": "提案與頁面產出：商業提案撰寫、landing page、統一設計工作室、人味寫作。"
+      "description": "提案與頁面產出：商業提案撰寫、landing page、統一設計工作室、open-slide 網頁簡報、人味寫作。"
     },
     {
       "name": "dev-workflow",
