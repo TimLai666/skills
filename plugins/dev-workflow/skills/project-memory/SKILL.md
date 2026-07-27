@@ -8,7 +8,7 @@ allowed-tools:
   - Edit
   - AskUserQuestion
 metadata:
-  version: "1.7.0"
+  version: "1.9.0"
 ---
 
 ## Why this store and not the agent's own memory
@@ -58,7 +58,7 @@ python3 "$_MEM" --help
 | `load` | Print this project's memory, deduplicated by key, layered |
 | `load --all` | Same but every entry expanded |
 | `load --json` | Same, as a JSON array |
-| `add` | Append one learning |
+| `add` | Append one learning, optionally merging older ones into it |
 | `search QUERY` | Filter learnings by substring |
 | `stats` | Counts by type and average confidence |
 | `path` | Print the store path for this project |
@@ -71,16 +71,17 @@ python3 "$_MEM" --help
 python3 "$_MEM" load
 ```
 
-The output is layered. `architecture` and `preference` hold for the whole project,
-so they print in full — you need them before touching anything. Everything else is
-situational and prints as a bare key list:
+The output is layered by where else the knowledge exists. `pitfall`, `pattern` and
+`preference` print in full, because nothing else in the project writes them down.
+`architecture` and `tool` print as a bare key list, because `AGENTS.md` and the
+code already carry them and the agent is about to read those anyway:
 
 ```
-## Project-wide (architecture, preference)
-- **no-orm-raw-sql** (9/10) — this project deliberately avoids an ORM
+## Only recorded here (pitfall, pattern, preference)
+- **n-plus-one-products** (9/10) — Product.includes(:variants) needed in catalog controller
 
 ## Index — 42 more, run `search <key>` for the full text
-- **pitfall**: n-plus-one-products, tz-naive-timestamps, redis-pool-size
+- **architecture**: no-orm-raw-sql, events-are-append-only
 - **tool**: rg-over-grep
 ```
 
@@ -110,9 +111,12 @@ question at a time. Every question at this point is another reason the entry
 never gets written, and a wrong entry is cheap to fix: re-add the same key and
 `load` shows only the newest. Report what you recorded once it is in.
 
-1. **Type** — `architecture` and `preference` are project-wide and always load in
-   full; `pitfall`, `pattern` and `tool` are situational and load as keys only.
-   Pick by scope, not by how important it feels.
+1. **Type** — `pitfall` for something that actually went wrong, `pattern` for a
+   way of working that turned out to hold, `preference` for how the user wants
+   things done. Those three load in full. `architecture` and `tool` describe how
+   the project is put together and load as keys only, because a file in the repo
+   already says it. Pick by which of those the entry is, not by how important it
+   feels or by which one gets shown.
 2. **Key** — kebab-case, and it must describe the lesson. Most entries appear in
    `load` as nothing but their key, so `lesson-001` is invisible in practice
    while `n-plus-one-products` is findable. The script rejects generic and
@@ -136,11 +140,41 @@ Re-adding an existing key is how you update it. `load` shows only the newest.
 
 ---
 
+## Merging entries
+
+Merge two entries when they turn out to have the same root cause, not when the
+output feels long. The merged insight has to carry the specifics that made each
+one worth keeping — the number, the file, the thing that actually broke.
+Collapsing two concrete lessons into one general statement throws away the only
+thing this store holds that `AGENTS.md` does not.
+
+A merge is an ordinary `add` that names what it now covers:
+
+```bash
+python3 "$_MEM" add \
+  --type pitfall \
+  --key skill-instructions-need-an-execution-point \
+  --insight '<one sentence, keeping the specifics from both>' \
+  --confidence 8 \
+  --absorbs 'skill-write-actions-need-a-moment,printed-suggestion-is-not-an-executed-step'
+```
+
+The absorbed keys stop taking a line of their own and print after the merged
+entry instead, so nothing drops out of the output and `search` still finds them
+under their old keys. No line ever leaves the file. This is not a delete: re-add
+an absorbed key with a fresh timestamp and it stands on its own again.
+
+---
+
 ## What is worth recording
 
 - Confidence 7 or above only.
 - Project-specific lessons only. General programming knowledge does not belong here.
-- Real pitfalls actually hit, or patterns that actually worked.
+- Would the line be at home in `AGENTS.md`? Then write it there instead. This
+  store is for what only surfaces while doing the work: what broke, what the fix
+  turned out to be, what the user wants done differently next time.
+- Real pitfalls actually hit, patterns that actually held up, preferences the
+  user actually stated.
 - Not task lists and not open bugs — those belong in the project's issue tracker
   or its `AGENTS.md`.
 

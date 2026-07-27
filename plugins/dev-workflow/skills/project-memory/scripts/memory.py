@@ -7,7 +7,7 @@ write the same file, so a lesson learned in one agent is visible in the next.
 
 Usage:
   memory.py load [--all] [--json]
-  memory.py add --type T --key K --insight S --confidence N [--files a,b] [--source X]
+  memory.py add --type T --key K --insight S --confidence N [--files a,b] [--source X] [--absorbs k1,k2]
   memory.py search QUERY [--json]
   memory.py stats
   memory.py path
@@ -21,10 +21,12 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 
-TYPES = ("pattern", "pitfall", "preference", "architecture", "tool")
-# Always expanded on load: these hold for the whole project, so an agent needs
-# them before touching anything. The rest are situational and stay collapsed.
-PROJECT_TYPES = ("architecture", "preference")
+TYPES = ("pitfall", "pattern", "preference", "architecture", "tool")
+# Always expanded on load: nothing else in the project writes these down, so the
+# store is the only place they exist. architecture and tool stay collapsed —
+# AGENTS.md and the code itself already carry them, and spending the top of the
+# output on them is spending it on something the agent is about to read anyway.
+UNWRITTEN_TYPES = ("pitfall", "pattern", "preference")
 GENERIC_KEYS = ("lesson", "note", "item", "memo", "learning", "entry", "thing", "misc")
 ROOT = os.path.join(os.path.expanduser("~"), ".mystack", "projects")
 
@@ -96,14 +98,40 @@ def dedupe(entries):
     return sorted(best.values(), key=lambda e: (e.get("type", ""), e["key"]))
 
 
+def absorbed_keys(entries):
+    """Keys whose content has moved into a newer entry, so they stop printing alone.
+
+    The claim only holds while it is no older than what it absorbs. That one
+    comparison is what keeps a wrong merge as cheap to undo as a wrong entry:
+    re-add an absorbed key later and it comes straight back. It also settles
+    chains without recursion — when c absorbs b and b absorbs a, b's claim on a
+    still counts here even though b itself no longer prints. Timestamps are
+    whole seconds, so a merge and its undo have to land in different seconds;
+    merging several entries within one second is the case that must work, and
+    does.
+    """
+    latest = {e["key"]: e.get("ts", "") for e in entries}
+    hidden = set()
+    for e in entries:
+        for k in e.get("absorbs") or []:
+            # An entry naming itself would erase itself under >=. add rejects
+            # that, but a hand-edited file can still carry it.
+            if k != e["key"] and k in latest and e.get("ts", "") >= latest[k]:
+                hidden.add(k)
+    return hidden
+
+
 def _detail(e):
+    absorbs = e.get("absorbs") or []
+    merged = "  (absorbs %s)" % ", ".join(absorbs) if absorbs else ""
     files = e.get("files") or []
     tail = "  [%s]" % ", ".join(files) if files else ""
-    return "- **%s** (%s/10) — %s%s" % (e["key"], e.get("confidence", "?"), e.get("insight", ""), tail)
+    return "- **%s** (%s/10) — %s%s%s" % (
+        e["key"], e.get("confidence", "?"), e.get("insight", ""), merged, tail)
 
 
 def render(entries, corrupt, path, header, expand_all=False):
-    """Layered by default: project-wide entries in full, the rest as keys only.
+    """Layered by default: what only lives here in full, the rest as keys only.
 
     Every key is always listed. Collapsing detail is fine; hiding that an entry
     exists is not — an agent that cannot see a key will never search for it.
@@ -124,14 +152,14 @@ def render(entries, corrupt, path, header, expand_all=False):
             out.append("\n⚠ %d unparsable line(s) skipped: %s" % (len(corrupt), corrupt))
         return "\n".join(out)
 
-    wide = [e for t in ordered if t in PROJECT_TYPES for e in by_type[t]]
-    rest = [(t, by_type[t]) for t in ordered if t not in PROJECT_TYPES]
+    unwritten = [e for t in ordered if t in UNWRITTEN_TYPES for e in by_type[t]]
+    rest = [(t, by_type[t]) for t in ordered if t not in UNWRITTEN_TYPES]
     n_rest = sum(len(v) for _, v in rest)
 
     out = [header]
-    if wide:
-        out.append("\n## Project-wide (%s)" % ", ".join(PROJECT_TYPES))
-        out.extend(_detail(e) for e in wide)
+    if unwritten:
+        out.append("\n## Only recorded here (%s)" % ", ".join(UNWRITTEN_TYPES))
+        out.extend(_detail(e) for e in unwritten)
     if rest:
         out.append("\n## Index — %d more, run `search <key>` for the full text" % n_rest)
         for t, group in rest:
@@ -154,14 +182,15 @@ def add_reminder():
     return (
         "\n---\n"
         "BEFORE THIS SESSION ENDS — record what was learned here, without waiting to be asked:\n"
-        "  python3 %s add --type <pattern|pitfall|preference|architecture|tool> \\\n"
+        "  python3 %s add --type <pitfall|pattern|preference|architecture|tool> \\\n"
         "    --key <describes-the-lesson> --insight '<one sentence>' \\\n"
         "    --confidence <7-10> --source '<agent-or-skill-name>'\n"
         "Draft every field yourself from what actually happened and write it. Do not ask\n"
         "permission first and do not interview the user field by field; report what you\n"
         "recorded once it is in. A wrong entry is cheap: re-add the same key and the older\n"
         "one stops showing.\n"
-        "Bar: confidence 7+, specific to this project, actually encountered.\n"
+        "Bar: confidence 7+, specific to this project, actually encountered, and\n"
+        "not something AGENTS.md or the code already says.\n"
         "\"Nothing worth recording\" is a valid answer — say it out loud rather than\n"
         "skipping the decision in silence." % os.path.abspath(__file__)
     )
@@ -171,6 +200,10 @@ def cmd_load(args):
     path = store_path()
     entries, corrupt = read_all(path)
     entries = dedupe(entries)
+    # Filtered here rather than inside render(), so `search` still finds an
+    # absorbed entry under its old key.
+    hidden = absorbed_keys(entries)
+    entries = [e for e in entries if e["key"] not in hidden]
     if args.json:
         print(json.dumps(entries, ensure_ascii=False, indent=2))
         return 0
@@ -183,6 +216,11 @@ def cmd_load(args):
     return 0
 
 
+def _kebab(s):
+    """Replace, never delete: silently dropping characters turns "N+1" into "n1"."""
+    return re.sub(r"-{2,}", "-", re.sub(r"[^a-z0-9]+", "-", s.strip().lower())).strip("-")
+
+
 def cmd_add(args):
     if args.type not in TYPES:
         print("ERROR: --type must be one of %s" % ", ".join(TYPES), file=sys.stderr)
@@ -190,8 +228,7 @@ def cmd_add(args):
     if not 1 <= args.confidence <= 10:
         print("ERROR: --confidence must be 1-10", file=sys.stderr)
         return 2
-    # Replace, never delete: silently dropping characters turns "N+1" into "n1".
-    key = re.sub(r"-{2,}", "-", re.sub(r"[^a-z0-9]+", "-", args.key.strip().lower())).strip("-")
+    key = _kebab(args.key)
     if not key:
         print("ERROR: --key must contain kebab-case characters", file=sys.stderr)
         return 2
@@ -212,6 +249,16 @@ def cmd_add(args):
               "easier to spot in the index" % key.split("-")[0], file=sys.stderr)
 
     path = store_path()
+    # Self-absorption would be a no-op anyway (the timestamps are equal), but it
+    # reads as a typo for a key the author meant to name, so say so.
+    absorbs = [k for k in (_kebab(a) for a in args.absorbs.split(",")) if k and k != key]
+    if absorbs:
+        known = {e["key"] for e in read_all(path)[0]}
+        unknown = [k for k in absorbs if k not in known]
+        if unknown:
+            print("WARNING: --absorbs names %s, which is not in the store; the merge "
+                  "records the claim but hides nothing" % ", ".join(unknown), file=sys.stderr)
+
     os.makedirs(os.path.dirname(path), exist_ok=True)
     entry = {
         "ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -223,10 +270,12 @@ def cmd_add(args):
         "branch": args.branch or branch(),
         "files": [f.strip() for f in args.files.split(",") if f.strip()] if args.files else [],
     }
+    if absorbs:
+        entry["absorbs"] = absorbs
     # json.dumps handles quotes, backslashes and newlines that hand-built JSON breaks on.
     with open(path, "a", encoding="utf-8") as fh:
         fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
-    print("SAVED %s -> %s" % (key, path))
+    print("SAVED %s%s -> %s" % (key, " (absorbs %s)" % ", ".join(absorbs) if absorbs else "", path))
     return 0
 
 
@@ -250,20 +299,28 @@ def cmd_stats(args):
     path = store_path()
     entries, corrupt = read_all(path)
     uniq = dedupe(entries)
+    # Counted the same way load prints, so the two never disagree about how much
+    # is actually in play. Absorbed keys are reported separately rather than
+    # dropped: they are the other half of the gap between lines and keys.
+    absorbed = absorbed_keys(uniq)
+    live = [e for e in uniq if e["key"] not in absorbed]
     print("PATH: %s" % path)
-    print("TOTAL: %d line(s), %d unique key(s)" % (len(entries), len(uniq)))
-    if not uniq:
+    print("TOTAL: %d line(s), %d live key(s)%s" % (
+        len(entries), len(live), ", %d absorbed" % len(absorbed) if absorbed else ""))
+    # Ahead of the early return: a store whose keys are all absorbed still needs
+    # to report damaged lines.
+    if corrupt:
+        print("CORRUPT_LINES: %s" % corrupt)
+    if not live:
         return 0
     counts = {}
-    for e in uniq:
+    for e in live:
         counts[e.get("type", "other")] = counts.get(e.get("type", "other"), 0) + 1
     for t, c in sorted(counts.items(), key=lambda kv: -kv[1]):
         print("  %-14s %d" % (t, c))
-    confs = [e["confidence"] for e in uniq if isinstance(e.get("confidence"), int)]
+    confs = [e["confidence"] for e in live if isinstance(e.get("confidence"), int)]
     if confs:
         print("AVG_CONFIDENCE: %.1f" % (sum(confs) / len(confs)))
-    if corrupt:
-        print("CORRUPT_LINES: %s" % corrupt)
     return 0
 
 
@@ -279,7 +336,7 @@ def main():
 
     lo = sub.add_parser("load", help="print deduplicated memory for this project")
     lo.add_argument("--json", action="store_true")
-    lo.add_argument("--all", action="store_true", help="expand every entry, not just project-wide ones")
+    lo.add_argument("--all", action="store_true", help="expand every entry, not just the ones only recorded here")
     lo.set_defaults(func=cmd_load)
 
     ad = sub.add_parser("add", help="append one learning")
@@ -290,6 +347,8 @@ def main():
     ad.add_argument("--files", default="")
     ad.add_argument("--source", default="user-stated")
     ad.add_argument("--branch", default="")
+    ad.add_argument("--absorbs", default="",
+                    help="comma-separated keys this entry now covers; they stop printing on their own line")
     ad.set_defaults(func=cmd_add)
 
     se = sub.add_parser("search", help="filter learnings by substring")
