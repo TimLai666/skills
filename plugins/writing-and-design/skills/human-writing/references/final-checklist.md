@@ -12,6 +12,7 @@ The text:
 - [ ] does not leak internal planning language or unexplained analytical frames into the final prose
 - [ ] does not answer an objection, accusation, or inner judgment that no one raised
 - [ ] does not use niche vocabulary, jargon, or project shorthand without explanation
+- [ ] does not use uncommon imagery or literal translated terms such as「基線」or「閉環」when plain descriptions of people, actions, information, and consequences would be clearer
 - [ ] keeps every verb whole and says what it acts on: no two-syllable verb shaved to one character, in prose or in a table cell
 - [ ] uses no abbreviation the reader has not already met elsewhere, and none that collides with an existing word
 - [ ] replaces vague abstractions with concrete nouns, verbs, examples, conditions, or consequences where needed

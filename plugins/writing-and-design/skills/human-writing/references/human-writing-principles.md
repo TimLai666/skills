@@ -56,6 +56,7 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 - Prefer common words over niche terms, jargon, project shorthand, and author-created labels.
 - If a term such as「剪刀差」is necessary, explain it in plain language at first use. Otherwise, directly describe the difference or consequence it refers to.
 - Do not treat a familiar term within one field as familiar to every reader.
+- Do not use uncommon imagery or literal translated terms merely because they sound compact or professional. Words such as「基線」and「閉環」make readers stop and decode the sentence. Unless the intended reader already uses the term and the technical precision matters, replace it with the people, actions, information, and unresolved consequence it hides.
 
 ### 8. Do not clip a two-syllable verb down to one character
 
