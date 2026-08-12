@@ -1,6 +1,6 @@
 # Human writing principles
 
-Use these rules to make prose feel written, not generated. They are grouped in the order the decisions come up while writing: what to say, who is reading, how to structure it, how it sounds, and finally punctuation.
+Use these rules to make prose feel written by a person. They follow the order in which you make decisions: what to say, who will read it, how to structure it, how it should sound, and finally punctuation.
 
 ## Make it concrete
 
@@ -12,16 +12,16 @@ Use these rules to make prose feel written, not generated. They are grouped in t
 
 ### 2. Do not use abstract adjectives and adverbs
 
-Abstract modifiers only feel descriptive to the writer. The reader gets no picture, no idea what happened or how good "good" is, and can only fill the blank with their own guess. Watch for four forms:
+Abstract modifiers can feel descriptive to the writer, but they give the reader no picture of what happened or what makes something good. The reader has to guess. Watch for four forms:
 
 - **AI-invented shorthand that no real person says**, such as「不繞」「最穩」「一直在撐」. These sound punchy to the model but are not how people talk, and the reader cannot even tell what quality is being claimed. This form is the strongest AI tell of the four.
 - **Impression summaries**, such as「很好」「很棒」「非常愉快」. They report the writer's feeling about the thing instead of the thing, so the picture in the writer's head never reaches the reader.
 - **Ambiguous abstractions**, such as「彈性」「完善」or "robust", "seamless". Every reader decodes them differently, so the writer thinks the point is made while each reader understands something else.
 - **Ornate stacked modifiers**, such as「深刻地」「優雅地」「淋漓盡致」. They perform style without adding content. If deleting the word loses no information, it was empty.
 
-In every case, rewrite the sentence to show the thing itself, in words a real person would say: what happened, how much, compared to what, what it looks like in use, or what it lets the reader do. If nothing concrete is known, delete the modifier and let the plain statement stand. Never invent a number or detail just to replace a banned word.
+Rewrite the sentence in ordinary words. Say what happened, how much, compared with what, what it looks like in use, or what the reader can do. If you do not know a concrete detail, remove the modifier and keep the plain statement. Never invent a number or detail to fill the gap.
 
-The test for "concrete" is whether the reader can replay the scene or operation in their head, not whether the sentence contains a number.「結帳從五步縮成兩步」still fails: the reader does not know what the five steps were, so the number is just another summary. Concrete means the reader could walk through it:「以前在購物網站下單，每次都要重打一遍地址。改版後登入會員，結帳頁直接帶出上次的地址，按送出就完成了」.
+The test is whether the reader can picture the scene or carry out the operation, not whether the sentence has a number.「結帳從五步縮成兩步」still fails because the reader does not know those five steps. Concrete writing lets the reader follow the action:「以前在購物網站下單，每次都要重打一遍地址。改版後登入會員，結帳頁直接帶出上次的地址，按送出就完成了」.
 
 The ban targets modifiers that replace content, not all modifiers. When a sentence is already concrete and unambiguous, a modifier can ride on it:「按送出就結束了，順很多」works because the reader has just seen the operation and knows exactly what "順" refers to. Two limits still apply: do not reuse the same modifier across the text, and do not attach a modifier to every sentence. When most sentences stand plain, the few modifiers that remain actually register.
 
@@ -56,11 +56,12 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 - Prefer common words over niche terms, jargon, project shorthand, and author-created labels.
 - If a term such as「剪刀差」is necessary, explain it in plain language at first use. Otherwise, directly describe the difference or consequence it refers to.
 - Do not treat a familiar term within one field as familiar to every reader.
+- Do not use unfamiliar imagery or literal translated terms just because they sound compact or professional. Words such as「基線」and「閉環」make readers stop and work out what the sentence means. Unless the intended reader already uses the term and its technical precision matters, replace it with the people, actions, information, and unresolved consequence it hides.
 
 ### 8. Do not clip a two-syllable verb down to one character
 
 - A one-character Chinese verb needs something behind it to stand on: an object（查資料）, a complement（改好了、查清楚）, or an aspect marker（測過了、拆掉）. Left bare at the end of a clause, it stops sounding like anything a person would say.「範例照抄也要驗」「命中的已拆」「表現優異的項目也要查」are all the same failure.
-- Clipping the verb usually drops its object with it, so putting the second character back is not enough.「範例照抄也要驗一次」reads more smoothly, but the reader still cannot tell what to verify. Write「就算照抄範例，也要自己檢查每一條有沒有歸錯欄」. This is rule 3 from another angle: a verb worn down to one character is usually the sign that its object went missing.
+- Clipping the verb usually drops its object with it, so putting the second character back is not enough.「範例照抄也要驗一次」reads more smoothly, but the reader still cannot tell what to verify. Write「就算照抄範例，也要自己檢查每一條有沒有放錯欄位」. This is rule 3 from another angle: a verb worn down to one character is usually the sign that its object went missing.
 - Status columns in a table are the exception. The row subject already supplies the object, so it does not need repeating, but the verb still has to be whole: write「驗過」, not「已驗」.
 - Column width is not a reason to shave characters. When something has to be shorter, choose a shorter complete wording instead.
 - The same applies to nouns: do not coin an abbreviation on the spot. Use only ones already in circulation（健保、台大、API）, and drop any that collides with an existing word —「產品經理」cut down to「產經」reads as 產業經濟.
@@ -75,15 +76,15 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 ### 10. Do not default to setup-and-reveal structures
 
-- 先抑後揚 and 先破後立 — first putting something down or building up a wrong view, then revealing the real point — is a default rhetorical reflex of models, not of people. When every section opens by knocking something over, the whole text runs on one visible formula, and the reader learns to skip the first half of every paragraph.
+- 先抑後揚 and 先破後立 start by building up a wrong view, then reveal the real point. Models fall into this pattern easily. When every section starts that way, readers learn to skip the first half of each paragraph.
 - Most points are stronger stated directly: lead with the claim, then support it.
 - Keep the structure only when the intended reader genuinely holds the misconception and correcting it is the point of the passage. Never invent a strawman just to have something to knock down. Even when justified, use it once in a piece, not as the skeleton of every section.
 
-### 11. Sound like someone is making a point
+### 11. Make the point clear
 
-- Give the prose a center of gravity.
-- In restrained writing, this means clear judgment and stable framing.
-- In voiced writing, this can include opinion, tension, or a light edge.
+- The reader should be able to tell what the writer thinks or wants them to understand.
+- In restrained writing, state the judgment clearly and keep the framing consistent.
+- In voiced writing, use opinion, tension, or a light edge when it helps the point.
 
 ### 12. Write body text as body text, not as slogans
 
@@ -95,7 +96,7 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 - Do not force every idea into neat triples.
 - Do not make every paragraph the same length.
-- Allow one sharp sentence, one longer turn, one quiet sentence when useful.
+- Let sentence length change with the point. Do not arrange every paragraph into the same pattern.
 
 ## Control rhythm and tone
 
@@ -117,7 +118,7 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 - Add feeling through timing, specificity, and point of view.
 - Avoid melodrama unless the task genuinely calls for it.
 
-### 17. Use restraint as a feature
+### 17. Keep it restrained
 
 - The best human-like line is often simpler than the first draft.
 - Do not show off range when a plain sentence will land better.

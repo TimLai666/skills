@@ -1,6 +1,6 @@
 # AI writing patterns to remove
 
-Use this file as a cleanup checklist after drafting or rewriting.
+Use this checklist after drafting or rewriting.
 
 ## High-priority patterns
 
@@ -15,6 +15,14 @@ Use this file as a cleanup checklist after drafting or rewriting.
 - Invented abbreviations
   - Examples:「產品經理」cut to「產經」, or an acronym coined mid-paragraph in English and then reused as if the reader knows it.
   - Fix: keep only abbreviations already in circulation（健保、台大、API）, and never one that collides with an existing word. When something has to be shorter, choose a shorter complete wording instead of shaving characters.
+
+- Unfamiliar imagery and literal translated terms
+  - Examples:「基線」「閉環」when the reader does not already use them.
+  - Fix: say who does what, what information they have, and what remains unresolved. Keep the term only when the intended reader needs its technical precision.
+
+- Invented details in a rewrite
+  - Examples: adding a price, a time, a person, a feature, or a scene that the source text does not provide.
+  - Fix: use only facts from the source or facts you have verified. If no concrete detail is available, remove the vague claim instead of making one up.
 
 - Vague attribution
   - Examples: "experts say", "observers note", "industry reports suggest"

@@ -10,37 +10,36 @@ description: >-
   explicitly owns the writing style or the output is purely code, structured
   data, or a command. Supports Chinese and English.
 metadata:
-  version: "1.2.4"
+  version: "1.2.6"
 ---
 
 # Human Writing
 
 ## Overview
 
-Treat this as the default prose skill for anything a person will read, including every user-facing answer and any formal or informal document.
-Use it for both `rewrite` and `generate` tasks. Aim for writing that sounds like someone meant it, not like a model averaged it.
+Use this for prose that a person will read, whether you are writing from scratch or revising a draft. The goal is clear, natural writing that sounds intentional.
 
-Apply it by default when the output contains prose intended for a person. Do not force it onto purely technical output such as source code, JSON, SQL, shell commands, or other structured data. If another skill explicitly owns the output's domain structure or style, let that skill drive the content plan and use this skill to shape the final prose.
+Do not apply it to code, JSON, SQL, shell commands, or other structured output. When another skill owns the format or subject matter, use that skill to plan the content and use this one for the prose.
 
-This file only defines the process. The actual rules live in the reference files, and each workflow step names the file to read at that stage. Read the file at that step and follow it. Do not substitute a remembered summary for the file's content.
+This file gives the sequence. The rules are in the linked references. Read the reference named at each step instead of relying on a remembered summary.
 
 ## Workflow
 
-1. Route the task.
+1. Choose the mode.
    Read [references/mode-selection-and-language-rules.md](./references/mode-selection-and-language-rules.md).
-   Decide `rewrite` or `generate`, identify the audience and what the text must do, settle language handling, and pick `grounded` or `voiced`. The same file then gives the working rules for the mode and style you picked.
+   Decide between `rewrite` and `generate`, identify the reader and purpose, match the language, and choose `grounded` or `voiced`.
 
-2. Draft or rewrite.
-   Read [references/human-writing-principles.md](./references/human-writing-principles.md) and write under all of its principles. They cover specificity, anchoring actions and objects, zero shared reader context, abstract adjectives and adverbs, argument structure, vocabulary, rhythm, tone, and punctuation.
+2. Write the draft.
+   Read [references/human-writing-principles.md](./references/human-writing-principles.md). Use its rules for concrete detail, reader context, structure, vocabulary, rhythm, tone, and punctuation.
 
-3. Calibrate against examples.
-   While drafting or rewriting, consult [references/human-writing-examples.md](./references/human-writing-examples.md) to see what each principle looks like when applied to real sentences, including cases where a first rewrite is still not concrete enough. The scenarios in the examples are only sentence content, not a limit on when this skill applies.
+3. Check the examples.
+   Consult [references/human-writing-examples.md](./references/human-writing-examples.md) while writing. They show how the rules work in sentences, including rewrites that still leave too much for the reader to infer.
 
-4. Run a cleanup pass.
-   Read [references/ai-writing-patterns.md](./references/ai-writing-patterns.md) and remove every artifact it lists from the draft, keeping the meaning, facts, and intent intact.
+4. Remove AI patterns.
+   Read [references/ai-writing-patterns.md](./references/ai-writing-patterns.md). Remove every listed pattern without changing the meaning, facts, or intent.
 
-5. Final check.
-   Read [references/final-checklist.md](./references/final-checklist.md) and run every item against the finished text. Fix whatever fails, then run it again until everything passes.
+5. Check the finished text.
+   Read [references/final-checklist.md](./references/final-checklist.md). Test every item against the actual text, fix failures, and check it again.
 
 ## Resources
 
