@@ -1,6 +1,6 @@
 # Final checklist
 
-Use this before you deliver. Check every item against the actual text, not a general impression of the draft. Fix what fails, then check again. Each item shortens a rule from [human-writing-principles.md](./human-writing-principles.md); return there when you need the full rule.
+Use this before you deliver. Check every item against the actual text, not a general impression of the draft. Fix what fails, then check again. Each item shortens a rule from [human-writing-principles.md](./human-writing-principles.md), [ai-writing-patterns.md](./ai-writing-patterns.md), or [mode-selection-and-language-rules.md](./mode-selection-and-language-rules.md); return there when you need the full rule.
 
 The text:
 
@@ -22,6 +22,7 @@ The text:
 - [ ] anchors every action and object: the reader can tell what is done, to what, and where, without guessing
 - [ ] does not rely on vague authorities or inflated importance
 - [ ] does not repeat the same sentence pattern throughout a paragraph or section
+- [ ] does not force ideas into neat triples
 - [ ] does not stack several short fragments with 頓號 just to create a slogan-like rhythm
 - [ ] reads as running prose: no body paragraph built from headline or slogan-style declarations that could double as slide titles
 - [ ] does not repeatedly force ordinary statements into「不是……而是……」對比句型
@@ -30,6 +31,7 @@ The text:
 - [ ] gives every instruction an actor, an action with its object, and a deadline, and ends with the reader's next step when one is expected
 - [ ] keeps the conventions, register, and formulaic phrases of fixed-format genres（公文、契約、法律條款）, applying only the structural fixes there
 - [ ] does not lean on unnatural em dashes to simulate voice
-- [ ] contains no semicolon unless removing it would make a formal quotation, required syntax, or a genuinely complex list less clear
+- [ ] contains no semicolon in ordinary Chinese prose, unless removing it would make a formal quotation, required syntax, or a genuinely complex list less clear
 - [ ] supports each important claim instead of using smooth wording to cover a gap in the reasoning
+- [ ] in a rewrite, carries a one-line `Kept as-is:` note when a hedge, condition, or complex clause stayed for precision, and no note when nothing did
 - [ ] matches the user's language and implied social context

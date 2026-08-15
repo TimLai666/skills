@@ -10,14 +10,14 @@ description: >-
   explicitly owns the writing style or the output is purely code, structured
   data, or a command. Supports Chinese and English.
 metadata:
-  version: "1.3.0"
+  version: "1.3.2"
 ---
 
 # Human Writing
 
 ## Overview
 
-Use this for prose that a person will read, whether you are writing from scratch or revising a draft. The goal is clear, natural writing that sounds intentional.
+Use this for prose that a person will read, whether you are writing from scratch or revising a draft. The goal is prose the reader can picture and act on, with no AI tells left in.
 
 Do not apply it to code, JSON, SQL, shell commands, or other structured output. When another skill owns the format or subject matter, use that skill to plan the content and use this one for the prose.
 
@@ -47,8 +47,8 @@ This file gives the sequence. The rules are in the linked references. Read the r
 - Writing principles: [references/human-writing-principles.md](./references/human-writing-principles.md)
 - Pre-delivery checklist: [references/final-checklist.md](./references/final-checklist.md)
 - Rewrite examples with original and improved sentences: [references/human-writing-examples.md](./references/human-writing-examples.md)
-- AI-writing artifacts to remove: [references/ai-writing-patterns.md](./references/ai-writing-patterns.md)
+- AI writing patterns to remove: [references/ai-writing-patterns.md](./references/ai-writing-patterns.md)
 
 ## Suggested Prompt
 
-Use `$human-writing` to write or rewrite human-facing text so it reads naturally, credibly, and like a person actually meant it.
+Use `$human-writing` to write or rewrite human-facing text so it reads like a person actually meant it.

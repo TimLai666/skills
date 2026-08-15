@@ -31,7 +31,7 @@ Choose `voiced` when the text is:
 When the prompt is ambiguous:
 
 - default to `grounded` for business, documentation, updates, or neutral explanation
-- default to `voiced` for essays, commentary, posts, and marketing-style asks
+- default to `voiced` for essays, commentary, posts, and marketing-style requests
 
 ## 3. Rewrite mode rules
 
@@ -58,7 +58,7 @@ Use this mode when the user wants fresh prose from an idea, outline, notes, or a
 
 Use for business writing, internal updates, memos, documentation, proposals, factual summaries, and other trust-sensitive text.
 
-- Prefer direct claims, plain syntax, and calm confidence.
+- Prefer direct claims and plain syntax: state the conclusion first, and hedge only where the claim needs it.
 - Use specific nouns and verbs over abstract framing.
 - Keep tone natural without sounding casual for no reason.
 - Let credibility come from clear claims and supporting facts.
@@ -67,7 +67,7 @@ Use for business writing, internal updates, memos, documentation, proposals, fac
 
 Use for commentary, opinion, social posts, persuasive copy, essays, and prose that benefits from character.
 
-- Allow stronger rhythm shifts, sharper phrasing, and controlled opinion.
+- Allow harder rhythm breaks and blunter word choices than grounded writing would take. State an opinion outright when the piece calls for one.
 - Add personality through perspective, not gimmicks.
 - Use a short aside or a direct opinion only when it helps the point.
 - Do not add quirks just to sound personal.

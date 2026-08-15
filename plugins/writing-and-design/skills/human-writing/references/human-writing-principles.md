@@ -92,7 +92,7 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 - Some document types carry a fixed format and conventional phrases: 台灣公文 with 主旨／說明 and 期望語（請查照、請核示）, contracts and legal clauses with their set formulas. In these genres the conventions are how a person writes. Stripping them to sound plainer makes the text less human, not more.
 - Apply only the structural rules there — the conclusion goes into 主旨, details move down into 說明, actors and deadlines stay explicit — and leave the register, formulaic phrases, and required vocabulary alone.「主旨：請轉知所屬同仁報名本校 9 月 10 日及 17 日辦理之資訊安全教育訓練，請查照。」keeps every convention and still leads with the point.
-- The same gate applies to vocabulary cleanup.「係」「惟」「俾」are padding in an email and normal register in a contract. Judge by the genre the reader expects, not by a universal word list.
+- Vocabulary cleanup works the same way.「係」「惟」「俾」are padding in an email and normal register in a contract. Judge by the genre the reader expects, not by a universal word list.
 
 ### 13. Do not default to setup-and-reveal structures
 
@@ -103,7 +103,7 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 ### 14. Make the point clear
 
 - The reader should be able to tell what the writer thinks or wants them to understand.
-- In restrained writing, state the judgment clearly and keep the framing consistent.
+- In grounded writing, state the judgment clearly and keep the framing consistent.
 - In voiced writing, use opinion, tension, or a light edge when it helps the point.
 
 ### 15. Write body text as body text, not as slogans
@@ -115,8 +115,8 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 ### 16. Break sterile symmetry
 
 - Do not force every idea into neat triples.
-- Do not make every paragraph the same length.
-- Let sentence length change with the point. Do not arrange every paragraph into the same pattern.
+- Vary paragraph length, and let sentence length change with the point.
+- When every paragraph follows the same arc, break the arc.
 
 ## Control rhythm and tone
 
@@ -146,9 +146,9 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 ### 21. Match social context
 
-- Business writing should feel reliable, not robotic.
-- Public-facing copy should feel intentional, not inflated.
-- Commentary should sound considered, not generic.
+- Business writing earns trust by stating facts and next steps plainly, without template phrases.
+- Public-facing copy should read as if someone chose each word for this product and this reader.
+- In commentary, take a position and give its reason. A survey of safe opinions reads as filler.
 - Chinese and English should each sound native to their own rhetorical habits.
 
 ## Punctuation
