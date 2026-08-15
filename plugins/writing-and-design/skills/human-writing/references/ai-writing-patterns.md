@@ -5,20 +5,20 @@ Use this checklist after drafting or rewriting.
 ## High-priority patterns
 
 - Invented shorthand modifiers
-  - Examples:「不繞」「最穩」「一直在撐」「很頂」— punchy-sounding abstract descriptors no real person uses, where the reader cannot even tell what quality is being claimed.
-  - Fix: rewrite the whole sentence to say the concrete thing in ordinary spoken wording. There is no one-word substitute; the shorthand exists because the model skipped the actual content.
+  - Examples:「不繞」「最穩」「一直在撐」「很頂」
+  - Fix: rewrite the whole sentence to say the concrete thing in ordinary spoken wording. See rule 2 in [human-writing-principles.md](./human-writing-principles.md).
 
 - Clipped verbs
-  - Examples:「範例照抄也要驗」「命中的已拆」「表現優異的項目也要查」— a two-syllable verb shaved down to one character with nothing behind it.
-  - Fix: write the verb whole and say what it acts on.「也要驗一次」still fails, because the reader cannot tell what to verify. A table's status column may take the object from its row subject, but the verb still has to be whole:「驗過」, not「已驗」.
+  - Examples:「範例照抄也要驗」「命中的已拆」「表現優異的項目也要查」
+  - Fix: write the verb whole and say what it acts on. See rule 8 in [human-writing-principles.md](./human-writing-principles.md).
 
 - Invented abbreviations
-  - Examples:「產品經理」cut to「產經」, or an acronym coined mid-paragraph in English and then reused as if the reader knows it.
-  - Fix: keep only abbreviations already in circulation（健保、台大、API）, and never one that collides with an existing word. When something has to be shorter, choose a shorter complete wording instead of shaving characters.
+  - Examples:「產品經理」cut to「產經」, or an acronym coined mid-paragraph in English.
+  - Fix: keep only abbreviations already in circulation, or choose a shorter complete wording. See rule 8 in [human-writing-principles.md](./human-writing-principles.md).
 
 - Unfamiliar imagery and literal translated terms
   - Examples:「基線」「閉環」when the reader does not already use them.
-  - Fix: say who does what, what information they have, and what remains unresolved. Keep the term only when the intended reader needs its technical precision.
+  - Fix: say who does what, what information they have, and what remains unresolved. See rule 7 in [human-writing-principles.md](./human-writing-principles.md).
 
 - Invented details in a rewrite
   - Examples: adding a price, a time, a person, a feature, or a scene that the source text does not provide.
@@ -82,7 +82,7 @@ Use this checklist after drafting or rewriting.
   - Fix: write running prose. Give each sentence a subject, a verb, and a connection to the sentence before it; keep headline diction in actual headings.
 
 - Semicolon overuse in ordinary Chinese prose
-  - Fix: replace each semicolon with a full stop, comma, or clearer sentence boundary. Keep one only for formal quotations, required syntax, or a genuinely complex list.
+  - Fix: replace each semicolon with a full stop, comma, or clearer sentence boundary. See rule 22 in [human-writing-principles.md](./human-writing-principles.md).
 
 ## Bilingual cleanup notes
 

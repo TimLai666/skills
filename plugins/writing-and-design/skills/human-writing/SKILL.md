@@ -10,7 +10,7 @@ description: >-
   explicitly owns the writing style or the output is purely code, structured
   data, or a command. Supports Chinese and English.
 metadata:
-  version: "1.3.2"
+  version: "1.4.0"
 ---
 
 # Human Writing
@@ -40,14 +40,6 @@ This file gives the sequence. The rules are in the linked references. Read the r
 
 5. Check the finished text.
    Read [references/final-checklist.md](./references/final-checklist.md). Test every item against the actual text, fix failures, and check it again.
-
-## Resources
-
-- Mode and style routing, mode rules, language handling: [references/mode-selection-and-language-rules.md](./references/mode-selection-and-language-rules.md)
-- Writing principles: [references/human-writing-principles.md](./references/human-writing-principles.md)
-- Pre-delivery checklist: [references/final-checklist.md](./references/final-checklist.md)
-- Rewrite examples with original and improved sentences: [references/human-writing-examples.md](./references/human-writing-examples.md)
-- AI writing patterns to remove: [references/ai-writing-patterns.md](./references/ai-writing-patterns.md)
 
 ## Suggested Prompt
 
