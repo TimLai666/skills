@@ -44,6 +44,10 @@ Use this checklist after drafting or rewriting.
   - Examples: "in order to", "it is important to note", "at this point in time"
   - Fix: compress to direct language.
 
+- Padding verbs and classical residue in ordinary Chinese prose
+  - Examples:「進行討論」「加以檢視」where「討論」「檢視」does the work;「係」「惟」「俾」in an email, product doc, or announcement.
+  - Fix: cut the padding verb and keep the real one（進行優化→優化）; replace classical residue with plain words（係→是、惟→但）. Keep them only in genres whose register requires them（公文、契約、法律條款）— see the fixed-format genre rule in [human-writing-principles.md](./human-writing-principles.md).
+
 - Over-hedging
   - Examples: "could potentially", "it may perhaps", "seems to suggest"
   - Fix: keep only the uncertainty the claim actually needs.

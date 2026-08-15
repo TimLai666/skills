@@ -74,25 +74,45 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 ## Structure the argument straight
 
-### 10. Do not default to setup-and-reveal structures
+### 10. Lead with the point in informational writing
+
+- When the text informs — announcements, emails, reports, documentation, status updates — put the decision, change, or required action in the first sentence, and the reasons and background after it. Readers of informational text scan for what changed and what to do; making them read the build-up first is author-centric ordering.
+-「鑑於近期內部作業流程有所調整，經多方評估與審慎考量後，本公司決定自下月一日起，將週會調整至週三下午辦理」buries the only fact the reader needs. Write「下個月起，週會改到週三下午開（原本是週一上午）」, or in a formal register,「本年度健康檢查 9 月 1 日至 15 日開放報名，名額增至三百名」with the reasons following. Leading with the point changes the order, not the register.
+- Headings state content, not category.「5/20 凌晨 2–4 點系統暫停服務」tells the reader what is happening;「系統維護公告」only names a drawer to look in. A heading should answer, not tease.
+- Voiced writing may earn a slower opening, but even there, never bury the fact the reader came for.
+
+### 11. Write instructions as doable actions
+
+- When the reader must do something, the sentence needs an actor, an action with its object, and a deadline.「相關資料應於期限內補齊，逾期恕不受理」names no one, no document, and no date; write「申請人請於 8 月 29 日前，將身分證影本上傳至報名系統」.
+- Every obligation needs a subject.「本案應予處理」— by whom?
+- Put the condition before the action（「如果 X，就做 Y」）so readers it excludes can stop reading early.
+- When the text expects the reader to act, end with the next step.「若有疑問歡迎隨時聯繫」closes nothing; write「請回信告訴我選方案一還是方案二，我週五前要回覆廠商」.
+
+### 12. Fixed-format genres keep their conventions
+
+- Some document types carry a fixed format and conventional phrases: 台灣公文 with 主旨／說明 and 期望語（請查照、請核示）, contracts and legal clauses with their set formulas. In these genres the conventions are how a person writes. Stripping them to sound plainer makes the text less human, not more.
+- Apply only the structural rules there — the conclusion goes into 主旨, details move down into 說明, actors and deadlines stay explicit — and leave the register, formulaic phrases, and required vocabulary alone.「主旨：請轉知所屬同仁報名本校 9 月 10 日及 17 日辦理之資訊安全教育訓練，請查照。」keeps every convention and still leads with the point.
+- The same gate applies to vocabulary cleanup.「係」「惟」「俾」are padding in an email and normal register in a contract. Judge by the genre the reader expects, not by a universal word list.
+
+### 13. Do not default to setup-and-reveal structures
 
 - 先抑後揚 and 先破後立 start by building up a wrong view, then reveal the real point. Models fall into this pattern easily. When every section starts that way, readers learn to skip the first half of each paragraph.
 - Most points are stronger stated directly: lead with the claim, then support it.
 - Keep the structure only when the intended reader genuinely holds the misconception and correcting it is the point of the passage. Never invent a strawman just to have something to knock down. Even when justified, use it once in a piece, not as the skeleton of every section.
 
-### 11. Make the point clear
+### 14. Make the point clear
 
 - The reader should be able to tell what the writer thinks or wants them to understand.
 - In restrained writing, state the judgment clearly and keep the framing consistent.
 - In voiced writing, use opinion, tension, or a light edge when it helps the point.
 
-### 12. Write body text as body text, not as slogans
+### 15. Write body text as body text, not as slogans
 
 - Body sentences need a subject, a verb, and a connection to the sentences before and after. A paragraph built from headline-style declarations, such as「效率，從此不同」「一個平台，解決所有問題」, reads like presentation titles pasted together, and the reader cannot find the line of reasoning.
 - Headline diction belongs in headings. If a sentence would work unchanged as a slide title, it is probably not doing body-text work.
 - State the claim as a full sentence with its reason or consequence attached, then continue the thread into the next sentence.
 
-### 13. Break sterile symmetry
+### 16. Break sterile symmetry
 
 - Do not force every idea into neat triples.
 - Do not make every paragraph the same length.
@@ -100,31 +120,31 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 ## Control rhythm and tone
 
-### 14. Vary rhythm on purpose
+### 17. Vary rhythm on purpose
 
 - Mix short sentences with longer ones.
 - Avoid paragraphs where every sentence has the same shape.
 - Let emphasis come from contrast, not from constant intensity.
 
-### 15. Choose stronger verbs before adding adjectives
+### 18. Choose stronger verbs before adding adjectives
 
 - Fix weak verb choice first.
 - Prefer "cut", "argue", "miss", "ship", "delay", "expose", or "earn" over soft general verbs.
 - Use adjectives only when they add meaning, not sheen.
 
-### 16. Keep emotional texture controlled
+### 19. Keep emotional texture controlled
 
 - Human writing is not emotionally flat, but it also does not overperform.
 - Add feeling through timing, specificity, and point of view.
 - Avoid melodrama unless the task genuinely calls for it.
 
-### 17. Keep it restrained
+### 20. Keep it restrained
 
 - The best human-like line is often simpler than the first draft.
 - Do not show off range when a plain sentence will land better.
 - Leave room for the reader to trust the voice.
 
-### 18. Match social context
+### 21. Match social context
 
 - Business writing should feel reliable, not robotic.
 - Public-facing copy should feel intentional, not inflated.
@@ -133,7 +153,7 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 ## Punctuation
 
-### 19. Treat semicolons as an exception
+### 22. Treat semicolons as an exception
 
 - In ordinary Chinese prose, do not use semicolons by default.
 - During the final pass, replace each semicolon with a full stop, comma, colon, or a clearer sentence boundary whenever possible.

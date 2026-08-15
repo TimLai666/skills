@@ -14,6 +14,7 @@ The text:
 - [ ] does not use niche vocabulary, jargon, or project shorthand without explanation
 - [ ] does not use uncommon imagery or literal translated terms such as「基線」or「閉環」when plain descriptions of people, actions, information, and consequences would be clearer
 - [ ] keeps every verb whole and says what it acts on: no two-syllable verb shaved to one character, in prose or in a table cell
+- [ ] contains no padding verbs or classical residue（進行討論、加以檢視、係、惟）outside genres whose register requires them
 - [ ] uses no abbreviation the reader has not already met elsewhere, and none that collides with an existing word
 - [ ] replaces vague abstractions with concrete nouns, verbs, examples, conditions, or consequences where needed
 - [ ] contains no abstract adjectives or adverbs standing in for content, no repeated modifier, and no invented fact patched in where a modifier was removed
@@ -25,6 +26,9 @@ The text:
 - [ ] reads as running prose: no body paragraph built from headline or slogan-style declarations that could double as slide titles
 - [ ] does not repeatedly force ordinary statements into「不是……而是……」對比句型
 - [ ] does not lean on 先抑後揚 or 先破後立 openings: at most one real-misconception correction per piece, and no invented strawman
+- [ ] puts the decision, change, or required action before the background when the text informs, and its headings state content, not category
+- [ ] gives every instruction an actor, an action with its object, and a deadline, and ends with the reader's next step when one is expected
+- [ ] keeps the conventions, register, and formulaic phrases of fixed-format genres（公文、契約、法律條款）, applying only the structural fixes there
 - [ ] does not lean on unnatural em dashes to simulate voice
 - [ ] contains no semicolon unless removing it would make a formal quotation, required syntax, or a genuinely complex list less clear
 - [ ] supports each important claim instead of using smooth wording to cover a gap in the reasoning
