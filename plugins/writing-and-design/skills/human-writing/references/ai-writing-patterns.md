@@ -53,8 +53,8 @@ Use this checklist after drafting or rewriting.
   - Fix: delete「直接」and look at what remains. If the claim is empty, state the actual mechanism or cut the sentence. Keep「直接」only when it literally means a step is skipped.
 
 - Over-hedging
-  - Examples: "could potentially", "it may perhaps", "seems to suggest"
-  - Fix: keep only the uncertainty the claim actually needs.
+  - Examples: "could potentially", "it may perhaps", "seems to suggest"; also the structural form, a limitation or disclaimer appended to every claim, even in a proposal meant to persuade.
+  - Fix: keep only the uncertainty the claim actually needs, and park risks in the genre's own risk section instead of on each sentence. See rule 7 in [human-writing-principles.md](./human-writing-principles.md).
 
 ## Structural patterns
 
@@ -86,7 +86,7 @@ Use this checklist after drafting or rewriting.
   - Fix: write running prose. Give each sentence a subject, a verb, and a connection to the sentence before it; keep headline diction in actual headings.
 
 - Semicolon overuse in ordinary Chinese prose
-  - Fix: replace each semicolon with a full stop, comma, or clearer sentence boundary. See rule 24 in [human-writing-principles.md](./human-writing-principles.md).
+  - Fix: replace each semicolon with a full stop, comma, or clearer sentence boundary. See rule 25 in [human-writing-principles.md](./human-writing-principles.md).
 
 ## Bilingual cleanup notes
 

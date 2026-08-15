@@ -56,6 +56,7 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 - Explain what the reader needs to understand the point, then stop.
 - Do not add an answer to an objection, accusation, or inner judgment that no one raised.
 - If a sentence only defends against an imagined criticism and removing it does not weaken the point, remove it.
+- The same reflex appears as a limitation or disclaimer appended to every claim. In genres whose job is to persuade — a proposal, a pitch — stressing limitations no one asked about defends the writer instead of informing the reader. Put risks where the genre expects them, once, in their own section, not on the tail of every sentence.
 
 ### 8. Avoid unexplained niche vocabulary
 
@@ -118,7 +119,14 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 - Headline diction belongs in headings. If a sentence would work unchanged as a slide title, it is probably not doing body-text work.
 - State the claim as a full sentence with its reason or consequence attached, then continue the thread into the next sentence.
 
-### 17. Break sterile symmetry
+### 17. One sentence takes one step
+
+- The model plans the whole passage at once, so it tries to fit the claim, its parallel aspects, conditions, and exceptions into one sentence, strung together with「同時」「並」「也」「兼顧」. The reader can only walk one path at a time; a sentence that covers everything reads mechanical and cold.
+- Let a sentence be temporarily incomplete: state this step plainly and end it. The caveat and the exception are the next footprint. What comes next should be seen on arrival, not announced at the start.
+- When one sentence strings two or more separate aspects together with these connectors, split it. Real enumerations may stay lists; this rule governs the pacing of an argument, not items.
+- This does not overturn leading with the point: in informational writing the conclusion still comes first. Walking governs how every sentence after it advances.
+
+### 18. Break sterile symmetry
 
 - Do not force every idea into neat triples.
 - Vary paragraph length, and let sentence length change with the point.
@@ -126,36 +134,36 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 ## Control rhythm and tone
 
-### 18. Vary rhythm on purpose
+### 19. Vary rhythm on purpose
 
 - Mix short sentences with longer ones.
 - Avoid paragraphs where every sentence has the same shape.
 - Let emphasis come from contrast, not from constant intensity.
 
-### 19. Choose stronger verbs before adding adjectives
+### 20. Choose stronger verbs before adding adjectives
 
 - Fix weak verb choice first.
 - Prefer "cut", "argue", "miss", "ship", "delay", "expose", or "earn" over soft general verbs.
 - Use adjectives only when they add meaning, not sheen.
 
-### 20. Keep emotional texture controlled
+### 21. Keep emotional texture controlled
 
 - Human writing is not emotionally flat, but it also does not overperform.
 - Add feeling through timing, specificity, and point of view.
 - Avoid melodrama unless the task genuinely calls for it.
 
-### 21. Keep it restrained
+### 22. Keep it restrained
 
 - The best human-like line is often simpler than the first draft.
 - Do not show off range when a plain sentence will land better.
 - Leave room for the reader to trust the voice.
 
-### 22. Do not overcorrect into telegraph style
+### 23. Do not overcorrect into telegraph style
 
 - Removing AI patterns is a means; the goal is text a person would actually send. Do not strip the courtesy, warmth, or connective tissue the genre normally carries. The fix for an empty polite letter is adding the missing information, not deleting the manners.
 - When a cleanup pass leaves nothing but clipped statements of fact, the text has become machine-like from the opposite direction. Reread the result as its genre: a reply, a post, an announcement. If no person would send it that way, put the human parts back.
 
-### 23. Match social context
+### 24. Match social context
 
 - Business writing earns trust by stating facts and next steps plainly, without template phrases.
 - Public-facing copy should read as if someone chose each word for this product and this reader.
@@ -164,7 +172,7 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 ## Punctuation
 
-### 24. Treat semicolons as an exception
+### 25. Treat semicolons as an exception
 
 - In ordinary Chinese prose, do not use semicolons by default.
 - During the final pass, replace each semicolon with a full stop, comma, colon, or a clearer sentence boundary whenever possible.
