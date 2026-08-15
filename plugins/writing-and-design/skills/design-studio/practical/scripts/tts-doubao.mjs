@@ -172,7 +172,7 @@ async function tts({ text, voice, speed, encoding }) {
   if (!voiceId) throw new Error('缺 DOUBAO_TTS_VOICE_ID（检查 .env 或用 --voice 传）');
 
   const body = {
-    user: { uid: 'huashu-design' },
+    user: { uid: 'practical' },
     req_params: {
       text,
       speaker: voiceId,

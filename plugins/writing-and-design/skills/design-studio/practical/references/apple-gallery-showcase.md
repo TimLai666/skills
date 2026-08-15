@@ -1,7 +1,7 @@
 # Apple Gallery Showcase · 畫廊展示牆動畫風格
 
 > 靈感來源：Claude Design 官網 hero 影片 + 蘋果產品頁「作品牆」式陳列
-> 實戰出處：huashu-design 發布 hero v5
+> 實戰出處：practical 發布 hero v5
 > 適用場景：**產品發布 hero 動畫、skill 能力演示、作品集展示**——任何需要把「多件高品質產出」同時展陳並引導觀眾注意力的場景
 
 ---
@@ -280,7 +280,7 @@ requestAnimationFrame(function tick(now) {
 ```html
 <div class="corner-brand">
   <div class="mark"></div>
-  <div>HUASHU · DESIGN</div>
+  <div>PRACTICAL</div>
 </div>
 ```
 

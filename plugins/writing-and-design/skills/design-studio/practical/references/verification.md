@@ -21,7 +21,7 @@ open -a "Google Chrome" "/path/to/your/design.html"
 HTML檔案裡最常見的問題是JS報錯導致白屏。用Playwright跑一遍：
 
 ```bash
-python huashu-design/scripts/verify.py path/to/design.html  # 路徑相對本 skill 的 huashu-design/ 目錄
+python practical/scripts/verify.py path/to/design.html  # 路徑相對本 skill 的 practical/ 目錄
 ```
 
 這個腳本會：

@@ -2,7 +2,7 @@
 
 > Director's Notes for the **huashu-md-html v2.0** launch film
 > 30 seconds · 1920×1080 · 25 fps · no voiceover
-> Director: huashu-design (acting as Apple-tier launch film director)
+> Director: practical (acting as Apple-tier launch film director)
 > Composer: TBD (target: Max Richter / Ólafur Arnalds / Jóhann Jóhannsson minimal-cinematic register)
 > Color base: ivory white #FAFAF6 · ink #1A1A1A · terracotta #C2410C
 > Type: Newsreader (display + body) · JetBrains Mono (interface) · Noto Serif SC (中文)
@@ -221,7 +221,7 @@ Caret          (block 3px wide)      —         typing cursor               —
 
 **關鍵安全區**：
 - 頂部 60px 內：chrome 元素區（capability counter, version chip）
-- 底部 60px 內：watermark / metadata 區
+- 底部 60px 內：metadata 區（僅設計稿明確需要時使用）
 - 中央 800×600 區域：主內容禁區（每一鏡的 hero 元素必須落在此區域內）
 
 ## 2.4 動畫系統
@@ -303,17 +303,7 @@ scene 之間過渡            300ms 重疊    cross-dissolve + scale
 - 一條橫線連線 6 個名字，進度點（●）隨時間從左滑到右
 - 入場：07s 時整條 fade-in 500ms
 
-**Chrome D · bottom-right · watermark（持續）**
-
-```
-   CREATED BY HUASHU-DESIGN
-```
-
-- 字型：JetBrains Mono 10px，letter-spacing 0.24em
-- 顏色：rgba(26,26,26,0.32)
-- 完全靜態，不動
-
-**Chrome E · 極淡 paper texture（持續）**
+**Chrome D · 極淡 paper texture（持續）**
 
 - SVG 噪點 + 極慢的 0.3% scale 呼吸
 - opacity ≤ 0.04
@@ -511,7 +501,7 @@ SHOT NN · NAME
 - BGM: room tone 進入 (300ms fade-in to -38dB)
 - SFX: 無
 
-**[CHROME]** 全部隱藏。Chrome A/B/C/D/E 都還沒顯形。
+**[CHROME]** 全部隱藏。Chrome A/B/C/D 都還沒顯形。
 
 **[ANTI-SLOP]**
 
@@ -705,8 +695,7 @@ morph 的設計哲學：**從 mono 到 serif，是從「我在打字」到「我
 - A（top-left capability counter）: ON, 顯示 `CAPABILITY · 01`, 第一個 dot 實心
 - B（version chip）: ON, 持續顯示
 - C（timeline ticker）: OFF (會在 SHOT 05 入場)
-- D（watermark）: ON, 永遠 ON
-- E（paper texture）: ON
+- D（paper texture）: ON
 
 **[ANTI-SLOP]**
 
@@ -797,7 +786,6 @@ md 字元與 destination card 之間用一條 terracotta 細線連線，從 md �
 - B: ON
 - **C: 首次入場** at 09.80s，`any→md  ━━━━●━━━━━  md→html  ─  html→md  ─  md→docx  ─  md→pdf  ─  md→epub`，進度點 ● 位於第二格上方
 - D: ON
-- E: ON
 
 **[ANTI-SLOP]**
 
@@ -885,7 +873,6 @@ arrow direction 反向：從右側 destination card 向左 md 字元方向（短
 - B: ON
 - C: 進度點 ● 滑到「html→md」位置
 - D: ON
-- E: ON
 
 **[ANTI-SLOP]**
 
@@ -968,7 +955,7 @@ destination card 設計：**出版社級 docx 章節首頁**（高密度資訊�
 **[CHROME]**
 
 - A: `CAPABILITY · 04`, 第四個 dot 實心
-- B/C/D/E: ON
+- B/C/D: ON
 
 **[ANTI-SLOP]**
 
@@ -1069,7 +1056,6 @@ PDF B（大32開，前面）：
 - B: ON, 此時 version chip 旁的橙點同步 pulse（強調「v2.0 新增」）
 - C: 進度點 ● 滑到「md→pdf」位置, 這個位置的文字字級加大 0.5px 強調
 - D: ON
-- E: ON
 
 **[ANTI-SLOP]**
 
@@ -1160,7 +1146,6 @@ destination card 設計：**Apple Books 風的 EPUB reader frame**（強調「�
 - B: 版本 chip 的橙點 pulse 加強（amplitude × 1.5）
 - C: 進度點 ● 抵達最右端「md→epub」位置
 - D: ON
-- E: ON
 
 **[ANTI-SLOP]**
 
@@ -1224,7 +1209,6 @@ md 周圍的 6 個 capability label（any→md / md→html / html→md / md→do
 - B: ON, 但開始為 ACT III 準備過渡（保持位置不變，但內部 spacing 略微 tighten）
 - C: fade out at 22.50s
 - D: ON
-- E: ON
 
 **[ANTI-SLOP]**
 
@@ -1306,7 +1290,6 @@ ONE SOURCE.
 - B: ON, 但**重要變化**：version chip 此時 cross-dissolve 成新形態——在右上角的同位置，但 chip 的尺寸略大，字級 18px（之前 16px），更突出。同時 Terracotta dot 的 pulse amplitude × 2（強調「v2.0 升級時刻」）
 - C: OFF (已退場)
 - D: ON
-- E: ON
 
 **新增 chrome**：
 - md 字元（top-left, 56px, Newsreader 600 + Terracotta dot）正式入駐 corner，成為品牌印章
@@ -1407,8 +1390,7 @@ md 是原始碼，萬物是產物。
 **[CHROME]**
 
 - B: ON, version chip 持續
-- D: ON, watermark 持續
-- E: ON
+- D: ON
 - md 印章 (top-left): ON
 
 **[ANTI-SLOP]**
@@ -1457,11 +1439,9 @@ md 是原始碼，萬物是產物。
                                             md.                   ← Newsreader 600, 88px, Ink + Terracotta dot
                                           ───                     ← Terracotta rule, 120×2px
 
-                                                                                CREATED BY HUASHU-DESIGN
-                                                                                              (bottom-right watermark)
 ```
 
-整個畫面只有 4 個元素：md 印章、accent rule、top-right chrome、bottom-right watermark。所有其他全空。
+整個畫面只有 3 個元素：md 印章、accent rule、top-right chrome。所有其他全空。
 
 **[TYPE]**
 
@@ -1488,7 +1468,6 @@ md 是原始碼，萬物是產物。
 
 - B: ON, 持續
 - D: ON, 持續
-- E: ON, 持續
 - 其他全部 OFF
 
 **[ANTI-SLOP]**
@@ -1563,7 +1542,7 @@ no vocals, 30 seconds duration, ivory paper mood
 
 ## 5.4 SFX 來源
 
-**首選**：用 huashu-design skill 的 `assets/sfx/<category>/*.mp3` 37 個預製資源：
+**首選**：用 practical skill 的 `assets/sfx/<category>/*.mp3` 37 個預製資源：
 
 ```
 事件                          推薦 SFX 檔案

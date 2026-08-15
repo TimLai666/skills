@@ -1,6 +1,6 @@
 # Anti-AI Slop Rules (Shared)
 
-Both cinematic-ui and huashu-design enforce these rules. Read this before any build phase.
+Both cinematic-ui and practical enforce these rules. Read this before any build phase.
 
 ## What is AI Slop?
 

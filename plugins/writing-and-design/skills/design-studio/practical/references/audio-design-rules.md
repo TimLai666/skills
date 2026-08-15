@@ -1,7 +1,7 @@
-# 音訊設計規則 · huashu-design
+# 音訊設計規則 · practical
 
 > 所有動畫 demo 的音訊應用配方。和 `sfx-library.md`（資產清單）配套使用。
-> 實戰錘鍊：huashu-design 發布 hero v1-v9 迭代 · Anthropic 三支官方片子的 Gemini 深度拆解 · 8000+ 次 A/B 對比
+> 實戰錘鍊：practical 發布 hero v1-v9 迭代 · Anthropic 三支官方片子的 Gemini 深度拆解 · 8000+ 次 A/B 對比
 
 ---
 
@@ -91,7 +91,7 @@ Anthropic 的秘訣不是「SFX 音量大」，是**頻段分層**：
 
 ## BGM 選擇決策樹
 
-huashu-design skill 自帶 6 首 BGM（`assets/bgm-*.mp3`）：
+practical skill 自帶 6 首 BGM（`assets/bgm-*.mp3`）：
 
 ```
 動畫性格是什麼？
@@ -115,7 +115,7 @@ huashu-design skill 自帶 6 首 BGM（`assets/bgm-*.mp3`）：
 
 ## 場景配方（開箱即用）
 
-### 配方 A · 產品發布 hero（huashu-design v9 同款）
+### 配方 A · 產品發布 hero（practical v9 同款）
 ```
 時長：25 秒
 BGM：bgm-tech.mp3 · 45% · 頻段 <4kHz
@@ -257,4 +257,4 @@ ffmpeg -y -i video.mp4 -i sfx-track.mp3 -i bgm.mp3 \
 - SFX 資產清單：`sfx-library.md`
 - 視覺風格參考：`apple-gallery-showcase.md`
 - Anthropic 三支片子深度音訊分析：AUDIO-BEST-PRACTICES.md（作者本地資料，未隨倉庫分發）
-- huashu-design v9 實戰案例：hero-animation-v9-final.mp4（作者本地樣本，未隨倉庫分發）
+- practical v9 實戰案例：hero-animation-v9-final.mp4（作者本地樣本，未隨倉庫分發）

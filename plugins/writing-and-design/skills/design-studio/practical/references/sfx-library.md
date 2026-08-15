@@ -1,4 +1,4 @@
-# SFX Library · huashu-design
+# SFX Library · practical
 
 > 全部由 ElevenLabs Sound Generation API 生成，蘋果發表會級音質。
 > 產品級 SFX 資產庫，覆蓋花叔動畫/演示/產品 Demo 全場景。

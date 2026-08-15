@@ -24,14 +24,14 @@ npx impeccable detect <output-dir-or-file>
 ```
 Fix all flagged issues (overused fonts, purple gradients, nested cards, bounce easing, low-contrast text, flat type hierarchy, side-tab borders, icon-tile stacking).
 
-## Verify Script (huashu-design)
+## Verify Script (practical)
 
 ```bash
 python3 scripts/verify.py
 ```
 Wraps Playwright for automated checks.
 
-## Video Export Verification (huashu-design)
+## Video Export Verification (practical)
 
 For animation outputs:
 ```bash

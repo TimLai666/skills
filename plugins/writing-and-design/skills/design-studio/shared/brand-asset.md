@@ -1,6 +1,6 @@
 # Brand Asset Protocol (Shared)
 
-From huashu-design, adopted by cinematic-ui for any project involving real brands.
+From practical, adopted by cinematic-ui for any project involving real brands.
 
 ## Trigger
 

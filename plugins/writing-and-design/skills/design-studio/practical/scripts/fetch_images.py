@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-从 Wikimedia Commons 抓真实图片（公共领域 / CC），供 huashu-design「内容型设计取真图」用（Phase 3.5）。
+从 Wikimedia Commons 抓真实图片（公共领域 / CC），供 practical「内容型设计取真图」用（Phase 3.5）。
 
 为什么有这个脚本：内容型设计（鹦鹉/咖啡/马来西亚…）必须用真图，不能 CSS 色块糊弄。
 每次让模型现写抓图逻辑既慢又容易漏坑（忘清代理→TLS 炸 / 忘合规 UA→429）。这里固化好，下次只改关键词。
@@ -20,7 +20,7 @@ for _k in ("ALL_PROXY", "all_proxy", "HTTP_PROXY", "http_proxy", "HTTPS_PROXY", 
 
 API = "https://commons.wikimedia.org/w/api.php"
 # ② 合规 User-Agent 是硬性要求，否则 Wikimedia 返 429
-UA = "huashu-design-image-fetcher/1.0 (https://huasheng.ai; skill contact)"
+UA = "practical-image-fetcher/1.0 (https://huasheng.ai; skill contact)"
 
 
 def _api_get(params):
@@ -73,7 +73,7 @@ def fetch(query, out, count, width):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Wikimedia Commons 真图抓取（huashu-design Phase 3.5）")
+    ap = argparse.ArgumentParser(description="Wikimedia Commons 真图抓取（practical Phase 3.5）")
     ap.add_argument("--query", nargs="+", required=True, help="一个或多个英文关键词（英文命中率高）")
     ap.add_argument("--out", required=True, help="输出目录（建议 项目/assets/img）")
     ap.add_argument("--count", type=int, default=2, help="每个关键词抓几张（默认 2）")

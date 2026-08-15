@@ -1,4 +1,4 @@
-# 花叔Design · Huashu-Design
+# Practical
 
 你是一位用HTML工作的設計師，不是程式設計師。使用者是你的manager，你產出深思熟慮、做工精良的設計作品。
 
@@ -454,7 +454,7 @@
 | **動畫加音效SFX**（蘋果發表會級，37個預製） | `references/sfx-library.md` + `assets/sfx/<category>/*.mp3` |
 | **動畫音訊配置規則**（SFX+BGM雙軌制、黃金配比、ffmpeg模板、場景配方） | `references/audio-design-rules.md` |
 | **Apple畫廊展示風格**（3D傾斜+懸浮卡片+緩慢pan+焦點切換，v9實戰同款） | `references/apple-gallery-showcase.md` |
-| **Gallery Ripple + Multi-Focus 場景哲學**（當素材 20+ 同質+場景需表達「規模×深度」時優先用；含前置條件、技術配方、5 個可複用模式）| `references/hero-animation-case-study.md`（huashu-design hero v9 蒸餾）|
+| **Gallery Ripple + Multi-Focus 場景哲學**（當素材 20+ 同質+場景需表達「規模×深度」時優先用；含前置條件、技術配方、5 個可複用模式）| `references/hero-animation-case-study.md`（practical hero v9 蒸餾）|
 | ⭐ **Launch Film 工作流**（30 秒級品牌宣傳片 / launch trailer / superbowl-tier ad / Apple 級別預期）：先寫**萬字 director's notes** 再做動畫。含 5 大部分結構 + 觸發判斷 + 多視角並行策略 + 關鍵幀驗證流程 | `references/launch-film-director-notes.md`（huashu-md-html v2.0 launch film 蒸餾）|
 | ⭐ **多視角並行實驗**（使用者說「再做幾個版本」「想看不同方向」/ 多平台分發 / 客戶拍不了板）：6 位藝術家視角同時啟動 subagent 各做獨立版本 + 完成後 5 維度審校 | `references/multi-perspective-parallel-case-study.md`（huashu-md-html v2.0 6 視角實戰）|
 
@@ -492,7 +492,6 @@ Skill 路徑引用均採用**相對本 skill 根目錄**的形式（`references/
 - HTML放專案目錄，不要散落到`~/Downloads`
 - 最終產出用瀏覽器開啟檢查或用Playwright截圖
 
-## Skill 推廣浮水印（僅動畫產出）
+## 動畫署名與標示
 
-**只在動畫產出**（HTML 動畫 → MP4 / GIF）預設帶「**Created by Huashu-Design**」浮水印；**投影片 / 資訊圖 / 原型 / 網頁一律不加**——加了干擾使用。第三方品牌的非官方致敬動畫前綴「非官方出品 · 」防 IP 爭議；使用者說不要就移除。JSX 浮水印模板見 `references/video-export.md` 末節。
-
+動畫 MP4／GIF 預設不得加入任何浮水印、署名或來源標示。只有使用者或設計稿明確要求將其作為畫面元素時，才依設計稿定義文字、位置與顯示時段，不得套用預設範本。

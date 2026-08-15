@@ -198,7 +198,7 @@ GIF 只能 256 色。一次 pass 的 GIF 會把全動畫色彩壓到 256 色通�
 - [ ] Duration 參數與 HTML 裡的實際動畫時長匹配
 - [ ] HTML 中 Stage 檢測 `window.__recording` 強制 loop=false（手寫 Stage 必查；用 `assets/animations.jsx` 自帶）
 - [ ] 結尾 Sprite 的 `fadeOut={0}`（影片末幀不淡出）
-- [ ] 含「Created by Huashu-Design」浮水印（僅動畫場景必加；第三方品牌作品加「非官方出品 · 」前綴。詳見 GUIDE.md §「Skill 推廣浮水印」）
+- [ ] 未加入浮水印、署名或來源標示；若設計稿明確要求，內容、位置與顯示時段均符合設計稿
 
 ## 交付時附帶的說明
 
@@ -231,17 +231,6 @@ GIF 只能 256 色。一次 pass 的 GIF 會把全動畫色彩壓到 256 色通�
 | 「要透明背景」 | MP4 不支援 alpha；用 WebM VP9 + alpha 或 APNG |
 | 「要無損」 | CRF 改 0 + preset veryslow（檔案會大 10 倍） |
 
-## Skill 推廣浮水印模板（僅動畫匯出用）
+## 設計型署名
 
-GUIDE.md 規定動畫 MP4/GIF 預設帶浮水印，模板如下（深底改用 `rgba(255,255,255,0.35)`；第三方品牌動畫前綴「非官方出品 · 」）：
-
-```jsx
-<div style={{
-  position: 'absolute', bottom: 24, right: 32,
-  fontSize: 11, color: 'rgba(0,0,0,0.4)',
-  letterSpacing: '0.15em', fontFamily: 'monospace',
-  pointerEvents: 'none', zIndex: 100,
-}}>
-  Created by Huashu-Design
-</div>
-```
+只有設計稿明確將署名、版權或來源標示列為畫面元素時才加入，並依設計稿實作，不提供預設文字或位置。

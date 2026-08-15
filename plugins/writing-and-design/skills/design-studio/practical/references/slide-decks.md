@@ -172,7 +172,7 @@ Chromium 預設不帶彩色 emoji 字型，`page.pdf()` 或 `page.screenshot()` 
 
 ### 2. `export_deck_pdf.mjs` 報錯 `Cannot find package 'playwright'`
 
-原因：ESM 模組解析從腳本所在位置向上找 `node_modules`。腳本在 `~/.claude/skills/huashu-design/scripts/`，那裡沒依賴。
+原因：ESM 模組解析從腳本所在位置向上找 `node_modules`。腳本在 `~/.claude/skills/practical/scripts/`，那裡沒依賴。
 
 **對策**：把腳本複製到 deck 專案目錄（例如 `brochure/build-pdf.mjs`），在專案根跑 `npm install playwright pdf-lib`，然後 `node build-pdf.mjs --slides slides --out output/deck.pdf`。
 

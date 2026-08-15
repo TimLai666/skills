@@ -145,7 +145,7 @@ use case 分配（按平台和受眾）：
 
 ---
 
-## 關鍵洞察（寫給 huashu-design 的未來使用者）
+## 關鍵洞察（寫給 practical 的未來使用者）
 
 ### 洞察 1 · 「先寫萬字 director's notes」方法論**完全 reproducible**
 

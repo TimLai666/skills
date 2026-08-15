@@ -112,4 +112,4 @@
 
 **版本**：v1.0
 **建立日期**：2026-02-13
-**適用於**：huashu-design GUIDE Phase 3 推薦環節
+**適用於**：practical GUIDE Phase 3 推薦環節

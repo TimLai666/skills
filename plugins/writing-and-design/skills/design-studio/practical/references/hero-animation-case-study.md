@@ -1,6 +1,6 @@
 # Gallery Ripple + Multi-Focus · 場景編排哲學
 
-> 從 huashu-design hero 動畫 v9（25 秒，8 場景）裡提煉出的**一種可複用的視覺編排結構**。
+> 從 practical hero 動畫 v9（25 秒，8 場景）裡提煉出的**一種可複用的視覺編排結構**。
 > 不是動畫製作流水線，是**什麼場景下這種編排是"對的"**。
 > 實戰參考：[https://www.huasheng.ai/huashu-design-hero/](https://www.huasheng.ai/huashu-design-hero/)
 
@@ -202,7 +202,7 @@ Brand wordmark 從 Thin → Bold 用 0.9s 漸變，配合 letter-spacing 微調�
 
 ### 5. **Corner Brand 低強度持續簽名**
 
-Gallery 階段左上角有個 `HUASHU · DESIGN` 小標識，16% opacity 色值，12px 字號，寬字距。
+Gallery 階段左上角有個 `PRACTICAL` 小標識，16% opacity 色值，12px 字號，寬字距。
 
 **為什麼加這個**：
 - Ripple 爆發後觀眾容易"失焦"不記得在看什麼，左上角輕標示幫助 anchor
