@@ -30,6 +30,7 @@ The text:
 - [ ] puts the decision, change, or required action before the background when the text informs, and its headings state content, not category
 - [ ] gives every instruction an actor, an action with its object, and a deadline, and ends with the reader's next step when one is expected
 - [ ] keeps the conventions, register, and formulaic phrases of fixed-format genres（公文、契約、法律條款）, applying only the structural fixes there
+- [ ] keeps the courtesy, warmth, and connective tissue its genre expects: cleanup has not trimmed it into telegraph style
 - [ ] does not lean on unnatural em dashes to simulate voice
 - [ ] contains no semicolon in ordinary Chinese prose, unless removing it would make a formal quotation, required syntax, or a genuinely complex list less clear
 - [ ] supports each important claim instead of using smooth wording to cover a gap in the reasoning

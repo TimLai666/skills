@@ -10,7 +10,7 @@ description: >-
   explicitly owns the writing style or the output is purely code, structured
   data, or a command. Supports Chinese and English.
 metadata:
-  version: "1.4.0"
+  version: "1.5.0"
 ---
 
 # Human Writing

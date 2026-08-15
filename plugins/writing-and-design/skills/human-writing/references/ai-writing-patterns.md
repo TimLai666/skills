@@ -5,20 +5,20 @@ Use this checklist after drafting or rewriting.
 ## High-priority patterns
 
 - Invented shorthand modifiers
-  - Examples:「不繞」「最穩」「一直在撐」「很頂」
-  - Fix: rewrite the whole sentence to say the concrete thing in ordinary spoken wording. See rule 2 in [human-writing-principles.md](./human-writing-principles.md).
+  - Examples:「不繞」「最穩」「一直在撐」「很頂」, and bare potential complements:「XX接得住」「XX補得完」「讀得完的XX」
+  - Fix: rewrite the whole sentence to say the concrete thing in ordinary spoken wording. See rules 2 and 3 in [human-writing-principles.md](./human-writing-principles.md).
 
 - Clipped verbs
   - Examples:「範例照抄也要驗」「命中的已拆」「表現優異的項目也要查」
-  - Fix: write the verb whole and say what it acts on. See rule 8 in [human-writing-principles.md](./human-writing-principles.md).
+  - Fix: write the verb whole and say what it acts on. See rule 9 in [human-writing-principles.md](./human-writing-principles.md).
 
 - Invented abbreviations
   - Examples:「產品經理」cut to「產經」, or an acronym coined mid-paragraph in English.
-  - Fix: keep only abbreviations already in circulation, or choose a shorter complete wording. See rule 8 in [human-writing-principles.md](./human-writing-principles.md).
+  - Fix: keep only abbreviations already in circulation, or choose a shorter complete wording. See rule 9 in [human-writing-principles.md](./human-writing-principles.md).
 
 - Unfamiliar imagery and literal translated terms
   - Examples:「基線」「閉環」when the reader does not already use them.
-  - Fix: say who does what, what information they have, and what remains unresolved. See rule 7 in [human-writing-principles.md](./human-writing-principles.md).
+  - Fix: say who does what, what information they have, and what remains unresolved. See rule 8 in [human-writing-principles.md](./human-writing-principles.md).
 
 - Invented details in a rewrite
   - Examples: adding a price, a time, a person, a feature, or a scene that the source text does not provide.
@@ -47,6 +47,10 @@ Use this checklist after drafting or rewriting.
 - Padding verbs and classical residue in ordinary Chinese prose
   - Examples:「進行討論」「加以檢視」where「討論」「檢視」does the work;「係」「惟」「俾」in an email, product doc, or announcement.
   - Fix: cut the padding verb and keep the real one（進行優化→優化）; replace classical residue with plain words（係→是、惟→但）. Keep them only in genres whose register requires them（公文、契約、法律條款）— see the fixed-format genre rule in [human-writing-principles.md](./human-writing-principles.md).
+
+- Empty「直接」intensifier
+  - Examples:「手機版可以直接簽核」in feature copy. Most common in proposals and pitches, where「直接」is padded before a verb purely to add force while the sentence never says how.
+  - Fix: delete「直接」and look at what remains. If the claim is empty, state the actual mechanism or cut the sentence. Keep「直接」only when it literally means a step is skipped.
 
 - Over-hedging
   - Examples: "could potentially", "it may perhaps", "seems to suggest"
@@ -82,7 +86,7 @@ Use this checklist after drafting or rewriting.
   - Fix: write running prose. Give each sentence a subject, a verb, and a connection to the sentence before it; keep headline diction in actual headings.
 
 - Semicolon overuse in ordinary Chinese prose
-  - Fix: replace each semicolon with a full stop, comma, or clearer sentence boundary. See rule 22 in [human-writing-principles.md](./human-writing-principles.md).
+  - Fix: replace each semicolon with a full stop, comma, or clearer sentence boundary. See rule 24 in [human-writing-principles.md](./human-writing-principles.md).
 
 ## Bilingual cleanup notes
 
