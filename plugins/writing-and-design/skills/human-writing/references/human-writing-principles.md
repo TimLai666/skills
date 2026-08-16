@@ -146,11 +146,11 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 - Prefer "cut", "argue", "miss", "ship", "delay", "expose", or "earn" over soft general verbs.
 - Use adjectives only when they add meaning, not sheen.
 
-### 21. Keep emotional texture controlled
+### 21. Carry the feeling of the moment in the form
 
-- Human writing is not emotionally flat, but it also does not overperform.
-- Add feeling through timing, specificity, and point of view.
-- Avoid melodrama unless the task genuinely calls for it.
+- A person thinks while writing, so every sentence carries how the writer feels at this point. The feeling rarely shows up as adjectives; it soaks into the form: the choice of function words and frames（「我以為」already carries an expectation falling through）, the long or short variant of the same word（但／但是、沒辦法／無法）, how tight the punctuation is, and where the words pile up: linger where you care, move fast through routine. Readers cannot always name these signals, but they read them.
+- Take the feeling from the content itself: a genuinely messy problem may be written with its weight, a genuinely clean fix may be written light. Do not fabricate personal experience, do not stage spontaneity, and do not hang an emotion word on every sentence. Emotion spread evenly reads as no emotion at all.
+- In grounded writing this stays an undertone; voiced writing may let it surface.
 
 ### 22. Keep it restrained
 
@@ -168,6 +168,7 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 - Business writing earns trust by stating facts and next steps plainly, without template phrases.
 - Public-facing copy should read as if someone chose each word for this product and this reader.
 - In commentary, take a position and give its reason. A survey of safe opinions reads as filler.
+- When replying to a message, mirror the other side's paralinguistic level: if they write with「～」, exclamation marks, or emoji, do not answer in bare full-stop sentences, which read as cold or even displeased; if they write formally, do not sprinkle symbols. A friendly signal that gets no echo erodes trust.
 - Chinese and English should each sound native to their own rhetorical habits.
 
 ## Punctuation
