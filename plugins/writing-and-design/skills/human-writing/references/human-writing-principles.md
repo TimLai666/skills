@@ -14,7 +14,7 @@ Use these rules to make prose feel written by a person. They follow the order in
 
 Abstract modifiers can feel descriptive to the writer, but they give the reader no picture of what happened or what makes something good. The reader has to guess. Watch for four forms:
 
-- **AI-invented shorthand that no real person says**, such as「不繞」「最穩」「一直在撐」「很頂」. These sound punchy to the model but are not how people talk, and the reader cannot even tell what quality is being claimed. This form is the strongest AI tell of the four. The same family includes bare potential complements posing as capability claims:「XX接得住」「XX補得完」「讀得完的XX」. The construction is normal Chinese when it has a real object（接得住球）; used bare, the model thinks it sounds literary, but the reader never learns what is being caught, completed, or read.
+- **AI-invented shorthand that no real person says**, such as「不繞」「最穩」「一直在撐」「很頂」「不演」. These sound punchy to the model but are not how people talk, and the reader cannot even tell what quality is being claimed. This form is the strongest AI tell of the four. The same family includes bare potential complements posing as capability claims:「XX接得住」「XX補得完」「讀得完的XX」. The construction is normal Chinese when it has a real object（接得住球）; used bare, the model thinks it sounds literary, but the reader never learns what is being caught, completed, or read.
 - **Impression summaries**, such as「很好」「很棒」「非常愉快」. They report the writer's feeling about the thing instead of the thing, so the picture in the writer's head never reaches the reader.
 - **Ambiguous abstractions**, such as「彈性」「完善」or "robust", "seamless". Every reader decodes them differently, so the writer thinks the point is made while each reader understands something else.
 - **Ornate stacked modifiers**, such as「深刻地」「優雅地」「淋漓盡致」. They perform style without adding content. If deleting the word loses no information, it was empty.
@@ -39,94 +39,101 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 ## Write for a reader with zero context
 
-### 5. Assume zero shared context
+### 5. Keep the subject and the verb recoverable
+
+- Chinese drops subjects naturally when the topic chain carries them:「改好了，等你看過確認」loses nothing. The limit of ellipsis is that the reader can still say who acts and what the action is.
+- When one clause supports two readings of who does what（「給你驗」: the writer verifying, or the reader checking and accepting?）, the ellipsis went too deep. Write the actor back in.
+- The verb must remain a word you can point at. A directional（進）, an aspect particle, or a bare object cannot carry the action; when the verb has vanished, put it back（一律進例集→一律寫進例集）.
+- Clipped verbs (rule 10) and obligations without a subject (rule 13) are this rule caught in two specific forms.
+
+### 6. Assume zero shared context
 
 - Write as if the reader has none of the Agent's prior conversation, planning, reasoning, project background, or unstated domain knowledge.
 - Do not use「如上」「這一層」「前述問題」or similar references unless the current text has clearly introduced them.
 - Make the reader's understanding depend on what is written, not on what the writer remembers thinking.
 
-### 6. Keep internal reasoning out of the final prose
+### 7. Keep internal reasoning out of the final prose
 
 - Do not assume the reader knows the categories, layers, sequence, or terminology created during planning.
 - Translate internal frameworks into concrete actions, observable facts, order, reasons, or consequences.
 - Introduce a concept before using it as a shared reference. If it cannot help the reader understand or act, remove it.
 
-### 7. Do not over-explain
+### 8. Do not over-explain
 
 - Explain what the reader needs to understand the point, then stop.
 - Do not add an answer to an objection, accusation, or inner judgment that no one raised.
 - If a sentence only defends against an imagined criticism and removing it does not weaken the point, remove it.
 - The same reflex appears as a limitation or disclaimer appended to every claim. In genres whose job is to persuade — a proposal, a pitch — stressing limitations no one asked about defends the writer instead of informing the reader. Put risks where the genre expects them, once, in their own section, not on the tail of every sentence.
 
-### 8. Avoid unexplained niche vocabulary
+### 9. Avoid unexplained niche vocabulary
 
 - Prefer common words over niche terms, jargon, project shorthand, and author-created labels.
 - If a term such as「剪刀差」is necessary, explain it in plain language at first use. Otherwise, directly describe the difference or consequence it refers to.
 - Do not treat a familiar term within one field as familiar to every reader.
 - Do not use unfamiliar imagery or literal translated terms just because they sound compact or professional. Words such as「基線」and「閉環」make readers stop and work out what the sentence means. Unless the intended reader already uses the term and its technical precision matters, replace it with the people, actions, information, and unresolved consequence it hides.
 
-### 9. Do not clip a two-syllable verb down to one character
+### 10. Do not clip a two-syllable verb down to one character
 
-- A one-character Chinese verb needs something behind it to stand on: an object（查資料）, a complement（改好了、查清楚）, or an aspect marker（測過了、拆掉）. Left bare at the end of a clause, it stops sounding like anything a person would say.「範例照抄也要驗」「命中的已拆」「表現優異的項目也要查」are all the same failure.
+- A one-character Chinese verb needs something behind it to stand on: an object（查資料）, a complement（改好了、查清楚）, or an aspect marker（測過了、拆掉）. Left bare at the end of a clause, it stops sounding like anything a person would say.「範例照抄也要驗」「命中的已拆」「表現優異的項目也要查」「改好再給你驗」are all the same failure.
 - Clipping the verb usually drops its object with it, so putting the second character back is not enough.「範例照抄也要驗一次」reads more smoothly, but the reader still cannot tell what to verify. Write「就算照抄範例，也要自己檢查每一條有沒有放錯欄位」. This is rule 4 from another angle: a verb worn down to one character is usually the sign that its object went missing.
 - Status columns in a table are the exception. The row subject already supplies the object, so it does not need repeating, but the verb still has to be whole: write「驗過」, not「已驗」.
 - Column width is not a reason to shave characters. When something has to be shorter, choose a shorter complete wording instead.
 - The same applies to nouns: do not coin an abbreviation on the spot. Use only ones already in circulation（健保、台大、API）, and drop any that collides with an existing word —「產品經理」cut down to「產經」reads as 產業經濟.
 - In English the matching habit is inventing an acronym mid-paragraph, or using a verb as a noun ("a solve", "the ask", "learnings"). Restore the ordinary wording.
 
-### 10. Remove unexplained figurative language
+### 11. Remove unexplained figurative language
 
 - Keep a metaphor only when the reader can tell what it refers to and what it means in the situation.
 - Replace vague images such as「漏過去」with the concrete missing data, action, location, or consequence.
 
 ## Structure the argument straight
 
-### 11. Lead with the point in informational writing
+### 12. Lead with the point in informational writing
 
 - When the text informs — announcements, emails, reports, documentation, status updates — put the decision, change, or required action in the first sentence, and the reasons and background after it. Readers of informational text scan for what changed and what to do; making them read the build-up first is author-centric ordering.
 -「鑑於近期內部作業流程有所調整，經多方評估與審慎考量後，本公司決定自下月一日起，將週會調整至週三下午辦理」buries the only fact the reader needs. Write「下個月起，週會改到週三下午開（原本是週一上午）」, or in a formal register,「本年度健康檢查 9 月 1 日至 15 日開放報名，名額增至三百名」with the reasons following. Leading with the point changes the order, not the register.
 - Headings state content, not category.「5/20 凌晨 2–4 點系統暫停服務」tells the reader what is happening;「系統維護公告」only names a drawer to look in. A heading should answer, not tease.
 - Voiced writing may earn a slower opening, but even there, never bury the fact the reader came for.
 
-### 12. Write instructions as doable actions
+### 13. Write instructions as doable actions
 
 - When the reader must do something, the sentence needs an actor, an action with its object, and a deadline.「相關資料應於期限內補齊，逾期恕不受理」names no one, no document, and no date; write「申請人請於 8 月 29 日前，將身分證影本上傳至報名系統」.
 - Every obligation needs a subject.「本案應予處理」— by whom?
 - Put the condition before the action（「如果 X，就做 Y」）so readers it excludes can stop reading early.
 - When the text expects the reader to act, end with the next step.「若有疑問歡迎隨時聯繫」closes nothing; write「請回信告訴我選方案一還是方案二，我週五前要回覆廠商」.
 
-### 13. Fixed-format genres keep their conventions
+### 14. Fixed-format genres keep their conventions
 
 - Some document types carry a fixed format and conventional phrases: 台灣公文 with 主旨／說明 and 期望語（請查照、請核示）, contracts and legal clauses with their set formulas. In these genres the conventions are how a person writes. Stripping them to sound plainer makes the text less human, not more.
 - Apply only the structural rules there — the conclusion goes into 主旨, details move down into 說明, actors and deadlines stay explicit — and leave the register, formulaic phrases, and required vocabulary alone.「主旨：請轉知所屬同仁報名本校 9 月 10 日及 17 日辦理之資訊安全教育訓練，請查照。」keeps every convention and still leads with the point.
 - Vocabulary cleanup works the same way.「係」「惟」「俾」are padding in an email and normal register in a contract. Judge by the genre the reader expects, not by a universal word list.
 
-### 14. Do not default to setup-and-reveal structures
+### 15. Do not default to setup-and-reveal structures
 
 - 先抑後揚 and 先破後立 start by building up a wrong view, then reveal the real point. Models fall into this pattern easily. When every section starts that way, readers learn to skip the first half of each paragraph.
 - Most points are stronger stated directly: lead with the claim, then support it.
 - Keep the structure only when the intended reader genuinely holds the misconception and correcting it is the point of the passage. Never invent a strawman just to have something to knock down. Even when justified, use it once in a piece, not as the skeleton of every section.
 
-### 15. Make the point clear
+### 16. Make the point clear
 
 - The reader should be able to tell what the writer thinks or wants them to understand.
 - In grounded writing, state the judgment clearly and keep the framing consistent.
 - In voiced writing, use opinion, tension, or a light edge when it helps the point.
 
-### 16. Write body text as body text, not as slogans
+### 17. Write body text as body text, not as slogans
 
 - Body sentences need a subject, a verb, and a connection to the sentences before and after. A paragraph built from headline-style declarations, such as「效率，從此不同」「一個平台，解決所有問題」, reads like presentation titles pasted together, and the reader cannot find the line of reasoning.
 - Headline diction belongs in headings. If a sentence would work unchanged as a slide title, it is probably not doing body-text work.
 - State the claim as a full sentence with its reason or consequence attached, then continue the thread into the next sentence.
 
-### 17. One sentence takes one step
+### 18. One sentence takes one step
 
 - The model plans the whole passage at once, so it tries to fit the claim, its parallel aspects, conditions, and exceptions into one sentence, strung together with「同時」「並」「也」「兼顧」. The reader can only walk one path at a time; a sentence that covers everything reads mechanical and cold.
 - Let a sentence be temporarily incomplete: state this step plainly and end it. The caveat and the exception are the next footprint. What comes next should be seen on arrival, not announced at the start.
 - When one sentence strings two or more separate aspects together with these connectors, split it. Real enumerations may stay lists; this rule governs the pacing of an argument, not items.
 - This does not overturn leading with the point: in informational writing the conclusion still comes first. Walking governs how every sentence after it advances.
 
-### 18. Break sterile symmetry
+### 19. Break sterile symmetry
 
 - Do not force every idea into neat triples.
 - Vary paragraph length, and let sentence length change with the point.
@@ -134,36 +141,36 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 ## Control rhythm and tone
 
-### 19. Vary rhythm on purpose
+### 20. Vary rhythm on purpose
 
 - Mix short sentences with longer ones.
 - Avoid paragraphs where every sentence has the same shape.
 - Let emphasis come from contrast, not from constant intensity.
 
-### 20. Choose stronger verbs before adding adjectives
+### 21. Choose stronger verbs before adding adjectives
 
 - Fix weak verb choice first.
 - Prefer "cut", "argue", "miss", "ship", "delay", "expose", or "earn" over soft general verbs.
 - Use adjectives only when they add meaning, not sheen.
 
-### 21. Carry the feeling of the moment in the form
+### 22. Carry the feeling of the moment in the form
 
 - A person thinks while writing, so every sentence carries how the writer feels at this point. The feeling rarely shows up as adjectives; it soaks into the form: the choice of function words and frames（「我以為」already carries an expectation falling through）, the long or short variant of the same word（但／但是、沒辦法／無法）, how tight the punctuation is, and where the words pile up: linger where you care, move fast through routine. Readers cannot always name these signals, but they read them.
 - Take the feeling from the content itself: a genuinely messy problem may be written with its weight, a genuinely clean fix may be written light. Do not fabricate personal experience, do not stage spontaneity, and do not hang an emotion word on every sentence. Emotion spread evenly reads as no emotion at all.
 - In grounded writing this stays an undertone; voiced writing may let it surface.
 
-### 22. Keep it restrained
+### 23. Keep it restrained
 
 - The best human-like line is often simpler than the first draft.
 - Do not show off range when a plain sentence will land better.
 - Leave room for the reader to trust the voice.
 
-### 23. Do not overcorrect into telegraph style
+### 24. Do not overcorrect into telegraph style
 
 - Removing AI patterns is a means; the goal is text a person would actually send. Do not strip the courtesy, warmth, or connective tissue the genre normally carries. The fix for an empty polite letter is adding the missing information, not deleting the manners.
 - When a cleanup pass leaves nothing but clipped statements of fact, the text has become machine-like from the opposite direction. Reread the result as its genre: a reply, a post, an announcement. If no person would send it that way, put the human parts back.
 
-### 24. Match social context
+### 25. Match social context
 
 - Business writing earns trust by stating facts and next steps plainly, without template phrases.
 - Public-facing copy should read as if someone chose each word for this product and this reader.
@@ -173,7 +180,7 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 ## Punctuation
 
-### 25. Treat semicolons as an exception
+### 26. Treat semicolons as an exception
 
 - In ordinary Chinese prose, do not use semicolons by default.
 - During the final pass, replace each semicolon with a full stop, comma, colon, or a clearer sentence boundary whenever possible.

@@ -13,7 +13,7 @@ The text:
 - [ ] does not answer an objection, accusation, or inner judgment that no one raised
 - [ ] does not use niche vocabulary, jargon, or project shorthand without explanation
 - [ ] does not use uncommon imagery or literal translated terms such as「基線」or「閉環」when plain descriptions of people, actions, information, and consequences would be clearer
-- [ ] keeps every verb whole and says what it acts on: no two-syllable verb shaved to one character, in prose or in a table cell
+- [ ] keeps every verb whole and every subject recoverable: the reader can tell who acts and what the action is, and no two-syllable verb is shaved to one character, in prose or in a table cell
 - [ ] contains no padding verbs or classical residue（進行討論、加以檢視、係、惟）outside genres whose register requires them
 - [ ] uses no abbreviation the reader has not already met elsewhere, and none that collides with an existing word
 - [ ] replaces vague abstractions with concrete nouns, verbs, examples, conditions, or consequences where needed
