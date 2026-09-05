@@ -1,30 +1,32 @@
 ---
 name: ultrathink
 description: >-
-  MUST run whenever the agent thinks at all — writing, planning, building,
-  coding, debugging, or deciding. For each decision unit, MUST select one or
-  two relevant task categories from 邏輯推導, 創意發想, 市場分析, 進度管理,
-  權衡得失, 預測未來, and 辯論思考, then run every tool and self-check in each
-  selected category. MUST NOT run every task category merely for completeness.
-  After routing, MUST run isolated analyses in English, Spanish, German, Modern
-  Standard Arabic, Korean, and Turkish, then synthesize in Traditional Chinese.
-  MUST NOT choose thinking languages by country, market, jurisdiction, source,
-  or audience. MUST then run the common layer in full:
+  MUST run when deep thinking is needed: planning, designing, deciding,
+  weighing options, or judging a proposal whose conclusion is not obvious.
+  SHOULD run when the user works through real trade-offs without naming a
+  framework. MUST NOT run for fact lookups, direct answers, wording or format
+  fixes, or tasks with one obvious next step. For each decision unit, MUST
+  select one or two task categories from 邏輯推導, 創意發想, 市場分析,
+  進度管理, 權衡得失, 預測未來, and 辯論思考, then run every tool and
+  self-check in each. MUST NOT run every category for completeness. After
+  routing, MUST run isolated analyses in English, Spanish, German, Modern
+  Standard Arabic, Korean, and Turkish, then synthesize in Traditional
+  Chinese. MUST NOT choose thinking languages by country, market,
+  jurisdiction, source, or audience. MUST then run the common layer in full:
   第一性原理, 反向思考法, 二階思考, 能力圈, 奧坎剃刀, the fallacy checks, and
-  subtraction review. Trigger on ultrathink, 深度思考, 想清楚再做, 思考框架,
-  抓重點, 言之有物, 沒抓到重點, any included framework name, or any task that
-  involves thinking.
+  subtraction review. Trigger on ultrathink, 深度思考, 深入思考, 想清楚再做,
+  思考框架, 抓重點, 言之有物, 沒抓到重點, or any included framework name.
 metadata:
-  version: "1.4.0"
+  version: "1.5.0"
 ---
 
 # Ultrathink 動手前思考層
 
 ## Overview
 
-只要在思考，就使用本 skill。先把任務切成需要各自下結論的「決策單元」，每個決策單元選擇 1～2 個相關的任務類別。選中的類別要把全部工具與自檢依序跑完，不選的類別不讀、不硬套。
+需要深入思考時使用本 skill：要下不明顯的結論、比較方案、設計做法或裁決提案的任務。查證事實、直接回答、修字句或格式、下一步顯而易見的任務，不用本 skill。先把任務切成需要各自下結論的「決策單元」，每個決策單元選擇 1～2 個相關的任務類別。選中的類別要把全部工具與自檢依序跑完，不選的類別不讀、不硬套。
 
-任務類別跑完後，固定執行六條多語言思考路徑：英文、西班牙文、德文、現代標準阿拉伯文、韓文與土耳其文。每條路徑都要完整回答任務，再執行該語言負責的注意力檢查。繁體中文保留使用者原意，並把六條路徑整理成共同結論、衝突、獨有發現與待查證事實，不在這一層下最終判斷。之後由共用層整合這些結果，跑完五個思維模型、謬誤檢核與減法審查，再形成最終判斷。繁體中文不算第七條思考路徑。多語言思考層與共用層都不占 1～2 個任務類別的名額，也不能因為任務看起來簡單而省略。
+任務類別跑完後，固定執行六條多語言思考路徑：英文、西班牙文、德文、現代標準阿拉伯文、韓文與土耳其文。每條路徑都要完整回答任務，再執行該語言負責的注意力檢查。繁體中文保留使用者原意，並把六條路徑整理成共同結論、衝突、獨有發現與待查證事實，不在這一層下最終判斷。之後由共用層整合這些結果，跑完五個思維模型、謬誤檢核與減法審查，再形成最終判斷。繁體中文不算第七條思考路徑。多語言思考層與共用層都不占 1～2 個任務類別的名額，一旦本 skill 適用，也不能因為任務看起來簡單而省略。
 
 本 skill 只負責思考層，不規定交付物的最終格式，可與負責產出的其他 skill 疊加使用。
 
