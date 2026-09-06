@@ -71,6 +71,8 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 - If a term such as「剪刀差」is necessary, explain it in plain language at first use. Otherwise, directly describe the difference or consequence it refers to.
 - Do not treat a familiar term within one field as familiar to every reader.
 - Do not use unfamiliar imagery or literal translated terms just because they sound compact or professional. Words such as「基線」and「閉環」make readers stop and work out what the sentence means. Unless the intended reader already uses the term and its technical precision matters, replace it with the people, actions, information, and unresolved consequence it hides.
+- In ordinary prose, avoid attaching「邊界」to an abstract noun. Phrases such as「事實邊界」「能力邊界」「認知邊界」「風險邊界」and「責任邊界」usually hide a plainer idea: the applicable cases, a limit, who handles what, or the conditions under which something changes. Write that idea directly. Keep「邊界」only for an actual dividing line or an established technical, legal, or organizational term the intended reader already uses; do not invent a new「XX 邊界」for one passage.
+- Use「說法」only when the noun points to words someone actually said, wrote, or publicly expressed. A quotation, paraphrased claim, disputed wording, or stated public position can be called a「說法」. When the sentence describes an action or result instead, name that action or result directly（「避免錯誤範圍成為正式說法」→「錯誤的影響範圍沒有發布出去」）. Adding「正式」「普遍」or「常見」does not make「說法」valid when no act of expression is being discussed.
 
 ### 10. Do not clip a two-syllable verb down to one character
 
@@ -80,6 +82,14 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 - Column width is not a reason to shave characters. When something has to be shorter, choose a shorter complete wording instead.
 - The same applies to nouns: do not coin an abbreviation on the spot. Use only ones already in circulation（健保、台大、API）, and drop any that collides with an existing word —「產品經理」cut down to「產經」reads as 產業經濟.
 - In English the matching habit is inventing an acronym mid-paragraph, or using a verb as a noun ("a solve", "the ask", "learnings"). Restore the ordinary wording.
+
+### 10A. Keep the ordinary full form of Chinese
+
+- A sentence can be grammatically complete and still sound over-compressed. In ordinary prose, prefer the form people normally say（列出事實、混淆初稿與定稿、會不會寫文章）instead of shortening every action（列事實、把兩種狀態混在一起、會不會寫）. Short forms can stay when the object is already unmistakable and the shorter wording is conventional or creates a deliberate rhythm（列三點、他會寫，也會畫）.
+- Check neighboring clauses together. Two bare or one-character verbs in close succession often make prose sound clipped. Restore the missing object, complement, or full verb unless the abrupt cadence serves a clear purpose in that passage. Also remove accidental verb echoes whose functions overlap（「主管需要要求逐項查證」→「主管應要求逐項查證」）.
+- Do not delete function words merely to make a sentence shorter.「的」can clarify the relation between nouns and give the second half of a contrast enough weight（「付出的卻是文件的可信度」）;「會」can mark an expected or conditional result（「查證納入流程後，錯誤才會下降」）. Keep the shorter form when it is the established compound, a direct state, or an observed event（文件可信度評估、有憑證才算完成、改版後錯誤才下降）.
+- Do not use「把 A 說成 B」as a generic shortcut for every distortion of scope or meaning. It is natural when someone literally says or mistakes one thing for another（把週三說成週四）. For an abstract consequence, state what the draft claims or what the reader may misunderstand（「成稿可能把有限情境說成全面故障」→「讀者可能會以為所有情況都會故障」）.
+- Do not make an abstract noun perform a physical return.「讓討論回到正題」is an established relation;「讓每句話回到來源」is not. Name the checkable relation instead（「每句話都能對照原始資料」）.
 
 ### 11. Remove unexplained figurative language
 

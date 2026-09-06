@@ -11,9 +11,12 @@ The text:
 - [ ] does not rely on the reader to fill in missing context or read the writer's mind
 - [ ] does not leak internal planning language or unexplained analytical frames into the final prose
 - [ ] does not answer an objection, accusation, or inner judgment that no one raised
-- [ ] does not use niche vocabulary, jargon, or project shorthand without explanation
+- [ ] does not invent「XX 邊界」compounds in ordinary prose:「邊界」means a real dividing line or an established term the intended reader already uses, while ordinary limits, responsibilities, applicable cases, and conditions are named directly
+- [ ] uses「說法」only when referring to words someone actually said, wrote, claimed, or publicly expressed
 - [ ] does not use uncommon imagery or literal translated terms such as「基線」or「閉環」when plain descriptions of people, actions, information, and consequences would be clearer
 - [ ] keeps every verb whole and every subject recoverable: the reader can tell who acts and what the action is, and no two-syllable verb is shaved to one character, in prose or in a table cell
+- [ ] uses ordinary full Chinese forms where the passage needs them: nearby clauses do not pile up clipped or redundant verbs, and「的」or「會」was not deleted when it carries a noun relation, conditional result, or deliberate weight
+- [ ] uses「把 A 說成 B」and「讓 X 回到 Y」only for literal or established relations; abstract scope changes and source checks name the actual misunderstanding or verifiable relation
 - [ ] contains no padding verbs or classical residue（進行討論、加以檢視、係、惟）outside genres whose register requires them
 - [ ] uses no abbreviation the reader has not already met elsewhere, and none that collides with an existing word
 - [ ] replaces vague abstractions with concrete nouns, verbs, examples, conditions, or consequences where needed

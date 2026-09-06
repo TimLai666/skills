@@ -12,6 +12,14 @@ Use this checklist after drafting or rewriting.
   - Examples:「範例照抄也要驗」「命中的已拆」「表現優異的項目也要查」「改好再給你驗」, and the verb dropped entirely:「一律進例集」
   - Fix: write the verb whole and say what it acts on, and keep the actor recoverable（「改好再給你驗」→「改好了，等你看過確認」）. See rules 5 and 10 in [human-writing-principles.md](./human-writing-principles.md).
 
+- Over-compressed Chinese clauses
+  - Examples:「作者先列事實」「AI 是否會寫，而團隊把兩種狀態混在一起」「付出的是文件可信度」「主管需要要求逐項查證」, or deleting「會」from a conditional result merely to make it shorter.
+  - Fix: use the ordinary full form, then read neighboring clauses together. Restore the object, complement, full verb,「的」, or「會」when it makes the action clearer or gives the sentence its natural weight. Remove adjacent verbs that repeat the same function. Keep a short form only when it is conventional in that context or intentionally shapes the rhythm. See rule 10A in [human-writing-principles.md](./human-writing-principles.md).
+
+- Abstract transformation frames
+  - Examples:「把有限情境說成全面故障」「讓每句話回到來源」when no one literally says one thing as another and nothing can literally or conventionally return.
+  - Fix: name the actual claim, misunderstanding, or verification relation（「讀者可能會以為所有情況都會故障」「每句話都能對照原始資料」）. Keep the frame when the relation is literal or established（「把週三說成週四」「讓討論回到正題」）.
+
 - Invented abbreviations
   - Examples:「產品經理」cut to「產經」, or an acronym coined mid-paragraph in English.
   - Fix: keep only abbreviations already in circulation, or choose a shorter complete wording（「產經」→ write「產品經理」out）. See rule 10 in [human-writing-principles.md](./human-writing-principles.md).
@@ -19,6 +27,10 @@ Use this checklist after drafting or rewriting.
 - Unfamiliar imagery and literal translated terms
   - Examples:「基線」「閉環」when the reader does not already use them.
   - Fix: say who does what, what information they have, and what remains unresolved. See rule 9 in [human-writing-principles.md](./human-writing-principles.md); example 17 in [human-writing-examples.md](./human-writing-examples.md) shows the full rewrite of「閉環」.
+
+- Invented「XX 邊界」compounds and「說法」wrappers
+  - Examples:「事實邊界」「能力邊界」「認知邊界」「責任邊界」or「避免錯誤範圍成為正式說法」when ordinary prose can name the affected people, limits, division of work, conditions, or published result.
+  - Fix: replace「邊界」with the actual scope, limit, responsibility, or condition. Keep it only for a real dividing line or an established term the intended reader already uses. Use「說法」only for words someone actually said, wrote, claimed, or publicly expressed; modifiers such as「正式」「普遍」and「常見」do not replace that requirement.
 
 - Invented details in a rewrite
   - Examples: adding a price, a time, a person, a feature, or a scene that the source text does not provide.
