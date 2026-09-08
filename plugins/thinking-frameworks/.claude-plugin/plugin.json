@@ -1,7 +1,7 @@
 {
   "name": "thinking-frameworks",
-  "description": "通用思考框架：ultrathink 會把決策單元路由到 1～2 個任務類別，再固定以六種語言獨立分析並用繁中統整，最後跑完共用思維模型、謬誤檢核與減法審查。另含 plan-grilling 與 subtraction-thinking。",
-  "version": "0.38.0",
+  "description": "通用思考框架：ultrathink 依問題選用分析方法，六語分析與完整謬誤檢核可依需要自動啟用或明確指定。另含 plan-grilling 與 subtraction-thinking。",
+  "version": "0.40.3",
   "author": {
     "name": "TimLai666"
   }
