@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**3 / 62**。ultrathink 已經使用者確認並要求推送。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**4 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 審查範圍：目前 repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -317,9 +317,11 @@
 
   **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/ship-it/SKILL.md:3)、[主檔:15](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/ship-it/SKILL.md:15)、[主檔:53](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/ship-it/SKILL.md:53)、[主檔:65](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/ship-it/SKILL.md:65)、[主檔:75](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/ship-it/SKILL.md:75)、[主檔:87](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/ship-it/SKILL.md:87)、[主檔:146](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/ship-it/SKILL.md:146)、[主檔:163](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/ship-it/SKILL.md:163)。
 
-- [ ] **29. software-engineering-guidelines**（高優先）
+- [x] **29. software-engineering-guidelines**（高優先）
 
-  **目前已確認並修改：** 文件操作沿用專案既有安排；沒有安排時，額外問題記在 AGENTS.md 的 Follow-ups，AGENTS.md 放實際指令、CLAUDE.md 作為入口。既有實質內容保留。澄清先查證可取得的資訊，重要缺項才確認，其餘採合理假設繼續。測試依影響範圍選擇，重大變更測試先行，專案完整測試照規則執行。skill 版本 1.4.1、plugin 版本 1.20.1；接著整理重複敘述，本項尚未勾選。
+  **已完成並經使用者確認：** 原則保留完整判斷標準，Workflow 改為執行順序與原則引用，Pre-Ship Checklist 簡短核對範圍、驗證及完成條件。linter／type checker 與驗證缺口回報集中於測試原則。skill 1.4.2、plugin 1.20.2。保留 Principles 現有標題分節。格式檢查通過，使用者已要求提交並推送。
+
+  **目前已確認並修改：** 文件操作沿用專案既有安排；沒有安排時，額外問題記在 AGENTS.md 的 Follow-ups，AGENTS.md 放實際指令、CLAUDE.md 作為入口。既有實質內容保留。澄清先查證可取得的資訊，重要缺項才確認，其餘採合理假設繼續。測試依影響範圍選擇，重大變更測試先行，專案完整測試照規則執行。skill 版本 1.4.1、plugin 版本 1.20.1；此為前一階段紀錄，重複敘述整理已完成。
 
   **可以改哪裡：** 任何軟體活動甚至一行變更都必載；原則→流程→清單重複同一事項。範圍外問題一律寫 AGENTS、初始化一律把 CLAUDE 改指標，有額外副作用。所有變更與全測試一刀切。
 

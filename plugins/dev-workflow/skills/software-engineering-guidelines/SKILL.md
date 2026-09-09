@@ -2,7 +2,7 @@
 name: software-engineering-guidelines
 description: "Software engineering guidelines for any software change. This skill MUST be loaded before requirement clarification, architecture/design, implementation, refactoring, code review, testing, or shipping, and MUST NOT be skipped because the change is a one-liner. Covers simplicity, surgical changes, testing-first for high-impact changes with TDD (Test-Driven Development), and verifiable success criteria. Triggers on: 任何軟體規劃, 需求釐清, 架構設計, 寫 code, 改 code, 做功能, 修 bug, refactor, 開發, coding, development, 實作, 實現, 寫程式, 改程式, 加功能, 修問題, code review, 測試, 重構, init, 初始化專案, 建立 CLAUDE.md, 建立 AGENTS.md"
 metadata:
-  version: "1.4.1"
+  version: "1.4.2"
 ---
 
 ## Core Principles
@@ -54,6 +54,7 @@ Baseline rule:
 - Every behavior-changing change needs test coverage.
 - For text, formatting, or documentation changes, use checks suited to the affected content.
 - Run the full test suite according to the project's rules.
+- Run the project's linter and type checker when provided, and report their results alongside the tests. Unresolved failures mean verification is incomplete.
 - For small, local, low-risk fixes, add/update tests around the change (before or immediately after implementation is acceptable if justified).
 - For large changes, broad-scope changes, or major new features, you MUST apply TDD: write the failing test first, then implement — don't write code and backfill tests.
 
@@ -91,27 +92,23 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ### A. Before Writing Code
 
-1. Establish the requirement from available information and handle remaining gaps according to Principle 1.
-2. Choose an approach; explain material tradeoffs when they affect the decision.
-3. Define success criteria: what does "done" look like (Principle 5).
-4. Select verification and establish any required pre-change results according to Principle 4.
+1. Establish the requirement and approach (Principle 1).
+2. Define success criteria (Principle 5).
+3. Select verification and establish required pre-change results (Principle 4).
 
 ### B. While Writing Code
 
-Apply Principles 2–4: keep it simple, change only what the request requires, and use the TDD loop for TDD-scope work.
+Implement using Principles 2–4.
 
 ### C. After Completion
 
-1. Complete the verification selected under Principle 4 and report actual results, including unresolved failures.
-2. Run linter / type checker (if the project has one).
-3. Walk the Pre-Ship Checklist below.
+1. Complete and report verification (Principle 4).
+2. Review the Pre-Ship Checklist.
 
 ---
 
 ## Pre-Ship Checklist
 
-- [ ] Every changed line traces to the user's request — nothing was added that wasn't asked for.
-- [ ] No abstractions for single-use code; code is simple, no more than required.
-- [ ] Verification meets Principle 4, including required test-first work and bug reproduction coverage.
-- [ ] Required checks pass, and no test was weakened just to make it pass; unresolved failures are reported as incomplete verification.
-- [ ] Linter / type checker reports no errors.
+- [ ] Scope and simplicity reviewed against Principles 2–3.
+- [ ] Verification completed under Principle 4.
+- [ ] Results demonstrate the agreed success criteria; any remaining gaps are reported.
