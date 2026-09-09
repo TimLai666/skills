@@ -17,6 +17,7 @@ Use this checklist after drafting or rewriting.
   - Fix: use the ordinary full form, then read neighboring clauses together. Restore the object, complement, full verb,「的」, or「會」when it makes the action clearer or gives the sentence its natural weight. Remove adjacent verbs that repeat the same function. Keep a short form only when it is conventional in that context or intentionally shapes the rhythm. See rule 10A in [human-writing-principles.md](./human-writing-principles.md).
 
 - Formulaic relationship statements and translated clause structure
+  - Also watch for「仍」added to an ordinary requirement without a continuing or contrary-to-expectation meaning. See rule 10B; keep the actual relationship rather than inventing a contrast.
   - Watch for overused「代表」frames, unclear relationships between clauses, sentence-initial「只是」carried over from English structure, and awkward word combinations.
   - Fix: rewrite according to the intended relationship and natural Chinese usage in context. See rule 10B in [human-writing-principles.md](./human-writing-principles.md) and example 15A in [human-writing-examples.md](./human-writing-examples.md).
 

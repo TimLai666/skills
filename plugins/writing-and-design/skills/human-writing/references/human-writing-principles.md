@@ -93,6 +93,8 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 ### 10B. State effects and conditions in natural Chinese
 
+- Use「仍」when the context conveys that something continues or holds despite a change or contrary expectation, carrying the sense of「還是」. Ordinary requirements and factual statements need no implied contrast. Choose wording from the actual relationship rather than adding「仍」for emphasis or formality.
+
 - Avoid repeatedly using「代表」or「代表……不代表……」as a generic frame for explaining relationships. State the actual meaning, effect, inference, or contrast in wording that fits the context. Keep the word where it is natural and precise; swapping it for another repeated formula does not solve the problem.
 - Make the relationship between neighboring clauses clear, including whether a result is observed, possible, or intended. Choose the sentence structure from the meaning and context rather than applying a fixed connector or replacement phrase.
 - Write conditions and qualifications in idiomatic Chinese rather than copying English clause structure. Sentence-initial「只是」often sounds translated when used to introduce a situation, including wording modeled on English “just because.” Reconsider the whole sentence and its connection to the preceding text. It can remain where the context makes it natural, such as a qualification of the preceding statement.

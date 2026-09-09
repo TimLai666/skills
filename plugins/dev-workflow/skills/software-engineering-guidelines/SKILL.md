@@ -2,19 +2,19 @@
 name: software-engineering-guidelines
 description: "Software engineering guidelines for any software change. This skill MUST be loaded before requirement clarification, architecture/design, implementation, refactoring, code review, testing, or shipping, and MUST NOT be skipped because the change is a one-liner. Covers simplicity, surgical changes, testing-first for high-impact changes with TDD (Test-Driven Development), and verifiable success criteria. Triggers on: 任何軟體規劃, 需求釐清, 架構設計, 寫 code, 改 code, 做功能, 修 bug, refactor, 開發, coding, development, 實作, 實現, 寫程式, 改程式, 加功能, 修問題, code review, 測試, 重構, init, 初始化專案, 建立 CLAUDE.md, 建立 AGENTS.md"
 metadata:
-  version: "1.3.1"
+  version: "1.4.1"
 ---
 
 ## Core Principles
 
 ### 1. Think Before Coding
 
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
+**Verify what you can. Make material assumptions and tradeoffs clear.**
 
 Before implementing:
 
-- State your assumptions explicitly. If something is unclear, stop, name what's confusing, and ask.
-- If multiple interpretations exist, present them — don't pick silently.
+- Check available information first. Ask the user when an unresolved gap would materially affect the result, scope, authorization, or an important tradeoff. Continue independent work while that decision is pending.
+- Otherwise proceed with a reasonable assumption, explaining it when it helps the user assess the result. When interpretations differ materially, explain the relevant difference and recommend an approach for confirmation.
 - If a simpler approach exists, say so. Push back when warranted.
 
 ### 2. Simplicity First
@@ -47,11 +47,13 @@ The test: Every changed line should trace directly to the user's request.
 
 ### 4. Testing Strategy (Test-First + scoped TDD)
 
-**All changes and features must have meaningful tests. No test = not done.**
+**Choose verification that demonstrates the change works and matches its impact.**
 
 Baseline rule:
 
 - Every behavior-changing change needs test coverage.
+- For text, formatting, or documentation changes, use checks suited to the affected content.
+- Run the full test suite according to the project's rules.
 - For small, local, low-risk fixes, add/update tests around the change (before or immediately after implementation is acceptable if justified).
 - For large changes, broad-scope changes, or major new features, you MUST apply TDD: write the failing test first, then implement — don't write code and backfill tests.
 
@@ -63,8 +65,8 @@ Baseline rule:
 
 Rules:
 
-- **Every bug fix must start with a test that reproduces the bug.**
-- **Before refactoring, confirm all tests pass. After refactoring, confirm again.**
+- **Bug fixes need a test that reproduces the bug; use the test-first requirements above to determine timing.**
+- **Before refactoring, establish the result of relevant tests; rerun them after the change.**
 - **Don't weaken a test just to make it pass.** Unless the test itself is wrong.
 
 ### 5. Goal-Driven Execution
@@ -89,10 +91,10 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ### A. Before Writing Code
 
-1. Confirm the requirement, state assumptions, surface anything unclear (Principle 1).
-2. List possible approaches, explain which you choose and why.
+1. Establish the requirement from available information and handle remaining gaps according to Principle 1.
+2. Choose an approach; explain material tradeoffs when they affect the decision.
 3. Define success criteria: what does "done" look like (Principle 5).
-4. If tests exist, run them first to confirm they all pass.
+4. Select verification and establish any required pre-change results according to Principle 4.
 
 ### B. While Writing Code
 
@@ -100,7 +102,7 @@ Apply Principles 2–4: keep it simple, change only what the request requires, a
 
 ### C. After Completion
 
-1. Run all tests, confirm they all pass.
+1. Complete the verification selected under Principle 4 and report actual results, including unresolved failures.
 2. Run linter / type checker (if the project has one).
 3. Walk the Pre-Ship Checklist below.
 
@@ -110,7 +112,6 @@ Apply Principles 2–4: keep it simple, change only what the request requires, a
 
 - [ ] Every changed line traces to the user's request — nothing was added that wasn't asked for.
 - [ ] No abstractions for single-use code; code is simple, no more than required.
-- [ ] All changes and features have corresponding tests; large or high-risk changes were implemented test-first (TDD).
-- [ ] Bug fix has a test that reproduces the bug.
-- [ ] All tests pass, and no test was weakened just to make it pass.
+- [ ] Verification meets Principle 4, including required test-first work and bug reproduction coverage.
+- [ ] Required checks pass, and no test was weakened just to make it pass; unresolved failures are reported as incomplete verification.
 - [ ] Linter / type checker reports no errors.

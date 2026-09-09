@@ -16,7 +16,7 @@ The text:
 - [ ] does not use uncommon imagery or literal translated terms such as「基線」or「閉環」when plain descriptions of people, actions, information, and consequences would be clearer
 - [ ] keeps every verb whole and every subject recoverable: the reader can tell who acts and what the action is, and no two-syllable verb is shaved to one character, in prose or in a table cell
 - [ ] uses ordinary full Chinese forms where the passage needs them: nearby clauses do not pile up clipped or redundant verbs, and「的」or「會」was not deleted when it carries a noun relation, conditional result, or deliberate weight
-- [ ] expresses relationships in context-appropriate Chinese, avoids overusing「代表」frames or importing English clause structure, and uses natural word combinations
+- [ ] expresses relationships in context-appropriate Chinese, avoids overusing「代表」frames or importing English clause structure, uses「仍」only for a genuine continuing or contrary-to-expectation meaning, and uses natural word combinations
 - [ ] uses「把 A 說成 B」and「讓 X 回到 Y」only for literal or established relations; abstract scope changes and source checks name the actual misunderstanding or verifiable relation
 - [ ] contains no padding verbs or classical residue（進行討論、加以檢視、係、惟）outside genres whose register requires them
 - [ ] uses no abbreviation the reader has not already met elsewhere, and none that collides with an existing word

@@ -319,7 +319,7 @@
 
 - [ ] **29. software-engineering-guidelines**（高優先）
 
-  **目前已確認並修改：** 文件操作沿用專案既有安排；沒有安排時，額外問題記在 AGENTS.md 的 Follow-ups，AGENTS.md 放實際指令、CLAUDE.md 作為入口。既有實質內容保留。skill 版本 1.3.1、plugin 版本 1.19.1；其餘建議尚未修改，本項尚未勾選。
+  **目前已確認並修改：** 文件操作沿用專案既有安排；沒有安排時，額外問題記在 AGENTS.md 的 Follow-ups，AGENTS.md 放實際指令、CLAUDE.md 作為入口。既有實質內容保留。澄清先查證可取得的資訊，重要缺項才確認，其餘採合理假設繼續。測試依影響範圍選擇，重大變更測試先行，專案完整測試照規則執行。skill 版本 1.4.1、plugin 版本 1.20.1；接著整理重複敘述，本項尚未勾選。
 
   **可以改哪裡：** 任何軟體活動甚至一行變更都必載；原則→流程→清單重複同一事項。範圍外問題一律寫 AGENTS、初始化一律把 CLAUDE 改指標，有額外副作用。所有變更與全測試一刀切。
 
@@ -674,6 +674,8 @@
   **原文位置：** [主檔:21](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/design-studio/SKILL.md:21)、[主檔:135](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/design-studio/SKILL.md:135)、[practical/GUIDE.md:192](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/design-studio/practical/GUIDE.md:192)、[practical/GUIDE.md:350](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/design-studio/practical/GUIDE.md:350)、[practical/GUIDE.md:473](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/design-studio/practical/GUIDE.md:473)、[shared/guardrails.md:18](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/design-studio/shared/guardrails.md:18)、[shared/verification.md:34](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/design-studio/shared/verification.md:34)。
 
 - [x] **60. human-writing**（高優先）
+
+  **後續用字修正：** 加入「仍」的語意判斷與完整測試例句，避免在一般規則中加入不存在的轉折。同步原則、例集、反模式與最後檢查表；skill 1.9.3、plugin 1.20.2。
 
   **完成決定：** 使用者已確認並要求提交、推送。完整閱讀範例移到起草前，移除 Suggested Prompt，取消自動附加 Kept as-is 備註。依文章比較新增規則與三組範例：減少過度使用「代表」句型，按句意與中文習慣處理連接、條件及搭配，具體替換詞只作例句示範。原有「這代表每位照護者必須照看更多長者。」保留。
 
