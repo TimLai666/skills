@@ -82,7 +82,7 @@ One file per ticket under `docs/tickets/`, numbered from `01` in dependency orde
 - [ ] ...
 ```
 
-This is a location `dev-task-loop` can be pointed at when it asks where the backlog lives.
+Use this directory as the backlog location when handing off implementation.
 
 ### OpenSpec
 

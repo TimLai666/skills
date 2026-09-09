@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.10.5"
+  version: "1.10.6"
 ---
 
 ## Command routing
@@ -290,7 +290,7 @@ Cut by what someone can do, not by which layer the code sits in. Each ticket is 
 
 Tickets land where the Preamble established:
 
-- **Plain markdown** — one file per ticket under `docs/tickets/`, numbered in dependency order. Point `dev-task-loop` at that directory when it asks where the backlog lives.
+- **Plain markdown** — one file per ticket under `docs/tickets/`, numbered in dependency order. Use that directory as the backlog when handing off implementation.
 - **OpenSpec** — one ticket is one change, never one task. Map each change to one milestone id in `delivery-status.md`; that milestone order carries the blocking edges, because OpenSpec has none between changes. Use the `openspec` skill for CLI commands, delta syntax, validation and archive flow if it is installed; if it is not, say so and fall back to plain markdown rather than hand-rolling the directory layout.
 
 Either way the ordering lives on the tickets, not in `ENG.md`.

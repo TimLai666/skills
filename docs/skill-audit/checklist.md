@@ -1,8 +1,8 @@
 # Skills 簡化清單
 
-目前完成優化：**5 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**6 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
-審查範圍：目前 repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
+初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
 依據：[Eric Provencher：Rethinking skills and prompts for GPT-6 Astra](https://x.com/pvncher/status/2095991462416490862)。文章提醒縮短並精確描述適用情境、只在需要時讀取細節、減少過度固定的流程，以及清楚界定完成條件和需要停下來的決策。下列各項是對本 repo 的審查判斷，不是作者對這些 skills 的評語。
 
@@ -217,15 +217,9 @@
 
   **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/db-engineering/SKILL.md:3)、[主檔:15](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/db-engineering/SKILL.md:15)、[主檔:55](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/db-engineering/SKILL.md:55)、[主檔:69](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/db-engineering/SKILL.md:69)、[主檔:94](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/db-engineering/SKILL.md:94)、[主檔:110](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/db-engineering/SKILL.md:110)。
 
-- [ ] **19. dev-task-loop**（高優先）
+- [x] **19. dev-task-loop**
 
-  **可以改哪裡：** description 塞入整個工作流程；每次固定六問、選首張、每張再問、三輪停下，使已授權 backlog loop 重複確認。正文宣稱平台中立卻內嵌特定瀏覽器 API、固定 merge/rebase/force push 與歷史偏好。
-
-  **建議改法：** description 只保留 backlog 場景及單票排除；六項改成可從上下文補齊的工作契約，只問缺項。依一次授權持續執行；提交合併同步策略從專案契約取得。平台操作移按需 reference；附件需實際讀取即可，不一律要求每票用瀏覽器。
-
-  **應保留：** 一個 OpenSpec change 是一張票、UI 實際驗證、範圍隔離、逐票完成條件與回寫驗證、阻礙及剩餘票清單。
-
-  **原文位置：** [主檔:4](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/dev-task-loop/SKILL.md:4)、[主檔:25](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/dev-task-loop/SKILL.md:25)、[主檔:56](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/dev-task-loop/SKILL.md:56)、[主檔:70](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/dev-task-loop/SKILL.md:70)、[主檔:113](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/dev-task-loop/SKILL.md:113)、[主檔:143](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/dev-task-loop/SKILL.md:143)、[主檔:155](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/dev-task-loop/SKILL.md:155)、[主檔:185](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/dev-task-loop/SKILL.md:185)、[主檔:201](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/dev-task-loop/SKILL.md:201)。
+  **已依使用者要求刪除。** 原內容可從 Git 歷史取得。README 已移除項目，現有 skill 數量為 61。eng-architect 的兩處交接說明改為直接指向任務目錄，避免依賴已刪除的 skill。
 
 - [ ] **20. diff-inspector**（中優先）
 
