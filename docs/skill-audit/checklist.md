@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**2 / 62**。ultrathink 已經使用者確認並要求推送。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**3 / 62**。ultrathink 已經使用者確認並要求推送。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 審查範圍：目前 repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -655,7 +655,13 @@
 
   **原文位置：** [主檔:24](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/commercial-proposal-writing/SKILL.md:24)、[主檔:42](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/commercial-proposal-writing/SKILL.md:42)、[主檔:147](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/commercial-proposal-writing/SKILL.md:147)、[主檔:183](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/commercial-proposal-writing/SKILL.md:183)、[主檔:215](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/commercial-proposal-writing/SKILL.md:215)、[references/01-intake-and-audience-routing.md:5](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/commercial-proposal-writing/references/01-intake-and-audience-routing.md:5)。
 
-- [ ] **59. design-studio**（高優先）
+- [x] **59. design-studio**（高優先）
+
+  **本次已完成，使用者已確認並要求推送：** 按實際工具與上下文限制適配流程，取消非 Claude 自動降級；移除需求重述與規格的字數門檻；純評論及不涉及視覺規範的小修改沿用既有設計資料；影片音軌依用途與約定驗證，有音訊時建議同時設計節拍層與氛圍底。保留三版設計、風格流程及確認要求。其餘初次審查建議尚未採用。
+
+  **變更檔案：** SKILL.md（1.13.1）、practical/GUIDE.md、shared/verification.md、practical/references/audio-design-rules.md、README.md、plugin.json（1.20.1）及本清單。
+
+  **驗證：** quick_validate、YAML／JSON 解析與 git diff --check 通過；核對主檔、實作流程與音訊參考的一致性。這次修改的是流程文件，尚未實跑設計或影片匯出；本次依使用者要求提交與推送。以下為初次審查紀錄。
 
   **可以改哪裡：** 所有設計都寫 DESIGN.md、讀五份 shared 文件；practical 七階段、三版本、秒數抽風格、多次停等，並以非 Claude 判定能力不足。雙主題與音訊的預設也增加工作。
 

@@ -31,7 +31,7 @@
 | launch film/品牌宣傳片（「Apple級」「超級碗品質」） | 先寫萬字 director's notes → `references/launch-film-director-notes.md` |
 | App/iOS 原型 | 「App / iOS 原型專屬守則」（覆蓋通用規則） |
 | 評審/打分 | Step 10 → `references/critique-guide.md` |
-| 弱 runtime（無 subagent/非 Claude） | 上述任一條 + 「弱 runtime 降級模式」 |
+| 工具或上下文資源受限 | 上述任一條 + 「環境能力適配」 |
 
 例：「做個咖啡主題的 PPT」= 第 2 行 + 第 3 行——Fallback 出三版（咖啡是主題不是品牌，不找 logo），deck 骨架統一用概覽牆模板。
 
@@ -204,12 +204,12 @@
 > 使用者給了**具體品牌/產品名（能去官網找到 logo 的那種，如 Stripe / DJI / 某 App）**或品牌資產/參考站 → **跳出 Fallback**，走「核心哲學 #1」+「§1.a 核心資產協議」主幹。
 > ⚠️ **但普通主題名不算品牌名**：「咖啡 / 鸚鵡 / 歷史 / 健身」這類是**內容主題**，不是可找 logo 的品牌——**繼續走 Fallback，不要跑去找「咖啡的 logo」空轉**。Fallback 正是服務「給了主題、但沒給品牌/風格參考」這種最常見的情況。
 
-**Phase 2 · 顧問式重述**（**≥200 字**，把需求真正嚼透，不是敷衍一句）
+**Phase 2 · 顧問式重述**（清楚交代需求、受眾、情境與尚待確認的假設）
 用自己的話深入重述本質需求、受眾、場景、情感基調、使用者沒說出口的潛在期待。以「基於這個理解，我**直接做 3 個不同方向的真實版本給你看**」結尾——❌ 不要以「你想選哪個方向？」結尾（見 Phase 3 鐵律）。
 
 **Phase 3 · 固化設計 spec（三套邏輯的共同輸入）**
 
-把 Phase 1-2 澄清到的東西寫成一份 **≥500 字的詳盡設計 spec**——這是三個 subagent 的**唯一共同輸入**，寫薄了三版都會飄。必須覆蓋：產品/專案是什麼、目標受眾與使用場景、核心資訊與內容要點(分點列出主要區塊)、情感基調與氣質關鍵詞、**輸出格式與尺寸（必填——網頁還是 PPT？具體畫素？三個 subagent 必須統一用這個尺寸，否則三版尺寸不一無法橫向對比）**、已知約束（品牌色/禁忌/必含元素）、圖片需求（Phase 3.5 判斷的結果）、視覺母題假設（這個內容獨有的視覺元素/結構/隱喻，見工作流 Step 3 form推導五問）。它們各自獨立工作、只看 spec、互不參考——所以 spec 越具體，三版越不會跑偏。
+把 Phase 1-2 澄清到的東西寫成一份**資訊完整的設計 spec**——這是三個 subagent 的**唯一共同輸入**，缺少關鍵資訊會讓三版偏離需求。必須覆蓋：產品/專案是什麼、目標受眾與使用場景、核心資訊與內容要點(分點列出主要區塊)、情感基調與氣質關鍵詞、**輸出格式與尺寸（必填——網頁還是 PPT？具體畫素？三個 subagent 必須統一用這個尺寸，否則三版尺寸不一無法橫向對比）**、已知約束（品牌色/禁忌/必含元素）、圖片需求（Phase 3.5 判斷的結果）、視覺母題假設（這個內容獨有的視覺元素/結構/隱喻，見工作流 Step 3 form推導五問）。它們各自獨立工作、只看 spec、互不參考——spec 應足以讓各組理解同一任務並進行比較。
 
 **Phase 3.5 · 🔴 CHECKPOINT 圖片素材前置（spawn 三套邏輯前必做，硬要求）**
 
@@ -244,7 +244,7 @@
 
 > 🔴 **選擇無效鐵律**（花叔 2026-06 實測確認）：絕不讓使用者在「只有文字、沒看到視覺」時選風格——使用者沒依據。所以不拋文字單選題，而是**並行啟動 3 個 subagent 同時跑三套互補邏輯**，各產出一版真實視覺，一次性擺出來讓使用者選「看得見的東西」。三個 subagent **獨立 context、互不參考**（避免趨同），並行是為了更快 deliver。
 
-> ⚙️ **不支援 spawn subagent 的 runtime（Codex / Cursor / 純對話）**：改**序列**跑三套——每套開跑前只讀 spec、清空對上一套的記憶、不許參考已生成的版本，並用三個不同 anchor（輪盤號 / 參照案例 / 設計師名）物理隔離趨同。序列也**必須出三版**，不許偷懶併成一版。spawn prompt 裡只餵 spec，別把另兩套的邏輯一起寫進去。
+> **沒有 subagent 工具時**：依序完成三個設計方向，每版依共同規格與自己的方向執行。共用上下文無法保證彼此隔離，須如實說明。可用 subagent 但名額不足時，分批開啟獨立上下文。
 
 每個 subagent 拿同一份 spec + 同一份使用者真實內容，各按一套邏輯產出一版**純 HTML/CSS**（default 無生圖）真實視覺：
 
@@ -328,16 +328,13 @@
 7. **驗證**：用Playwright截圖（見 `references/verification.md`），檢查控制台錯誤，發給使用者。
    🛑 **檢查點5：交付前自己肉眼過一遍瀏覽器**。AI寫的程式碼經常有interaction bug。
 8. **總結**：極簡，只說caveats和next steps。
-9. **（預設）匯出影片 · 必帶 SFX + BGM**：動畫 HTML 的**預設交付形態是帶音訊的 MP4**，不是純畫面。無聲版本等於半成品——使用者潛意識感知「畫在動但沒聲音響應」，廉價感的根源就在這裡。流水線：
-   - `scripts/render-video.js` 錄 25fps 純畫面 MP4（只是中間產物，**不是成品**）
-   - 需要**真 60fps / 確定性 / B站作品集交付**且動畫走 Stage 時鐘時，改用 `scripts/render-video-seek.js --fps=60`（逐幀 seek，免插幀、無黑幀，詳見 `references/video-export.md`）
-   - `scripts/convert-formats.sh` 派生 60fps MP4 + palette 最佳化 GIF（視平台需要）
-   - `scripts/add-music.sh` 加 BGM（6 首場景化配樂：tech/ad/educational/tutorial + alt 變體）
-   - SFX 按 `references/audio-design-rules.md` 設計 cue 清單（時間軸 + 音效類型），用 `assets/sfx/<category>/*.mp3` 37 個預製資源，按配方 A/B/C/D 選密度（發布 hero ≈ 6個/10s，工具演示 ≈ 0-2個/10s）
-   - **BGM + SFX 雙軌制必須同時做**——只做 BGM 是 ⅓ 分完成度；SFX 佔高頻、BGM 佔低頻，頻段隔離見 audio-design-rules.md 的 ffmpeg 模板
-   - 交付前 `ffprobe -select_streams a` 確認有 audio stream，沒有則不是成品
-   - **跳過音訊的條件**：使用者明確說「不要音訊」「純畫面」「我要自己配音」——否則預設帶。
-   - 參考完整流程見 `references/video-export.md` + `references/audio-design-rules.md` + `references/sfx-library.md`。
+9. **匯出影片與音訊**：依播放情境、影片用途與使用者要求決定格式及音訊。無聲展示、GIF 或供後製的素材可交付純畫面；敘事影片依需要配置配音、音效及背景音樂。
+   - `scripts/render-video.js` 錄製 25fps MP4。
+   - 需要真 60fps 或確定性輸出，且動畫使用 Stage 時鐘時，使用 `scripts/render-video-seek.js --fps=60`。
+   - 依平台需求用 `scripts/convert-formats.sh` 轉換格式。
+   - 需要音訊時，建議同時設計 SFX 節拍層與 BGM 氛圍底，依 `references/audio-design-rules.md` 配合用途調整，使用 `scripts/add-music.sh` 或音效資源混音。
+   - 有音訊要求時，用 `ffprobe -select_streams a` 確認音軌並實際試聽；無聲交付檢查畫面、時序與格式。
+   - 工具細節見 `references/video-export.md`、`references/audio-design-rules.md` 與 `references/sfx-library.md`。
 9.5. **（帶解說時走這條）解說驅動動畫 · L2 長概念影片**：使用者要做「5-20 分鐘解釋一個概念」、「帶配音的教學」、「長篇科普影片」時——**不要先做動畫再配音**，那會讓畫面節奏跟解說對不上。改走 `references/voiceover-pipeline.md` 的解說驅動流程：
    - **寫解說稿**（markdown，`## scene-id` 分段，`[[cue:xx]]` 標關鍵句）→ 解說稿是原始碼，節奏靠它撐
    - **跑 narrate-pipeline.mjs**（豆包 TTS · `.env` 配置音色）→ 輸出 voiceover.mp3 + timeline.json（cue 時間是真實測出來的，不是按字元估算）
@@ -470,18 +467,15 @@
 
 Skill 路徑引用均採用**相對本 skill 根目錄**的形式（`references/xxx.md`、`assets/xxx.jsx`、`scripts/xxx.sh`）——agent 或使用者按自身安裝位置解析，不依賴任何絕對路徑。
 
-### 弱 runtime 降級模式
+### 環境能力適配
 
-**觸發判定**（滿足任一即進入）：無 spawn subagent 能力 / 驅動模型非 Claude / 上下文視窗小的 runtime（Codex、Gemini CLI、Copilot 等）。為什麼：按滿血流程跑，弱 runtime 中途爆上下文或偷工，產出反而更差（issue #2/#6/#41 使用者復現不出效果的根因）。
+先檢查當前環境可用的 subagent、檔案、瀏覽器、匯出工具與上下文資源，再調整受限制的步驟。
 
-**降級動作（按吃緊程度逐級啟用）**：
-1. 三版並行 → 序列：按上文 Phase 4「不支援 spawn subagent 的 runtime」規則執行（已有規則，直接引用）
-2. 序列仍吃緊 → 只做 1 個主版 + 2 個輕量變體：變體只換色板/換排印，不換佈局邏輯（為什麼：佈局重寫最耗上下文，色板/排印變體便宜但仍給使用者真實的選擇依據）
-3. references 只讀當前任務對應的 1 個檔案，不全讀（為什麼：路由表的意義就是按需載入，全讀必爆視窗）
-4. deck 預設單檔案架構（`assets/deck_stage.js`）（為什麼：多檔案 + 概覽牆依賴多輪檔案操作，弱 runtime 容易半途而廢留下壞 deck）
-5. 跳過 🛑 檢查點問答，改為在產出中標註 assumption 清單（為什麼：多輪問答成本高，把「問」換成「可審計的假設」）
-
-**原則一句話**：降級犧牲多樣性和流程，絕不犧牲反 slop 底線和真實資產協議。
+1. **可用 subagent，但同時執行名額不足**：分批建立獨立上下文，各組只取得共同規格、素材與自己的設計方向。
+2. **沒有 subagent**：依序完成三版，保留各自設計方向，說明共用上下文，不能宣稱已清空記憶或彼此隔離。
+3. **上下文或工具出現實際限制**：分段處理並保存必要工作狀態，按任務查閱參考文件。若仍無法完成約定成果，說明缺口；需要縮減版本數或設計差異時，先取得使用者同意。
+4. **缺少預覽或匯出能力**：使用可用的替代工具；驗證不了的部分明確記錄。
+5. **確認與品質要求**：沿用原任務的授權和必要確認，保留真實素材、視覺與互動驗證要求。
 
 ## 產出要求
 

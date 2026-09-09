@@ -33,11 +33,11 @@ Wraps Playwright for automated checks.
 
 ## Video Export Verification (practical)
 
-For animation outputs:
+For animation outputs that require audio:
 ```bash
 ffprobe -select_streams a output.mp4
 ```
-Must show audio stream. No audio = half-finished product.
+Confirm the required audio stream is present, then listen for intelligibility, synchronization, and clipping. For intentionally silent delivery, verify the visual output against the agreed use and format; an audio stream is not required.
 
 ## QA Checklist Before Delivery
 

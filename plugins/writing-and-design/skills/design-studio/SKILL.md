@@ -2,14 +2,14 @@
 name: design-studio
 description: >-
   Unified design skill for ALL design work — websites, apps, presentations,
-  animations, prototypes, infographics, branding. Every session produces or
-  evolves a DESIGN.md (Google format). Routes to cinematic-ui or practical
+  animations, prototypes, infographics, branding. Creates or updates DESIGN.md (Google format) when establishing or changing
+  the project's visual identity. Routes to cinematic-ui or practical
   engines based on task. This skill MUST be used for any design task. MUST
   trigger on: 設計, design, 原型, prototype, PPT, 投影片, slides, 動畫, animation, 簡報,
   deck, landing page, website, UI, mockup, MP4, GIF, infographic, branding,
   logo, 評審, critique, film-inspired, cinematic.
 metadata:
-  version: "1.12.2"
+  version: "1.13.1"
 ---
 
 # Design Studio
@@ -18,7 +18,7 @@ Unified design skill. One entry point, two engines, one design system file.
 
 ## DESIGN.md: The Design System File
 
-Every design session MUST produce or evolve a `DESIGN.md` in the project root. This file is the single source of truth for the project's visual identity.
+Create or update `DESIGN.md` when establishing or changing reusable visual rules. For a review or a small edit that leaves those rules unchanged, use existing design context and deliver the requested review or edit. Read an existing `DESIGN.md` before design work.
 
 ### Format
 
@@ -85,7 +85,7 @@ components:
 
 | Scenario | Action |
 |----------|--------|
-| No DESIGN.md exists | Copy `shared/DESIGN-template.md` to project root, rename to `DESIGN.md`, fill in during session |
+| No DESIGN.md exists and the task establishes visual rules | Copy `shared/DESIGN-template.md` to project root, rename to `DESIGN.md`, fill in during session |
 | DESIGN.md exists, user says "redesign" / "重新設計" | Run `shared/redesign-protocol.md` first — detect Preserve vs Overhaul, audit the current state — then rewrite DESIGN.md accordingly |
 | DESIGN.md exists, user wants changes | **Read first**, then expand/modify specific sections. Preserve unchanged tokens. |
 | DESIGN.md exists, new task on same project | **Read first**, stay consistent with existing tokens unless user says otherwise |
@@ -134,15 +134,15 @@ After reading DESIGN.md (or deciding to create one), route to the right engine:
 
 ## Session Flow (this file drives every session)
 
-1. **Context** — Read `DESIGN.md` if it exists (lifecycle table above); otherwise copy `shared/DESIGN-template.md`.
+1. **Context** — Read `DESIGN.md` if it exists (lifecycle table above); create one from `shared/DESIGN-template.md` when the task establishes visual rules.
 2. **Shared rules** — Read `shared/anti-slop.md`, `shared/hard-rules.md`, `shared/guardrails.md`, `shared/brand-asset.md`, `shared/verification.md`. They bind every route.
 3. **Route** — Pick the engine from the Route Decision table, then read **only** that engine's GUIDE and run its workflow:
    - **Cinematic** → `cinematic-ui/GUIDE.md` — director + film → cinematic grammar → web structure, in 4 phases: decisions → storyboard → compiled-spec → build. Best for landing pages, brand websites, editorial layouts. References: `cinematic-ui/references/` (200 directors, hero archetypes, compositions, color grades).
    - **Practical** → `practical/GUIDE.md` — task router → brand protocol → Fallback advisor → Junior Designer. Best for prototypes, presentations, animations, reviews, infographics. References: `practical/references/` (40 styles, animation pitfalls, slide decks, critique guide).
 
    A GUIDE is an execution manual, not a separate skill: it runs inside this session, under the shared rules and the `DESIGN.md` context already loaded. This file stays in charge of steps 4–6.
-4. **During design** — Extract tokens (colors, typography, spacing, components) from decisions into `DESIGN.md`.
-5. **Before delivery** — Run `shared/verification.md`; make `DESIGN.md` reflect the final design, not the initial plan.
+4. **During design** — Record new or changed reusable colors, typography, spacing, and component rules in `DESIGN.md`.
+5. **Before delivery** — Run `shared/verification.md`; if visual rules changed, make `DESIGN.md` reflect the final design.
 6. **On revisit** — Read `DESIGN.md` first. Expand, don't restart.
 
 ## Hybrid Tasks
