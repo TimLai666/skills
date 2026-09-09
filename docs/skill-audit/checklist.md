@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**4 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**5 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 審查範圍：目前 repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -331,7 +331,9 @@
 
   **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/software-engineering-guidelines/SKILL.md:3)、[主檔:8](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/software-engineering-guidelines/SKILL.md:8)、[主檔:42](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/software-engineering-guidelines/SKILL.md:42)、[主檔:44](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/software-engineering-guidelines/SKILL.md:44)、[主檔:48](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/software-engineering-guidelines/SKILL.md:48)、[主檔:88](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/software-engineering-guidelines/SKILL.md:88)、[主檔:109](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/software-engineering-guidelines/SKILL.md:109)。
 
-- [ ] **30. test-and-fix**（高優先）
+- [x] **30. test-and-fix**（高優先）
+
+  **已完成並經使用者確認：** 依測試目標選方法，主分支可測試，啟動資訊由專案取得；測試順序遵循 software-engineering-guidelines，沒有框架先評估既有工具。提交遵循使用者與專案安排，沒有指定時保留修正、回歸測試分開 commit 的原規則。移除固定連接埠與 delivery-plan.md 依賴，改讀相關既有任務紀錄。skill 1.4.0、plugin 1.21.0，README 同步。格式檢查通過，使用者已要求提交並推送；未實跑測試情境。
 
   **可以改哪裡：** 泛用測試 skill 寫死 web route、固定 port、base branch 禁測；為 CLI/library 也要啟動 app。修 bug 強制 fix/test 分開 commit，沒有框架就要 bootstrap。仍讀 delivery-plan.md。
 
