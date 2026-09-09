@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**1 / 62**。ultrathink 已經使用者確認並要求推送。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**2 / 62**。ultrathink 已經使用者確認並要求推送。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 審查範圍：目前 repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -573,7 +573,7 @@
 
   **應保留：** 減法包括保留但變簡單、豐富不等於冗餘、根據實際損失判斷、不以數量作完成標準。
 
-  **原文位置：** [主檔:4](/Users/timlai/Developer/skills/plugins/thinking-frameworks/skills/subtraction-thinking/SKILL.md:4)、[主檔:26](/Users/timlai/Developer/skills/plugins/thinking-frameworks/skills/subtraction-thinking/SKILL.md:26)、[主檔:37](/Users/timlai/Developer/skills/plugins/thinking-frameworks/skills/subtraction-thinking/SKILL.md:37)、[主檔:85](/Users/timlai/Developer/skills/plugins/thinking-frameworks/skills/subtraction-thinking/SKILL.md:85)、[主檔:98](/Users/timlai/Developer/skills/plugins/thinking-frameworks/skills/subtraction-thinking/SKILL.md:98)、[主檔:126](/Users/timlai/Developer/skills/plugins/thinking-frameworks/skills/subtraction-thinking/SKILL.md:126)、[主檔:145](/Users/timlai/Developer/skills/plugins/thinking-frameworks/skills/subtraction-thinking/SKILL.md:145)、[主檔:172](/Users/timlai/Developer/skills/plugins/thinking-frameworks/skills/subtraction-thinking/SKILL.md:172)。
+  **決定：保留原版，不修改。** 使用者已結束本項調整；原有數量門檻、Won’t List、審查流程、輸出格式與版本全部保留。上述審查建議未採用，本項不計入完成優化數，也不再列為待驗收。已比對 Git 提交版本，確認 skill 與所屬 plugin 版本均已還原。
 
 - [x] **54. ultrathink**（高優先）
 
@@ -665,7 +665,11 @@
 
   **原文位置：** [主檔:21](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/design-studio/SKILL.md:21)、[主檔:135](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/design-studio/SKILL.md:135)、[practical/GUIDE.md:192](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/design-studio/practical/GUIDE.md:192)、[practical/GUIDE.md:350](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/design-studio/practical/GUIDE.md:350)、[practical/GUIDE.md:473](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/design-studio/practical/GUIDE.md:473)、[shared/guardrails.md:18](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/design-studio/shared/guardrails.md:18)、[shared/verification.md:34](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/design-studio/shared/verification.md:34)。
 
-- [ ] **60. human-writing**（高優先）
+- [x] **60. human-writing**（高優先）
+
+  **完成決定：** 使用者已確認並要求提交、推送。完整閱讀範例移到起草前，移除 Suggested Prompt，取消自動附加 Kept as-is 備註。依文章比較新增規則與三組範例：減少過度使用「代表」句型，按句意與中文習慣處理連接、條件及搭配，具體替換詞只作例句示範。原有「這代表每位照護者必須照看更多長者。」保留。
+
+  **變更及驗證：** SKILL.md（1.9.2）、四份寫作參考文件及模式文件、plugin.json（1.19.2）與本清單。quick_validate、JSON／YAML、相對連結及 git diff --check 通過。兩個 Luna 曾比較 1.8.4 與 1.8.6，未見明顯全面改善；1.9.2 尚未重跑比較。測試文章與流程紀錄已清除，skill 的教學範例保留。以下為初次審查紀錄，未採用的建議不再列為待辦。
 
   **可以改哪裡：** 任何對話文字都觸發；46 行主檔要求讀五份參考文件，原則、反模式、清單重複。
 

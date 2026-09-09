@@ -42,7 +42,7 @@ Use this mode when the user provides source text and wants it to read better.
 3. Remove obvious AI tells first, then fix rhythm and voice.
 4. Improve precision before adding flair.
 5. If the source is already strong, edit lightly.
-6. When plainness would cost precision, keep the precision. If a hedge, condition, or complex clause stays because simplifying it would distort the meaning, append a one-line `Kept as-is:` note naming what stayed and why. Skip the note when nothing was deliberately left unsimplified.
+6. When plainness would cost precision, keep the precision. Preserve a hedge, condition, or complex clause when simplifying it would distort the meaning. Explain these editing choices when the user asks for the reasoning behind the revision.
 
 ## 4. Generate mode rules
 

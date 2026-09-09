@@ -91,6 +91,13 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 - Do not use「把 A 說成 B」as a generic shortcut for every distortion of scope or meaning. It is natural when someone literally says or mistakes one thing for another（把週三說成週四）. For an abstract consequence, state what the draft claims or what the reader may misunderstand（「成稿可能把有限情境說成全面故障」→「讀者可能會以為所有情況都會故障」）.
 - Do not make an abstract noun perform a physical return.「讓討論回到正題」is an established relation;「讓每句話回到來源」is not. Name the checkable relation instead（「每句話都能對照原始資料」）.
 
+### 10B. State effects and conditions in natural Chinese
+
+- Avoid repeatedly using「代表」or「代表……不代表……」as a generic frame for explaining relationships. State the actual meaning, effect, inference, or contrast in wording that fits the context. Keep the word where it is natural and precise; swapping it for another repeated formula does not solve the problem.
+- Make the relationship between neighboring clauses clear, including whether a result is observed, possible, or intended. Choose the sentence structure from the meaning and context rather than applying a fixed connector or replacement phrase.
+- Write conditions and qualifications in idiomatic Chinese rather than copying English clause structure. Sentence-initial「只是」often sounds translated when used to introduce a situation, including wording modeled on English “just because.” Reconsider the whole sentence and its connection to the preceding text. It can remain where the context makes it natural, such as a qualification of the preceding statement.
+- Check ordinary word combinations as well as grammar. Avoid awkward repetition caused by mixing literal nouns with idioms. Read the whole clause in context and choose a natural combination that preserves the intended action.
+
 ### 11. Remove unexplained figurative language
 
 - Keep a metaphor only when the reader can tell what it refers to and what it means in the situation.

@@ -16,6 +16,10 @@ Use this checklist after drafting or rewriting.
   - Examples:「作者先列事實」「AI 是否會寫，而團隊把兩種狀態混在一起」「付出的是文件可信度」「主管需要要求逐項查證」, or deleting「會」from a conditional result merely to make it shorter.
   - Fix: use the ordinary full form, then read neighboring clauses together. Restore the object, complement, full verb,「的」, or「會」when it makes the action clearer or gives the sentence its natural weight. Remove adjacent verbs that repeat the same function. Keep a short form only when it is conventional in that context or intentionally shapes the rhythm. See rule 10A in [human-writing-principles.md](./human-writing-principles.md).
 
+- Formulaic relationship statements and translated clause structure
+  - Watch for overused「代表」frames, unclear relationships between clauses, sentence-initial「只是」carried over from English structure, and awkward word combinations.
+  - Fix: rewrite according to the intended relationship and natural Chinese usage in context. See rule 10B in [human-writing-principles.md](./human-writing-principles.md) and example 15A in [human-writing-examples.md](./human-writing-examples.md).
+
 - Abstract transformation frames
   - Examples:「把有限情境說成全面故障」「讓每句話回到來源」when no one literally says one thing as another and nothing can literally or conventionally return.
   - Fix: name the actual claim, misunderstanding, or verification relation（「讀者可能會以為所有情況都會故障」「每句話都能對照原始資料」）. Keep the frame when the relation is literal or established（「把週三說成週四」「讓討論回到正題」）.
