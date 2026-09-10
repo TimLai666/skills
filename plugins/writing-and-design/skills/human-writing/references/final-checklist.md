@@ -23,7 +23,7 @@ The text:
 - [ ] replaces vague abstractions with concrete nouns, verbs, examples, conditions, or consequences where needed
 - [ ] contains no abstract adjectives or adverbs standing in for content, no repeated modifier, and no invented fact patched in where a modifier was removed
 - [ ] does not add a fact, number, promise, person, or scene that the source text does not provide and the writer has not verified
-- [ ] anchors every action and object: the reader can tell what is done, to what, and where, without guessing
+- [ ] anchors every action and object: the reader can tell what is done, to what, and where, without guessing; bare「收」does not stand in for an unspecified editing or completion action
 - [ ] does not rely on vague authorities or inflated importance
 - [ ] does not repeat the same sentence pattern throughout a paragraph or section
 - [ ] does not force ideas into neat triples

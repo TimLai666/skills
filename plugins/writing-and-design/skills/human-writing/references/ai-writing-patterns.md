@@ -9,6 +9,7 @@ Use this checklist after drafting or rewriting.
   - Fix: rewrite the whole sentence to say the concrete thing in ordinary spoken wording; when no repair that keeps the word sounds natural, drop the word and use an ordinary verb（「接得住」→「流量翻倍也能承受」;「不演」→「不假裝是當場想到的」）. See rules 2 and 3 in [human-writing-principles.md](./human-writing-principles.md).
 
 - Clipped verbs
+  - Also watch for bare「收」in editing or completion updates, such as「需要再收一次」, when it leaves the action or object unclear. Name the intended work; see example 18.
   - Examples:「範例照抄也要驗」「命中的已拆」「表現優異的項目也要查」「改好再給你驗」, and the verb dropped entirely:「一律進例集」
   - Fix: write the verb whole and say what it acts on, and keep the actor recoverable（「改好再給你驗」→「改好了，等你看過確認」）. See rules 5 and 10 in [human-writing-principles.md](./human-writing-principles.md).
 

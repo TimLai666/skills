@@ -6,7 +6,9 @@ Confirm the project root and locate the design sources for the screens under rev
 
 A `DESIGN.md` found here is **input, not output**. It is `design-studio`'s design system file — read it and score against its tokens, never overwrite it. This mode writes `DESIGN-REVIEW.md` instead (Step 4).
 
-If a prior `DESIGN-REVIEW.md` exists, read its score history and open slop flags before scoring. A dimension that scored 4 last time and 4 again means the fix never landed — say so, rather than reporting it as a fresh finding.
+Inspect the actual rendered screens and exercise the relevant interactions at the viewport sizes and states under review. Source code and design documents support this inspection; they do not substitute for viewing the rendered result. Record which screens, states, and interactions were checked. If rendering or interaction is unavailable, state the missing evidence and leave affected judgments unverified.
+
+Compare previous findings with the current rendered behavior and implementation evidence. An unchanged score alone does not establish that a fix was not applied. Distinguish unresolved findings, partial improvements, and new issues.
 
 ### Step 1 — Rate each dimension
 
@@ -44,7 +46,7 @@ Flag any present:
 
 ### Step 3 — Present findings and decisions
 
-Present the findings and recommended fixes together. Apply the shared decision rules: ask about unresolved tradeoffs or changes to an agreed direction, and group related choices. A review request produces recommendations; execute fixes only within the user's authorized scope.
+Present findings and recommended fixes with evidence from the inspected screens and interactions. Apply the shared decision rules: ask about unresolved tradeoffs or changes to an agreed direction, and group related choices. A review request produces recommendations; execute fixes only within the user's authorized scope. After an authorized UI fix, inspect the rendered result again and repeat the affected interactions before marking the finding resolved.
 
 ### Step 4 — Update DESIGN-REVIEW.md
 
@@ -87,7 +89,7 @@ _Last reviewed: [date] - eng-architect design - [branch]_
 - **Touch target:** [size in px]
 
 ## Token conformance
-| Token | DESIGN.md value | Used as | Verdict |
+| Token | Design baseline value | Used as | Verdict |
 |-------|-----------------|---------|---------|
 [one row per violation only — matches are not worth listing]
 
@@ -96,6 +98,6 @@ _Last reviewed: [date] - eng-architect design - [branch]_
 |---------|-----------|----------|---------|
 ```
 
-**Do not define colors, spacing, or type scales here.** Those live in `DESIGN.md` and belong to `design-studio`. This mode scores the UI *against* them; a second set of tables here means two sources of truth and the UI ends up conforming to neither.
+Use the project's established visual specification, whether it is `DESIGN.md` or an equivalent source. Reference its actual location when assessing conformance; keep design-system definitions in that source rather than creating a second set in the review record.
 
-No `DESIGN.md` in the project? Then there is no baseline to score Color, Typography or Consistency against. Say so, score those three dimensions as ungraded rather than inventing a scale, and recommend running `design-studio` first.
+If no applicable baseline can be found, state that limitation and leave baseline-dependent scores ungraded. Report observable issues supported by rendered-screen evidence, and recommend establishing the missing visual specification when needed. The absence of the filename `DESIGN.md` alone does not establish that no baseline exists.

@@ -49,7 +49,7 @@ Use headings close to this shape:
 - Prefer outputs such as a merged capability, validated proposal, passing scenario, or reviewed document.
 
 ### `Next Ticket`
-- Name exactly one next ticket id.
+- Name one actionable next ticket id. If no ticket can start, state the blocker; if work is complete, say so rather than inventing another ticket.
 - This is the default pickup point for the next agent.
 - In OpenSpec mode the ticket id is the change id.
 

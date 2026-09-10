@@ -33,12 +33,14 @@ Entry point, what it touches, where it stores, what states it moves through.
 ```text
 [Browser] --POST /api/payment--> [PaymentController]
                                    validate inputs
-                                   [PaymentService] --> [Stripe API]
+                                   [PaymentService] --> [Stripe API: external]
                                    [DB: payments] success/failure
-                                   [EmailWorker] --> [Email]
+                                   [EmailWorker] --> [Email provider: external]
                              (async)
 
-Trust boundary: everything right of [PaymentController] is internal
+Trust boundaries: Browser -> PaymentController (untrusted client input);
+PaymentService -> Stripe API and EmailWorker -> Email provider (external services).
+Controller, service, worker, and payments DB are application-managed in this example.
 State machine: pending -> processing -> succeeded | failed | refunded
 ```
 
@@ -98,7 +100,7 @@ Record the proposed seam and its rationale. Reuse established choices; raise a d
 
 #### Where the 1b-1d tables go
 
-They are per-path analysis, not project state. Each row gets exactly one owning ticket in Step 5b, where it becomes that ticket's acceptance criteria. Until then they are working notes — do not park a second copy in `ENG.md`, because a copy there and a copy on the tickets drift apart within one iteration.
+When ticketing is requested, assign each row to exactly one owning ticket in Step 5a as acceptance criteria. For architecture-only work, include the relevant analysis in the requested deliverable or existing decision record without creating tickets. Keep one authoritative copy and link to it from shared records when needed.
 
 ---
 
@@ -146,9 +148,9 @@ For each migration: reversible? locks tables? needs backfill? can run while old 
 
 Use the project's existing architecture decision document. For the default full-handoff setup, write `ENG.md` to the project root. `ENG.md` is a **state file**: one per project, updated in place. Never date-stamp or branch-stamp the filename — git already provides version history and branch isolation, and a second copy would leave re-sync with no single target to read.
 
-**It holds only what is true across tickets.** Anything scoped to one path — the error map, shadow paths, interaction edge cases, per-ticket definition of done — belongs on the ticket that owns it (Step 5b), not here. What stays is the set of decisions a second run must not re-make from scratch: the architecture, the seam strategy, the standing assumptions, the migration sequence. Without them the same project gets a different seam every iteration, which is exactly what Step 2b exists to prevent.
+Keep shared architecture, testing strategy, standing assumptions, and migration order here. When tickets exist, keep path-specific acceptance criteria on their owning tickets and link to them. For architecture-only work, retain the requested analysis as described in the per-feature pass.
 
-**Who reads it.** The next `eng-architect` run, and any agent that arrives through `AGENTS.md` before touching architecture, seams or migrations. Step 5c is what puts it on that path — an `ENG.md` nobody registered is a file only its author will ever open.
+The next architecture review and agents changing these decisions read this record. Register its actual path and reading triggers in the project's coordination file during handoff (Step 5c).
 
 **Read before writing.** If the selected architecture document exists, read it first and update the sections that changed. Do not regenerate from scratch — a re-sync that rewrites blind loses the prior run's seam decisions.
 
@@ -183,13 +185,7 @@ Apply this step when the request includes tickets or development handoff. Update
 
 Locate the existing status and coordination records using project instructions and root-relative paths. Read the complete relevant content before updating it, preserve unrelated sections, and update the existing records in place. Verify a record is absent before creating one; a missing file in the current subdirectory or an unfamiliar filename is not sufficient evidence.
 
-#### 5a — Create or update `delivery-status.md`
-
-Read [references/delivery-status-guidelines.md](delivery-status-guidelines.md) before writing.
-
-Use that reference as the single source for status sections, update rules, and handoff context. Link the actual architecture decision document and ticket location. In the default OpenSpec arrangement, milestone ordering records the cross-change blocking sequence.
-
-#### 5b — Cut the work into tickets
+#### 5a — Cut the work into tickets
 
 Read [references/ticket-breakdown-guidelines.md](ticket-breakdown-guidelines.md) before slicing anything.
 
@@ -204,6 +200,12 @@ Tickets land where the Preamble established:
 
 Keep dependency ordering in the chosen ticket system or its designated status record, not in `ENG.md`.
 
+#### 5b — Create or update `delivery-status.md`
+
+Read [references/delivery-status-guidelines.md](delivery-status-guidelines.md) before writing.
+
+After the tickets and dependencies are established, select the next actionable ticket and update status. If none can start, record the blocker or completion state rather than inventing a next ticket. Use that reference as the single source for status sections, update rules, and handoff context. Link the actual architecture decision document and ticket location. In the default OpenSpec arrangement, milestone ordering records the cross-change blocking sequence.
+
 #### 5c — Create or update `AGENTS.md` and `CLAUDE.md`
 
 Read [references/agent-context-files.md](agent-context-files.md) first.
@@ -215,7 +217,7 @@ Read [references/agent-context-files.md](agent-context-files.md) first.
 - update rules
 - project-specific constraints
 
-The artifact registry is what gives `ENG.md` a reader. `CLAUDE.md` sends every agent to `AGENTS.md`, so an artifact named there is on a path someone walks; an artifact named nowhere is a file only its author opens. Register the actual artifacts in use. Default full-handoff example:
+Register actual artifact paths and when to read them. Default full-handoff example:
 
 ```md
 ## Required artifacts
@@ -227,9 +229,7 @@ The artifact registry is what gives `ENG.md` a reader. `CLAUDE.md` sends every a
   Pick up anything whose blockers are all done.
 ```
 
-Each entry carries the trigger, not the file's table of contents. Restating an artifact's sections here means editing that list in two places forever; the trigger is the part that only exists here.
-
-Keep the `ENG.md` entry even though `delivery-status.md` already links it. They answer different questions — one says where the file is, the other says when reading it is not optional — and an agent that picks up a single ticket never opens the status file at all.
+Keep the architecture record registered even when the status record also links it, so an agent starting from a single ticket knows when to read it.
 
 **`AGENTS.md` is shared. Own your sections, leave the rest alone.** Other skills maintain their own sections in the same file and none of them announce themselves here:
 

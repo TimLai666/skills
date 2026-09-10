@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.11.2"
+  version: "1.11.3"
 ---
 
 ## Overview
@@ -58,5 +58,6 @@ Read existing content before updating it, preserve unrelated sections, and regis
 
 - The result answers the requested architecture, ticketing, or UI-review need.
 - Engineering analysis covers feature flows, failures, interaction boundaries, testing, and applicable migration risks; ticketing work assigns every analyzed acceptance item an owner and records real blockers.
+- UI-review findings use actual rendered screens and relevant interactions; authorized fixes are rechecked in the rendered result. Missing visual evidence is reported.
 - Unresolved assumptions and decisions are explicit. Project-required validation and delivery rules are followed.
 - Updated records retain unrelated content, link to the actual sources, and identify the next verifiable action when handing off.
