@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**6 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**7 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -221,7 +221,9 @@
 
   **已依使用者要求刪除。** 原內容可從 Git 歷史取得。README 已移除項目，現有 skill 數量為 61。eng-architect 的兩處交接說明改為直接指向任務目錄，避免依賴已刪除的 skill。
 
-- [ ] **20. diff-inspector**（中優先）
+- [x] **20. diff-inspector**（中優先）
+
+  **已完成並經使用者確認：** 合併 Technical review 與 Review perspectives 的重複檢查，保留具體檢查內容、上下游追查與文件一致性。主審與 sub-agent 統一使用 CONFIRMED／NEEDS INVESTIGATION，已確認缺陷與有證據的待查疑點分開呈現。skill 1.5.0、plugin 1.23.0。
 
   **可以改哪裡：** description 含執行策略；technical review 與 perspectives 重複測試、安全、效能、資料/API 契約檢查；子 agent prompt 又重列一份。
 
