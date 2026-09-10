@@ -60,7 +60,7 @@ A row no ticket owns is a missing ticket, not an oversight to fix later. A row o
 
 ## Where the tickets land
 
-Ask once, at the start of the run, and use the answer for the rest of the session.
+Use the project's established ticket system and prior user decisions. Ask only when the destination remains unresolved and affects the workflow. The formats below are defaults when no arrangement exists; preserve the existing system's format while retaining behavior-based slices, acceptance coverage, and real blockers.
 
 ### Plain markdown (default)
 

@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**7 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**8 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -233,7 +233,9 @@
 
   **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/diff-inspector/SKILL.md:3)、[主檔:37](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/diff-inspector/SKILL.md:37)、[主檔:74](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/diff-inspector/SKILL.md:74)、[主檔:87](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/diff-inspector/SKILL.md:87)、[主檔:111](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/diff-inspector/SKILL.md:111)。
 
-- [ ] **21. eng-architect**（高優先）
+- [x] **21. eng-architect**（高優先）
+
+  **已完成並經使用者確認：** 精確化觸發及模式判斷，集中尚未定案的決策；沿用專案現有文件與任務系統，無安排且需要完整交接時保留原本整套文件。工程與 UI 流程分檔並保留完整範例，狀態格式只維護一份，舊檔遷移按需讀取。測試入口與覆蓋依行為邊界、風險及效能目標決定。skill 1.11.0、plugin 1.24.0。
 
   **可以改哪裡：** 任何非小功能實作前都必載，卻同時包架構、切票、UI 審查兩種任務。每功能流程／測試位置與整體圖逐關確認；每次強制 ENG、狀態、票、AGENTS、CLAUDE 多項成品。主檔重列 reference 的狀態格式與大量模板及舊檔名遷移歷史。
 

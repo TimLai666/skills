@@ -2,11 +2,11 @@
 
 ## 規則
 
-所有專案、所有專案下目錄層級，一律遵守：
+沿用既有專案的協調安排與已確認決策。需要建立預設交接安排時，遵守以下規則：
 
 1. **CLAUDE.md 永遠只放一行**：「Read `AGENTS.md` before doing any project work. Treat it as the project operating contract.」
 2. **任何 skill 叫你改 CLAUDE.md，改 AGENTS.md** — 不管 skill 怎麼寫，只要它要求修改 CLAUDE.md 的內容，全部寫進 AGENTS.md
-3. **如果專案是反過來的（CLAUDE.md 寫一堆、AGENTS.md 沒有或很短），修正它** — 把內容搬到 AGENTS.md，CLAUDE.md 砍回一行
+3. **如果專案是反過來的（CLAUDE.md 寫一堆、AGENTS.md 沒有或很短），修正它** — 把內容搬到 AGENTS.md，確認內容已完整保留且沒有衝突後，CLAUDE.md 改為指向 AGENTS.md 的一行
 
 ## `AGENTS.md` — 專案 operating contract
 
@@ -26,8 +26,6 @@
 只做一件事：告訴 agent 去讀 AGENTS.md。
 
 ```md
-# CLAUDE.md
-
 Read `AGENTS.md` before doing any project work. Treat it as the project operating contract.
 ```
 
@@ -37,4 +35,4 @@ Read `AGENTS.md` before doing any project work. Treat it as the project operatin
 - `CLAUDE.md` 只有一行指向 AGENTS.md
 - Skill 說「寫入 CLAUDE.md」→ 寫入 AGENTS.md
 - Skill 說「更新 CLAUDE.md」→ 更新 AGENTS.md
-- 如果發現專案是反過來的，立刻修正
+- 如果發現專案是反過來的，依上述讀取、保留與衝突處理規則調整

@@ -1,6 +1,6 @@
 # Delivery Status Guidelines
 
-Use `delivery-status.md` as the convergence entry point. A new agent should be able to read it first and know what state the project is in, what is blocked, and which ticket to pick up next.
+Use the project's established status record as the handoff entry point; `delivery-status.md` is the default when none exists and full handoff is needed. Preserve the existing format while covering the relevant state and source links below. A new agent should be able to read it first and know what state the project is in, what is blocked, and which ticket to pick up next.
 
 ## Required Sections
 
@@ -59,7 +59,7 @@ Use headings close to this shape:
 - Record deltas only; do not duplicate unchanged history.
 
 ### `Source Links`
-- Link `ENG.md` whenever it exists. This is not one option among several — it is the only route by which a later agent reaches the architecture, the seam strategy and the standing assumptions before changing any of them. Omit it and those decisions are written once and never found again.
+- Link the actual architecture decision document (`ENG.md` in the default setup), so the next agent can find architecture, testing decisions, and standing assumptions.
 - Then link the plan document, and the ticket directory or change directory.
 - Add the other primary sources needed to reconstruct context quickly: thread, document, issue, or PR.
 - Prefer stable links and concise labels over raw dump content.
@@ -86,6 +86,6 @@ Update `delivery-status.md` when:
 - The file points to the next ticket directly.
 - Milestone status is current and tied to verifiable signals.
 - Critical decisions are recoverable from `Decision Log` plus `Source Links`.
-- `Source Links` names `ENG.md`, so the architecture and seam decisions are reachable from here.
+- Source links reach the actual architecture and testing decisions.
 - The file is shorter than the chat history it replaces.
 - The file does not try to serve roadmap, launch, and handoff purposes at the same time.

@@ -1,6 +1,6 @@
 # Handoff and Feedback Loop
 
-Convergence is not a one-time setup. Re-sync the control surface whenever the project state changes.
+Use this loop for development handoffs. Update the project's existing records when relevant state changes. The default filenames below refer to the corresponding destinations selected in the engineering workflow; do not create duplicate records to satisfy these names.
 
 ## Update Loop
 

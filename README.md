@@ -104,7 +104,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 
 | Skill | 適合什麼需求 |
 | --- | --- |
-| `eng-architect` | 想設計技術架構、畫 architecture diagram、做 error map，並把工作切成一張張票：依使用者功能垂直切、標出彼此的擋路關係、共用基礎先做，再產出 ENG.md 與 delivery-status.md 等協作 artifact。 |
+| `eng-architect` | 設計技術架構、釐清模組邊界、按可驗收行為拆任務，或審查 UI。沿用專案既有文件與任務系統，沒有安排且需要完整交接時建立預設協作文件。 |
 | `diff-inspector` | 想在合併前審查 diff：scope drift check、critical code review、specialist 並行掃描、adversarial review。 |
 | `test-and-fix` | 依指定範圍或 diff 測試網站、API、命令列工具與函式庫，追查失敗原因、修復並驗證回歸測試。 |
 | `ship-it` | 想準備 PR、sync base、跑測試、開 PR，提醒你 CI/deploy 監控方式，收尾把這次學到的記進 project-memory。 |
