@@ -2,13 +2,7 @@
 
 ### Preamble
 
-```bash
-_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
-echo "BRANCH: $_BRANCH"
-find . -name "*.fig" -o -name "*.sketch" -o -name "DESIGN.md" 2>/dev/null | grep -v node_modules | head -5
-[ -f DESIGN-REVIEW.md ] && sed -n '/## Score history/,/^$/p' DESIGN-REVIEW.md
-[ -f DESIGN-REVIEW.md ] && sed -n '/## Open slop flags/,/^## /p' DESIGN-REVIEW.md
-```
+Confirm the project root and locate the design sources for the screens under review, using project instructions and actual content. Read the applicable design baseline and the existing review record, including score history and unresolved findings. Follow relevant sections and references rather than limiting discovery by file count or assuming fixed headings.
 
 A `DESIGN.md` found here is **input, not output**. It is `design-studio`'s design system file — read it and score against its tokens, never overwrite it. This mode writes `DESIGN-REVIEW.md` instead (Step 4).
 

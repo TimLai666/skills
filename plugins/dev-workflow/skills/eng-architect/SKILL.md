@@ -12,7 +12,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "1.11.0"
+  version: "1.11.2"
 ---
 
 ## Overview
@@ -39,7 +39,18 @@ A request for review or discussion produces the corresponding analysis. An autho
 
 ## Project records
 
-Use existing architecture documents, task systems, status records, and coordination conventions. When none exists and full development handoff is needed, use the complete default set in the engineering workflow. For a bounded decision or review, deliver the requested result and update an existing relevant record when appropriate.
+Use existing documents and task systems that serve the purposes below. When no arrangement exists and full development handoff is needed, create `ENG.md`, `delivery-status.md`, ticket files, `AGENTS.md`, and the `CLAUDE.md` pointer. For a bounded architecture decision or UI review, select the records needed for the requested outcome.
+
+| File or location | Purpose | When to create or update | When to read |
+|---|---|---|---|
+| `ENG.md` | Shared architecture, testing strategy, assumptions, and migration order across tickets | When shared technical decisions need to persist | Before changing the relevant architecture, testing strategy, or migrations |
+| `delivery-status.md` | Current progress, blockers, next verifiable output, and next ticket | When ongoing tracking or handoff is needed; update as relevant state changes | On arrival to pick up work |
+| `docs/tickets/` or the existing ticket system | Each ticket's deliverable, acceptance criteria, and blocking dependencies | When asked to break down work or prepare development handoff | Read the assigned ticket and its dependencies before implementation |
+| `AGENTS.md` | Project working rules and the locations and reading triggers of supporting records | When establishing coordination or changing working rules | Before starting project work |
+| `CLAUDE.md` | Entry point directing agents to `AGENTS.md` | When establishing the default coordination setup; keep actual rules in `AGENTS.md` | As an entry point to the project rules |
+| `DESIGN.md` | Visual baseline for UI review | This skill reads it; it does not create or overwrite it | Before reviewing the UI against the design baseline |
+| `DESIGN-REVIEW.md` | UI scores, unresolved findings, and component review results | When a persistent review is needed and no existing arrangement covers it; update on subsequent reviews | Before re-reviewing the UI |
+
 
 Read existing content before updating it, preserve unrelated sections, and register actual artifact paths with when they must be read. Keep shared technical decisions in the architecture record and per-ticket acceptance criteria on the owning ticket.
 

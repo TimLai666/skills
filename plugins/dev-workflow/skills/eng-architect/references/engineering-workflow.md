@@ -2,45 +2,13 @@
 
 ### Preamble
 
-```bash
-_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-')
-[ -z "$_BRANCH" ] && _BRANCH="unknown"
-_REPO=$(basename "$_ROOT" 2>/dev/null)
-echo "BRANCH: $_BRANCH"
-echo "REPO: ${_REPO:-unknown}"
-_DIR="$_ROOT/docs/plans"
-DESIGN=$(find "$_DIR" -maxdepth 1 -name "*-$_BRANCH-*-plan.md" -type f -exec ls -t {} + 2>/dev/null | head -1)
-[ -z "$DESIGN" ] && DESIGN=$(find "$_DIR" -maxdepth 1 -name '*-plan.md' -type f -exec ls -t {} + 2>/dev/null | head -1)
-[ -z "$DESIGN" ] && [ -n "$_ROOT" ] && DESIGN=$(find "$_ROOT" -name '*-plan.md' -type f \
-  ! -name 'delivery-plan.md' \
-  -not -path '*/.git/*' -not -path '*/node_modules/*' -exec ls -t {} + 2>/dev/null | head -1)
-[ -n "$DESIGN" ] && echo "PLAN_DOC: $DESIGN" || echo "PLAN_DOC: none"
-_R="${_ROOT:-.}"
-[ -f "$_R/delivery-plan.md" ] && echo "LEGACY_STATUS_FILE: delivery-plan.md"
-[ -f "$_R/ENG.md" ] && echo "ENG_MD: exists" || echo "ENG_MD: none"
-[ -d "$_R/openspec" ] && echo "OPENSPEC_DIR: exists" || echo "OPENSPEC_DIR: none"
-command -v openspec >/dev/null 2>&1 && echo "OPENSPEC_CLI: yes" || echo "OPENSPEC_CLI: no"
-[ -f "$_R/Gemfile" ] && echo "STACK:ruby"
-[ -f "$_R/package.json" ] && echo "STACK:node"
-{ [ -f "$_R/requirements.txt" ] || [ -f "$_R/pyproject.toml" ]; } && echo "STACK:python"
-[ -f "$_R/go.mod" ] && echo "STACK:go"
-[ -f "$_R/Cargo.toml" ] && echo "STACK:rust"
-git log --oneline -15 2>/dev/null
-head -40 "$_R/ARCHITECTURE.md" 2>/dev/null
-```
+Confirm the project root and resolve project files from it, even when starting in a subdirectory. Locate the plan that matches the user's scope by its content and project references. `docs/plans/` and `*-plan.md` are discovery hints; the user may have chosen another location. Distinguish feature plans from status records rather than choosing by modification time.
 
-Every check is anchored to the repo root, not the current directory. Started from a subdirectory, an unanchored `[ -f ENG.md ]` reports `none` while Step 4 still writes to the root — the run would overwrite the previous `ENG.md` blind instead of updating it.
+Read the applicable project instructions, the selected plan, and existing architecture documents, including `ENG.md` or `ARCHITECTURE.md` when present. Read the full relevant sections and their dependencies before designing or updating them. A missing conventional filename does not establish that no equivalent document exists.
 
-Read the plan document if it exists. Read all existing architecture docs before designing anything new. If `ENG_MD: exists`, read `ENG.md` too — this run updates it rather than replacing it (Step 4).
-
-`ARCHITECTURE.md` is a convention some projects happen to carry; read it when present. Nothing in this toolchain writes it, so its absence means nothing.
-
-`plan-grilling` defaults to `docs/plans/` but writes wherever the user asked it to, which is why the last glob sweeps the whole repo. It matches on the `*-plan.md` filename, not the directory.
+Inspect project configuration and documented workflows to establish the language, framework, database, deployment target, and ticket tooling. Verify required tool availability when relevant. Use source history when needed to resolve a decision or constraint. If a material choice remains unknown, ask with a recommendation.
 
 If `delivery-plan.md` exists, read [Legacy status migration](legacy-status-migration.md) before updating status records.
-
-**Stack and destinations.** Inspect project configuration and instructions; the sample probes are only discovery hints. If the stack is still unknown and affects the design, ask for the missing decision with a recommendation. Locate the current task's plan by content and user scope, not merely the newest filename.
 
 Follow existing architecture documents, status tracking, and ticket tooling. When none exists and full development handoff is needed, use the default artifact set in Steps 4-5. For advice or a bounded architecture decision, deliver the requested analysis and update an existing decision record when appropriate. Do not create a parallel tracking system.
 
@@ -170,12 +138,7 @@ Follow the project's testing rules. Explain coverage and workload choices using 
 
 ### Step 3 — Migration and deployment plan
 
-If the change touches the DB:
-
-```bash
-ls db/migrate/ 2>/dev/null | tail -5
-ls migrations/ 2>/dev/null | tail -5
-```
+If the change touches the database, locate its actual migration mechanism and read the migrations and conventions relevant to the change, including dependencies needed to understand their order and compatibility.
 
 For each migration: reversible? locks tables? needs backfill? can run while old code is live?
 
@@ -187,7 +150,7 @@ Use the project's existing architecture decision document. For the default full-
 
 **Who reads it.** The next `eng-architect` run, and any agent that arrives through `AGENTS.md` before touching architecture, seams or migrations. Step 5c is what puts it on that path — an `ENG.md` nobody registered is a file only its author will ever open.
 
-**Read before writing.** If `ENG_MD: exists`, read it first and update the sections that changed. Do not regenerate from scratch — a re-sync that rewrites blind loses the prior run's seam decisions.
+**Read before writing.** If the selected architecture document exists, read it first and update the sections that changed. Do not regenerate from scratch — a re-sync that rewrites blind loses the prior run's seam decisions.
 
 ```markdown
 # Engineering Plan: [project]
@@ -218,18 +181,7 @@ The title names the project, not the feature. One file serves every feature in t
 
 Apply this step when the request includes tickets or development handoff. Update the existing project system. With no established arrangement and a full handoff to prepare, create the complete default set below: `ENG.md`, `delivery-status.md`, tickets, `AGENTS.md`, and the `CLAUDE.md` pointer.
 
-Check for existing artifacts:
-
-```bash
-_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
-[ -f "$_ROOT/delivery-status.md" ] && echo "DELIVERY_PLAN: exists" || echo "DELIVERY_PLAN: missing"
-[ -f "$_ROOT/AGENTS.md" ] && echo "AGENTS_MD: exists" || echo "AGENTS_MD: missing"
-[ -f "$_ROOT/CLAUDE.md" ] && echo "CLAUDE_MD: exists" || echo "CLAUDE_MD: missing"
-head -40 "$_ROOT/delivery-status.md" 2>/dev/null
-head -20 "$_ROOT/AGENTS.md" 2>/dev/null
-```
-
-All three live at the repo root, alongside `ENG.md`. Anchor the check to the root rather than the current directory — a run started from a subdirectory would otherwise report `missing` and create a second copy.
+Locate the existing status and coordination records using project instructions and root-relative paths. Read the complete relevant content before updating it, preserve unrelated sections, and update the existing records in place. Verify a record is absent before creating one; a missing file in the current subdirectory or an unfamiliar filename is not sufficient evidence.
 
 #### 5a — Create or update `delivery-status.md`
 
