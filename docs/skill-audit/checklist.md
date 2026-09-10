@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**8 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**9 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -249,7 +249,9 @@
 
   **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/eng-architect/SKILL.md:3)、[主檔:18](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/eng-architect/SKILL.md:18)、[主檔:30](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/eng-architect/SKILL.md:30)、[主檔:72](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/eng-architect/SKILL.md:72)、[主檔:100](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/eng-architect/SKILL.md:100)、[主檔:152](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/eng-architect/SKILL.md:152)、[主檔:168](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/eng-architect/SKILL.md:168)、[主檔:203](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/eng-architect/SKILL.md:203)、[主檔:238](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/eng-architect/SKILL.md:238)、[主檔:289](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/eng-architect/SKILL.md:289)、[主檔:377](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/eng-architect/SKILL.md:377)、[references/delivery-status-guidelines.md:5](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/eng-architect/references/delivery-status-guidelines.md:5)。
 
-- [ ] **22. investigate**（高優先）
+- [x] **22. investigate**（高優先）
+
+  **已完成並經使用者確認：** 精確化根因調查觸發，取消固定假說數與無依據百分比；診斷允許可逆修改並保護機密資訊，一般指令改為查證要求。測試順序依專案及風險，無其他安排時保留修正與回歸測試分開提交。停止條件依新增證據及實際阻礙，未解問題按相關性說明。skill 1.3.1、plugin 1.25.1。
 
   **可以改哪裡：** 所有 bug 強制 3–5 假說並填機率，即使已有直接證據；固定三次修正封頂；強制修正與回歸測試各自 commit。禁止改 code 的診斷範例卻要求加 logging／pin 版本，且示例直接印環境變數。
 

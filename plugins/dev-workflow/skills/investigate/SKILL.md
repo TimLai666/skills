@@ -1,6 +1,6 @@
 ---
 name: investigate
-description: "Systematic debugger. Root cause before any fix. Iron Law: no fixes without investigation. This skill MUST be invoked when the user reports a bug, and MUST NOT be skipped because the cause looks obvious. SHOULD also be invoked on 為什麼會這樣, 壞掉了, failing, broken, or flaky. Hypothesis-driven — form 3-5 hypotheses, test them cheaply before touching code. Stop after 3 failed fix attempts and escalate."
+description: "This skill MUST be used when a bug's root cause is unknown and requires investigation, or when the user explicitly requests investigate or root-cause analysis. SHOULD be used for unexplained failures, regressions, or intermittent behavior: 根因調查, 為什麼會這樣, 壞掉了, failing, broken, flaky. MUST NOT treat an apparently obvious cause as confirmed without evidence. When evidence already establishes the cause, proceed to targeted verification and repair without restarting the investigation."
 allowed-tools:
   - Bash
   - Read
@@ -9,84 +9,63 @@ allowed-tools:
   - Glob
   - AskUserQuestion
 metadata:
-  version: "1.2.7"
+  version: "1.3.1"
 ---
 
-## Iron Law
+## Core rule
 
-**No fix without understanding the root cause.**
-
-If you have attempted 3 different fixes and none worked: **STOP and escalate.** Do not guess a 4th fix. More attempts without new information just waste time and may make the system harder to understand.
-
----
+**No fix without understanding the root cause.** Use verified evidence to explain how the cause produces the symptom. An apparently obvious cause still needs verification; an already established cause does not need a new round of hypotheses.
 
 ## Step 1 — Understand the symptom
 
-Ask if not clearly provided:
-- **Exact symptom** — error message verbatim, wrong output, crash, silent failure?
-- **Reproduction** — always, sometimes (what triggers it), or intermittent?
-- **When did it start** — after what change? Or has it always been this way?
-- **Environment** — local, staging, prod? All three?
-- **What was tried** — what has already been attempted?
+Gather the following from the report, available logs, project configuration, and prior attempts. Ask only for missing information that materially affects the investigation:
 
----
+- **Exact symptom:** verbatim error, wrong output, crash, or silent failure.
+- **Reproduction:** reliable trigger, frequency, and conditions for intermittent failures.
+- **Onset:** when it started and potentially related changes.
+- **Environment:** where it occurs and relevant differences from working environments.
+- **Prior attempts:** what was tested or changed and the observed results.
 
 ## Step 2 — Form hypotheses
 
-Based on the symptom, list **3–5 possible root causes** ranked by likelihood. For each, state the evidence that points to it:
+Propose plausible causes supported by the available evidence. Rank them by evidential support and explain the uncertainty without inventing percentages or padding the list to a fixed count. For each hypothesis, identify a discriminating check:
 
-```
-H1 (most likely, ~60%): [hypothesis]
-  Evidence: [why you think this]
-  Rules out: [what would disprove it]
-
-H2 (~25%): [hypothesis]
-  Evidence: [why you think this]
-  Rules out: [what would disprove it]
-
-H3 (~10%): [hypothesis]
-  Evidence: [why you think this]
-
-H4 (~5%): [hypothesis]
+```text
+Hypothesis: [possible cause]
+Evidence: [observations supporting it]
+Would rule it out: [contradicting observation]
+Next check: [how to obtain evidence that distinguishes it from alternatives]
 ```
 
-**Common hypothesis categories:**
-- Wrong assumption about data (nil where non-nil expected, wrong type, wrong shape)
-- State/timing issue (race condition, stale cache, wrong ordering)
-- Config/environment mismatch (works local, fails staging)
-- External dependency changed (API, library version)
-- Regression from recent change (`git log --oneline -10`)
+Common categories:
+- Wrong data assumptions: missing values, unexpected types, or shapes.
+- State or timing: concurrency, stale caches, or operation ordering.
+- Configuration or environment differences.
+- Changed external dependencies or library behavior.
+- Regression from a relevant source change.
 
-A user's belief that an area cannot be at fault only affects the order in which you check — it is never evidence that rules the area out.
+A user's belief that an area cannot be at fault affects investigation priority, but does not itself rule out that area.
 
----
+## Step 3 — Test hypotheses with minimal disruption
 
-## Step 3 — Test hypotheses cheaply (observe before touching code)
+Prefer existing logs, a debugger, configuration inspection, and controlled reproductions. Choose checks by their ability to distinguish causes, cost, and operational impact.
 
-For each hypothesis, design a minimal test that confirms or rules it out — **without modifying code**:
+When observation is insufficient, use a reversible diagnostic change within the authorized scope. Record what changed, preserve existing work, and remove temporary instrumentation or restore diagnostic-only dependency changes after the check. Retain a diagnostic change only when it is intentionally part of the agreed fix.
 
-| Hypothesis | Test method | Cost |
-|------------|-------------|------|
-| H1: value is nil | Add `puts/console.log/print` at boundary | Trivial |
-| H2: race condition | Log timestamps of competing operations | Trivial |
-| H3: config issue | Print ENV values at startup | Trivial |
-| H4: library bug | Pin version and reproduce | Low |
+| Hypothesis | Example check |
+|---|---|
+| A value is missing | Inspect it at the relevant boundary with a debugger or temporary targeted logging |
+| Operations race | Compare operation timing and state transitions in a controlled reproduction |
+| Configuration differs | Compare only relevant settings; redact secrets and prefer presence or equality checks for sensitive values |
+| Dependency behavior changed | Compare relevant versions in an isolated reproduction without changing the shared environment |
 
-Run the cheapest tests first. Report results. Eliminate hypotheses.
-
-```bash
-# Check recent changes that might be relevant
-git log --oneline -15
-git log --since="7 days ago" --name-only --format="" | sort | uniq -c | sort -rn | head -10
-```
-
----
+Inspect source history for changes tied to the affected behavior and symptom onset. Follow relevant evidence rather than a fixed number of commits or days. Record the outcome of each check and revise or eliminate hypotheses.
 
 ## Step 4 — Trace the data flow
 
-Once narrowed to 1–2 hypotheses, trace the exact path of the bad data:
+Use the evidence to trace the affected path, checking hypotheses along the way:
 
-```
+```text
 [Request/Event enters at: ]
   → [Layer 1] — state here: [what you found]
   → [Layer 2] — state here: [what you found]
@@ -94,56 +73,40 @@ Once narrowed to 1–2 hypotheses, trace the exact path of the bad data:
   → [Where the symptom manifests]
 ```
 
-Identify the earliest verified point where actual behavior diverges from expected. Cite the **exact file:line** when applicable, explain how it causes the symptom, and continue tracing upstream until earlier causes are ruled out.
+Identify the earliest verified point where actual behavior diverges from expected. Cite the exact file and line when applicable, explain how it causes the symptom, and continue tracing upstream until earlier causes are ruled out. Steps 2–4 can inform one another as new evidence appears.
 
----
+## Step 5 — Fix the confirmed cause
 
-## Step 5 — Fix (only after root cause confirmed)
+Make the smallest change that addresses the verified root cause. Before editing, explain the cause and why the proposed change resolves it. Mention related unresolved problems only when they affect the user's outcome or the scope of this fix.
 
-**Minimal fix** — change only what's necessary to address the root cause, not the symptom.
+Choose test-writing order according to project rules and risk. Add regression coverage that reproduces the original failure under its triggering conditions, fails on the pre-fix version, and passes with the fix. Assert the relevant observable behavior rather than private implementation details. If reproduction is intermittent or the required environment is unavailable, report the evidence limit and remaining verification instead of claiming a proven fix.
 
-Before writing the fix, state:
-- "Root cause: [exact description]"
-- "Fix: [what will change and why this addresses the root cause, not just the symptom]"
-- "Does not fix: [what this won't change]"
-
-**Commit the minimal fix separately before adding the regression test.**
-
-**Write a regression test immediately after:**
-- The test must fail before the fix and pass after
-- Tests the root cause, not the symptom
-- Commit the regression test separately from the fix
-
----
+Follow the user's or project's commit arrangement; otherwise keep the fix and regression test in separate commits, staging only their intended changes. Test-writing order and commit order are separate decisions: a test can be written first even when committed separately after the fix.
 
 ## Step 6 — Verify
 
-Reproduce the original symptom after the fix. Confirm it's gone.
+Repeat the original reproduction with the fix and verify the regression coverage before and after it. Run relevant checks for affected behavior and follow the project's full-suite rules. Confirm temporary diagnostic changes have been cleaned up or intentionally retained.
 
-If the symptom persists: you may have fixed a symptom, not the root cause. Go back to Step 2 with updated hypotheses.
+If the symptom persists, use the observed result to revisit the hypothesis and data flow. Before another fix attempt, identify what new evidence justifies it. Apply the stopping conditions below when further attempts would repeat unsupported guesses.
 
----
+## Step 7 — Stop or request help when evidence cannot advance
 
-## Step 7 — Escalation (after 3 failed attempts)
+Pause affected repair attempts when the next attempt has no new evidence or distinct diagnostic check, repeats a disproven guess, or requires unavailable information, access, expertise, or authorization. Continue independent investigation that can safely produce new evidence. An evidence-backed next step may proceed regardless of how many earlier attempts failed.
 
-If three different fixes have been tried and none resolved the symptom:
+Report the actual blocker and a concrete next step:
 
-```
-⚠ ESCALATION — 3 attempts failed
+```text
+Blocked investigation: [what cannot currently be established]
 
-Attempts:
-1. [Fix 1] — what changed — result: [what happened]
-2. [Fix 2] — what changed — result: [what happened]
-3. [Fix 3] — what changed — result: [what happened]
+Attempts and observations:
+- [check or fix attempted, what changed, and observed result]
 
-Remaining hypotheses:
-H?: [hypothesis] — need to test: [what information/access/expertise is required]
+Current understanding:
+[confirmed facts, remaining hypotheses, and what is uncertain]
 
-Current best understanding:
-The root cause is likely in [area], but I cannot verify without [specific missing info].
+Missing evidence or access:
+[what is needed to distinguish the remaining causes]
 
 Recommended next step:
-[Specific action: add more logging, check external service, get access to prod logs, pair with someone who knows the system]
+[specific check, information request, or authorized action]
 ```
-
-**STOP HERE.** Do not attempt a 4th fix.
