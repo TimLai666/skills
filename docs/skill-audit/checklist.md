@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**14 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**15 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -397,7 +397,9 @@
 
   **原文位置：** [主檔:22](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/mermaid-visualizer/SKILL.md:22)、[主檔:193](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/mermaid-visualizer/SKILL.md:193)、[主檔:270](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/mermaid-visualizer/SKILL.md:270)。
 
-- [ ] **34. obsidian-bases**（中優先）
+- [x] **34. obsidian-bases**（中優先）
+
+  **已完成並經使用者確認：** 主檔保留最小可用範例、屬性與公式對應、引號、Duration 與空值提醒，以及實際 Obsidian 驗證。三份完整案例、schema／視圖／彙總表、屬性與公式範例分檔，主檔明確引用。觸發範圍維持。skill 1.2.0、plugin 1.6.0。
 
   **可以改哪裡：** 三個完整範例常駐（297–420），Duration 教學與 troubleshooting 重複；完整 file properties／summary 清單可按需查。
 
