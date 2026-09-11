@@ -9,7 +9,7 @@ description: >-
   search vault content, perform vault operations from the command line, or
   develop and debug Obsidian plugins and themes.
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Obsidian CLI
@@ -68,48 +68,8 @@ obsidian backlinks file="My Note"
 
 Use `--copy` on any command to copy output to clipboard. Use `silent` to prevent files from opening. Use `total` on list commands to get a count.
 
-## Plugin development
+## Plugin and theme development
 
-### Develop/test cycle
-
-After making code changes to a plugin or theme, follow this workflow:
-
-1. **Reload** the plugin to pick up changes:
-   ```bash
-   obsidian plugin:reload id=my-plugin
-   ```
-2. **Check for errors** — if errors appear, fix and repeat from step 1:
-   ```bash
-   obsidian dev:errors
-   ```
-3. **Verify visually** with a screenshot or DOM inspection:
-   ```bash
-   obsidian dev:screenshot path=screenshot.png
-   obsidian dev:dom selector=".workspace-leaf" text
-   ```
-4. **Check console output** for warnings or unexpected logs:
-   ```bash
-   obsidian dev:console level=error
-   ```
-
-### Additional developer commands
-
-Run JavaScript in the app context:
-
-```bash
-obsidian eval code="app.vault.getFiles().length"
-```
-
-Inspect CSS values:
-
-```bash
-obsidian dev:css selector=".workspace-leaf" prop=background-color
-```
-
-Toggle mobile emulation:
-
-```bash
-obsidian dev:mobile on
-```
-
-Run `obsidian help` to see additional developer commands including CDP and debugger controls.
+Before developing or debugging an Obsidian plugin or theme, read
+[Plugin development](references/plugin-development.md) for the complete reload,
+error-checking, visual-verification workflow and developer command examples.

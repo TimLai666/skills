@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**15 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**16 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -411,6 +411,8 @@
 
 - [ ] **35. obsidian-canvas-creator**（中優先）
 
+  **已略過，保留原版：** 依使用者要求不修改，本項不勾選。
+
   **可以改哪裡：** 使用條件再次擴成任意 visual diagram；ID、間距、escaping 在產生/驗證/Critical/Pitfalls 重複；兩個範例只是重講分析流程。
 
   **建議改法：** description 與 body 同限 Obsidian Canvas；合併結構規則和驗收，保留一次；版面與尺寸/色票移按需 reference，兩個重述流程範例可移除。把固定 320/200 間距改為預設起點＋依卡片尺寸驗證。
@@ -419,11 +421,13 @@
 
   **原文位置：** [主檔:19](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/obsidian-canvas-creator/SKILL.md:19)、[主檔:104](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/obsidian-canvas-creator/SKILL.md:104)、[主檔:142](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/obsidian-canvas-creator/SKILL.md:142)。
 
-- [ ] **36. obsidian-cli**（低優先）
+- [x] **36. obsidian-cli**（低優先）
+
+  **已完成並經使用者確認：** 僅將外掛／主題開發段落原文移至 references/plugin-development.md，主檔加入直接引用及閱讀時機。一般操作、觸發範圍與完整開發指令維持。skill 1.1.1、plugin 1.6.1。
 
   **可以改哪裡：** 基本 CLI 內容已緊湊並以 obsidian help 查現況，未見需要大改；但 note 操作也常載入完整 plugin debug 段，description 重列多種同義操作。
 
-  **建議改法：** 低優先保留主體；description 壓成 vault 操作與 plugin/theme debugging 兩類；71–115 開發命令移專用 reference，僅開發任務讀。
+  **建議改法：** 依討論保留主體與 description；開發命令原文移專用 reference，主檔標明開發／除錯外掛或主題前必讀。
 
   **應保留：** 執行中的 Obsidian 前提、help、vault/file/path 目標解析差異與引號語法。
 
