@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**13 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**14 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -375,6 +375,8 @@
 
 - [ ] **32. llm-wiki**（高優先）
 
+  **已略過，保留原版：** 依使用者要求不修改，本項不勾選。
+
   **可以改哪裡：** 把一般研究自動升級成建 wiki；每次查詢也先讀 schema/index/log＋一致性探查；初始化模板、Ingest、21項 lint、headless 安裝全常駐。筆記規律在主檔、模板、Ingest、Pitfalls 多次重述，且跨 skill 同步一份 checklist。
 
   **建議改法：** description 限定 wiki 建置／維護／查詢，不因研究一詞自建；按 init/ingest/query/lint 分流 references；templates 與 headless 安裝各按需讀。查詢只讀相關索引與頁面，寫入才查完整規範；七項檢核只留一份權威內容＋極短後備，減少每個 backlink 不處理理由的重複紀錄。
@@ -383,7 +385,9 @@
 
   **原文位置：** [主檔:26](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/llm-wiki/SKILL.md:26)、[主檔:163](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/llm-wiki/SKILL.md:163)、[主檔:206](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/llm-wiki/SKILL.md:206)、[主檔:512](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/llm-wiki/SKILL.md:512)。
 
-- [ ] **33. mermaid-visualizer**（中優先）
+- [x] **33. mermaid-visualizer**（中優先）
+
+  **已完成並經使用者確認：** 合併流程與驗收，完整圖例、色票及設計選項分檔，保留直接引用。自然語意觸發與 HTML Artifact 整合界線同步，語法限制依渲染環境判斷，修正參考文件的換行、不可見連線與註解示例。要求實際畫面驗證。skill 1.2.0、plugin 1.5.0。獨立完整圖例使用 mermaid fence，語法片段與錯誤示範使用 text。
 
   **可以改哪裡：** Quick Start 與 Workflow 是同一五步，Critical Syntax 與 Workflow 檢查及 Quality Checklist 重複；六種圖類型常識、虛擬配置選單與示例占主要篇幅。
 

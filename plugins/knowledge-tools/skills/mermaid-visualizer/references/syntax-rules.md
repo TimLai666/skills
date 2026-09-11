@@ -17,13 +17,13 @@ This reference provides comprehensive syntax rules and error prevention strategi
 
 ### List Syntax Conflict (Most Common Error)
 
-**Problem:** Mermaid parser interprets `number. space` as Markdown ordered list syntax.
+**Problem:** Some renderer versions or Markdown-label settings interpret numbered labels as unsupported lists. Preserve the intended text where supported; use the alternatives below when this error occurs.
 
 **Error Message:** `Parse error: Unsupported markdown: list`
 
 **Solutions:**
 
-```mermaid
+```text
 ❌ [1. Perception]
 ❌ [2. Planning]
 ❌ [3. Reasoning]
@@ -45,7 +45,7 @@ This reference provides comprehensive syntax rules and error prevention strategi
 
 **Rule:** Subgraphs with spaces must use ID + display name format.
 
-```mermaid
+```text
 ❌ subgraph Core Process
      A --> B
    end
@@ -60,7 +60,7 @@ This reference provides comprehensive syntax rules and error prevention strategi
 ```
 
 **Referencing subgraphs:**
-```mermaid
+```text
 ❌ Title --> Core Process      # Cannot reference display name
 ✅ Title --> core              # Must reference ID
 ```
@@ -69,7 +69,7 @@ This reference provides comprehensive syntax rules and error prevention strategi
 
 **Rule:** Always reference nodes by ID, never by display text.
 
-```mermaid
+```text
 # Define nodes
 A[Display Text A]
 B["Display Text B"]
@@ -79,58 +79,60 @@ A --> B                        ✅ Use node IDs
 Display Text A --> Display Text B  ❌ Cannot use display text
 ```
 
+Syntax fragments below belong inside a flowchart declaration unless a complete diagram is shown.
+
 ## Node Syntax
 
 ### Basic Node Types
 
-```mermaid
-# Rectangle (default)
+```text
+%% Rectangle (default)
 A[Rectangle Text]
 
-# Rectangle with rounded corners
+%% Rectangle with rounded corners
 B(Rounded Text)
 
-# Stadium shape
+%% Stadium shape
 C([Stadium Text])
 
-# Circle
+%% Circle
 D((Circle<br/>Text))
 
-# Asymmetric shape
+%% Asymmetric shape
 E>Right Arrow]
 
-# Rhombus (decision)
+%% Rhombus (decision)
 F{Decision?}
 
-# Hexagon
+%% Hexagon
 G{{Hexagon}}
 
-# Parallelogram
+%% Parallelogram
 H[/Parallelogram/]
 
-# Database
+%% Database
 I[(Database)]
 
-# Trapezoid
+%% Trapezoid
 J[/Trapezoid\]
 ```
 
 ### Node Text Rules
 
 **Line breaks:**
-- `<br/>` only works in circle nodes: `((Text<br/>Break))`
-- For other nodes, use separate annotation nodes or keep text concise
+- Use supported Markdown strings or HTML line breaks according to the target renderer and configuration. Line breaks are not restricted to circles.
+- Inspect the rendered label for wrapping and clipping.
 
 **Special characters:**
 - Spaces: Use quotes if needed: `["Text with spaces"]`
-- Quotes: Replace with 『』or avoid
-- Parentheses: Replace with 「」or avoid
+- Quotes: Use supported entity encoding inside quoted labels, such as `#quot;`, and verify the displayed text.
+- Parentheses: Enclose the label in double quotes, e.g. `A["Task (optional)"]`.
 - Colons: Generally safe but avoid if causing issues
 - Hyphens/dashes: Safe to use
 
 **Length guidelines:**
 - Keep node text under 50 characters
-- Use multiple lines (circle nodes) or separate annotation nodes for longer content
+- Use supported line breaks or separate annotation nodes for longer content
 - Consider splitting into multiple nodes if text is too long
 
 ## Subgraph Syntax
@@ -139,18 +141,18 @@ J[/Trapezoid\]
 
 ```mermaid
 graph TB
-    # Correct format with ID and display name
+    %% Correct format with ID and display name
     subgraph id["Display Name"]
         direction TB
         A --> B
     end
     
-    # Simple ID only (no spaces)
+    %% Simple ID only (no spaces)
     subgraph simple
         C --> D
     end
     
-    # Can set direction inside subgraph
+    %% Can set direction inside subgraph
     subgraph horiz["Horizontal"]
         direction LR
         E --> F
@@ -190,10 +192,10 @@ graph TB
         B[Node B]
     end
     
-    # Connect individual nodes (recommended)
+    %% Connect individual nodes (recommended)
     A --> B
     
-    # Connect subgraphs (creates invisible link for layout)
+    %% Connect subgraphs with a visible dashed arrow
     g1 -.-> g2
 ```
 
@@ -201,16 +203,20 @@ graph TB
 
 ### Basic Arrows
 
-```mermaid
-A --> B          # Solid arrow
-A -.-> B         # Dashed arrow
-A ==> B          # Thick arrow
-A ~~~> B         # Invisible link (layout only, not rendered)
+```text
+%% Solid arrow
+A --> B
+%% Dashed arrow
+A -.-> B
+%% Thick arrow
+A ==> B
+%% Invisible link (layout only, not rendered)
+A ~~~ B
 ```
 
 ### Arrow Labels
 
-```mermaid
+```text
 A -->|Label Text| B
 A -.->|Optional| B
 A ==>|Important| B
@@ -218,29 +224,31 @@ A ==>|Important| B
 
 ### Multi-target Connections
 
-```mermaid
-# One to many
+```text
+%% One to many
 A --> B & C & D
 
-# Many to one
+%% Many to one
 A & B & C --> D
 
-# Chaining
+%% Chaining
 A --> B --> C --> D
 ```
 
 ### Bidirectional
 
-```mermaid
-A <--> B         # Bidirectional solid
-A <-.-> B        # Bidirectional dashed
+```text
+%% Bidirectional solid
+A <--> B
+%% Bidirectional dashed
+A <-.-> B
 ```
 
 ## Styling and Colors
 
 ### Inline Styling
 
-```mermaid
+```text
 style NodeID fill:#color,stroke:#color,stroke-width:2px
 ```
 
@@ -252,24 +260,24 @@ style NodeID fill:#color,stroke:#color,stroke-width:2px
 
 ### Common Style Patterns
 
-```mermaid
-# Professional look
+```text
+%% Professional look
 style A fill:#d3f9d8,stroke:#2f9e44,stroke-width:2px
 
-# Emphasis
+%% Emphasis
 style B fill:#ffe3e3,stroke:#c92a2a,stroke-width:3px
 
-# Muted/secondary
+%% Muted/secondary
 style C fill:#f8f9fa,stroke:#dee2e6,stroke-width:1px
 
-# Title/header
+%% Title/header
 style D fill:#1971c2,stroke:#1971c2,stroke-width:3px,color:#ffffff
 ```
 
 ### Styling Multiple Nodes
 
-```mermaid
-# Apply same style to multiple nodes
+```text
+%% Apply same style to multiple nodes
 style A,B,C fill:#d3f9d8,stroke:#2f9e44,stroke-width:2px
 ```
 
@@ -277,12 +285,17 @@ style A,B,C fill:#d3f9d8,stroke:#2f9e44,stroke-width:2px
 
 ### Direction Codes
 
-```mermaid
-graph TB    # Top to Bottom (vertical)
-graph BT    # Bottom to Top
-graph LR    # Left to Right (horizontal)
-graph RL    # Right to Left
-graph TD    # Top Down (same as TB)
+```text
+%% Top to Bottom (vertical)
+graph TB
+%% Bottom to Top
+graph BT
+%% Left to Right (horizontal)
+graph LR
+%% Right to Left
+graph RL
+%% Top Down (same as TB)
+graph TD
 ```
 
 ### Layout Control Tips
@@ -407,9 +420,9 @@ graph TB
 
 #### Error: "Unsupported markdown: list"
 
-**Cause:** Using `number. space` pattern in node text
+**Cause:** The target renderer interprets a numbered label as unsupported Markdown list syntax.
 
-**Solution:** Remove space or use alternatives (①, (1), Step 1:)
+**Solution:** Check label quoting and renderer settings, then use a supported numbering form if needed.
 
 #### Error: "Parse error: unexpected character"
 
@@ -419,14 +432,14 @@ graph TB
 3. Invalid Mermaid syntax
 
 **Solutions:**
-- Replace problematic characters (quotes → 『』, parens → 「」)
+- Quote labels and encode special characters without changing their meaning
 - Use proper node definition syntax
 - Check arrow syntax
 
 #### Diagram doesn't render correctly
 
 **Causes:**
-1. Missing style declarations
+1. Unsupported syntax or renderer configuration
 2. Incorrect direction specification
 3. Invalid connections
 
@@ -439,7 +452,7 @@ graph TB
 
 Before finalizing any diagram:
 
-- [ ] No `number. space` patterns in node text
+- [ ] Numbered labels parse and display correctly in the target renderer
 - [ ] All subgraphs use proper ID syntax if they contain spaces
 - [ ] All node references use IDs not display text
 - [ ] All arrows use valid syntax (-->, -.->)
@@ -450,35 +463,8 @@ Before finalizing any diagram:
 
 ### Platform-Specific Notes
 
-**Obsidian:**
-- Older Mermaid version, more strict parsing
-- Limited support for `<br/>` (only in circle nodes)
-- Test diagrams before finalizing
+Confirm the actual Mermaid version and configuration used by Obsidian, GitHub,
+or the target HTML artifact. A diagram working in Mermaid Live Editor does not
+prove it works in another host. Test in the target environment when available.
 
-**GitHub:**
-- Good Mermaid support
-- Renders most modern syntax
-- May differ slightly from Obsidian rendering
-
-**Mermaid Live Editor:**
-- Most up-to-date parser
-- Best for testing new syntax
-- May support features not available in Obsidian/GitHub
-
-## Quick Reference
-
-### Safe Numbering Methods
-✅ `1.Text` `①Text` `(1)Text` `Step 1:Text`
-❌ `1. Text`
-
-### Safe Subgraph Syntax
-✅ `subgraph id["Name"]` `subgraph simple_name`
-❌ `subgraph Name With Spaces`
-
-### Safe Node References
-✅ `NodeID --> AnotherID`
-❌ `"Display Text" --> "Other Text"`
-
-### Safe Special Characters
-✅ `『』` for quotes, `「」` for parentheses
-❌ `"` unescaped quotes, `()` in problematic contexts
+Source: [Official flowchart syntax](https://mermaid.js.org/syntax/flowchart.html).

@@ -4,283 +4,57 @@ description: >-
   Transform text content into professional Mermaid diagrams for presentations
   and documentation. This skill MUST be used when the user names Mermaid, and
   SHOULD be used when they ask to visualize concepts, create flowcharts, or
-  make diagrams from text. For hand-drawn whiteboard style, use
-  excalidraw-diagram. For interactive Obsidian Canvas with spatial
-  organization, use obsidian-canvas-creator. Supports process flows, system
-  architectures, comparisons, mindmaps, and more with built-in syntax error
-  prevention.
+  make diagrams from text (流程圖、架構圖、關係圖、時序圖、心智圖). For diagrams
+  inside HTML Artifacts, MUST prefer the artifact’s existing HTML/CSS/SVG or
+  diagram approach; select Mermaid when it fits, not merely because a flowchart
+  was requested. Explicit Excalidraw requests MUST use excalidraw-diagram, and
+  explicit Obsidian Canvas requests MUST use obsidian-canvas-creator.
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Mermaid Visualizer
 
-## Overview
+## 選用與目標
 
-Convert text content into clean, professional Mermaid diagrams optimized for presentations and documentation. Automatically handles common syntax pitfalls (list syntax conflicts, subgraph naming, spacing issues) to ensure diagrams render correctly in Obsidian, GitHub, and other Mermaid-compatible platforms.
-
-## Quick Start
-
-When creating a Mermaid diagram:
-
-1. **Analyze the content** - Identify key concepts, relationships, and flow
-2. **Choose diagram type** - Select the most appropriate visualization (see Diagram Types below)
-3. **Select configuration** - Determine layout, detail level, and styling
-4. **Generate diagram** - Create syntactically correct Mermaid code
-5. **Output in markdown** - Wrap in proper code fence with optional explanation
-
-**Default assumptions:**
-- Vertical layout (TB) unless horizontal requested
-- Medium detail level (balanced between simplicity and information)
-- Professional color scheme with semantic colors
-- Obsidian/GitHub compatible syntax
-
-## Diagram Types
-
-### 1. Process Flow (graph TB/LR)
-**Best for:** Workflows, decision trees, sequential processes, AI agent architectures
-
-**Use when:** Content describes steps, stages, or a sequence of actions
-
-**Key features:**
-- Swimlanes via subgraph for grouping related steps
-- Arrow labels for transitions
-- Feedback loops and branches
-- Color-coded stages
-
-**Configuration options:**
-- `layout`: "vertical" (TB), "horizontal" (LR)
-- `detail`: "simple" (core steps only), "standard" (with descriptions), "detailed" (with annotations)
-- `style`: "minimal", "professional", "colorful"
-
-### 2. Circular Flow (graph TD with circular layout)
-**Best for:** Cyclic processes, continuous improvement loops, agent feedback systems
-
-**Use when:** Content emphasizes iteration, feedback, or circular relationships
-
-**Key features:**
-- Central hub with radiating elements
-- Curved feedback arrows
-- Clear cycle indicators
-
-### 3. Comparison Diagram (graph TB with parallel paths)
-**Best for:** Before/after comparisons, A vs B analysis, traditional vs modern systems
-
-**Use when:** Content contrasts two or more approaches or systems
-
-**Key features:**
-- Side-by-side layout
-- Central comparison node
-- Clear differentiation via color/style
-
-### 4. Mindmap
-**Best for:** Hierarchical concepts, knowledge organization, topic breakdowns
-
-**Use when:** Content is hierarchical with clear parent-child relationships
-
-**Key features:**
-- Radial tree structure
-- Multiple levels of nesting
-- Clean visual hierarchy
-
-### 5. Sequence Diagram
-**Best for:** Interactions between components, API calls, message flows
-
-**Use when:** Content involves communication between actors/systems over time
-
-**Key features:**
-- Timeline-based layout
-- Clear actor separation
-- Activation boxes for processes
-
-### 6. State Diagram
-**Best for:** System states, status transitions, lifecycle stages
-
-**Use when:** Content describes states and transitions between them
-
-**Key features:**
-- Clear state nodes
-- Labeled transitions
-- Start and end states
-
-## Critical Syntax Rules
-
-**Always follow these rules to prevent parsing errors:**
-
-### Rule 1: Avoid List Syntax Conflicts
-```
-❌ WRONG: [1. Perception]       → Triggers "Unsupported markdown: list"
-✅ RIGHT: [1.Perception]         → Remove space after period
-✅ RIGHT: [① Perception]         → Use circled numbers (①②③④⑤⑥⑦⑧⑨⑩)
-✅ RIGHT: [(1) Perception]       → Use parentheses
-✅ RIGHT: [Step 1: Perception]   → Use "Step" prefix
-```
-
-### Rule 2: Subgraph Naming
-```
-❌ WRONG: subgraph AI Agent Core  → Space in name without quotes
-✅ RIGHT: subgraph agent["AI Agent Core"]  → Use ID with display name
-✅ RIGHT: subgraph agent          → Use simple ID only
-```
-
-### Rule 3: Node References
-```
-❌ WRONG: Title --> AI Agent Core  → Reference display name directly
-✅ RIGHT: Title --> agent          → Reference subgraph ID
-```
-
-### Rule 4: Special Characters in Node Text
-```
-✅ Use quotes for text with spaces: ["Text with spaces"]
-✅ Escape or avoid: quotation marks → use 『』instead
-✅ Escape or avoid: parentheses → use 「」instead
-✅ Line breaks in circle nodes only: ((Text<br/>Break))
-```
-
-### Rule 5: Arrow Types
-- `-->` solid arrow
-- `-.->` dashed arrow (for supporting systems, optional paths)
-- `==>` thick arrow (for emphasis)
-- `~~~` invisible link (for layout only)
-
-For complete syntax reference and edge cases, see [references/syntax-rules.md](references/syntax-rules.md)
-
-## Configuration Options
-
-All diagrams accept these parameters:
-
-**Layout:**
-- `direction`: "vertical" (TB), "horizontal" (LR), "right-to-left" (RL), "bottom-to-top" (BT)
-- `aspect`: "portrait" (default), "landscape" (wide), "square"
-
-**Detail Level:**
-- `simple`: Core elements only, minimal labels
-- `standard`: Balanced detail with key descriptions (default)
-- `detailed`: Full annotations, explanations, and metadata
-- `presentation`: Optimized for slides (larger text, fewer details)
-
-**Style:**
-- `minimal`: Monochrome, clean lines
-- `professional`: Semantic colors, clear hierarchy (default)
-- `colorful`: Vibrant colors, high contrast
-- `academic`: Formal styling for papers/documentation
-
-**Additional Options:**
-- `show_legend`: true/false - Include color/symbol legend
-- `numbered`: true/false - Add sequence numbers to steps
-- `title`: string - Add diagram title
-
-## Example Usage Patterns
-
-**Pattern 1: Basic request**
-```
-User: "Visualize the software development lifecycle"
-Response: [Analyze → Choose graph TB → Generate with standard detail]
-```
-
-**Pattern 2: With configuration**
-```
-User: "Create a horizontal flowchart of our sales process with lots of detail"
-Response: [Analyze → Choose graph LR → Generate with detailed level]
-```
-
-**Pattern 3: Comparison**
-```
-User: "Compare traditional AI vs AI agents"
-Response: [Analyze → Choose comparison layout → Generate with contrasting styles]
-```
+依內容與交付位置自動選用，使用者不必記住 skill 名稱。適合把步驟、
+概念關係、架構或互動整理成 Mermaid 圖。明確指定其他圖表格式時尊重指定。
+HTML Artifact 內先沿用既有 HTML、CSS、SVG 或圖表工具；Mermaid 符合
+整份交付物的需求時才使用，不因「流程圖」一詞就強制切換。
 
 ## Workflow
 
-1. **Understand the content**
-   - Identify main concepts, entities, and relationships
-   - Determine hierarchy or sequence
-   - Note any comparisons or contrasts
+1. 理解概念、關係、順序與圖表用途，確認呈現位置及可用的 Mermaid 版本。
+2. 依下表選圖類型。需要分組、回饋迴圈或中心節點範例時，讀 [完整圖例](references/examples.md)。
+3. 套用使用者指定的方向、細節與風格；未指定時以 TB、適中細節為起點，依畫面調整。配色或設計選項見 [設計參考](references/design-options.md)，其中選項不是通用 API 參數。
+4. 產生 Mermaid 程式碼，遵守下方易錯規則。特殊標點、換行、subgraph、樣式或解析錯誤，先讀 [語法與排錯](references/syntax-rules.md) 對應段落。
+5. 執行下方驗收，修正受影響的圖。Markdown 使用 mermaid code fence；HTML 依既有整合方式嵌入。
+6. 交付圖表及必要說明，指出實際驗證的工具與尚未確認的相容性。
 
-2. **Select diagram type**
-   - Match content structure to diagram type
-   - Consider user's presentation context
-   - Default to process flow if ambiguous
+## 圖表選擇
 
-3. **Choose configuration**
-   - Apply user-specified options
-   - Use sensible defaults for unspecified options
-   - Optimize for readability
+| 內容 | 圖類型 |
+|---|---|
+| 步驟、決策、工作流程 | Flowchart，TB 或 LR |
+| 循環與回饋 | Flowchart 加回饋連線，不保證自動排成圓形 |
+| 方案比較 | 平行分組或對照流程 |
+| 概念階層 | Mindmap |
+| 元件間隨時間的訊息互動 | Sequence diagram |
+| 狀態與轉換 | State diagram |
 
-4. **Generate Mermaid code**
-   - Follow all syntax rules strictly
-   - Use semantic naming (descriptive IDs)
-   - Apply consistent styling
-   - Test for common errors:
-     * No "number. space" patterns in node text
-     * All subgraphs use ID["display name"] format
-     * All node references use IDs not display names
+## 易錯規則
 
-5. **Output with context**
-   - Wrap in ```mermaid code fence
-   - Add brief explanation of diagram structure
-   - Mention rendering compatibility (Obsidian, GitHub, etc.)
-   - Offer to adjust or create variations
+- 節點與 subgraph 使用明確 ID，顯示名稱另外設定，例如 `subgraph core["Core Process"]`。連線引用 ID。
+- 含特殊標點的標籤先用引號包住並正確編碼，保留原文意思，不一律把括號或引號換成其他標點。
+- 若目標工具出現 `Unsupported markdown: list`，檢查編號標籤與 Markdown 字串的處理方式，再改成可解析且不改意思的寫法。
+- 換行、HTML 標籤與樣式支援依實際版本及設定驗證，不預設換行只適用圓形節點。
+- Mermaid 註解用獨立一行的 `%%`。錯誤示範與說明文字不得混入可執行圖例。
+- `-->` 是實線箭頭，`-.->` 是虛線箭頭，`==>` 是粗箭頭，`~~~` 是不可見的佈局連線。
+- 使用一致配色及清楚標籤，不使用 Emoji。採用目標工具的預設樣式也可以，不強制每張圖都有 style 宣告。
 
-## Color Scheme Defaults
+## 驗收
 
-Standard professional palette:
-- Green (#d3f9d8/#2f9e44): Input, perception, start states
-- Red (#ffe3e3/#c92a2a): Planning, decision points
-- Purple (#e5dbff/#5f3dc4): Processing, reasoning
-- Orange (#ffe8cc/#d9480f): Actions, tool usage
-- Cyan (#c5f6fa/#0c8599): Output, execution, results
-- Yellow (#fff4e6/#e67700): Storage, memory, data
-- Pink (#f3d9fa/#862e9c): Learning, optimization
-- Blue (#e7f5ff/#1971c2): Metadata, definitions, titles
-- Gray (#f8f9fa/#868e96): Neutral elements, traditional systems
-
-## Common Patterns
-
-### Swimlane Pattern (Grouping)
-```mermaid
-graph TB
-    subgraph core["Core Process"]
-        A --> B --> C
-    end
-    subgraph support["Supporting Systems"]
-        D
-        E
-    end
-    core -.-> support
-```
-
-### Feedback Loop Pattern
-```mermaid
-graph TB
-    A[Start] --> B[Process]
-    B --> C[End]
-    C -.->|Feedback| A
-```
-
-### Hub and Spoke Pattern
-```mermaid
-graph TB
-    Central[Hub]
-    A[Spoke 1] --> Central
-    B[Spoke 2] --> Central
-    C[Spoke 3] --> Central
-```
-
-## Quality Checklist
-
-Before outputting, verify:
-- [ ] No "number. space" patterns in any node text
-- [ ] All subgraphs use proper ID syntax
-- [ ] All arrows use correct syntax (-->, -.->)
-- [ ] Colors applied consistently
-- [ ] Layout direction specified
-- [ ] Style declarations present
-- [ ] No ambiguous node references
-- [ ] Compatible with Obsidian/GitHub renderers
-- [ ] **No Emoji** in any node text - use text labels or color coding instead
-
-## References
-
-For detailed syntax rules and troubleshooting, see:
-- [references/syntax-rules.md](references/syntax-rules.md) - Complete syntax reference and error prevention
+- 在目標渲染工具或相同版本的環境解析並實際查看畫面，檢查節點、分組、連線與標籤是否符合原意。
+- 確認文字完整、無不當遮擋、方向清楚、配色可讀。解析通過不能代替畫面驗證。
+- 涉及互動時實際操作；修正後重新檢查受影響部分。
+- 若只能在其他版本或工具中驗證，明說差異；無法渲染時回報未驗證，不宣稱已相容所有平台。
