@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**10 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**11 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -297,11 +297,13 @@
 
   **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/postgrest-baas-builder/SKILL.md:3)、[主檔:15](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/postgrest-baas-builder/SKILL.md:15)、[主檔:47](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/postgrest-baas-builder/SKILL.md:47)、[主檔:68](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/postgrest-baas-builder/SKILL.md:68)、[主檔:87](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/postgrest-baas-builder/SKILL.md:87)、[主檔:93](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/postgrest-baas-builder/SKILL.md:93)、[主檔:109](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/postgrest-baas-builder/SKILL.md:109)。
 
-- [ ] **26. project-memory**（高優先）
+- [x] **26. project-memory**（高優先）
+
+  **已完成並經使用者確認：** 保留自動讀取與記錄、完整索引及操作範例。縮短重複解釋，合併、儲存格式與匯出細節移至明確引用的參考文件；主檔與腳本提醒取消強制宣告沒有內容可記。skill 1.10.0、plugin 1.27.0。
 
   **可以改哪裡：** 每個既有專案啟動與收尾必載，必須口頭表態並自動 add；主檔大量解釋為何強制與為何採 JSONL，重複 add 命令及各階段規則。記憶全 key 永久輸出可能隨規模成長。
 
-  **建議改法：** description 改精準記錄／回顧專案經驗任務，既有專案採相關性按需搜尋；若保留自動記憶模式，先由使用者啟用。主檔留下 load/search/add 最小操作與記錄資格，格式、合併、匯出細節移按需參考。刪除重複勸說與口頭無事宣告；大庫以任務相關檢索為入口。
+  **建議改法（依討論調整）：** 保留自動讀取與記錄及完整索引。主檔保留 load/search/add 的時機、範例與記錄資格，格式、合併、匯出細節移至有直接引用的參考文件。縮短重複解釋及腳本提醒，取消口頭無事宣告。
 
   **應保留：** 腳本處理轉義、去重可追溯、專案特有且實際發生的經驗、不把開放問題混入記憶、不自動匯出至版本控制文件。
 

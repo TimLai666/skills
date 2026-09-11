@@ -8,36 +8,15 @@ allowed-tools:
   - Edit
   - AskUserQuestion
 metadata:
-  version: "1.9.0"
+  version: "1.10.0"
 ---
 
-## Why this store and not the agent's own memory
+## Purpose and workflow
 
-Every agent has its own memory, and no agent can read another's. A lesson Claude
-learns is invisible to Codex, and the reverse. This skill keeps one plain JSONL
-file outside all of them, so whichever agent is driving today reads what
-yesterday's agent learned.
+Keep project-specific lessons in one shared file so different agents can reuse them.
 
-That only works if every agent **loads** the file, not just writes to it. Loading
-is the first half of this skill, not an optional extra.
-
----
-
-## Two mandatory moves
-
-Two situations, both mandatory.
-
-1. **Starting work in a project** — run `load` before reading code or making
-   changes. Do this without being asked.
-2. **Work wraps up, or the moment something is learned** — whichever comes
-   first. The user hits a pitfall, discovers a pattern, states a preference, or
-   says 記一下 / remember this. Run `add`.
-
-The end of a session is a checkpoint, not a courtesy: decide out loud whether
-anything is worth keeping, and answer "nothing this time" when that is true.
-Skipping the decision in silence is how this store loses most of its entries.
-
----
+1. **Starting work in a project** — run `load` before reading code or making changes, without waiting to be asked. Search related keys before working in that area.
+2. **When something is learned or work wraps up** — check the recording criteria below and run `add` for qualifying lessons. Report saved entries; if nothing qualifies, no announcement is needed.
 
 ## The script
 
@@ -88,28 +67,25 @@ code already carry them and the agent is about to read those anyway:
 Every key is always listed, however large the store gets. Collapsing detail is
 fine; hiding that an entry exists is not — a key you cannot see is one you will
 never search for. When a key looks related to what you are about to do, run
-`search <key>` before you touch that area.
+`search <key>` before you touch that area:
+
+```bash
+python3 "$_MEM" search n-plus-one-products
+```
 
 Already deduplicated: same key, newest wins. `NO_LEARNINGS` means a fresh
 project; carry on. Damaged lines are skipped and reported rather than aborting.
 
 `--all` expands everything, for when you want to read the whole store.
 
-`load` closes with a reminder to record what this session learns. That is
-deliberate. `load` fires far more reliably than `add`, because starting work is
-a moment an agent can detect while "something was learned" is a judgement with
-no moment attached to it, so the write half borrows a moment from the read half.
-`--json` and `--all` skip the reminder, being machine output and export.
+`load` ends with a recording reminder; `--json` and `--all` omit it.
 
 ---
 
 ## Add
 
-Draft all four fields yourself from what actually happened and write the entry.
-Do not ask permission first, and do not walk the user through the fields one
-question at a time. Every question at this point is another reason the entry
-never gets written, and a wrong entry is cheap to fix: re-add the same key and
-`load` shows only the newest. Report what you recorded once it is in.
+Draft the fields from what actually happened and write qualifying entries without
+asking the user to supply or approve each field. Report what was saved.
 
 1. **Type** — `pitfall` for something that actually went wrong, `pattern` for a
    way of working that turned out to hold, `preference` for how the user wants
@@ -140,31 +116,9 @@ Re-adding an existing key is how you update it. `load` shows only the newest.
 
 ---
 
-## Merging entries
-
-Merge two entries when they turn out to have the same root cause, not when the
-output feels long. The merged insight has to carry the specifics that made each
-one worth keeping — the number, the file, the thing that actually broke.
-Collapsing two concrete lessons into one general statement throws away the only
-thing this store holds that `AGENTS.md` does not.
-
-A merge is an ordinary `add` that names what it now covers:
-
-```bash
-python3 "$_MEM" add \
-  --type pitfall \
-  --key skill-instructions-need-an-execution-point \
-  --insight '<one sentence, keeping the specifics from both>' \
-  --confidence 8 \
-  --absorbs 'skill-write-actions-need-a-moment,printed-suggestion-is-not-an-executed-step'
-```
-
-The absorbed keys stop taking a line of their own and print after the merged
-entry instead, so nothing drops out of the output and `search` still finds them
-under their old keys. No line ever leaves the file. This is not a delete: re-add
-an absorbed key with a fresh timestamp and it stands on its own again.
-
----
+Before merging entries with the same root cause, read
+[Merging entries](references/store-operations.md#merging-entries) for the command,
+preservation rules and how to restore an absorbed key.
 
 ## What is worth recording
 
@@ -177,22 +131,6 @@ an absorbed key with a fresh timestamp and it stands on its own again.
   user actually stated.
 - Not task lists and not open bugs — those belong in the project's issue tracker
   or its `AGENTS.md`.
-
----
-
-## Where it lives
-
-`~/.mystack/projects/<slug>/learnings.jsonl`, one JSON object per line:
-
-```json
-{"ts":"2026-04-04T10:00:00Z","type":"pitfall","key":"n-plus-one-products","insight":"Product.includes(:variants) needed in catalog controller","confidence":9,"source":"user-stated","branch":"feat/catalog","files":["app/controllers/catalog_controller.rb"]}
-```
-
-`<slug>` comes from the git remote (`org-repo`), falling back to the directory
-name when there is no remote. Run `python3 "$_MEM" path` to see it.
-
-The format is deliberately boring: append-only, one line per learning, no index
-and no lock. Any agent, in any language, can read it.
 
 ---
 
@@ -210,17 +148,11 @@ Same rules apply: confidence 7 or above, project-specific, actually encountered.
 
 ---
 
-## Export
+## Storage and export
 
-Turn the memory into markdown for a `CLAUDE.md`, `AGENTS.md` or handover doc:
+The shared store is `~/.mystack/projects/<slug>/learnings.jsonl`.
+To locate it or understand its format, read
+[Storage format and project identity](references/store-operations.md#where-it-lives).
 
-```bash
-python3 "$_MEM" load --all
-```
-
-`--all` matters here: the default view collapses most entries to their key, which
-is right for loading context and wrong for a handover document.
-
-The output is already markdown. Copy it, or append it to the target file if the
-user asks. Never append automatically — that file is version-controlled and
-shared with other people.
+When asked to export memory for a handover or project document, read
+[Export](references/store-operations.md#export). Do not append it to project documents automatically.

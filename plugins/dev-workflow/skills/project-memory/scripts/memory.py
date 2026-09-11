@@ -170,29 +170,17 @@ def render(entries, corrupt, path, header, expand_all=False):
 
 
 def add_reminder():
-    """Closing prompt appended to `load`.
-
-    `load` runs far more often than `add`: starting work is a moment an agent
-    can detect, while "something was learned" is a judgement with no moment
-    attached to it. Hanging the reminder off the one call that reliably happens
-    is what gives the write half a moment of its own. It has to restate the
-    command and the bar, because by the time it matters SKILL.md is tens of
-    turns back in the context.
-    """
+    """Remind the agent to record qualifying lessons before work ends."""
     return (
         "\n---\n"
-        "BEFORE THIS SESSION ENDS — record what was learned here, without waiting to be asked:\n"
-        "  python3 %s add --type <pitfall|pattern|preference|architecture|tool> \\\n"
-        "    --key <describes-the-lesson> --insight '<one sentence>' \\\n"
-        "    --confidence <7-10> --source '<agent-or-skill-name>'\n"
-        "Draft every field yourself from what actually happened and write it. Do not ask\n"
-        "permission first and do not interview the user field by field; report what you\n"
-        "recorded once it is in. A wrong entry is cheap: re-add the same key and the older\n"
-        "one stops showing.\n"
-        "Bar: confidence 7+, specific to this project, actually encountered, and\n"
-        "not something AGENTS.md or the code already says.\n"
-        "\"Nothing worth recording\" is a valid answer — say it out loud rather than\n"
-        "skipping the decision in silence." % os.path.abspath(__file__)
+        "Before this session ends, record project-specific lessons actually encountered\n"
+        "with confidence 7+, excluding task lists, open bugs and existing project guidance:\n"
+        "  python3 %s add --type <pitfall|pattern|preference|architecture|tool> "
+        "--key <describes-the-lesson> --insight '<one sentence>' "
+        "--confidence <7-10> --source '<agent-or-skill-name>'\n"
+        "Draft the fields and save qualifying entries without waiting to be asked.\n"
+        "Report saved entries; if nothing qualifies, no announcement is needed."
+        % os.path.abspath(__file__)
     )
 
 
