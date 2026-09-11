@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**16 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**17 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -435,6 +435,8 @@
 
 - [ ] **37. obsidian-markdown**（高優先）
 
+  **已略過，保留原版：** 依使用者要求不修改，本項不勾選。
+
   **可以改哪裡：** 語法 skill 強制新 vault 採 llm-wiki 架構，混入另一項產品決策；每個新 note 被要求 frontmatter、embeds、callouts，非必要也易照做；完整例及一般 Math/Mermaid 教學常駐。
 
   **建議改法：** description 僅保留 Obsidian 特有語法觸發；移出強制 vault 架構到建庫 skill。流程改成依需要使用 properties/embed/callout，完整例移 reference，主檔只留特有差異。
@@ -443,7 +445,9 @@
 
   **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/obsidian-markdown/SKILL.md:3)、[主檔:18](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/obsidian-markdown/SKILL.md:18)、[主檔:198](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/obsidian-markdown/SKILL.md:198)。
 
-- [ ] **38. tutor**（中優先）
+- [x] **38. tutor**（中優先）
+
+  **已完成並經使用者確認：** 已指定範圍直接開始，目標不明才選 Session；保留四題四選項與零暗示，依工具能力呈現，不適合時用一般文字。出題規則與檔案更新各維護一份，初始化模板分檔並直接引用。skill 1.2.0、plugin 1.7.0。
 
   **可以改哪裡：** 即使使用者已說考哪一節也強制再選 Session；綁死 AskUserQuestion 的四題四選項；read quiz-rules、無暗示、檔案更新與語言在 reference 與主檔反覆重述；初始化模板每次載入。
 

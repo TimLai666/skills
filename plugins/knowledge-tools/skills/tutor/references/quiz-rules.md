@@ -39,18 +39,14 @@ When targeting 🔴 concepts from concept files:
 - Test the same underlying knowledge from a different angle
 - E.g., if user confused "400 vs 422", ask a scenario question where they must choose the correct status code for a new situation
 
-## AskUserQuestion Format
+## Quiz Presentation
 
-- 4 questions per round, 4 options each, single-select
-- Header: max 12 chars, "Q1. Topic"
+- Four questions per round, four options each, single-select.
+- Use an available question tool only when it supports neutral quiz choices and its usage rules permit quizzes. Follow its actual limits; if needed, split the four-question round across calls.
+- Do not use a tool that requires recommending or preselecting an answer. If no suitable tool is available, present the four questions in ordinary text with A–D options and wait for the user's answers.
+- Keep labels and descriptions neutral. Do not reveal answers through selection defaults, descriptions or answer-shaped response examples.
+- Short headers such as "Q1. Topic" are useful when supported; follow the actual tool's length limit.
 
-## File Update Protocol
-
-After grading:
-1. Update `concepts/{area}.md` — add/update concept rows + error notes
-2. Update dashboard — recalculate area stats from concept files
-3. Badges: 🟥 0-39% · 🟨 40-69% · 🟩 70-89% · 🟦 90-100% · ⬜ no data
-
-## Language Rule
-
-All file content and output in the user's detected language. Badge emojis are universal.
+After the user answers, return to the main skill's Grade & Explain and Update
+Files phases. Those phases define the concept and dashboard update procedure;
+use the language selected at the start of the session.
