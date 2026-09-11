@@ -61,6 +61,7 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 ### 8. Do not over-explain
 
 - Explain what the reader needs to understand the point, then stop.
+- Make prose concise by removing repetition and unnecessary wording while preserving the details needed to understand or act. A complete verb can still leave its meaning unfinished: say what must be marked, checked, or explained, including the content or criterion when the surrounding text does not make it clear. Restore necessary information even when the sentence becomes longer. See example 18B in [human-writing-examples.md](./human-writing-examples.md).
 - Do not add an answer to an objection, accusation, or inner judgment that no one raised.
 - If a sentence only defends against an imagined criticism and removing it does not weaken the point, remove it.
 - The same reflex appears as a limitation or disclaimer appended to every claim. In genres whose job is to persuade — a proposal, a pitch — stressing limitations no one asked about defends the writer instead of informing the reader. Put risks where the genre expects them, once, in their own section, not on the tail of every sentence.
