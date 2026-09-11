@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**9 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**10 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -263,6 +263,8 @@
 
 - [ ] **23. openclaw-agent-builder**（高優先）
 
+  **已討論，保留原版：** 使用者要求完整還原本次修改，不調整此 skill。相關 README 與 plugin 版本變更一併還原，新增參考文件已移除。本項不勾選。
+
   **可以改哪裡：** 只要 host 有 ~/.openclaw 就強制觸發，會把無關任務拉進來；已說明新增或編輯仍問模式、本機/SSH；SSH 教學、概念、型態、部署及編輯 runbook 全放主檔，且編輯時要求順手補全部安全項目。
 
   **建議改法：** 觸發限明確 OpenClaw agent 建立／修改，不靠檔案存在。沿用已知目標與模式，只問缺失；主檔保留決策分流、安全必備與驗收，SSH、型態展開、編輯對照、部署細節放 reference。安全健檢發現範圍外缺口先列建議；未來圖形化平台段移出執行主檔。
@@ -273,6 +275,8 @@
 
 - [ ] **24. openclaw-ops**（中優先）
 
+  **已略過，保留原版：** 依使用者要求不修改，本項不勾選。
+
   **可以改哪裡：** scope 與轉交 builder 重述多次；debug、設定寫入、SSH 已有 reference 卻在主檔重列 runbook。每次先問目標且 debug 也逐步確認；dmPolicy 在分類矩陣屬 ops，但關係段又宣稱 builder 領域。
 
   **建議改法：** 主檔縮成目標/版本/授權檢查、分流矩陣、完成條件；操作細節只在對應 reference。沿用已建立連線，不為讀取再次確認；保留具體破壞性操作授權但消除多份同意流程。統一 agent 設定與 channel 設定的責任界線。
@@ -281,11 +285,13 @@
 
   **原文位置：** [主檔:4](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/openclaw-ops/SKILL.md:4)、[主檔:25](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/openclaw-ops/SKILL.md:25)、[主檔:38](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/openclaw-ops/SKILL.md:38)、[主檔:43](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/openclaw-ops/SKILL.md:43)、[主檔:119](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/openclaw-ops/SKILL.md:119)、[主檔:151](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/openclaw-ops/SKILL.md:151)、[主檔:193](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/openclaw-ops/SKILL.md:193)、[主檔:213](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/openclaw-ops/SKILL.md:213)、[主檔:228](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/openclaw-ops/SKILL.md:228)、[主檔:257](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/openclaw-ops/SKILL.md:257)、[主檔:285](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/openclaw-ops/SKILL.md:285)、[references/debug.md:19](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/openclaw-ops/references/debug.md:19)。
 
-- [ ] **25. postgrest-baas-builder**（中優先）
+- [x] **25. postgrest-baas-builder**（中優先）
+
+  **已完成並經使用者確認：** 保留 db-engineering 前置要求；主檔保留「自架 Supabase 補充」與「InsForge 補充」提醒，並加入平台與任務導讀；完整平台設定及範例保留於原參考文件，欄位慣例改引用。收尾改為實際角色、功能及平台可用的安全／效能驗證，同步修正 performance 參考文件的 advisors 要求。skill 1.3.0、plugin 1.26.0。各規則段落保留直接文件連結與閱讀時機。
 
   **可以改哪裡：** 任何 RLS/PostgREST 查詢先載完整 db-engineering；主檔同時載 Supabase Cloud、自架、InsForge/MCP 設定，不同平台內容無條件伴隨。欄位慣例與收尾重複規則。
 
-  **建議改法：** 只在涉及 schema／migration 等 DB 工作載入對應 DB 指引；先辨別平台及任務，再讀 RLS、Auth、效能、自架或 InsForge reference。MCP 安裝及平台限制移 reference；主檔保留平台分流與安全檢查，不重列通用欄位。
+  **建議改法（依討論調整）：** 保留 db-engineering 前置要求；先辨別平台及任務，再讀 RLS、Auth、效能、自架或 InsForge reference。MCP 安裝指令由 reference 提供；主檔保留自架 Supabase 與 InsForge 的易踩坑補充、平台分流與安全檢查，不重列通用欄位。
 
   **應保留：** RLS 與授權驗證、內建 Auth 適配、金鑰不進 git、明列查詢欄位、實際平台可用的安全/效能驗證。
 

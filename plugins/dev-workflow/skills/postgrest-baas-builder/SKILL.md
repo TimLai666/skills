@@ -9,7 +9,7 @@ allowed-tools:
   - Grep
   - AskUserQuestion
 metadata:
-  version: "1.2.4"
+  version: "1.3.0"
 ---
 
 ## 前置
@@ -24,13 +24,13 @@ metadata:
 
 `public` schema 下每一張新表，建立時就 `enable row level security`，並補上明確 policy。沒有例外、不是選項。
 
-Policy 寫法規範見 `references/rls.md`。
+撰寫或修改 policy 前，先讀 [RLS 規範與樣板](references/rls.md)。
 
 ### 2. Auth 用 BaaS 內建
 
 認證一律走 `auth.users`（Supabase）或平台內建 auth（InsForge），不要自己另開一張 users 表來做帳密。要存額外的使用者資料時，才開一張 `profiles` 之類的擴充表，以 `auth.users.id` 為外鍵。
 
-Auth 串接細節見 `references/auth.md`。
+串接 Auth、擴充 profiles 或處理 JWT 驗證前，先讀 [Auth 指南](references/auth.md)；InsForge 另依下方平台指南適配。
 
 ### 3. PostgREST 查詢規範
 
@@ -39,31 +39,16 @@ Auth 串接細節見 `references/auth.md`。
 
 ### 4. RLS 效能
 
+撰寫或修改 policy、PostgREST 查詢前，必讀 [效能指南](references/performance.md)。
+
 - policy 內 `auth.uid()` 一律包成 `(select auth.uid())`
 - 每條 policy 寫 `to <role>`
 - 同一 (role, action) 不要疊多條 permissive
 - `security definer` function 要 `set search_path = ''` 並標 `stable`
 
-### 5. MCP 設定（BaaS 跟 IaaS 不一樣）
+### 5. 金鑰保護
 
-| MCP | scope | 為什麼 |
-|---|---|---|
-| **Supabase Cloud** | OAuth 自動 | 一個帳號連 OAuth，跨 project 用工具參數切 |
-| **InsForge** | **project scope** | 一把 API key 綁一個 instance，多 project 必須各自一份 `.mcp.json` |
-| **Zeabur** | user scope | 一把 token 管所有 project |
-
-InsForge MCP project scope 設定：
-
-```bash
-claude mcp add insforge --scope project \
-  -e API_KEY=ik_xxx \
-  -e API_BASE_URL=https://<instance>.<host> \
-  -- npx -y @insforge/mcp@latest
-```
-
-`.mcp.json` 一定要加 `.gitignore`，同時建 `.mcp.json.example` 進 git 當範本。
-
----
+含金鑰的 `.mcp.json` 加入 `.gitignore`，另建不含真實金鑰的 `.mcp.json.example` 供版本控制。
 
 ## 自架 Supabase 補充
 
@@ -72,7 +57,7 @@ claude mcp add insforge --scope project \
 - **整套 stack 12 個服務**，secret 變動牽動多個服務
 - **沒有 Cloud MCP**，改用 psql 直連 / curl PostgREST
 
-第一次接手自架 Supabase，先跑 `references/self-hosted-on-zeabur.md` 的全面 checklist。
+第一次接手自架 Supabase，先跑 [自架指南](references/self-hosted-on-zeabur.md) 的全面 checklist。後續處理 Auth 簽章、金鑰輪換或服務設定時，先讀其中對應章節。
 
 ## InsForge 補充
 
@@ -80,23 +65,23 @@ claude mcp add insforge --scope project \
 - Service role 等同物：admin API key（`ik_` 前綴）
 - 平台限制：`moddatetime` 不能裝、`raw_user_meta_data` 不存在、`cron.schedule` 不能寫
 
-第一次接手 InsForge，先跑 `references/insforge.md` 的 checklist。
+第一次接手 InsForge，先跑 [InsForge 指南](references/insforge.md) 的 checklist。處理 API、Auth、資料庫適配或 MCP 設定前，先讀其中對應章節；MCP 設定依「MCP per-project 設定 SOP」操作。
 
----
+## 平台與參考文件
 
-## 欄位命名慣例
+先確認目前使用 Supabase Cloud、自架 Supabase 或 InsForge，以及目標專案與環境，再讀取對應文件：
 
-依 `db-engineering`（鐵則 9 與 `references/data-conventions.md`）：`id`／`created_at`／`updated_at`／`deleted_at` 標準欄位、`moddatetime` trigger、禁止自創名稱。
+| 平台或工作 | 必讀內容 |
+|---|---|
+| 自架 Supabase on Zeabur | [自架指南](references/self-hosted-on-zeabur.md)：Auth 簽章、金鑰輪換、服務設定與維運工具。第一次接手先執行其中的全面 checklist。 |
+| InsForge | [InsForge 指南](references/insforge.md)：API 路徑、admin key、平台限制與適配方式。第一次接手先執行其中的 checklist；設定 MCP 時依「MCP per-project 設定 SOP」操作。 |
+| RLS policy | [RLS 規範與完整樣板](references/rls.md) |
+| Policy 或 PostgREST 查詢 | [效能指南](references/performance.md)，寫入前必讀。 |
+| Auth 串接 | [Auth 指南](references/auth.md)：Supabase Auth、profiles 與 JWT 驗證；InsForge 同時依其平台指南適配。 |
 
----
+Supabase Cloud 使用目前環境提供的工具，操作前核對工具參數與目標 project。自架與 InsForge 的連線及 MCP 設定依各自指南。
 
-## 參考檔案
-
-- `references/rls.md` — RLS policy 樣板（擁有者制、公開讀、軟刪感知、service_role）
-- `references/performance.md` — Supabase／PostgREST 效能地雷：RLS initplan、`select=`、`count=exact`、`getSession()` 快取、JWKS 驗章、冷啟動。寫 policy 或查詢前必讀
-- `references/auth.md` — Supabase Auth、profiles 擴充表、JWT 驗證
-- `references/insforge.md` — InsForge API endpoint mapping、admin key、適配清單
-- `references/self-hosted-on-zeabur.md` — 自架 Supabase on Zeabur checklist
+欄位命名與通用資料慣例依前置 `db-engineering` 的 `references/data-conventions.md`；平台不支援的功能依上述平台指南適配。
 
 ## 起手式素材（assets/）
 
@@ -106,11 +91,11 @@ claude mcp add insforge --scope project \
 - `assets/starter-migrations/0002_profiles.sql` — auth.users 擴充表
 - `assets/starter-migrations/example_table.sql` — 業務表範本（完整套用 BaaS 鐵則）
 
-## 收尾自我檢查
+## 收尾驗證
 
-- [ ] 每一張 `public` 表都已 `enable row level security` 且有明確 policy
-- [ ] 認證走 `auth.users`；沒有自製帳密 users 表
-- [ ] PostgREST 查詢 `select=` 明列欄位、不用 `*`
-- [ ] policy 內 auth 函式都包成 `(select ...)`
-- [ ] 每條 policy 都寫 `to <role>`
-- [ ] 跑過 `get_advisors(type=performance)` 與 `get_advisors(type=security)`，沒有新 WARN
+針對本次變更留下實際驗證結果：
+
+- 以受影響的角色測試資料讀寫權限，包括允許及拒絕的情境；只用管理員金鑰測試，不能證明 RLS 正確。
+- 驗證本次 Auth 串接或 PostgREST 查詢的實際行為，並確認符合上方 BaaS 規則。
+- 環境提供 `get_advisors` 時，依實際工具參數執行 performance 與 security 檢查，處理本次新增的警告。既有警告與尚未解決的項目分開記錄。
+- 沒有 advisors 時，以平台可用工具檢查受影響的 schema、權限、索引及查詢計畫，搭配角色存取測試。說明實際檢查範圍與未驗證項目，不宣稱已通過 advisors 掃描。

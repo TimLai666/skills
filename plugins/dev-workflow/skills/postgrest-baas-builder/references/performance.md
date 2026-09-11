@@ -2,7 +2,7 @@
 
 Supabase 慢的時候，九成不是平台問題，是 RLS 與查詢寫法沒踩好。這份是 BaaS 專屬的效能地雷；通用的 schema／索引／應用層地雷（FK 索引、迴圈內呼叫 DB、connection pool…）見 `db-engineering` skill 的 `references/performance-pitfalls.md`，兩份都要過。
 
-開發時隨時可以用 `mcp__supabase__get_advisors`（type=performance）一鍵掃出大部分問題；正式上線前也跑一次。
+環境提供 `get_advisors` 時，開發期間及正式上線前用 performance 檢查協助找出效能問題，呼叫參數依實際工具定義。沒有此工具的平台，改用可用的索引、查詢計畫與資料庫統計檢查，記錄實際涵蓋範圍。
 
 ---
 
@@ -255,4 +255,4 @@ async function authHeader() {
 - [ ] 後端驗 JWT 用 JWKS 本地驗章，沒在請求路徑上打 `/auth/v1/user`。
 
 ### 驗證
-- [ ] migration 寫完後跑 `get_advisors(type=performance)`，沒有新的 WARN。
+- [ ] migration 完成後，依主檔「收尾驗證」使用平台可用的效能檢查，處理本次新增的警告，記錄未解決或未驗證的項目。
