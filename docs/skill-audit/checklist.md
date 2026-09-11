@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**11 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**12 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -311,6 +311,8 @@
 
 - [ ] **27. set-zeabur-conventions**（中優先）
 
+  **已略過，保留原版：** 依使用者要求不修改，本項不勾選。
+
   **可以改哪裡：** 觸發限制中英重述，主檔在寫部署規範任務裡同載 MCP 安裝、完整 envsubst 維運知識及罕見 shared variable 故障；description 說只支援 Dockerfile，正文承認自動偵測建置，規則有漂移風險。
 
   **建議改法：** description 留一次精準部署目標與排除；主檔只留查既有段落、更新模板、驗證，MCP 安裝／環境變數生效／特殊診斷移按需 reference。長期約束只在模板保留一份；平台能力先依官方現況驗證再更新，避免把舊限制寫成永遠事實。
@@ -319,11 +321,13 @@
 
   **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/set-zeabur-conventions/SKILL.md:3)、[主檔:12](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/set-zeabur-conventions/SKILL.md:12)、[主檔:24](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/set-zeabur-conventions/SKILL.md:24)、[主檔:61](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/set-zeabur-conventions/SKILL.md:61)、[主檔:85](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/set-zeabur-conventions/SKILL.md:85)、[主檔:104](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/set-zeabur-conventions/SKILL.md:104)。
 
-- [ ] **28. ship-it**（高優先）
+- [x] **28. ship-it**（高優先）
+
+  **已完成並經使用者確認：** 限定分支到 PR 的交付流程，同步、提交、測試依專案及既有授權。採用現行交付文件並相容舊檔，PR 優先使用專案模板，區分推送、PR、CI 與部署狀態；記憶遵循新版 project-memory，PR 不附共同作者署名。skill 1.4.0、plugin 1.28.0。AI 主動追蹤必要 CI 與指定部署流程，受阻時回報未驗證項目，不等待 GitHub 通知。
 
   **可以改哪裡：** release/deploy/merge 等廣泛觸發卻只支援 feature branch→PR；固定 merge 同步、全套測試及新路徑 100% 覆蓋；收尾強制 project-memory。讀 legacy delivery-plan.md，與 eng-architect 的 delivery-status.md 不一致。
 
-  **建議改法：** 定位清楚限定分支交付到 PR；先讀專案既有交付規則、已驗證證據與授權。同步和測試依變更風險及專案需求，避免重跑同一 diff 審查；PR 模板移素材並優先 repo 模板；記憶改有實際新經驗且啟用才記錄。統一狀態文件入口並兼容舊檔，不把 PR 建立稱完整上線。
+  **建議改法：** 定位清楚限定分支交付到 PR；先讀專案既有交付規則、已驗證證據與授權。同步和測試依變更風險及專案需求，避免重跑同一 diff 審查；PR 模板移素材並優先 repo 模板；記憶沿用 project-memory，自動記錄符合條件的實際經驗，不強制口頭宣告無事可記。統一狀態文件入口並兼容舊檔，不把 PR 建立稱完整上線。
 
   **應保留：** 秘密掃描、工作目標確認、修正引入的失敗、必要審查與 CI 證據、PR URL 和實際交付狀態。
 

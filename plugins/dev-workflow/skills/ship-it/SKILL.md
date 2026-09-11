@@ -1,6 +1,6 @@
 ---
 name: ship-it
-description: "Prepare and ship a feature branch: sync, test, open PR. This skill MUST be invoked on the triggers below, and SHOULD be invoked when the user sounds ready to merge without saying so outright. Triggers on: 可以上了嗎, 準備上線, 開 PR, ship this, deploy, release, 上線, merge, push this, 準備好了嗎, ready to go"
+description: "Prepare a feature branch for a pull request: verify scope, sync when needed, test, review, push and open or update the PR. This skill MUST be used when the user requests this branch-to-PR workflow or explicitly invokes ship-it (開 PR、準備 PR、整理分支交付). It SHOULD be used when the user asks to prepare a completed feature for review. It MUST NOT be triggered solely by a push, merge, release, deployment request or a general readiness question."
 allowed-tools:
   - Bash
   - Read
@@ -9,167 +9,133 @@ allowed-tools:
   - Grep
   - AskUserQuestion
 metadata:
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
-## Preamble
+## Step 1 — Confirm scope and project rules
+
+Read the project's coordination and delivery instructions. Confirm the requested
+outcome, current branch, target remote and PR base from repository settings and
+user intent; do not guess `main` when the base is unknown.
+
+Use the project's existing delivery document. With no other arrangement, look
+for `delivery-status.md`; support `delivery-plan.md` in older projects. Read the
+current phase, expected output and acceptance requirements, not just the first
+few lines. If the diff conflicts with the agreed scope, resolve that decision
+with the user before shipping. Do not create a status file just for this check.
+
+Inspect working-tree changes and outgoing commits. Include only the intended
+work. Proceed with already authorized commits without asking again; do not
+silently stash, discard or include unrelated changes. If the work is on the base
+branch, establish a suitable PR branch without resetting existing work.
+
+After setting `_SHIP_REMOTE`, `_SHIP_BASE` and `_SHIP_BRANCH` to verified values:
 
 ```bash
-_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
-_BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||')
-[ -z "$_BASE" ] && git rev-parse --verify origin/main >/dev/null 2>&1 && _BASE="main"
-[ -z "$_BASE" ] && git rev-parse --verify origin/master >/dev/null 2>&1 && _BASE="master"
-_BASE="${_BASE:-main}"
-echo "BRANCH: $_BRANCH"
-echo "BASE: $_BASE"
-which gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1 && echo "GH_CLI=true" || echo "GH_CLI=false"
-[ -f delivery-plan.md ] && echo "DELIVERY_PLAN: exists" || echo "DELIVERY_PLAN: missing"
-[ -f delivery-plan.md ] && head -20 delivery-plan.md
+git status --short
+git diff "$_SHIP_REMOTE/$_SHIP_BASE...HEAD" --stat
+git log "$_SHIP_REMOTE/$_SHIP_BASE..HEAD" --oneline
 ```
 
-If `DELIVERY_PLAN: exists`: read the `Next Verifiable Output` and `Current Phase` sections. Before shipping, confirm:
+## Step 2 — Sync when needed
 
-```text
-⚠ delivery-plan.md check:
-- Current phase: [X]
-- Next output: [Y]
-- Does this diff match? [yes / no / no delivery-plan found]
-```
-
-If it doesn't match, ask the user whether to update delivery-plan.md before shipping.
-
----
-
-## Step 1 — Pre-flight
-
-1. If `BRANCH == BASE`: abort with "You're on the base branch. Ship from a feature branch."
-2. `git status` — if uncommitted changes exist, describe them and ask whether to commit, stash, or abort.
-3. Show what's being shipped:
-   - `git diff origin/$_BASE --stat`
-   - `git log origin/$_BASE..HEAD --oneline`
-
----
-
-## Step 2 — Sync with base
+Fetch the target base and check whether synchronization is needed. Follow the
+project's merge or rebase convention; do not automatically merge the base into
+every branch. Avoid rewriting shared history without authorization.
 
 ```bash
-_BASE=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'); _BASE="${_BASE:-main}"
-git fetch origin $_BASE
-git merge origin/$_BASE --no-edit
+git fetch "$_SHIP_REMOTE" "$_SHIP_BASE"
 ```
 
-If merge conflicts: show each conflict and ask whether to keep mine, keep theirs, or show both.
+Resolve conflicts from the intended behavior and both sides' changes, then
+validate the resolution. Ask only when a material behavior or scope decision
+cannot be determined from available evidence.
 
----
+## Step 3 — Verify behavior and review the final diff
 
-## Step 3 — Run tests
+Run tests appropriate to the changes and risks. Run the project's full suite
+according to its rules. Reuse prior results only when they cover the current
+code and relevant environment; rerun affected checks after subsequent edits or
+conflict resolution.
 
-Run the project's full test suite.
+Check coverage of important behavior, boundary conditions and error handling.
+Add meaningful tests where those behaviors lack evidence, rather than requiring
+a test for every new code path or testing implementation details alone.
 
-Test failure triage:
-- in-branch failure → stop, fix before shipping
-- pre-existing failure → ask how to handle
+Fix failures introduced by this branch. Establish evidence for pre-existing
+failures or environment blockers, apply project delivery rules, and report any
+remaining gate instead of presenting partial results as a pass.
 
----
+Run **diff-inspector** on the outgoing diff unless an existing review covers
+that same diff. Review later changes and their effects. Resolve confirmed
+findings according to severity and project rules, and distinguish unresolved
+questions from confirmed defects.
 
-## Step 4 — Coverage audit
+## Step 4 — Push and open or update the PR
 
-Goal: 100% of new code paths have at least one test.
-
-For each changed file, search for corresponding test coverage. Rate:
-- **strong** — behavior + edge cases + error paths
-- **medium** — happy path only
-- **weak** — implementation tests
-- **none** — no tests
-
----
-
-## Step 5 — Pre-landing review (if no prior review)
-
-If no code review has been run on this branch, run the **diff-inspector** skill on the outgoing diff. If P0 issues are found: fix or get user approval before pushing.
-
----
-
-## Step 6 — Push and open PR
-
-Before pushing, scan the outgoing diff for secrets (keys, tokens, credentials, connection strings). If found, stop and tell the user — do not push.
+Before pushing, scan the outgoing commits and diff for secrets, including keys,
+tokens, credentials and sensitive connection strings. If found, stop the push
+and report their locations without reproducing secret values.
 
 ```bash
-_BRANCH=$(git branch --show-current)
-git push origin $_BRANCH
+git push "$_SHIP_REMOTE" "$_SHIP_BRANCH"
 ```
 
-If GH CLI is available:
+Check for an existing PR for the branch before creating one. Follow the
+repository's PR template. If none exists, use
+[the PR body template](assets/pr-body.md), filling it with actual changes and
+verification results. Scale detail to the change and remove irrelevant sections.
+
+**Do not append co-author credits, `Co-authored-by` trailers or agent signatures
+to PR titles or descriptions.**
+
+With an authenticated GitHub CLI, save the completed body to a temporary file
+and use its path as `_SHIP_PR_BODY`. Set `_SHIP_TITLE` from the actual change:
 
 ```bash
-gh pr create \
-  --title "[auto-detect from branch name and commits]" \
-  --body "$(cat <<'EOF'
-## What
-[1-2 sentences: what does this change do]
-
-## Why
-[Why is this needed]
-
-## How
-[Brief technical description]
-
-## Testing
-- Tests run: N passed
-- Coverage: [summary]
-
-## Checklist
-- [ ] Tests pass
-- [ ] No secrets committed
-- [ ] Migrations reversible (if applicable)
-- [ ] Docs updated
-EOF
-)"
+gh pr create --base "$_SHIP_BASE" --head "$_SHIP_BRANCH" \
+  --title "$_SHIP_TITLE" --body-file "$_SHIP_PR_BODY"
 ```
 
-If no GH CLI: print the PR description for the user to copy.
+For an existing PR, update it with `gh pr edit` using the completed body file.
+If the CLI is unavailable or unauthenticated, use an available authorized
+alternative or provide the completed title and body for manual submission.
+Report which operations actually succeeded.
 
----
+## Step 5 — Check CI and record lessons
 
-## Step 7 — Post-ship reminders
+Read checks for the resulting PR and report passed, failed, pending or unavailable:
 
-```text
-PR 已建立。接下來你可以：
-
-  gh pr checks --watch        盯 CI 狀態
-  gh run watch                盯部署進度
-  或等 GitHub 通知
+```bash
+gh pr checks "$_SHIP_PR_URL"
 ```
 
----
+When waiting for required CI is part of the requested delivery, actively watch
+those checks to a result and handle failures within scope:
 
-## Step 8 — Record what this ship taught
-
-Run the **project-memory** skill now, not after deployment. Shipping is the
-wrap-up checkpoint that skill names, and it is the last point where the session
-still holds why things went the way they did.
-
-Decide out loud whether this branch taught anything worth keeping, then write it
-without asking permission first. "Nothing this time" is a valid answer, but say
-it rather than passing over the step in silence.
-
-The earlier steps are where the candidates usually are: a test that failed in
-Step 3 for a reason nobody would guess from the code, a gap Step 4 or Step 5 kept
-finding, a Step 2 conflict that came from how the project is laid out rather than
-from bad luck.
-
----
-
-## Step 9 — Ship report
-
-```text
-## Ship Report [branch] [date]
-
-Tests: N passed, N failed
-Coverage: [summary]
-Pre-landing review: [SKIPPED / N issues found, N fixed]
-PR: [URL or "ready — push manually"]
-Learnings recorded: [key(s) written to project-memory, or "none this time"]
-
-Status: shipped
+```bash
+gh pr checks "$_SHIP_PR_URL" --watch
 ```
+
+When deployment verification is requested, identify the deployment workflow run
+for the intended revision and environment. Set `_SHIP_RUN_ID` to that verified
+run ID and watch it explicitly:
+
+```bash
+gh run watch "$_SHIP_RUN_ID" --exit-status
+```
+
+Inspect failed checks or jobs and resolve failures within scope. Verify the
+deployment's required outcome before reporting success; a passing unrelated
+workflow is not deployment evidence. If monitoring is blocked or interrupted,
+report the last observed state, the PR or run URL, and what remains unverified.
+
+Run **project-memory** at this wrap-up checkpoint, following its recording
+criteria. Save qualifying project-specific lessons and report saved entries.
+If nothing qualifies, no announcement is needed.
+
+## Delivery report
+
+Report the branch and scope, actual test and review results, PR URL, CI state
+and unresolved requirements. Distinguish pushed, PR created or updated, merged,
+and deployed based on evidence. Creating a PR does not establish merge or deployment.
