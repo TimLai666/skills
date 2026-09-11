@@ -1,25 +1,62 @@
 # Excalidraw JSON Schema Reference
 
-## Color Palette
+生成任何模式前讀取本檔。以下個別元素範例只展示該類型差異，須與共用欄位組合；不是完整 drawing。
 
-### Primary Colors
-| Purpose | Color | Hex |
-|---------|-------|-----|
-| Main Title | Deep Blue | `#1e40af` |
-| Subtitle | Medium Blue | `#3b82f6` |
-| Body Text | Dark Gray | `#374151` |
-| Emphasis | Orange | `#f59e0b` |
-| Success | Green | `#10b981` |
-| Warning | Red | `#ef4444` |
+## 共用欄位與相容性
 
-### Background Colors
-| Purpose | Color | Hex |
-|---------|-------|-----|
-| Light Blue | Background | `#dbeafe` |
-| Light Gray | Neutral | `#f3f4f6` |
-| Light Orange | Highlight | `#fef3c7` |
-| Light Green | Success | `#d1fae5` |
-| Light Purple | Accent | `#ede9fe` |
+以下是未綁定元素的起始範例。`boundElements: null` 只適用於沒有綁定對象；
+綁定文字時必須同時設定容器的 `boundElements` 與文字的 `containerId`，見下方範例。
+`boundElements` 可為陣列或 null，不應清空既有的有效綁定。
+
+`frameId`、`index`、`versionNonce` 是官方元素欄位，不能一律當作不合法欄位刪除。
+`updated` 是更新時間戳，不必固定為 1。範例中的 1 是初始示例值。
+新增或編輯時依目標版本的匯出格式處理，保留有效既有欄位；不要自行加入未知欄位。
+不同工具版本的相容性，須以實際開啟、渲染及必要互動確認。
+
+查證來源：[官方元素型別](https://github.com/excalidraw/excalidraw/blob/master/packages/element/src/types.ts)。
+
+```json
+{
+  "id": "unique-id",
+  "type": "rectangle",
+  "x": 100, "y": 100,
+  "width": 200, "height": 50,
+  "angle": 0,
+  "strokeColor": "#1e1e1e",
+  "backgroundColor": "transparent",
+  "fillStyle": "solid",
+  "strokeWidth": 2,
+  "strokeStyle": "solid",
+  "roughness": 1,
+  "opacity": 100,
+  "groupIds": [],
+  "roundness": {"type": 3},
+  "seed": 123456789,
+  "version": 1,
+  "isDeleted": false,
+  "boundElements": null,
+  "updated": 1,
+  "link": null,
+  "locked": false
+}
+```
+
+`strokeStyle` values: `"solid"`（實線，預設）| `"dashed"`（虛線）| `"dotted"`（點線）。虛線適合表示選擇性路徑、非同步流、弱關聯等。
+
+Text elements add:
+```json
+{
+  "text": "顯示文字",
+  "fontSize": 20,
+  "fontFamily": 5,
+  "textAlign": "center",
+  "verticalAlign": "middle",
+  "containerId": null,
+  "originalText": "顯示文字",
+  "autoResize": true,
+  "lineHeight": 1.25
+}
+```
 
 ## Element Types
 
@@ -127,7 +164,6 @@
   "version": 2,
   "source": "https://excalidraw.com",
   "elements": [
-    // Array of elements
   ],
   "appState": {
     "gridSize": null,
@@ -136,6 +172,8 @@
   "files": {}
 }
 ```
+
+配色請使用 [色票與對比規則](design-palette.md)。
 
 ## Font Family Values
 
@@ -152,7 +190,7 @@
 - `solid` - Solid fill
 - `hachure` - Hatched lines
 - `cross-hatch` - Cross-hatched
-- `dots` - Dotted pattern
+- `zigzag` - Zigzag pattern
 
 ## Roundness Types
 
@@ -162,7 +200,7 @@
 
 ## Element Binding
 
-To connect text to a container:
+To connect text to a container, maintain both sides with matching IDs. These fragments extend the common fields:
 
 ```json
 {
@@ -182,7 +220,7 @@ To connect text to a container:
 
 ## Arrow Binding
 
-To connect arrows to shapes:
+To connect arrows to shapes, use the target version’s exported binding format and update the shapes’ reverse `boundElements` references. The following is a legacy focus/gap example; do not copy it into a different version without verifying import and movement behavior:
 
 ```json
 {

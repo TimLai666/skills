@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**12 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**13 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -361,11 +361,13 @@
 
 ### knowledge-tools
 
-- [ ] **31. excalidraw-diagram**（高優先）
+- [x] **31. excalidraw-diagram**（高優先）
+
+  **已完成並經使用者確認：** 保留自然語意自動選用與三種模式，HTML Artifact 內優先沿用 HTML 做法。模式模板及完整回覆範例分檔，共用元素格式與色票集中維護，主檔保留直接引用與閱讀時機。依官方型別修正綁定與欄位禁令，要求實際畫面及相關互動驗證。skill 1.4.0、plugin 1.4.0。
 
   **可以改哪裡：** 主檔兩次列完整 element/text schema（233–295、311–368），Obsidian 包裝也重複（42–69、407–426）；三模式模板與三段回覆範例常駐；「畫圖／動畫圖」觸發過廣。主檔 boundElements 一律 null 與 reference 綁定範例有差異。
 
-  **建議改法：** 主檔保留模式選擇、產出及驗證；每種模式模板、完整 schema、色票與回覆例移 references/assets，schema 單一來源。description 收斂至 Excalidraw／手繪白板；對 boundElements 等相容性禁令先查證適用版本，再統一範例，勿直接刪保護。
+  **建議改法：** 主檔保留模式選擇、產出及驗證；每種模式模板、完整 schema、色票與回覆例移 references/assets，schema 單一來源。description 依自然語意及交付位置自動選用，不要求記住名稱；HTML Artifact 內優先沿用 HTML 方法；對 boundElements 等相容性禁令先查證適用版本，再統一範例，勿直接刪保護。
 
   **應保留：** 三模式實際格式差異、唯一 ID、JSON 合法性、文字可讀性與版面檢查。
 

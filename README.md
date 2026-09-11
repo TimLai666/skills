@@ -137,7 +137,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | `obsidian-cli` | 想用 CLI 操作 Obsidian vault（搜尋、替換、匯出、管理 vault）。 |
 | `obsidian-bases` | 想在 Obsidian 裡建立資料庫視圖（類似 Notion database），管理結構化資料。 |
 | `obsidian-canvas-creator` | 想建立 Obsidian Canvas（.canvas），做空間佈局、心智圖或自由版面配置。 |
-| `excalidraw-diagram` | 想產出手繪風格的 Excalidraw 圖（流程圖、心智圖、對比圖），支援 Obsidian .md、標準 .excalidraw 與動畫模式。 |
+| `excalidraw-diagram` | 依需求產出獨立流程圖、心智圖、關係圖或可編輯白板，支援 Obsidian、標準 Excalidraw 與動畫；HTML Artifact 內的圖優先沿用 HTML 做法。 |
 | `mermaid-visualizer` | 想把文字內容轉成 Mermaid 圖表（流程圖、序列圖、架構圖等），用於簡報與文件。 |
 
 ### `utilities` — 通用工具
