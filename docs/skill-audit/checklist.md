@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**18 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**19 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -469,7 +469,9 @@
 
   **原文位置：** [主檔:11](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/tutor-setup/SKILL.md:11)、[主檔:20](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/tutor-setup/SKILL.md:20)、[主檔:43](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/tutor-setup/SKILL.md:43)、[主檔:70](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/tutor-setup/SKILL.md:70)、[主檔:234](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/tutor-setup/SKILL.md:234)、[主檔:280](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/tutor-setup/SKILL.md:280)。
 
-- [ ] **40. zettelkasten**（中優先）
+- [x] **40. zettelkasten**（中優先）
+
+  **已完成：** 合併重複原則與檢核，新增／修改前完整讀取拆卡判準與範例；明定獨立主張應拆，不能以保留脈絡為由混放不同想法。保留兩份參考文件全文及 llm-wiki 既有引用，移除 Suggested Prompt，回報聚焦實際變更與重要邊界決策。
 
   **可以改哪裡：** 核心原則、流程、檢核、Quality/Common Mistakes 反覆講原子性、自己話與連結；同一 checklist 又複製 reference 並要求同步 llm-wiki（reference 02 行3）。
 
