@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**17 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**18 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -457,7 +457,9 @@
 
   **原文位置：** [主檔:42](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/tutor/SKILL.md:42)、[主檔:109](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/tutor/SKILL.md:109)、[主檔:156](/Users/timlai/Developer/skills/plugins/knowledge-tools/skills/tutor/SKILL.md:156)。
 
-- [ ] **39. tutor-setup**（高優先）
+- [x] **39. tutor-setup**（高優先）
+
+  **已完成並經使用者確認：** 僅採用第 1、3、4、5 項，模式確認與 CWD 限制維持。三模式分檔並直接引用，PDF 依內容抽取或查看原頁；深度保留原理、前置知識、例外及應用分析，題數比例改共用預設。同步以具體對應保護手寫內容與進度，刪改來源先核對處理，長度不作拒絕匯入門檻。skill 1.2.0、plugin 1.8.0。
 
   **可以改哪裡：** 三模式主檔負擔不均（Codebase 已外移，Document/Wiki 還完整常駐）；已知模式/來源仍多次必問確認；PDF 只能 pdftotext，無視掃描/圖表；Equal Depth 要將每個旁枝補成 textbook note。題數/比例機械化且兩模式分析題規則不一致；Wiki >200 行拒絕與 llm-wiki 長度不是拆分理由衝突。
 

@@ -79,7 +79,7 @@ Create exercises that guide new developers through the codebase. Per [codebase-t
 - **Configuration**: "How would you change Y?" — answer with file paths + snippets
 - **Debugging**: "Where would you look if Z breaks?" — answer with investigation steps
 - **Extension**: "How would you add feature W?" — answer with architectural approach
-- Minimum 5 exercises per major module
+- Follow [Learning Depth and Practice](learning-quality.md) for default exercise counts and learning coverage.
 - All answers use `> [!answer]- <label>` fold callout (localize label to team language, e.g., "정답 보기" for Korean, "View Answer" for English)
 
 ## Phase C8: Interlinking

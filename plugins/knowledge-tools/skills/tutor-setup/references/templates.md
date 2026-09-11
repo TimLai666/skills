@@ -224,12 +224,12 @@ keywords: practice, <topic keywords>
 
 ### Practice Question Rules
 
-- Every topic folder MUST have a practice file (8+ questions)
+- Every topic folder MUST have a practice file. Follow [Learning Depth and Practice](learning-quality.md) for default counts and coverage.
 - **Answer hiding**: ALL answers use `> [!answer]- 정답 보기` fold callout
 - **Patterns**: `> [!hint]-` / `> [!summary]-` fold callouts (MANDATORY)
 - **Question type diversity**: tag `[recall]`, `[application]`, `[analysis]` in heading
-  - ≥60% recall, ≥20% application, ≥2 analysis per file
-- Scenario in one `>` blockquote line; answer 1-3 lines in fold
+  - Follow the shared recall/application/analysis criteria in [Learning Depth and Practice](learning-quality.md).
+- Present scenarios clearly; keep answers folded and include the reasoning needed to understand the solution.
 - `## Related Concepts` with `[[wiki-links]]` (MANDATORY)
 
 ---
@@ -287,5 +287,5 @@ Stored at `StudyVault/.sync-manifest.json`. Created on first sync, updated on ev
 
 - **First sync**: Create manifest, import all wiki concept/entity pages.
 - **Subsequent syncs**: Compare sha256 per page. Only NEW/CHANGED pages are processed.
-- **Deleted pages**: If a manifest entry has no matching wiki file, the StudyVault file is removed and learning progress is archived (not deleted).
+- **Deleted or renamed pages**: Follow [source reconciliation](wiki-workflow.md#reconcile-source-changes-before-modifying-existing-notes). Preserve notes and progress while handling is pending; do not automatically delete or remap by tags.
 - **User-added files**: Any StudyVault file not tracked in the manifest is left untouched by sync.

@@ -15,9 +15,9 @@ Before reporting completion, verify every item in the relevant mode's section. F
 - [ ] Non-core topic policy documented in MOC
 
 ### Coverage
-- [ ] Every topic from Phase D2 checklist has a concept note
-- [ ] Every enumerated category member has its own note
-- [ ] No source topic missing or underrepresented
+- [ ] Every topic from Phase D2 checklist maps to appropriate note coverage; no topic silently omitted
+- [ ] Every enumerated category member and its meaningful differences are covered
+- [ ] Depth meets [Learning Depth and Practice](learning-quality.md), including mechanisms, prerequisites, exceptions and needed examples
 
 ### Tags
 - [ ] All tags: English kebab-case, from registry only
@@ -42,11 +42,11 @@ Before reporting completion, verify every item in the relevant mode's section. F
 - [ ] Every section links to concept note via `→ [[Note]]`
 
 ### Practice — Active Recall
-- [ ] Every topic folder has practice file (8+ questions)
+- [ ] Every topic folder has practice covering its important concepts, following shared default counts
 - [ ] All answers use `> [!answer]- 정답 보기` fold — never immediately visible
 - [ ] Key Patterns: `> [!hint]-` fold; Pattern Summary: `> [!summary]-` fold
 - [ ] `## Related Concepts` with backlinks in every practice file
-- [ ] Question type diversity: ≥60% recall, ≥20% application, ≥2 analysis per file
+- [ ] Practice meets [Learning Depth and Practice](learning-quality.md), including application and analysis
 
 ### Interlinking
 - [ ] Every concept note has `## Related Notes`
@@ -88,7 +88,7 @@ Before reporting completion, verify every item in the relevant mode's section. F
 - [ ] Getting Started section is actionable (copy-paste commands)
 
 ### Onboarding Exercises
-- [ ] Minimum 5 exercises per major module
+- [ ] Exercise coverage and counts follow [Learning Depth and Practice](learning-quality.md)
 - [ ] Exercise types: code reading (trace), configuration, debugging, extension
 - [ ] All answers use `> [!answer]- 정답 보기` fold callout
 - [ ] Exercises reference relevant module notes via `[[wiki-links]]`
@@ -124,7 +124,7 @@ Before reporting completion, verify every item in the relevant mode's section. F
 ### Diff Detection
 - [ ] NEW wiki pages (not in manifest) are detected and imported
 - [ ] CHANGED wiki pages (sha256 mismatch) are re-imported
-- [ ] DELETED wiki pages (manifest entry without wiki file) trigger removal from StudyVault
+- [ ] Missing/renamed/split sources reconciled with concrete mappings and authorized handling; unresolved notes, progress and manifest entries retained
 - [ ] Learning progress (`concepts/{area}.md`) is preserved across re-imports
 
 ### Concept Grouping
@@ -140,8 +140,8 @@ Before reporting completion, verify every item in the relevant mode's section. F
 - [ ] High-risk content (`contested: true`, `confidence: low`) flagged as Exam Trap candidates
 
 ### Practice Questions
-- [ ] Every concept note folder has a practice file (≥8 questions)
-- [ ] Question type mix: ≥60% recall, ≥20% application, ≥2% analysis
+- [ ] Every learning topic has practice covering its concept notes
+- [ ] Depth and question mix meet [Learning Depth and Practice](learning-quality.md), including application and analysis
 - [ ] All answers use `> [!answer]-` fold callout (zero-hint policy)
 - [ ] High-risk wiki content prioritized for analysis questions
 
@@ -153,6 +153,6 @@ Before reporting completion, verify every item in the relevant mode's section. F
 
 ### Incremental Sync
 - [ ] On re-sync: only NEW/CHANGED pages are processed (not full regeneration)
-- [ ] User-added StudyVault files (not in manifest) are untouched
-- [ ] Sync report lists: added N, updated N, removed N
+- [ ] User-added files and handwritten additions within tracked notes are preserved
+- [ ] Sync report lists completed additions, updates, moves/removals and pending actions
 - [ ] Manifest updated after sync completes
