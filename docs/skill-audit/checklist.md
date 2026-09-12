@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**31 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**32 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -707,7 +707,7 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
 ### utilities
 
-- [ ] **55. defuddle**（中優先）
+- [x] **55. defuddle**（中優先）
 
   **可以改哪裡：** 49行本體已精簡，主要問題是 description 把每個 URL 都鎖成 MUST instead of WebFetch，且只用 .md 字尾判例外。
 
@@ -716,6 +716,12 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
   **應保留：** --md、metadata 抽取和輸出格式這些真正工具差異。
 
   **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/utilities/skills/defuddle/SKILL.md:3)、[主檔:16](/Users/timlai/Developer/skills/plugins/utilities/skills/defuddle/SKILL.md:16)。
+
+  **已採用第 2、3、4 點並經使用者確認：** Markdown 依回應類型與本文辨識，不只看 .md 字尾，可用 WebFetch 或 curl 直接讀取。保留精簡主檔及 CLI 範例，未安裝時可用 npx，全域安裝留作重複使用選項。第 1 點未採用，原有一般網頁觸發與 WebFetch 優先序保留。skill 1.2.0、utilities plugin 1.2.0。
+
+  **第 4 點已查證並依使用者確認修改：** 官方 src/fetch.ts 拒絕非 HTML 回應，src/cli.ts 將本機檔案按 UTF-8 HTML 解析，不支援直接解析 PDF。Defuddle 0.19.2 本機 HTML 實測：--json 同時輸出 content（HTML）與 contentMarkdown，--json --md 則 content 為 Markdown，沒有 contentMarkdown 欄位。README 已改為 HTML 網頁，JSON 輸出表已區分參數組合，原先認為 --json 不會同時輸出兩種格式的建議不準確。來源：https://github.com/kepano/defuddle/blob/main/src/cli.ts 、https://github.com/kepano/defuddle/blob/main/src/fetch.ts 。
+
+  **驗證與交付：** quick_validate、YAML／JSON、description 與 git diff --check 通過，skill 數與 README 列數／總數均為 61。使用者已確認並要求提交、推送。
 
 - [ ] **56. folder-organizer**（中優先）
 

@@ -144,7 +144,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 
 | Skill | 適合什麼需求 |
 | --- | --- |
-| `defuddle` | 想從網頁或 PDF 提取乾淨的 markdown 內容，移除廣告與導航列。 |
+| `defuddle` | 想從 HTML 網頁提取乾淨的 Markdown 內容，移除廣告與導航列。 |
 | `folder-organizer` | 想整理檔案與資料夾結構，快速把專案內容分類成可上傳或分享的格式。 |
 | `windows-rescue-from-linux` | 想用 Linux Live USB 救援無法開機或受損的 Windows 電腦，修復 BCD/UEFI、NTFS、BitLocker、資料救援與密碼重設。 |
 
