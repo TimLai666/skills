@@ -76,7 +76,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | `sor-marketing-strategy` | 想用 S-O-R 模型把刺激、心理反應、行為回應整理成行銷策略。 |
 | `psychological-trigger-marketing` | 想產出更有轉換力的行銷角度、CTA、campaign hooks、促發點。 |
 | `maslow-five-needs-marketing` | 想用 Maslow needs 分層整理受眾動機、情緒訴求與訊息方向。 |
-| `content-growth-studio` | 想製作成長導向內容、標題、腳本、社群包裝，或設計內容生產與複製流程。 |
+| `content-growth-studio` | 依自然語意處理內容分析、主題發想、影片標題、文章與社群改編，或設計內容生產流程，配合受眾與通路改善觸及、閱讀及互動。 |
 | `threads-viral-growth` | 想在 Threads 平台產出高互動爆文、設計社群貼文策略、趨勢研究與發文劇本。 |
 | `experiential-guerrilla-marketing` | 想規劃體驗行銷與游擊行銷整合策略、快閃活動、低預算高創意行銷與 KPI 評估。 |
 

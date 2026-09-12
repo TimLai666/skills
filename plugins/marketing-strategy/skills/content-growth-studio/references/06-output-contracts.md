@@ -2,6 +2,8 @@
 
 ## Global Rule
 
+Deliver the requested result first. The complete templates below support full analyses, plans, and multi-part requests; select sections that serve the task rather than automatically returning every heading. For rewriting, default to the revised text and a brief explanation of material changes when useful. For production, default to the finished draft or script and necessary usage notes.
+
 If important inputs are missing but the user asked for a fast draft, start with:
 
 ```md
@@ -13,7 +15,7 @@ Only include this section when assumptions are actually being made.
 
 ## `analyze`
 
-Default output shape:
+Full output template:
 
 ```md
 ## Content Formula
@@ -27,7 +29,7 @@ Default output shape:
 
 ## `ideate`
 
-Default output shape:
+Full output template:
 
 ```md
 ## Positioning Line
@@ -44,7 +46,7 @@ Notes:
 
 ## `rewrite`
 
-Default output shape:
+Full output template:
 
 ```md
 ## Revision Strategy
@@ -62,7 +64,7 @@ Notes:
 
 ## `package`
 
-Default output shape:
+Full output template:
 
 ```md
 ## Title Set
@@ -80,7 +82,7 @@ Notes:
 
 ## `produce`
 
-Default output shape:
+Full output template:
 
 ```md
 ## Content Strategy
@@ -97,7 +99,7 @@ Notes:
 
 ## `system`
 
-Default output shape:
+Full output template:
 
 ```md
 ## Workflow

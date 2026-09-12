@@ -30,29 +30,12 @@ It should combine analysis, generation, packaging, and workflow design in one pl
 - pure quantitative review mining without a content output
 - fabrication of analytics, competitor data, or source facts
 
-## Entry Path Detection
+## Entry Paths
 
-Choose `source-led` if the user provides any of:
-
-- URLs
-- transcripts
-- article text
-- existing script
-- title plus outline
-- competitor examples
-- channel examples
-- review, support, or social evidence
-
-Choose `brief-led` if the user mostly provides:
-
-- topic or subject
-- audience
-- channel
-- goal
-- voice or brand direction
-- constraints
-
-If both are present, keep both and treat the source as calibration material for the brief.
+Use the entry-path rules in [SKILL.md](../SKILL.md#input-contract).
+The scenarios below illustrate mode selection; choose from the intended result,
+not merely the presence of a URL, draft, or keyword. Content-growth intent can be
+clear from the task without the user naming this skill or saying “growth”.
 
 ## Auto Mode Rules
 

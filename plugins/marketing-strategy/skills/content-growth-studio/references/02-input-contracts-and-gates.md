@@ -96,7 +96,7 @@ If the request is blocked by missing core inputs and the user did not ask for sp
 
 If the user asks for a fast draft:
 
-1. List `3-5` assumptions.
+1. State only necessary assumptions that materially affect the output, with no fixed count.
 2. Make assumptions observable and business-relevant.
 3. Continue with the requested output.
 
@@ -118,7 +118,7 @@ Do not assume:
 
 ## MissingDataOutput Shape
 
-Use this shape when the task cannot safely proceed:
+When structured output is requested, use this shape for blocking missing information. Otherwise ask concise questions in plain language:
 
 ```json
 {
