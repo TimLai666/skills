@@ -1,6 +1,13 @@
 ---
 name: plan-grilling
-description: "Grill a plan before anyone commits to it — a feature, a campaign, a proposal, a process change, a personal decision. Reframes the problem, challenges the scope, and locks decisions one at a time. This skill MUST be invoked on the triggers below, and SHOULD be invoked whenever the user thinks aloud about something they want to build, launch, or decide. MUST NOT be skipped because the plan already sounds settled — a plan that sounds settled is exactly where unexamined decisions hide. Triggers on: 幫我規劃, 規劃一下, 幫我想一下, 這個怎麼做, 逼問我, 壓力測試這個計畫, 幫我想這個功能, grill me, planning mode, 動手之前先想清楚"
+description: >-
+  This skill MUST be used to clarify or pressure-test a plan before committing
+  resources, including requests such as 幫我規劃、規劃一下、幫我想一下、這個怎麼做、
+  逼問我、壓力測試這個計畫、幫我想這個功能、grill me、planning mode、動手之前先想清楚.
+  It SHOULD also be used when the user thinks aloud about a feature, campaign,
+  proposal, process change, or personal decision with unresolved choices.
+  It MUST NOT reopen settled decisions or turn an already authorized execution
+  task into a new planning interview.
 allowed-tools:
   - Bash
   - Read
@@ -12,217 +19,84 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "2.2.1"
+  version: "2.3.0"
 ---
 
-## What this covers
+## Overview
 
-Any plan that someone is about to commit resources to. A feature, a marketing
-campaign, a proposal, a process change, a hiring decision, a personal call.
-The interview is the same in every case: find the real pain, reframe it,
-challenge the scope, and force every implicit decision into the open.
+Clarify the real problem, challenge assumptions and scope, and turn unresolved
+choices into a plan the user can act on. This applies to features, campaigns,
+proposals, process changes, hiring and personal decisions.
 
-Nothing here is specific to writing code. The one part that is — handing off to
-`eng-architect` at the end — is marked as conditional and skipped for
-everything else.
+## Input Contract
 
-## Core rules
+Identify the intended outcome, affected people, current approach, constraints,
+existing plan and decisions already made. Read available files, configuration,
+history and other relevant evidence before asking the user for facts.
 
-### Ask about decisions, look up facts
+Use the user's chosen document location or existing project convention.
+Otherwise use `docs/plans/<slug>-plan.md` within the current workspace, whether
+or not it uses Git. If there is no clear workspace, ask where to save the plan.
+Read an existing document before updating it and preserve unrelated content.
 
-If an answer can be found by reading the files, the config, the git history, or
-by running a command, go and find it. Do not spend the user's turn on something
-you could have looked up yourself.
+## Workflow
 
-The decisions are theirs. Put every one of those to them and wait.
+### 1. Understand the problem
 
-### One question at a time
+Before the interview, read [Interview guide](references/interview-guide.md).
+Check the pain, affected people and current workaround. Identify assumptions,
+contradictory evidence and consequences if the assumptions fail. Reframe the
+problem when that clarifies a meaningful difference, and confirm changes to
+the intended outcome before proceeding.
 
-Never batch multiple questions. Ask one question, wait for the answer, record it, then move to the next.
+### 2. Resolve scope and decisions
 
-### Multiple choice with recommendation
+Review all ten areas in the interview guide. Reuse established answers and
+ask only about unresolved choices that affect direction, scope, resources or
+acceptance. Keep relevant findings even when they require no question.
 
-Every question must be:
-1. A clear question in plain language
-2. 2-4 concrete options (A, B, C...)
-3. One option marked as **RECOMMENDED** with a one-line reason
-4. The agent's recommendation is based on the context gathered so far
+Ask one question at a time and wait for the answer. For a choice, give concrete
+options and mark a recommendation with a reason based on the evidence. Use a
+plain question when asking for an experience or missing context rather than
+inventing choices for it.
 
-### Record every decision immediately
+For build plans, check the guide's rules for verifiable scope items even when
+the scope is already settled. Clarify wording within the agreed scope yourself.
+Ask before a rewrite changes capabilities, dependencies, scope or acceptance
+criteria. Do not infer a new capability from a technical label alone.
 
-After each answer, append the decision to the plan document before asking the next question. Format:
+End the interview when the available information supports an executable plan
+with clear acceptance criteria and no consequential choice still requires the
+user's decision. Record remaining uncertainties as assumptions to validate.
+If the user asks to stop or consolidate now, deliver the current conclusions
+and unresolved items.
 
-```markdown
-## Decision: [question topic]
-- **Chose:** [selected option]
-- **Rejected:** [other options with one-line reason why]
-- **Timestamp:** [ISO-8601]
-```
+### 3. Consolidate the plan
 
-### Where the plan document goes
+Before writing or updating the plan, read [Plan and decision templates](references/plan-template.md).
+Record substantive decisions, reasons and consequential tradeoffs as they are
+settled. Consolidate repeated discussion into the current decision; preserve
+reasons for a superseded decision when they help explain the change.
 
-Wherever the user says. They may already have a home for this kind of document —
-a `planning/` folder, an existing docs tree, a vault outside the repo. If they
-name one, use it and do not talk them out of it.
+Separate confirmed decisions from assumptions and unresolved choices. Check
+that the final scope, success criteria and next step agree with the discussion.
 
-Only when they have not said anything, default to `docs/plans/` inside the repo.
-Resolve the directory once at the start and reuse it for the rest of the session.
+## Output Contract
 
-```bash
-_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-_BRANCH=$(git branch --show-current 2>/dev/null | tr '/' '-')
-[ -z "$_BRANCH" ] && _BRANCH="no-branch"
-if [ -n "$_ROOT" ]; then
-  mkdir -p "$_ROOT/docs/plans"
-  echo "PLAN: $_ROOT/docs/plans/$(date +%Y-%m-%d)-$_BRANCH-<slug>-plan.md"
-else
-  echo "PLAN: none"
-fi
-```
+Deliver the plan at its actual path, with the problem, scope, assumptions,
+success criteria, failure modes and decisions. Use the user's language and
+requested format. Include a reframe only when one was useful.
 
-The directory is negotiable, the filename is not. Keep the
-`<date>-<branch>-<slug>-plan.md` shape wherever the file lands — `eng-architect`
-locates the plan by globbing that shape, so a file named any other way is a file
-it will not find.
+For development plans, recommend `eng-architect` as the next step when it is
+available, and provide the actual plan path for it to read. Otherwise describe
+the next planning action in ordinary language. For other plans, identify the
+next action that advances the decision. A planning request does not itself
+authorize implementation.
 
-`PLAN: none` means this is not a git repo — a standalone campaign or a personal
-decision, for instance. Ask the user where the plan should go. Do not pick a
-location yourself and do not write outside their project.
+## Quality Rules
 
----
-
-## Phase 1 — Understand the pain
-
-Ask at most 3 of these, one at a time:
-
-1. **Pain sharpness** — 「你上次遇到這個問題是什麼時候？給我一個具體的例子，不要假設情境。」
-2. **Who suffers** — 「誰有這個問題？能不能說出具體的人，而不是一個類型？」
-3. **Current workaround** — 「他們現在怎麼做？為什麼不夠好？」
-
-After these answers, reframe:
-- State 2-3 things the user did not realize they were describing
-- State 1-2 assumptions that might be wrong and what breaks if they are
-- State 1 completely different frame for the problem
-
-Record the reframe. Get agreement before continuing.
-
----
-
-## Phase 2 — Scope challenge (CEO review)
-
-Ask the user to pick a scope mode — **this is the only batch question allowed**:
-
-> 我讀完你的想法了。在進入細節之前，我想先確認 scope。
->
-> **RECOMMENDED: C** — 你的描述聽起來 pain 是確認過的，先把核心功能做對最重要。
->
-> A) **擴大 scope** — 找出隱藏的 10 星版本，每個擴大都是一次獨立確認
-> B) **選擇性擴大** — 保持 baseline，但列出值得考慮的擴展
-> C) **hold scope** — 把現有 plan 做到滴水不漏，不加不減
-> D) **縮減 scope** — 砍到最小可學習版本
-
-Record the mode selection.
-
-Then go through these 10 sections **one at a time**, asking one question per section only when the answer is not already clear from context:
-
-| # | Section | What to check | Ask only if... |
-|---|---------|---------------|----------------|
-| 1 | Problem clarity | 痛點具體嗎？ | pain 還是模糊的 |
-| 2 | Who it's for | 是真的人嗎？ | 還沒有具體對象 |
-| 3 | Scope in | 每個項目都直接解決問題嗎？ | scope 需要調整 |
-| 4 | Scope out | 有「不做」清單嗎？ | 還沒有明確排除 |
-| 5 | Success metric | 兩週內能量嗎？ | 還沒定義成功 |
-| 6 | Assumptions | 最關鍵的假設是什麼？ | 有未驗證的高風險假設 |
-| 7 | 10-star version | 做到極致長什麼樣？ | user 想知道上限 |
-| 8 | Minimum version | 最小能學到東西的版本？ | scope 太大需要縮 |
-| 9 | Failure modes | 最可能殺掉這件事的是什麼？ | 還沒盤點風險 |
-| 10 | Recommendation | SHIP / REVISE / RECONSIDER | — (always ask) |
-
-For each section:
-- If the answer is already clear from context, skip silently and record `[already addressed]`
-- If not clear, ask one question with options and a recommendation
-- Record the decision immediately
-
-### Scope items name what someone can do
-
-This governs how sections 3 and 4 get written, and applies only when the plan is
-about building something — a feature, a product, a service. Campaigns, hiring
-calls and other non-build plans keep plain `- [item] - reason` entries.
-
-Every scope item must read as "<who> can <do what>". An item that cannot be said
-that way is not a scope item yet.
-
-- Rewrite anything whose subject is a module, a layer or a technology.
-  「做會員 API」is not a scope item;「訪客可以用 email 註冊並登入」is.
-- Test each item: once this is done, can anyone see or use the difference? If
-  not, it is not a feature.
-- Foundations do not disappear, they move. Shared scaffolding, auth, core tables
-  and mechanical refactors that fan across the codebase are not user functions.
-  Collect them into one item the others depend on, rather than slicing them into
-  one item per layer.
-- Layers still matter, but only inside a single item — schema first, then logic,
-  then screen. Never as the axis that splits the whole plan.
-
-The last two bullets travel together. Without the test, "the member module's
-backend" gets dressed up as a user function and the plan is layered again;
-without somewhere for foundations to go, they get crammed into whichever feature
-happens to touch them first.
-
-**This check is not skippable.** Sections 3 and 4 may be recorded as
-`[already addressed]` only when the items are already phrased as user functions.
-A scope list that arrives written by module or by layer reads as settled — that
-is exactly when it needs the rewrite, not when it earns a skip.
-
-**Rewrites are a question, not an edit.** Show the item as given and as
-rewritten, say which layer it was cut on, and ask which one to record. The scope
-is the user's call; silently rephrasing their words hides a decision instead of
-locking it. If they keep the technical phrasing, record it and record the reason
-— that is a decision too.
-
----
-
-## Phase 3 — Write plan document
-
-After all decisions are recorded, write the final plan document:
-
-```markdown
-# Plan: [what is being planned]
-_Created: [date] - plan-grilling - [repo]:[branch]_
-
-## Problem
-[2-3 sentences: the real pain, who has it, why now]
-
-## Reframe
-[What the user said vs. what they were actually describing]
-
-## Scope decisions
-### Chosen scope
-- [who] can [do what] - reason
-
-### Explicitly out
-- [item] - reason
-
-### Deferred
-- [item] - reason
-
-## Assumptions to validate
-- [assumption] - risk if wrong: [consequence]
-
-## Success metric
-[Measurable, 2-week horizon]
-
-## Failure modes
-- [risk] - mitigation: [what to do]
-
-## Decisions log
-[All recorded decisions from Phase 1-2]
-
-## Next step
-[One action, and only one.]
-```
-
-For development work, that next step is `eng-architect` — it reads this file to
-lock architecture and build the convergence artifacts. It ships in the
-`dev-workflow` plugin, so only name it once you have confirmed the user has that
-plugin installed. For everything else, write the single action that moves this
-plan forward.
+- Facts come from available evidence; unresolved preferences belong to the user.
+- Recommendations explain the tradeoff and the consequences of a wrong assumption.
+- Success criteria specify what will be observed and when, using the plan's real horizon.
+- A decision to proceed, revise or reconsider follows the findings. Ask for a choice
+  only when the next action requires an unresolved user decision.

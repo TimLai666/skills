@@ -42,7 +42,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | Skill | 適合什麼需求 |
 | --- | --- |
 | `ultrathink` | 釐清尚有疑點或取捨的問題，依需要選用方法，查證假設、比較方案與反例，再提出建議。六語分析與完整謬誤檢核依需要自動啟用，也可明確指定。 |
-| `plan-grilling` | 動手之前想被逼問一輪：功能、行銷檔期、提案、流程調整、個人抉擇都適用。釐清真正的痛點、挑戰 scope，一次問一題並附上建議選項，決策當場記進 `docs/plans/`。 |
+| `plan-grilling` | 釐清或壓力測試功能、行銷、提案、流程與個人計畫，先查事實，再逐題處理未決選擇，整理範圍、驗收條件與決策紀錄。 |
 | `subtraction-thinking` | 想在動手前、途中、完成後強制做一輪減法審查：商業決策、組織流程、產品、行銷、提案報告、程式開發都適用。移除沒有存在理由的東西，簡化留下來的東西。 |
 
 ### `business-strategy` — 商業策略與評估

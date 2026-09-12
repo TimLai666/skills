@@ -1,7 +1,7 @@
 {
   "name": "thinking-frameworks",
   "description": "通用思考框架：ultrathink 依問題選用分析方法，六語分析與完整謬誤檢核可依需要自動啟用或明確指定。另含 plan-grilling 與 subtraction-thinking。",
-  "version": "0.40.3",
+  "version": "0.41.0",
   "author": {
     "name": "TimLai666"
   }

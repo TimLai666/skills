@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**30 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**31 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -649,15 +649,15 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
 ### thinking-frameworks
 
-- [ ] **52. plan-grilling**（高優先）
+- [x] **52. plan-grilling**（高優先）
 
-  **可以改哪裡：** 一般規劃或已定案也強制壓問；所有決策逐題問且立即寫時間戳、拒絕選項，固定要求新 framing 與兩週指標。所有領域都綁 git branch 檔名，只為 eng-architect 找檔。
+  **已完成並經使用者確認：** 保留自然語意觸發、一次一題與推薦理由，先查事實，沿用已定案事項，處理影響方向、範圍、資源及驗收的未決選擇。完整十項審查保留，取消固定重構問題配額、兩週指標與每答必記時間戳。
 
-  **建議改法：** 聚焦使用者要求釐清/壓測未決計畫；已決方向不重開。只問影響範圍與資源的未決問題，記錄實質決策而非每句訪談；reframe、兩週驗收改依情境。主檔留訪談判斷，完整訪談表與模板移 reference；明確傳交計畫路徑，非工程規劃不受 Git 檔名約束。
+  **方法與交付：** 訪談指南及計畫／決策模板分檔，主檔明列閱讀時機。保留使用者可驗收的工作切分及共用基礎工作，純文字整理不重問，改變能力或範圍時確認。紀錄實質決策與重要取捨，計畫依工作區慣例命名，以實際路徑交接。規劃不自動授權實作。 補上停止條件：資訊足以形成可執行、可驗收的計畫，且沒有待使用者決定的重要事項時結束提問，其餘列待驗證假設；使用者要求停止或先整理時交付目前結論與未決事項。
 
-  **應保留：** 先查事實再問決策、真正痛點與範圍、假設反例、使用者可驗收的工作切分、只建議後續開發步驟而不逕自開發。
+  **版本與驗證：** skill 2.3.0、thinking-frameworks plugin 0.41.0，README 同步。quick_validate、YAML／JSON、兩個相對連結、Markdown 圍欄及 git diff --check 通過。skill 數與 README 表格／總數均為 61。走查已定案功能的文字整理、尚待取捨的行銷計畫、無 Git 工作區的個人計畫三種情境，核對是否需要提問、落檔位置與交接規則；未執行真人訪談。使用者已驗收並要求提交、推送。
 
-  **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/thinking-frameworks/skills/plan-grilling/SKILL.md:3)、[主檔:29](/Users/timlai/Developer/skills/plugins/thinking-frameworks/skills/plan-grilling/SKILL.md:29)、[主檔:51](/Users/timlai/Developer/skills/plugins/thinking-frameworks/skills/plan-grilling/SKILL.md:51)、[主檔:83](/Users/timlai/Developer/skills/plugins/thinking-frameworks/skills/plan-grilling/SKILL.md:83)、[主檔:94](/Users/timlai/Developer/skills/plugins/thinking-frameworks/skills/plan-grilling/SKILL.md:94)、[主檔:111](/Users/timlai/Developer/skills/plugins/thinking-frameworks/skills/plan-grilling/SKILL.md:111)、[主檔:146](/Users/timlai/Developer/skills/plugins/thinking-frameworks/skills/plan-grilling/SKILL.md:146)、[主檔:184](/Users/timlai/Developer/skills/plugins/thinking-frameworks/skills/plan-grilling/SKILL.md:184)、[主檔:224](/Users/timlai/Developer/skills/plugins/thinking-frameworks/skills/plan-grilling/SKILL.md:224)。
+  **目前位置：** [主檔](../../plugins/thinking-frameworks/skills/plan-grilling/SKILL.md)、[訪談指南](../../plugins/thinking-frameworks/skills/plan-grilling/references/interview-guide.md)、[模板](../../plugins/thinking-frameworks/skills/plan-grilling/references/plan-template.md)。
 
 - [ ] **53. subtraction-thinking**（高優先）
 
