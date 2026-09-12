@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**20 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**21 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -495,7 +495,9 @@
 
   **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/content-growth-studio/SKILL.md:3)、[主檔:24](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/content-growth-studio/SKILL.md:24)、[主檔:47](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/content-growth-studio/SKILL.md:47)、[主檔:76](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/content-growth-studio/SKILL.md:76)、[主檔:115](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/content-growth-studio/SKILL.md:115)。
 
-- [ ] **42. experiential-guerrilla-marketing**（高優先）
+- [x] **42. experiential-guerrilla-marketing**（高優先）
+
+  **已完成：** 主檔整合為目標、場域、體驗、執行與衡量流程，四份參考文件保留框架、戰術、案例與模板並標明讀取時機。取消模組數量、完整 5E 與四層指標的硬性要求。成效採小幅修正：Canon 調查數字補來源保留，其餘未核實倍數移除，案例做法保留；依使用者修正，埋伏行銷聚焦手法與應用，移除專門法律限制，不加入道德評判。
 
   **可以改哪裡：** 行銷 KPI 等泛詞強制觸發；主檔大量理論教材、案例、年度趨勢/倍數主張，缺直接可核對來源；每活動強制多模組/完整5E；搭配八個技能表容易擴展工作。
 

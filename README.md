@@ -78,7 +78,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | `maslow-five-needs-marketing` | 想用 Maslow needs 分層整理受眾動機、情緒訴求與訊息方向。 |
 | `content-growth-studio` | 依自然語意處理內容分析、主題發想、影片標題、文章與社群改編，或設計內容生產流程，配合受眾與通路改善觸及、閱讀及互動。 |
 | `threads-viral-growth` | 想在 Threads 平台產出高互動爆文、設計社群貼文策略、趨勢研究與發文劇本。 |
-| `experiential-guerrilla-marketing` | 想規劃體驗行銷與游擊行銷整合策略、快閃活動、低預算高創意行銷與 KPI 評估。 |
+| `experiential-guerrilla-marketing` | 想規劃快閃、品牌體驗與游擊活動，設計受眾參與方式、現場執行安排，並依活動目標評估成效。 |
 
 ### `service-innovation` — 服務設計與創新
 
