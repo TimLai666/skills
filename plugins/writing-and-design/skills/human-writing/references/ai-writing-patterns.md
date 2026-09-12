@@ -95,6 +95,10 @@ Use this checklist after drafting or rewriting.
   - Examples:「很多人以為……但其實……」「傳統做法的問題在於……而我們……」, sections that first build a wrong view just to knock it down.
   - Fix: state the point directly and support it. Keep one correction only when the reader actually holds the misconception; never invent one, and never use the move as the skeleton of every section.
 
+- Revision leftovers disguised as prohibitions
+  - Watch for “use B, not A” after A has disappeared from the document and has no bearing on the reader's task.
+  - Fix: keep the current action and conditions. Apply rule 8A in [human-writing-principles.md](./human-writing-principles.md) to distinguish useful guidance from editing history.
+
 - Slogan rhythm from stacked fragments
   - Examples:「看見問題、快速判斷、即時處理、完整追蹤」— short fragments piled up with 頓號 for cadence. The same rhythm shows up in summaries and reports as strung negations:「不編造、不演、不平均分配」.
   - Fix: unless the items genuinely need enumerating, write full sentences that state how they relate:「不編造、不演、不平均分配」→「不編造個人經歷，不演出自發性，也不把情緒平均鋪在每一句」. Example 28 in [human-writing-examples.md](./human-writing-examples.md) rewrites the first example in full.

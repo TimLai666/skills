@@ -66,6 +66,12 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 - If a sentence only defends against an imagined criticism and removing it does not weaken the point, remove it.
 - The same reflex appears as a limitation or disclaimer appended to every claim. In genres whose job is to persuade — a proposal, a pitch — stressing limitations no one asked about defends the writer instead of informing the reader. Put risks where the genre expects them, once, in their own section, not on the tail of every sentence.
 
+### 8A. Write the current document for its current reader
+
+- When revising rules or documents, state the adopted approach and its conditions. If A has been replaced by B, and A is absent from the current document and irrelevant to the reader's task, write B on its own.
+- Keep a contrast or prohibition when the reader needs it to distinguish live alternatives, avoid a likely consequential mistake, or follow a migration. Revision history belongs in a requested change log or comparison.
+- Review each negative qualification against the finished document: does it help the reader act, or merely echo an editing discussion, rejected approach, or the writer's self-defense? Remove the latter. See example 16A in [human-writing-examples.md](./human-writing-examples.md).
+
 ### 9. Avoid unexplained niche vocabulary
 
 - Prefer common words over niche terms, jargon, project shorthand, and author-created labels.
