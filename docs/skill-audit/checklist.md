@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**43 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**44 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -155,7 +155,11 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **原文位置：** [主檔:20](/Users/timlai/Developer/skills/plugins/customer-insight/skills/customer-journey-mapper/SKILL.md:20)、[主檔:86](/Users/timlai/Developer/skills/plugins/customer-insight/skills/customer-journey-mapper/SKILL.md:86)、[主檔:124](/Users/timlai/Developer/skills/plugins/customer-insight/skills/customer-journey-mapper/SKILL.md:124)、[主檔:171](/Users/timlai/Developer/skills/plugins/customer-insight/skills/customer-journey-mapper/SKILL.md:171)、[主檔:194](/Users/timlai/Developer/skills/plugins/customer-insight/skills/customer-journey-mapper/SKILL.md:194)、[主檔:205](/Users/timlai/Developer/skills/plugins/customer-insight/skills/customer-journey-mapper/SKILL.md:205)、[主檔:267](/Users/timlai/Developer/skills/plugins/customer-insight/skills/customer-journey-mapper/SKILL.md:267)。
 
-- [ ] **08. customer-persona-framer**（中優先）
+- [x] **08. customer-persona-framer**（中優先）
+
+  **完成修改：** 依使用者修正，以建立 persona 為主體，旅程前置只在明確要求時啟用。人物誌保留需求、痛點、期望、行為、決策因素與限制，Persona 卡與 persona_block 合併，原有可重用欄位名稱保留。主檔區分研究資料、分析推論與草稿假設，取消固定假設數量。「直接整理」不視為補造內容的授權。選用旅程方法移至 references/journey-framing.md，保留 5W1H、五元素、階段及交接，補入已採用階段。skill 1.2.0、customer-insight plugin 1.6.0，README 與介面描述已同步。使用者已驗收並要求提交、推送。
+
+  **驗證：** quick_validate、YAML／JSON、description、相對連結、圍欄、原有六個人物誌欄位、七個交接欄位、59 個 skill／README 數量與 git diff --check 通過。獨立文件推演涵蓋訪談無產品、只要 persona 卻提情緒或旅程、直接整理缺資料、允許草稿、局部修改、明確旅程前置及缺產品的交接。沒有發現實質衝突，尚未量測模型效果。以下是初次審查紀錄，旅程前置導向的舊建議已由上述 persona 主體方向取代。
 
   **可以改哪裡：** persona-only 本身簡潔；journey-framing 固定 Persona、5W1H、五元素、階段及 handoff 多次重述同一資料；快速版固定三至五假設容易湊數。
 

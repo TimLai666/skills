@@ -60,7 +60,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | Skill | 適合什麼需求 |
 | --- | --- |
 | `orchestrating-mixed-methods` | 不確定研究該做質化、量化、還是 mixed methods，想先決定方法。 |
-| `customer-persona-framer` | 想先把目標客群整理成清楚的 persona。 |
+| `customer-persona-framer` | 建立或檢查人物誌，整理顧客需求、痛點、行為、決策因素與限制，明確要求時才加入旅程前置分析。 |
 | `customer-journey-mapper` | 依顧客輪廓與服務情境製作或更新旅程地圖，也可加入情緒分數、原因與曲線。 |
 | `review-mining-stp` | 想把評論、客服紀錄、回饋文字整理成 STP 分析。 |
 | `theory-analysis` | 想用產品定位、購買動機、口碑動機三套理論分析跨來源證據（訪談摘要、工單、貼文、研究筆記、觀察紀錄），逐句標註構面並保留可追溯引文。可同時套用多個理論。 |
