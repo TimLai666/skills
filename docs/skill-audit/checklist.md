@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**39 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**40 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -95,7 +95,11 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/business-strategy/skills/decision-bias-quality-control/SKILL.md:3)、[主檔:22](/Users/timlai/Developer/skills/plugins/business-strategy/skills/decision-bias-quality-control/SKILL.md:22)、[主檔:76](/Users/timlai/Developer/skills/plugins/business-strategy/skills/decision-bias-quality-control/SKILL.md:76)、[主檔:95](/Users/timlai/Developer/skills/plugins/business-strategy/skills/decision-bias-quality-control/SKILL.md:95)、[主檔:107](/Users/timlai/Developer/skills/plugins/business-strategy/skills/decision-bias-quality-control/SKILL.md:107)、[主檔:124](/Users/timlai/Developer/skills/plugins/business-strategy/skills/decision-bias-quality-control/SKILL.md:124)。
 
-- [ ] **04. pestel-analysis**（高優先）
+- [x] **04. pestel-analysis**（高優先）
+
+  **完成修改：** 完整分析為預設，明確限定需求時局部交付。精簡觸發與輸入確認，六面向依證據掃描，題庫與假設示例移至參考文件並指定讀取時機。保留三項評分與乘積，釐清數值及時間邊界、比較基準、未知範圍與時間視窗優先順序。統一因素記錄與 SWOT 輸入包，區分經濟及環境編號。skill 1.2.0、business-strategy plugin 1.6.0。使用者已驗收並要求提交、推送。
+
+  **驗證：** quick_validate、YAML／JSON、引用、圍欄、description、60 個 skill／README 數量及 git diff --check 通過。計算檢查涵蓋 75 組評分、7 個影響程度邊界、5 個時效邊界及示例範圍。文件審查修正局部交付與時間視窗的規則衝突，未做模型行為實測。
 
   **可以改哪裡：** description 混入執行評分；六面向教科書問句和案例常駐；每面向硬找三至五候選；SWOT 輸入包與末尾移交包重複且即使只要 PESTEL 也產出。
 
