@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**42 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**43 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -141,7 +141,11 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
 ### customer-insight
 
-- [ ] **07. customer-journey-mapper**（高優先）
+- [x] **07. customer-journey-mapper**（高優先）
+
+  **完成修改：** 主檔集中輸入判斷、八列順序與交付，保留預設五階段、自訂階段及使用者覆寫優先。足以辨識客群與服務情境即可製表，缺口及草稿假設依實際需要處理。情緒評分與呈現各移至按需參考文件，修正五列範例為 2、3、4.5、4.5、4 分。區分推估與研究資料，最大情緒改善不直接判為 Aha Moment。曲線依實際欄寬與階段數定位，產圖與嵌入保持比例，純 Markdown 依格式能力呈現。skill 1.2.0、customer-insight plugin 1.5.0，README 與介面描述已同步。使用者已驗收並要求提交、推送。
+
+  **驗證：** quick_validate、YAML／JSON、description、相對連結、圍欄、59 個 skill／README 數量及 git diff --check 通過。由範例表重算五列分數，六種相鄰差值情境通過。依呈現規格產出並檢視單階段、四／五／六階段、不等寬及缺值共六種 PNG，尺寸與欄中心座標檢查通過。獨立文件推演涵蓋客群文字、handoff、階段覆寫、快速草稿、局部更新及各種分數狀態。尚未驗證 Word 嵌入、網頁互動或模型效果。測試腳本、圖片與隔離 Python 環境位於 /private/tmp/cjm-verify.WE2Z1C，沒有加入 repo。以下保留初次審查紀錄，採用範圍以上述修改為準。
 
   **可以改哪裡：** 可選情緒模組連 matplotlib/Chart.js 與固定五欄尺寸都常駐，與自訂階段政策衝突；主檔三處重述表格行序；缺完整 persona 強制轉交，和快速草稿條款界線不清；範例情緒加減分多筆與公式不符。
 

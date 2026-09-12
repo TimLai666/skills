@@ -1,293 +1,84 @@
 ---
 name: customer-journey-mapper
 description: >-
-  This skill MUST be used when the final customer journey map, CJM, or
-  touchpoint-based journey table must be produced from a completed persona,
-  product or service, or a `handoff_to_customer_journey_mapper` block,
-  especially when the user asks for 顧客旅程地圖, CJM, final journey table, or wants
-  prior persona/framing work turned into the finished map. SHOULD also be used
-  when the user asks for 情緒分數, 情緒曲線, 加減分原因, sparkline, or wants emotion
-  scoring added to an existing CJM.
+  This skill MUST be used to create or update a customer journey map,
+  CJM、顧客旅程地圖、接觸點旅程表, from a customer profile and product or service,
+  including a handoff_to_customer_journey_mapper block. It SHOULD also be used
+  to add 情緒分數、情緒曲線、加減分原因 or a sparkline to a CJM.
+  It MUST NOT be used for persona-only work, journey-preparation briefs,
+  KPI-only dashboards, or backstage service blueprints.
 metadata:
-  version: "1.1.1"
+  version: "1.2.0"
 ---
 
 # Customer Journey Mapper
 
 ## Overview
 
-Create the final customer journey map in Traditional Chinese from the customer's point of view.
-This skill is downstream of persona definition and journey-framing work.
-If no completed persona is available yet, stop and use `customer-persona-framer` first.
-
-Default output is one Markdown table in transposed vertical form:
-`項目 | 認知 | 考慮/研究 | 決策/購買 | 使用 | 關係建立`
-
-The row order is fixed:
-
-1. `動機`
-2. `行動`
-3. `情緒`
-4. `（服務）接觸點`
-5. `感受/關鍵時刻`
-6. `科技服務`
-7. `行銷方法`
-8. `目標`
-
-`動機` must always appear before `行動`.
-
-## When To Use
-
-Use this skill when:
-
-- the user wants the finished customer journey map or CJM table itself
-- the task already has a clear persona and a product or service
-- the task includes a `handoff_to_customer_journey_mapper` block from upstream framing work
-- the user wants stages, touchpoints, emotions, key moments, marketing methods, or service ideas arranged into one final journey table
-- the output should be practical for proposals, workshops, internal strategy, or coursework
-- the user asks for emotion scores, 情緒分數, 情緒曲線, sparkline, or 加減分原因 on any CJM
-
-Do not use this skill when:
-
-- the task is only a persona profile, 人物誌, 顧客輪廓, or target audience definition with no final journey map
-- the task is only 5W1H, touchpoint discovery, or journey pre-analysis; use `customer-persona-framer`
-- no completed persona is provided yet; use `customer-persona-framer` first, then return with the persona or `handoff_to_customer_journey_mapper`
-- the task is only a funnel KPI dashboard with no customer narrative
-- the user wants a service blueprint with backstage operations; this skill is customer-facing only
+從顧客視角製作繁體中文顧客旅程地圖。預設交付一個核心客群的完整旅程表，階段為欄、項目為列。只要求修改既有旅程或加入情緒分數時，沿用其他適用內容。
 
 ## Input Contract
 
-Required:
+必要資訊為 `顧客輪廓` 與 `產品或服務`。顧客輪廓須足以辨識目標客群、核心需求及購買或使用情境，可來自文字描述、persona 或既有旅程。
 
-- `顧客輪廓`
-- `產品或服務`
+選用資訊包括品牌與產業背景、目標市場、目前接觸點、輸出用途、自訂階段、輸出格式、情緒分數模式，以及 `handoff_to_customer_journey_mapper`。
 
-Optional:
-
-- `品牌/產業背景`
-- `目標市場`
-- `目前接觸點`
-- `輸出用途`
-- `handoff_to_customer_journey_mapper`
-- `情緒分數模式` — whether to include emotion scores (see Emotion Score Module below)
-
-If `handoff_to_customer_journey_mapper` is present:
-
-- treat the block as authoritative input
-- do not re-ask fields that are already present
-- let explicit user overrides outside the block win over the handoff block
-
-Default assumptions:
-
-- produce one core persona journey, not multiple persona versions
-- if the user provides custom stages, use them
-- otherwise use the fixed five stages in this skill
+有 handoff 時沿用其中資料，使用者在區塊外的明確修正優先。也讀取同次交付中的階段定義與相關上下文，避免只拿交接區塊而漏掉已確認的階段。已提供的資訊不重問。
 
 ## Data Sufficiency Gate
 
-If both required inputs are clear enough, generate the table directly.
-If no completed persona is available, do not draft the final map yet.
-Route the work to `customer-persona-framer` first.
+資訊足以辨識客群與服務情境時製表。無法界定客群時，用 customer-persona-framer 補足必要輪廓後接續製表。產品或情境的重要缺口則針對缺項追問。
 
-If a `handoff_to_customer_journey_mapper` block contains at least `顧客輪廓` and `產品或服務`, generate directly from the handoff.
-
-If information is missing and the user did not ask for speed:
-
-- ask concise follow-up questions first
-- do not generate the final map yet
-
-If information is missing and the user asks for a quick draft, for example:
-
-- `先做一版`
-- `快速版`
-- `可先假設`
-- `直接幫我生成`
-
-Then:
-
-1. list `3-5` assumptions first
-2. generate the full table after the assumptions
-3. keep the assumptions concrete and business-relevant
-
-## Stage Policy
-
-Default stages:
-
-- `認知`
-- `考慮/研究`
-- `決策/購買`
-- `使用`
-- `關係建立`
-
-If the user explicitly defines different stages, respect the user-defined stages and preserve the same row order.
-
-## Emotion Score Module
-
-Activate this module when the user asks for any of: `情緒分數`, `情緒曲線`, `sparkline`, `加減分原因`, `1-5分`, or requests that the emotion row include scores.
-
-### Scoring rules
-
-- Scale: **1–5**, baseline = **3** (neutral, no strong feeling either way)
-- Score each stage independently based on what the customer would realistically feel at that point
-- Score = baseline (3) + sum of all plus factors − sum of all minus factors
-- Clamp final score to [1, 5]
-
-### Plus factors (raise score above 3)
-
-- Peer recommendation or social proof encountered
-- Trial / demo that delivers immediate, visible value
-- Friction removed (time saved, format correct on first try)
-- Unexpected delight (feature solves a pain not explicitly mentioned)
-- Long-term trust formed (data continuity, smooth handover, loyalty reward)
-
-### Minus factors (lower score below 3)
-
-- Existing negative stereotype about the product category
-- Unfamiliarity (never heard of this before)
-- Unresolved cost/value doubt
-- Fear of making a mistake (wrong format, data loss, learning curve)
-- Residual friction after use (manual corrections needed, partial failure)
-
-### Output for emotion scores
-
-Always produce **two separate outputs**:
-
-**1. Emotion curve row (inside the CJM table)**
-
-Split the `情緒` row into two sub-rows:
-
-- Sub-row A label: `情緒曲線` — contains a sparkline. Each data point must be positioned at the horizontal center of its stage column.
-- Sub-row B label: *(empty)* — contains the per-stage emotion text (real state or state change in customer voice), one cell per stage, background color matching the stage column color.
-
-**2. Emotion score detail table (below the CJM)**
-
-A separate table with columns: `階段 | 情緒分數 | 加分原因 | 減分原因`
-
-- `情緒分數`: bold, center-aligned, e.g. `2 分`
-- `加分原因`: each factor on its own line, prefixed with `＋`, green text
-- `減分原因`: each factor on its own line, prefixed with `－`, red text
-- If a stage has no plus or minus factors, write `（無）`
-
-### Sparkline in Word documents (.docx)
-
-When the output format is `.docx` and the emotion score module is active:
-
-1. Generate a matplotlib PNG:
-   - `figsize = (390/72, 90/72)` — maps to exactly 390 pt wide (5 stage cols × 78 pt each)
-   - `xlim = [0, 5]` — each stage column occupies exactly 1 unit
-   - Data points at `x = [0.5, 1.5, 2.5, 3.5, 4.5]` — centers of each column
-   - Vertical dotted dividers at `x = 1, 2, 3, 4` — align with column borders
-   - Dashed baseline at `y = 3`
-   - Fill area between curve and baseline: blue (`#378ADD`, alpha 0.20) above; red (`#E24B4A`, alpha 0.20) below
-   - Point colors: red (`#E24B4A`) if score < 3, amber (`#BA7517`) if score < 4, green (`#3B6D11`) if score ≥ 4
-   - Score labels above each point, bold, matching point color
-   - `subplots_adjust(left=0, right=1, top=1, bottom=0)` — zero padding so image edges align with column edges
-   - Background `#F0F7FF`, no axes, no tick marks, no spines
-   - Save at `dpi=150`, `bbox_inches='tight'`, `pad_inches=0`
-
-2. Embed in the CJM table:
-   - Sparkline cell spans all 5 stage columns (`columnSpan: 5`)
-   - Cell margins: `top=0, bottom=0, left=0, right=0` — no padding so image fills exactly to column boundaries
-   - `ImageRun transformation: { width: 390, height: 76 }` — exact pt dimensions
-   - Text sub-row below: empty label cell + 5 individual cells with emotion text per stage
-
-### Sparkline in chat (Markdown / widget)
-
-Render the sparkline using Chart.js with a line chart:
-
-- Labels: the five stage names
-- Scores dataset: computed scores, `tension: 0.35`, `fill: true`
-- Point colors: red if < 3, amber if < 4, green if ≥ 4
-- Second dataset: baseline `[3,3,3,3,3]`, dashed, no points
-- Disable default legend; build custom HTML legend above the chart
-- Show the detail table below the chart as a styled HTML or card layout
-
-## Output Contract
-
-Always answer in Traditional Chinese.
-
-Preferred format:
-
-- one Markdown table
-- transposed vertical layout
-- stages as column headers
-- fixed row order as below
-
-```md
-| 項目 | 認知 | 考慮/研究 | 決策/購買 | 使用 | 關係建立 |
-|---|---|---|---|---|---|
-| 動機 |  |  |  |  |  |
-| 行動 |  |  |  |  |  |
-| 情緒 |  |  |  |  |  |
-| （服務）接觸點 |  |  |  |  |  |
-| 感受/關鍵時刻 |  |  |  |  |  |
-| 科技服務 |  |  |  |  |  |
-| 行銷方法 |  |  |  |  |  |
-| 目標 |  |  |  |  |  |
-```
-
-When the emotion score module is active, replace the single `情緒` row with:
-
-```md
-| 情緒曲線 | [sparkline / score sequence] | [→] | [→] | [→] | [→] |
-| (空白)   | [emotion text]              | ... | ... | ... | ... |
-```
-
-And append the emotion score detail table after the CJM.
+使用者要求先做一版、快速草稿或允許假設時，依現有線索列出必要假設，再製作草稿，假設數量依缺口決定。假設與已確認資料分開標示，不補造人口背景、服務承諾或研究結果。連分析對象都無法合理界定時，先確認該資訊。
 
 ## Workflow
 
-1. Read the direct inputs and any `handoff_to_customer_journey_mapper` block.
-2. Normalize the effective inputs, using explicit user overrides over handoff values.
-3. Check if emotion score module should be activated.
-4. Read the persona and the product or service.
-5. Infer or confirm the purchase and use context.
-6. Build the journey from the customer's point of view, not the brand's point of view.
-7. Fill the five stages in order unless the user supplied different stages.
-8. Write `動機` before `行動` in every stage.
-9. If emotion score module is active: score each stage, compute plus/minus factors, prepare sparkline.
-10. Make `科技服務`, `行銷方法`, and `目標` logically connected.
-11. Do a final check for format, language, and customer viewpoint.
+### 1. 確認階段與範圍
+
+沿用使用者指定的階段名稱及順序，其次採用已確認的上游階段，否則採 Output Contract 的預設五階段。局部修改保留既有階段與內容，只修正受影響部分。
+
+### 2. 建立旅程內容
+
+依下方欄位順序，從顧客為何開始、實際做什麼、接觸什麼服務，到感受如何改變，建立一致的旅程。
+
+| 列名 | 要呈現的內容 |
+| --- | --- |
+| 動機 | 顧客在該階段想解決的需要或顧慮 |
+| 行動 | 顧客實際採取的具體行動 |
+| 情緒 | 顧客當下的感受或變化，以顧客語氣呈現 |
+| （服務）接觸點 | 顧客接觸的管道、介面、人員或服務 |
+| 感受/關鍵時刻 | 讓顧客改變判斷或下一步行動的事件 |
+| 科技服務 | 支援該接觸點、減少困難或滿足需求的具體服務 |
+| 行銷方法 | 符合該階段與接觸點的溝通或推廣方式 |
+| 目標 | 該服務或行銷行動希望達成的結果 |
+
+區分已存在的服務與改善建議。每項科技服務及行銷方法須能對應顧客需要與目標，無適用項目時說明原因。
+
+### 3. 依需求加入情緒分數
+
+使用者要求 CJM 的情緒分數、情緒曲線、sparkline、加減分原因或 1–5 分評分時，閱讀 [情緒評分與示例](references/emotion-scoring.md)，逐階段計算分數與原因。一般旅程保留文字情緒列即可。
+
+需要產圖或指定 Word／網頁呈現時，再讀 [情緒曲線呈現](references/emotion-rendering.md) 的共同規格及對應格式段落。格式限制會妨礙指定呈現時，說明限制與可行方式，不宣稱已完成無法呈現的效果。
+
+### 4. 核對內容與交付
+
+核對階段、列序、顧客觀點、事實與假設，以及行動和接觸點是否一致。啟用分數時重算各階段及相鄰差值，確認圖、表、原因使用同一組資料。產圖或產檔後實際檢視渲染結果。
+
+## Output Contract
+
+預設一張 Markdown 表，依 Workflow 的八列順序填寫，動機在行動之前。預設欄位為：
+
+`項目 | 認知 | 考慮/研究 | 決策/購買 | 使用 | 關係建立`
+
+自訂階段取代預設欄位，保留列序。使用者指定 Word 或可呈現圖表的網頁時沿用同一表格結構。
+
+啟用情緒分數時，將情緒列替換為 `情緒曲線` 及下一列的逐階段情緒文字，第二列的項目格留白。依格式呈現曲線或逐欄分數，旅程表後附 `階段 | 情緒分數 | 加分原因 | 減分原因` 明細，規則見情緒評分參考文件。
 
 ## Quality Rules
 
-- use customer voice and customer logic
-- avoid brand slogans or empty marketing claims
-- make each cell specific enough to act on
-- let `情緒` show a real state or state change
-- let `感受/關鍵時刻` describe the moment that changes momentum
-- make `科技服務` an enabler, not a vague buzzword
-- make `行銷方法` match the stage and touchpoint
-- make `目標` describe what the service or marketing action is trying to achieve
-- do not fall back to a horizontal table where each stage is a row
-- if the input is persona-only or framing-only, do not force a final table; route the work to `customer-persona-framer`
-- emotion scores must reflect real customer psychology, not brand optimism — scores below 3 are valid and expected in early stages for unfamiliar products
-- the largest single-stage score jump in the journey is the Aha Moment; call it out explicitly in the detail table notes or design insights section
-
-## Short Example
-
-Input:
-
-- `顧客輪廓`: 忙碌上班族，重視健康但沒時間準備午餐
-- `產品或服務`: 健康便當訂閱服務
-
-Output shape (without emotion scores):
-
-```md
-| 項目 | 認知 | 考慮/研究 | 決策/購買 | 使用 | 關係建立 |
-|---|---|---|---|---|---|
-| 動機 | 想找省時又健康的午餐方案 | 想確認價格與口味是否值得 | 想低風險試用避免踩雷 | 想驗證是否真的方便好吃 | 想找到可長期依賴的午餐解法 |
-| 行動 | 搜尋健康便當資訊 | 比較方案與評價 | 下單試吃 | 收餐並食用 | 回購與推薦 |
-```
-
-Emotion score example (same persona, scores + factors):
-
-| 階段 | 情緒分數 | 加分原因 | 減分原因 |
-|---|---|---|---|
-| 認知 | 2.5 分 | （無） | －0.5 不確定訂閱是否划算；－0.5 擔心口味踩雷 |
-| 考慮/研究 | 2.5 分 | ＋0.5 朋友有在訂、評價不錯 | －0.5 試吃門檻高，怕浪費錢 |
-| 決策/購買 | 4 分 | ＋1 首週折扣降低試錯成本；＋0.5 退訂容易降低風險感 | （無） |
-| 使用 | 4.5 分 | ＋1 餐點準時到、份量足；＋0.5 減少外食煩惱 | （無） |
-| 關係建立 | 5 分 | ＋0.5 每週菜單有變化不膩；＋0.5 推薦給同事獲得認同感 | （無） |
-
-← 最大跳升：考慮/研究 → 決策/購買（+1.5 分），Aha Moment = 首週折扣消除試錯顧慮
+- 顧客的動機、行動與感受具體一致，品牌的服務建議有清楚標示。
+- 已確認階段與使用者修正有被採用，沒有重問交接資料。
+- 草稿假設、分析推估及研究資料可區分，沒有將假設當成真實顧客行為。
+- 分數有可重算的原因，曲線點位對齊實際階段，顏色與文字不互相矛盾。
+- 關鍵時刻由行為與情境支持，沒有僅憑分數跳升推定顧客體認產品價值。
+- 一般表格、局部更新與情緒模組依需求交付，沒有重複產出同一份內容。

@@ -1,4 +1,4 @@
 interface:
   display_name: "顧客旅程地圖"
-  short_description: "把已完成 persona 或 handoff 轉成最終顧客旅程地圖表格"
+  short_description: "依清楚的顧客輪廓與服務情境製作旅程地圖，也可加入情緒分數與曲線"
   default_prompt: "Use $customer-journey-mapper to turn 顧客輪廓 and 產品或服務, or a handoff_to_customer_journey_mapper block, into a Traditional Chinese customer journey map."
