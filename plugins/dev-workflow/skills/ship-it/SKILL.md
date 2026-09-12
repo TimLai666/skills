@@ -9,7 +9,7 @@ allowed-tools:
   - Grep
   - AskUserQuestion
 metadata:
-  version: "1.4.1"
+  version: "1.4.2"
 ---
 
 ## Step 1 — Confirm scope and project rules
@@ -23,6 +23,8 @@ for `delivery-status.md`; support `delivery-plan.md` in older projects. Read the
 current phase, expected output and acceptance requirements, not just the first
 few lines. If the diff conflicts with the agreed scope, resolve that decision
 with the user before shipping. Do not create a status file just for this check.
+
+If `delivery-plan.md` exists, follow the [legacy status migration rules](../eng-architect/references/legacy-status-migration.md) to check the saved decision, ask when unresolved, and record the user's choice before changing the status arrangement.
 
 Inspect working-tree changes and outgoing commits. Include only the intended
 work. Proceed with already authorized commits without asking again; do not
