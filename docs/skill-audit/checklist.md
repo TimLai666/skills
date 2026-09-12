@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**29 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**30 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -635,15 +635,17 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **目前位置：** [主檔](../../plugins/service-innovation/skills/service-innovation-case-study/SKILL.md)、[研究流程](../../plugins/service-innovation/skills/service-innovation-case-study/references/01-research-protocol.md)、[分析鏈](../../plugins/service-innovation/skills/service-innovation-case-study/references/02-analysis-chain.md)、[區段規格](../../plugins/service-innovation/skills/service-innovation-case-study/references/03-section-specs.md)、[品質清單](../../plugins/service-innovation/skills/service-innovation-case-study/references/04-quality-checklist.md)、[模板](../../plugins/service-innovation/skills/service-innovation-case-study/assets/report-template.md)。
 
-- [ ] **51. service-innovation-workshop**（中優先）
+- [x] **51. service-innovation-workshop**（中優先）
 
-  **可以改哪裡：** SCAMPER、價值共創等泛詞重複觸發，固定 3–5 假設、至少三方向、六段輸出。
+  **已完成並經使用者確認：** 保留自然語意觸發，支援完整工作坊、局部發想、概念比較與既有方向驗證。取消兩項輸入、3–5 假設與至少三方案的配額，保留實質比較。SCAMPER 七維度逐一檢視，不強迫每維產生一案。
 
-  **建議改法：** 聚焦從機會到概念驗證的工作坊；不搶單方法任務。方向數依實質選項，已選方向就補原型與測試；六段留模板，references 依機會、方法、格式選讀。
+  **流程與交付：** 主檔依階段標明三份參考文件的閱讀時機，完整六段集中於既有模板，局部需求按範圍交付。測試補上觀察方式、比較對象及繼續／修正／停止的判斷依據。分類、機會來源、方法、風險清單與成功訊號例子保留。
 
-  **應保留：** 概念比較、顧客需求、組織能力、原型成功訊號。
+  **版本與設定：** skill 1.2.0、service-innovation plugin 2.5.0，README 同步定位。agents/openai.yaml 的 default_prompt 是介面呼叫設定，維持原文。
 
-  **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-innovation-workshop/SKILL.md:3)、[主檔:22](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-innovation-workshop/SKILL.md:22)、[主檔:37](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-innovation-workshop/SKILL.md:37)、[主檔:39](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-innovation-workshop/SKILL.md:39)、[主檔:48](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-innovation-workshop/SKILL.md:48)。
+  **驗證：** quick_validate、YAML／JSON、三個相對連結、Markdown 圍欄與 git diff --check 通過。比對 Git 確認視角參考及介面設定未變，skill 數與 README 表格／總數均為 61。逐項走查完整發想、已選定方案只做測試、SCAMPER 部分維度沒有合適改法三種情境，確認完整流程、局部範圍與七維度判斷各有對應規則。這是文件規則走查，未執行真實工作坊或原型測試。使用者已驗收並要求提交、推送，未同步安裝版本。
+
+  **目前位置：** [主檔](../../plugins/service-innovation/skills/service-innovation-workshop/SKILL.md)、[方法](../../plugins/service-innovation/skills/service-innovation-workshop/references/service-innovation-methods.md)、[模板](../../plugins/service-innovation/skills/service-innovation-workshop/references/service-innovation-output-templates.md)。
 
 ### thinking-frameworks
 
