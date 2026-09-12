@@ -1,83 +1,71 @@
 ---
 name: scamper
 description: >-
-  This skill MUST be used when applying the SCAMPER creative thinking
-  framework to systematically generate innovation ideas for products,
-  services, processes, or concepts. Trigger on requests involving
-  奔馳法、SCAMPER、創意發想、創新思考、產品改良、服務優化、創意激盪、系統化創新, and SHOULD be used when the user
-  wants to explore multiple creative angles for an existing
-  object/service/business model.
+  This skill MUST be used when applying SCAMPER (奔馳法) to generate or review
+  innovation ideas for products, services, processes, business models, or concepts.
+  It SHOULD also be used for 創意發想、創新思考、產品改良、服務優化、創意激盪、系統化創新
+  when the user wants to explore multiple creative angles for an existing target,
+  even without naming the framework.
 metadata:
-  version: "1.1.1"
+  version: "1.2.0"
 ---
 
 # SCAMPER 奔馳法創意思考工具
 
 ## Overview
 
-將任何現有產品、服務、流程或概念，透過 SCAMPER 七大思維維度系統化發想創新方案。
-
-輸出結果包含：
-- 完整的七維度創意清單
-- 每個維度的最佳建議與理由
-- 可執行的優先方案摘要
+運用替代、合併、調適、修改、挪作他用、消除、重組／逆向七個維度，探索現有產品、服務、流程或概念的改變方式，再比較值得推進的方案。
 
 ## Input Contract
 
-必填其中至少一項：
+從自然語言與既有材料辨識下列資訊，不要求使用者填寫欄位：
 
-- `target_object` — 要創新的目標（產品 / 服務 / 流程 / 商業模式）
-- `innovation_goal` — 希望達成的目標（降低成本 / 提升體驗 / 開拓市場...）
+- `target_object`：要創新的對象及其現有形式、功能與使用情境。
+- `innovation_goal`：希望改善的結果，例如降低成本、提升體驗或開拓市場。
+- `context`、`constraints`：背景、痛點、預算、技術、時間及不可改變的條件。
+- `depth`：`full`（預設，完整分析）或 `quick`（快速概覽）。
+- `focus_dimensions`：使用者指定的維度，例如「只看替代、合併、消除」。
+- `output_language`：預設台灣繁體中文。
 
-可選：
-
-- `context` — 產業背景、競爭環境或使用者痛點
-- `constraints` — 現有資源限制（預算 / 技術 / 時間）
-- `depth` — 輸出深度：`quick`（快速概覽）/ `full`（完整分析，預設）
-- `focus_dimensions` — 只展開特定維度，例如 `S, C, E`
-- `output_language` — 預設繁體中文
-
-資訊不足時，列出 3-5 個假設後繼續產出。
+只有目標而無具體對象時，先釐清要改變什麼。其他缺漏依對結果的影響決定是否詢問。能合理推進的假設須標明，不用固定數量的假設補滿輸入。
 
 ## Workflow
 
-1. 確認 `target_object`，釐清其現有形式、功能與使用情境。
-2. 依序套用 SCAMPER 七維度，每維度產出 2-3 個具體構想。
-3. 評估各構想的可行性與潛力，標記最具突破性的方案。
-4. 彙整成 `priority_innovations`，列出 Top 3 可優先執行的方向。
-5. 視需求補上 `implementation_note`，說明執行注意事項。
+### 1. 確認對象與探索範圍
+
+整理核心特點、功能、使用情境、痛點與限制，作為發想依據。
+
+| 模式 | 探索與交付範圍 |
+| --- | --- |
+| full | 完整檢視七維度，展開具體構想與比較理由 |
+| quick | 同樣檢視七維度，以精簡表格呈現構想與優先理由 |
+| 指定維度 | 只展開指定範圍，依 full 或 quick 決定說明深度 |
+
+### 2. 依方法發散構想
+
+開始前必讀 [七維度定義與提問矩陣](references/01-dimensions-and-questions.md)。對核心特點提出各維度的問題，探索「具體改變什麼、如何產生效果」。M 包含修改、放大、縮小，R 包含重組與逆向，不能只想到其中一種。
+
+先展開不同機制與切入點，容許大膽構想。暫時需要突破限制的想法須說明成立條件，留到篩選階段評估。各維度的構想數量依有效差異決定，不用換句話湊數。
+
+做教學演練、自然類比或受限材料發想時，讀 [實戰演練與進階技法](references/02-practice-and-advanced.md)。需要企業案例解釋方法或作為類比時，讀 [案例分析](references/03-case-studies.md)。
+
+### 3. 比較並收斂
+
+合併重複或互補的構想，依目標貢獻、可行性、資源需求與關鍵假設比較。從中提出值得優先推進的方向與理由，數量依問題決定。新奇程度不能代替優先判斷。
+
+若某維度探索後沒有值得保留的構想，交代嘗試的方向及不採用原因，不硬選一個最佳方案。若尚無方案符合限制，說明缺口及下一步驗證，不宣稱可執行。
 
 ## Output Contract
 
-固定輸出以下段落：
+依任務交付現況分析、各維度構想與優先方向。沿用 `subject_analysis`、`scamper_dimensions`、`priority_innovations` 名稱供需要固定欄位的情境使用，一般回覆使用自然中文標題。
 
-- `subject_analysis` — 目標物件的現況分析（形式、功能、痛點）
-- `scamper_dimensions` — 七維度創意展開（S / C / A / M / P / E / R）
-- `priority_innovations` — Top 3 優先創新方向與理由
-- `implementation_note` — 執行建議與風險提示（可選）
+- 每個構想說清楚改變的對象、做法與預期效果。
+- 優先方向提供比較理由、重要成立條件及可開始的下一步。
+- 資源、風險與驗證方式放在對應方案下，需要集中說明時再使用 `implementation_note`。
 
-`quick` 模式：僅輸出每個維度最強的 1 個構想 + priority_innovations。
-
-預設使用繁體中文 Markdown。
-
-## Quick Reference
-
-- SCAMPER 七維度定義與提問矩陣：讀 [references/01-dimensions-and-questions.md](./references/01-dimensions-and-questions.md)
-- 實戰演練與自然類比進階法：讀 [references/02-practice-and-advanced.md](./references/02-practice-and-advanced.md)
-- 企業案例分析（麥當勞、星巴克）：讀 [references/03-case-studies.md](./references/03-case-studies.md)
-- 輸出模板：讀 [references/04-output-templates.md](./references/04-output-templates.md)
+組織分析輸出時讀 [輸出模板](references/04-output-templates.md)，依模式使用。模板提供結構，不規定構想或優先方向的數量。
 
 ## Quality Rules
 
-- 每個維度至少產出 1 個具體且可落地的構想，不能只寫抽象描述。
-- 構想要聚焦在目標物件本身，避免偏離原始問題。
-- priority_innovations 要有理由，不能只列點。
-- 若使用者指定 `focus_dimensions`，其他維度簡述即可，聚焦在指定維度深挖。
-- 避免把同一個點子在不同維度重複包裝。
-
-## Common Mistakes
-
-- 每個維度只給泛泛的定義介紹，沒有針對目標物件產出具體構想。
-- priority_innovations 和七維度內容重複，缺乏整合性判斷。
-- 忽略 constraints，提出不切實際的方案。
-- 過度集中在 Substitute 和 Eliminate，忽略 Adapt 和 Rearrange 的潛力。
+- 同一構想可涉及多個維度，但只列一次並註明關係，不重複包裝。
+- 企業案例的 SCAMPER 分類是分析視角。事實、研究結果、預期效果與假設分清楚，具體事實附來源。

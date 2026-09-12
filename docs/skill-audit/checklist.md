@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**26 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**27 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -595,15 +595,19 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **目前位置：** [主檔](../../plugins/service-innovation/skills/ecosystem-map-and-blueprint/SKILL.md)、[生態系地圖](../../plugins/service-innovation/skills/ecosystem-map-and-blueprint/references/ecosystem-map.md)、[服務藍圖](../../plugins/service-innovation/skills/ecosystem-map-and-blueprint/references/service-blueprint.md)。
 
-- [ ] **48. scamper**（中優先）
+- [x] **48. scamper**（中優先）
 
-  **可以改哪裡：** 已有 quick 與 focus_dimensions，仍要求七維度各 2–3 構想、Top 3、缺資料列 3–5 假設。泛創意詞與工作坊重疊。
+  **已完成並經使用者確認：** 保留自然語意觸發，full 與 quick 都逐一檢視七維度，只有使用者指定部分維度時才縮小範圍。移除固定構想數、Top 3 與假設配額，保留具體構想、比較理由與下一步。
 
-  **建議改法：** 觸發突出 SCAMPER 方法；quick／指定維度決定展開範圍，完整工作坊才走全套。取消機械配額，保留可比較的獨立構想；企業案例按需讀。
+  **依討論採用的簡化：** 合併主檔與演練文件的重複流程，先發散再依目標及限制收斂。七維度方法必讀，其餘參考文件明列閱讀時機。模板同步調整，保留 M 的修改／放大／縮小及 R 的重組／逆向。不存在值得保留的構想時，說明探索及不採用原因。
 
-  **應保留：** 七維度方法、限制條件、不重複包裝點子；明確要求完整七維度時保留完整度。
+  **案例與證據：** 保留七維度提問、白板擦、自然類比、受限材料、灰姑娘及企業案例。修正灰姑娘 P 分類，並補上真正轉用故事用途的示例。查到 Hussain 與 Carignan 原始摘要，保留 p=.003 與效應量，修正重複測量設計與因果推論。企業事實附來源，未核實的具體做法改為假設練習，移除無來源成效保證。沒有 Suggested Prompt 同類殘留。
 
-  **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/service-innovation/skills/scamper/SKILL.md:3)、[主檔:36](/Users/timlai/Developer/skills/plugins/service-innovation/skills/scamper/SKILL.md:36)、[主檔:40](/Users/timlai/Developer/skills/plugins/service-innovation/skills/scamper/SKILL.md:40)、[主檔:44](/Users/timlai/Developer/skills/plugins/service-innovation/skills/scamper/SKILL.md:44)、[主檔:70](/Users/timlai/Developer/skills/plugins/service-innovation/skills/scamper/SKILL.md:70)。
+  **驗證：** quick_validate、YAML／JSON、四個相對連結、七維度方法、Markdown 圍欄與 git diff --check 通過。skill 數與 README 表格／總數均為 61。獨立走查快速圖書館流程、指定 S／C 雨傘收納、完整白板擦教學三案，修正受限材料的範圍規則及案例 A 分類。未實測產品或營運成效。
+
+  **版本與範圍：** skill 1.2.0、service-innovation plugin 2.2.0。README 原列描述仍符合定位，未改動。使用者已驗收並要求提交、推送，未同步安裝版本。
+
+  **目前位置：** [主檔](../../plugins/service-innovation/skills/scamper/SKILL.md)、[方法](../../plugins/service-innovation/skills/scamper/references/01-dimensions-and-questions.md)、[演練](../../plugins/service-innovation/skills/scamper/references/02-practice-and-advanced.md)、[案例](../../plugins/service-innovation/skills/scamper/references/03-case-studies.md)、[模板](../../plugins/service-innovation/skills/scamper/references/04-output-templates.md)。
 
 - [ ] **49. service-design-workshop**（中優先）
 
