@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**22 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**23 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -541,7 +541,9 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/maslow-five-needs-marketing/SKILL.md:3)、[主檔:15](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/maslow-five-needs-marketing/SKILL.md:15)、[主檔:60](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/maslow-five-needs-marketing/SKILL.md:60)、[主檔:73](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/maslow-five-needs-marketing/SKILL.md:73)、[主檔:92](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/maslow-five-needs-marketing/SKILL.md:92)、[主檔:129](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/maslow-five-needs-marketing/SKILL.md:129)、[主檔:137](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/maslow-five-needs-marketing/SKILL.md:137)、[主檔:181](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/maslow-five-needs-marketing/SKILL.md:181)。
 
-- [ ] **44. psychological-trigger-marketing**（中優先）
+- [x] **44. psychological-trigger-marketing**（中優先）
+
+  **已完成：** 合併重複說明並明列參考讀取時機，七種觸發器與完整例句保留；取消固定組合與文案數量，單一 CTA／標題直接交付，完整策略格式保留於參考文件。三個情境與驗證清單改按行為和真實條件驗收，修正六種／七種不一致。
 
   **可以改哪裡：** description 與 When to Use 重複；七模組摘要與 references/01 再述；每次硬選二至四觸發器並至少三標題三CTA，即單一CTA需求也膨脹。
 

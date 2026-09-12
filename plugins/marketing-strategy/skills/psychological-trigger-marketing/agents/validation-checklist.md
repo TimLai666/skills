@@ -1,60 +1,27 @@
 # Validation Checklist
 
-## RED: Baseline Findings
+## 結構檢查
 
-- 未載入 skill 時，輸出容易停在抽象行銷建議
-- 常見缺 trigger stack、headline 結構與 CTA 結構
-- 容易把 FOMO 直接寫成假限量或假倒數
-- 容易忽略台灣在地語感，寫成泛中文案
-- 容易只講品牌故事，不處理轉換節奏與價格比較
+- SKILL.md frontmatter 符合 repo 規範，含 name、description 與 metadata.version。
+- 主檔提供輸入判斷、觸發器選擇、通路寫法、交付要求與文件讀取入口。
+- references/01-trigger-playbook.md 保留七種觸發器、雙軌命名及完整例句。
+- references/02-application-matrix.md 保留通路與目標套用表。
+- references/03-output-contracts.md 提供完整策略與缺資料的結構化格式。
+- agents/openai.yaml 與主檔一致，三個既有情境保留。
 
-## GREEN: Structure Checks
+## 行為檢查
 
-- `SKILL.md` frontmatter 只有 `name` 與 `description`
-- description 只描述觸發條件，不摘要 workflow
-- `SKILL.md` 明確包含：
-  - `Overview`
-  - `When to Use`
-  - `Input Contract`
-  - `Data Sufficiency Gate`
-  - `Trigger Engine`
-  - `Trigger Selection Rules`
-  - `Output Contract`
-  - `Hard Rules`
-- `references/01-trigger-playbook.md` 包含六種 trigger
-- `references/02-application-matrix.md` 包含 channel 與目標的套用表
-- `agents/` 包含三個 pressure scenario 與一份 checklist
+- 依目標、受眾與證據選擇方法，說明作用，不按固定數量湊觸發器。
+- 完整策略具備可用的主軸、心理驅動理由與所需文案方向，不限定必須 JSON。
+- 單一 CTA／標題請求直接交付所需內容，不強出多個選項或完整策略包。
+- 缺資料時先使用現有脈絡，只問會影響結果的關鍵問題，假設須明示。
+- 使用繁體中文與台灣用語，CTA 清楚交代下一步。
+- 文案實際使用的事實與承諾有依據，不把案例條件當成通用要求。
+- 某個案例條件不成立時，能根據實際情境調整表達，不直接排除整種心理驅動。
 
-## GREEN: Behavioral Checks
+## 驗收
 
-- 產出固定欄位：
-  - `strategy_summary`
-  - `trigger_stack`
-  - `message_angles`
-  - `headline_options`
-  - `cta_options`
-  - `risk_flags`
-  - `assumptions_used`
-- 缺必要資料時，會先輸出 `MissingDataOutput`
-- 預設使用繁體中文與台灣用語
-- 保留雙軌命名：
-  - `嚇唬 / 失落驅動`
-  - `安撫 / 正當化驅動`
-  - `引誘 / 渴望驅動`
-- 不會一次把六種 trigger 全開
-
-## REFACTOR: Guardrail Checks
-
-- 不得捏造數據、見證、原價、限量或倒數
-- 使用稀缺或限時說法時，必須在 `risk_flags` 中能追溯到真實條件
-- 沒有 `proof_assets` 時，會降低強刺激 FOMO 的使用強度
-- 不把在地、公益、友善、永續當成空洞裝飾詞
-- CTA 不應只有空泛動詞
-
-## Acceptance Gate
-
-視為可交付前，至少要通過：
-
-- `quick_validate.py` 通過
-- `agents/openai.yaml` 與 `SKILL.md` 對齊
-- 三個 pressure scenario 都能用這份 skill 的結構檢查
+- quick_validate.py 通過，修改的 YAML／JSON 能解析，引用有效。
+- 逐一檢查三個 pressure scenario 的條件與通過標準是否和主檔一致。
+- 對照檢查：同樣提供產品與優惠，若使用者只要一個 CTA，不能套用促銷頁整包交付。
+- 若實際執行情境測試，保留輸出並依上述行為判斷。文件一致性檢查不等於實測通過。
