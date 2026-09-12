@@ -1,107 +1,48 @@
-# Output Templates (Dual Track Mandatory)
+# Output Templates
 
-## Template A: Standard Decision Report
+## 完整審查報告
 
-`self-agent` 亦使用此模板，以實際查核結果填寫證據欄，將方案修正放入 recommended_actions，未解分歧放入 Assumptions and Data Gaps。
+適用於完整十二問審查。風險與行動依實際發現列示，self-agent 的方案修正納入行動。
 
-```markdown
-## Executive Summary
-- 決策題目：{decision_statement}
-- 模式：{mode}
-- 決策大小：{decision_size}
-- 風險等級：{risk_level}
-- 建議：{go | conditional-go | no-go}
+### 決策摘要
 
-## A. 質性軌
-### bias_diagnosis
-- Group A（Q1-Q3）：{summary}
-- Group B（Q4-Q9）：{summary}
-- Group C（Q10-Q12）：{summary}
+- 決策題目、模式與範圍。
+- 決策建議及成立條件。
+- 決策大小、風險等級；未確定時呈現範圍與原因。
 
-### key_risks
-1. {risk_1}（證據：{evidence}）
-2. {risk_2}（證據：{evidence}）
-3. {risk_3}（證據：{evidence}）
+### 質性分析
 
-### recommended_actions
-1. [P1] {action}（owner: {owner}, due: {date}）
-2. [P2] {action}（owner: {owner}, due: {date}）
-3. [P3] {action}（owner: {owner}, due: {date}）
+依 Q1–3、Q4–9、Q10–12 分組整理偏誤診斷及主要風險，附證據。
+行動依優先次序列出具體修正、驗證方式與期限，負責人已知時才填入。
 
-## B. 量化軌
-### question_scores (0-2)
-| Q | score | rationale | evidence |
+### 十二問評分
+
+逐題填寫 Q1 至 Q12。分數、範圍及計算方式依 [評分規則](04-scoring-thresholds.md)。
+
+| 題號 | 分數／範圍 | 判斷理由 | 證據／缺口 |
 | --- | --- | --- | --- |
-| Q1 | {0-2} | {one-line reason} | {source} |
-| ... | ... | ... | ... |
-| Q12 | {0-2} | {one-line reason} | {source} |
 
-### group_scores (0-100)
-- Group A: {score}
-- Group B: {score}
-- Group C: {score}
+列出三組原始合計、標準化分數、加權總分、三因子及所用門檻。
+若有未知項，提供總分範圍及各可能分級的門檻結果。
 
-### weighted_total_score
-- {score}
+### 未解事項與下一步
 
-### threshold_profile_used
-- decision_size={Low|Medium|High}
-- threshold={table_reference}
+列出假設、仍待補足的資料、分歧及其對結論的影響，連到對應驗證行動。
+已在前文說明的內容直接引用。
 
-## Assumptions and Data Gaps
-- {assumption_1}
-- {gap_1}
+## 會議引導
 
-## Next Validation Loop
-- {48h or next meeting validation tasks}
-```
+- 決策目標、範圍與討論時間。
+- 依十二問三組安排提問順序，每題列提問者、回答者與所需證據；人員未定時用職責表示。
+- 收斂條件、未解分歧及下次需要的資料。
 
-## Template B: MissingDataOutput
+只要求腳本時交付以上內容。要求完整審查且已有證據時，同時提供完整審查報告。
 
-```markdown
-## MissingDataOutput
-- missing_fields:
-  - {field_1}
-  - {field_2}
-- why_needed:
-  - {reason_1}
-  - {reason_2}
-- questions_to_user:
-  1. {question_1}
-  2. {question_2}
-- temporary_assumption: {none | Medium decision size}
-- risk_of_assumption: {impact statement}
-```
+## 個人教練
 
-## Template C: Meeting Facilitation Add-on
+完整審查報告納入選項比較、偏誤重點、驗證行動與再次檢查的條件。
+明確要求互動追問時依目前問題推進，待有足夠資料再完成整體審查。
 
-```markdown
-## Meeting Facilitation Script
-- 會議目標：{objective}
-- 決策時間盒：{timebox}
+## 缺資料
 
-### question_sequence
-1. Group A: Q1 -> Q2 -> Q3
-2. Group B: Q4 -> Q5 -> Q6 -> Q7 -> Q8 -> Q9
-3. Group C: Q10 -> Q11 -> Q12
-
-### facilitator_prompts
-- Q1: {prompt}
-- Q5: {prompt}
-- Q11: {prompt}
-
-### consensus_gaps
-- {gap_1}
-- {gap_2}
-
-### close_criteria
-- {what must be true for decision closure}
-```
-
-## Output Ordering Rules
-
-- 先輸出 Executive Summary。
-- 再輸出 A. 質性軌。
-- 再輸出 B. 量化軌。
-- 最後輸出 Assumptions 與 Next Validation Loop。
-- 缺資料時，先輸出 MissingDataOutput，再提供可選暫定評分。
+用自然語言說明缺什麼、影響哪個結論、可以先完成什麼，以及下一個必要問題。

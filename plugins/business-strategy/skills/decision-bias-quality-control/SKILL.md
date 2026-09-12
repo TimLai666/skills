@@ -7,129 +7,72 @@ description: >-
   on requests such as 重大決策、偏誤檢查、提案審查、決策會議引導、決策教練、
   go/no-go 決策、AI 自行審查決策。
 metadata:
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # Decision Bias Quality Control
 
 ## Overview
 
-使用此技能來執行「決策品管」，把重大決策從直覺推進到可追溯、可檢查、可比較的判斷流程。
-
-遵循兩個核心原則：
-- 維持「雙軌輸出」：每次都同時輸出質性洞察與量化評分。
-- 檢查「提案過程」而非只看「提案結論」：用 12 問檢查清單找出偏誤來源。
-
-先閱讀下列參考檔：
-- 核心原則與來源：[references/01-source-principles.md](./references/01-source-principles.md)
-- 12 問題庫：[references/02-12-question-bank.md](./references/02-12-question-bank.md)
-- 模式流程：[references/03-mode-workflows.md](./references/03-mode-workflows.md)
-- 評分與門檻：[references/04-scoring-thresholds.md](./references/04-scoring-thresholds.md)
-- 統一輸出模板：[references/05-output-templates.md](./references/05-output-templates.md)
+用十二問檢查決策形成過程，找出影響判斷的偏誤、證據缺口與修正方式。
+完整審查預設提供質性分析與量化評分；只有使用者明確要求腳本、局部追問或其他部分成果時，才縮小交付。
 
 ## Input Contract
 
-接收下列結構化輸入；欄位不足時走 Data Sufficiency Gate。
-
-- `mode`: `self-agent | proposal-review | meeting-facilitation | personal-coaching | auto`
-- `decision_statement`: `string`（必要）
-- `decision_context`: `string`（必要）
-- `proposal_snapshot`: `string`（提案審查時建議提供）
-- `decision_size_factors`:
-  - `financial_impact`: `1|2|3`
-  - `reversibility`: `1|2|3`
-  - `org_blast_radius`: `1|2|3`
-
-## Mode Routing
-
-若 `mode=auto`，依需求語意路由：
-
-- 使用者要求 AI 自行查核、討論或審查目前決策，或由 ultrathink 自動轉接時，預設 `self-agent`；使用者明確要求下列工作時，依該需求選擇模式。
-- 出現「審查提案、投資案、核准、go/no-go」等語意時，路由 `proposal-review`。
-- 出現「主持、引導討論、會議流程、追問順序」等語意時，路由 `meeting-facilitation`。
-- 出現「我該怎麼選、個人抉擇、職涯選擇」等語意時，路由 `personal-coaching`。
-
-若語意混合，依使用者主要目的選擇模式。
+從目前任務取得決策題目、背景、候選方案與限制，承接已提供的提案或討論紀錄。
+模式可由使用者指定，否則依語意選擇。決策大小的三因子依 [評分規則](references/04-scoring-thresholds.md) 判定。
 
 ## Data Sufficiency Gate
 
-先從目前任務與已有資料取得輸入。`self-agent` 先查核可自行取得的資料，再提出仍影響結論的缺口。
+先查核可自行取得的資料，再說明仍缺什麼、影響哪個結論及需要補充的內容。
+可獨立處理的部分繼續。缺少決策大小因子時，依可能範圍比較門檻。
+題目證據不足時保留待驗證狀態，依評分規則呈現暫定分數或範圍。
 
-先檢查必要欄位：
+## Workflow
 
-- `decision_statement`
-- `decision_context`
+### 1. 選擇模式
 
-再檢查評分所需欄位：
+使用者明確指定優先，混合需求依主要目的選擇：
 
-- `decision_size_factors.financial_impact`
-- `decision_size_factors.reversibility`
-- `decision_size_factors.org_blast_radius`
+| 模式 | 使用情境 |
+| --- | --- |
+| self-agent | AI 自行查核、討論或審查目前決策；ultrathink 自動轉接的預設 |
+| proposal-review | 審查提案、核准條件或 go/no-go 建議 |
+| meeting-facilitation | 主持決策會議、安排提問與討論收斂 |
+| personal-coaching | 個人重大抉擇、選項比較與驗證行動 |
 
-缺資料時，輸出 `MissingDataOutput`：
+讀 [模式流程](references/03-mode-workflows.md) 的對應段落執行。
 
-- `missing_fields`
-- `why_needed`
-- `questions_to_user`
-- `temporary_assumption`
-- `risk_of_assumption`
+### 2. 執行十二問
 
-預設規則：
-- 若三因子缺漏且使用者仍要求繼續，暫定 `decision_size=Medium`，並標註風險。
+讀 [十二問題庫](references/02-12-question-bank.md)，保留各題的核心語意與分組。
+查核提案如何形成、替代方案及反證如何處理。
+需要確認方法來源、角色分離或適用邊界時，讀 [核心原則](references/01-source-principles.md)。
 
-## Output Contract (Mandatory Dual Track)
+完整審查逐題記錄判斷、證據與缺口；只準備腳本時覆蓋十二問的提問與證據需求。
+依已有證據判定可評分的內容。
 
-每次輸出都必須同時包含以下兩軌，不得省略其中任一軌。
+### 3. 評分與形成建議
 
-### A. 質性軌
+完整審查依 [評分與門檻](references/04-scoring-thresholds.md) 計算，保留可重算的分組原始分數、總分與門檻。
+以證據決定風險、修正及驗證行動的數量與優先次序。期限依決策窗口與取得資料所需時間安排。
 
-- `bias_diagnosis`: 偏誤診斷摘要（依 12 問分組）
-- `key_risks`: 3-5 個核心風險（附證據來源）
-- `recommended_actions`: 3-5 個可執行行動（含優先級）
+### 4. 交付與驗收
 
-### B. 量化軌
+依 [輸出模板](references/05-output-templates.md) 整理結果，確認十二問覆蓋、計算可重現、結論與證據一致。
+重大缺口尚未解決時，限制可下的結論並提供補證據行動。
 
-- `question_scores`: 12 題逐題分數（`0|1|2`）與簡要理由
-- `group_scores`: 三組標準化分數（0-100）
-- `weighted_total_score`: 加權總分（0-100）
-- `decision_size`: `Low|Medium|High`
-- `risk_level`: `Green|Yellow|Red`
-- `threshold_profile_used`: 對應門檻表
+## Output Contract
 
-## Scoring Rules
-
-依 [references/04-scoring-thresholds.md](./references/04-scoring-thresholds.md) 計算，使用固定模型：
-
-- 題目分數：每題 `0|1|2`
-- 分組加權：
-  - Q1-3 = `30%`
-  - Q4-9 = `40%`
-  - Q10-12 = `30%`
-- 分組先標準化至 0-100，再算加權總分
-- 動態門檻依決策大小調整風險等級
-
-## Execution Workflow
-
-1. 確認模式與決策邊界。
-2. 進行 Data Sufficiency Gate。
-3. 逐題執行 12 問，收集證據與評分。
-4. 計算分組分數、總分、風險等級。
-5. 輸出雙軌結果與 mode-specific 結論。
-6. 附上「下一步驗證行動」與「可逆/不可逆提醒」。
-
-## Mode-Specific Decision Output
-
-- `self-agent`: 輸出決策建議、完整十二問評分、關鍵問題與方案修正，依模式流程完成查核與複核。
-- `proposal-review`: 輸出 `go | conditional-go | no-go`。
-- `meeting-facilitation`: 輸出會議腳本、追問順序、決策收斂規則。
-- `personal-coaching`: 輸出選項比較、偏誤提醒、48 小時驗證行動。
-
-詳見 [references/03-mode-workflows.md](./references/03-mode-workflows.md)。
+完整審查包含決策建議、偏誤診斷、主要風險與修正，以及十二題評分、分組計算、總分與風險門檻。
+缺資料時附暫定判斷或範圍及成立條件。
+self-agent 另呈現方案修正，會議引導呈現提問與收斂安排，個人教練呈現選項比較與驗證行動。
+只要求部分成果時按指定範圍交付，使用自然標題。
 
 ## Quality Rules
 
-- 不可跳過 12 問中的任何一題。
-- 不可輸出無證據支持的結論。
-- 不可只給結論不給計算過程。
-- 不可把單一觀點誤當團隊共識。
-- 必須標註假設與不確定性來源。
+- 完整審查涵蓋十二問，完成度依實際查核範圍說明。
+- 分數衡量查核完整性，風險判斷另附具體依據。
+- 結論有可核對依據，區分事實、假設與未知。
+- 不把單一觀點、模擬討論或 agent 相互同意當成人類團隊共識。
+- 修正後複核受影響題目，保留仍未解決的缺口。

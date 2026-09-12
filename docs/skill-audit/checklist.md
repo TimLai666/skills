@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**38 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**39 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -81,9 +81,11 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **驗證：** quick_validate、YAML／JSON、引用、圍欄、skill／README 數量與 git diff --check 通過。完整分析、局部調整及缺資料情境完成文件推演，並補明局部任務不重新選震央或追加無關策略與實驗；未宣稱完成模型行為實測。
 
-- [ ] **03. decision-bias-quality-control**（中優先）
+- [x] **03. decision-bias-quality-control**（中優先）
 
-  **已驗收的部分：** 保留獨立 skill，ultrathink 增加自動轉接入口。新增 self-agent 模式，自行查核、十二問評分與方案修正，需要時使用 subagents 交叉審查。使用者已確認並要求推送。skill 1.2.0、business-strategy plugin 1.4.0，ultrathink 2.3.0、thinking-frameworks plugin 0.43.0。格式、引用與數量檢查通過，未做模型行為實測。其餘簡化及評分規則修正尚待確認，本項維持未勾選。
+  **完成修改：** 保留獨立 skill、完整十二問及雙軌審查，新增 self-agent 自行查核與方案修正，ultrathink 自動轉接。合併重複流程與評分規則，依需求交付腳本或完整審查。補齊三因子定義、小數門檻及缺資料的分數範圍，行動數量與期限依本案安排。文字以現行操作為主。skill 1.3.0、business-strategy plugin 1.5.0，ultrathink 2.3.0、thinking-frameworks plugin 0.43.0。使用者已確認接受並要求提交、推送。
+
+  **驗證：** quick_validate、YAML／JSON、引用、圍欄、skill／README 數量及 git diff --check 通過。評分檢查涵蓋 3,003 個小數門檻案例、637 組分組合計及未知題範圍計算。未做模型行為實測。
 
   **可以改哪裡：** 泛提案審查與個人選擇容易觸發；每次先讀五份檔且所有模式都強制十二題逐題量化與固定三至五項，會把會議引導變成評分報告；評分摘要與 references/04 重複。
 
