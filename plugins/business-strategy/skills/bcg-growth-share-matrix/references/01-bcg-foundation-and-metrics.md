@@ -62,27 +62,7 @@ relative_market_share = market_share / largest_competitor_share
 
 ## Coordinate Output Specification
 
-每次分析都應附 `matrix_plot_data`，至少包含：
-
-```json
-{
-  "x_axis": "relative_market_share",
-  "y_axis": "market_growth_rate",
-  "quadrant_cutoffs": {
-    "relative_market_share_cutoff": 1.0,
-    "market_growth_cutoff": 10.0
-  },
-  "points": [
-    {
-      "name": "Business A",
-      "x": 1.2,
-      "y": 12.5,
-      "quadrant": "Stars",
-      "borderline": false
-    }
-  ]
-}
-```
+`matrix_plot_data` 的欄位與 JSON 格式見 [分析模板](../assets/templates/bcg-portfolio-analysis-template.md#6-matrix-plot-data)，整理輸出時讀取。
 
 座標映射規則：
 - `x >= relative_market_share_cutoff` 且 `y > market_growth_cutoff` -> `Stars`

@@ -86,6 +86,16 @@
 - 哪些 question marks 應用分階段試驗而非大額一次性投資
 - 哪些 dogs 應退出，哪些可因協同而保留
 
+## Development Potential
+
+完整分析為每個事業體判斷發展潛力，並說明依據：
+
+- `high`：可見成長與份額改善路徑，且資本效率可接受。
+- `medium`：可改善，但有關鍵風險未解。
+- `low`：份額、經濟性或協同等核心條件不足。
+
+此分級與象限分開判斷，再連結以下轉移路徑與成立條件。
+
 ## Typical Transition Paths And Conditions
 
 ### Question Marks

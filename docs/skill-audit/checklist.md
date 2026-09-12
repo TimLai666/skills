@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**36 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**37 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -53,7 +53,7 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
 ### business-strategy
 
-- [ ] **01. bcg-growth-share-matrix**（中優先）
+- [x] **01. bcg-growth-share-matrix**（中優先）
 
   **可以改哪裡：** 觸發列表重複 description；分類規則與 references/01 重複；八大輸出主體、90 天追蹤與四份參考檔每次必讀，讓簡單分類也變成完整資本配置報告。
 
@@ -62,6 +62,10 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
   **應保留：** 最大競爭者分母、成長門檻來源、邊界敏感度、Dogs 協同例外與 Question Marks 投資停止條件。
 
   **原文位置：** [主檔:22](/Users/timlai/Developer/skills/plugins/business-strategy/skills/bcg-growth-share-matrix/SKILL.md:22)、[主檔:87](/Users/timlai/Developer/skills/plugins/business-strategy/skills/bcg-growth-share-matrix/SKILL.md:87)、[主檔:122](/Users/timlai/Developer/skills/plugins/business-strategy/skills/bcg-growth-share-matrix/SKILL.md:122)、[主檔:198](/Users/timlai/Developer/skills/plugins/business-strategy/skills/bcg-growth-share-matrix/SKILL.md:198)、[主檔:206](/Users/timlai/Developer/skills/plugins/business-strategy/skills/bcg-growth-share-matrix/SKILL.md:206)。
+
+  **完成修改：** 完整分析仍為預設，只有明確要求分類或計算時縮小交付。合併重複規則與欄位，保留四象限方法、發展潛力、轉移條件及座標資料。修正已有相對市佔仍索取原始市佔的矛盾；缺口以自然語言說明。模板移除重複座標欄，時程依本案調整。刪除提示詞參考文件，保留介面 default_prompt。skill 與 business-strategy plugin 均為 1.2.0。使用者已確認接受並要求提交、推送。
+
+  **驗證：** quick_validate、YAML／JSON、引用、圍欄、模板欄位、skill／README 數量及 git diff --check 通過。三種文件情境推演涵蓋完整配置、只做分類及缺資料不允許假設；並修正追問清單仍可能重複索取原始市佔的問題。
 
 - [ ] **02. business-model-architect**（高優先）
 

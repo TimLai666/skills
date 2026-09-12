@@ -39,13 +39,9 @@
   - 資料資產
 - 這些都可能讓「退出」不是最佳解
 
-## Required Caveat Section
+## 本案限制
 
-每次輸出都要有一段類似以下結構：
-
-- `What BCG explains well`
-- `What BCG may miss here`
-- `Which decisions still need deeper validation`
+依上述條件說明 BCG 在本案能解釋什麼、可能漏掉什麼，以及哪些決策仍需更深入驗證。合併到報告的「假設與限制」，不另外要求固定小標或重複框架介紹。
 
 ## Portfolio Logic Checklist
 
