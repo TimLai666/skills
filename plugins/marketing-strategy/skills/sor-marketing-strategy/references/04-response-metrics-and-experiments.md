@@ -16,10 +16,7 @@
 
 ## KPI Ladder Rules
 
-- 每份策略至少定義：
-  - 1 個 primary outcome metric
-  - 2-3 個 leading indicators
-  - 1-2 個 guardrail metrics
+- 定義目標結果及能觀察作用路徑的前導訊號；有重要副作用時加入對應指標。數量依問題與資料決定。
 - 若目標是 `conversion`，guardrail 常見是：
   - bounce rate
   - refund rate
@@ -31,7 +28,7 @@
 
 ## Activity Participation Rate
 
-對應草稿中的「活動參與率」，在這個 skill 中統一命名為 `activity_participation_rate`。
+活動參與率是衡量參與行為的一種例子，只有符合本次目標時才使用，欄位可命名為 `activity_participation_rate`。
 
 定義：
 - 在指定期間內，完成指定活動行為的人數占可參與人數的比例。
@@ -50,7 +47,7 @@ activity_participation_rate
 使用注意：
 - 需要明確定義 `eligible`，避免把無法參與的人算進分母。
 - 若活動分多步驟，另補 step-level participation，避免只看總參與率。
-- 建議與 `conversion` 或 `repurchase` 一起觀察，避免只優化活動熱度。
+- 依活動目標決定是否同時觀察後續行為，不固定搭配成交或回購指標。
 
 ## Experiment Mapping
 
@@ -69,7 +66,7 @@ We'll measure this through [leading metrics] and [result metric].
 
 - 一次只驗證一個主要 stimulus change
 - 先測最接近瓶頸的 stimulus
-- 先選 impact 高、實作成本低、倫理風險低的測試
+- 先選 impact 高、實作成本低、反效果與執行風險可控的測試
 
 ## Example Patterns
 
@@ -104,12 +101,12 @@ We'll measure this through [leading metrics] and [result metric].
 
 ## Handoff Notes
 
-- 需要正式 sample size、檢定方法、test duration 時，轉交 `$ab-test-setup`。
-- 需要事件、參數、GA4/GTM 實作時，轉交 `$analytics-tracking`。
+- 需要正式樣本量、檢定方法與測試期間時，使用可用且適用的統計分析能力完成。
+- 需要事件、參數、GA4/GTM 實作時，使用可用的追蹤與開發工具完成，不把規劃當成已實作。
 
 ## Minimum Output For Experiment Plan
 
-每次至少列出：
+使用者需要實驗計畫時列出：
 - `hypothesis`
 - `control`
 - `variant`

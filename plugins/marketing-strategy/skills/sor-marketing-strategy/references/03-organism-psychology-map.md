@@ -4,7 +4,7 @@
 
 這份檔案用來把「消費者為什麼會動」講清楚。Stimulus 沒有穿過 organism，就不算策略。
 
-## Five Organism Lenses
+## Six Organism Lenses
 
 ### 1) Cognitive
 
@@ -29,7 +29,18 @@
 - 情緒很高，但沒有行動方向
 - 太強的 urgency 引發壓迫感
 
-### 3) Trust And Risk
+### 3) Attitude And Brand Affinity
+
+要判斷：
+- 對品牌的整體評價是否改變
+- 是否感到品牌理解自己、值得接近或持續互動
+- 態度變化與一時的情緒反應有何不同
+
+常見問題：
+- 互動令人愉快，但沒有連回品牌印象
+- 只從點擊或停留推論品牌好感，缺少直接證據
+
+### 4) Trust And Risk
 
 要判斷：
 - 品牌是否可信
@@ -42,7 +53,7 @@
 - 清楚條款
 - 清楚示範
 
-### 4) Value Appraisal
+### 5) Value Appraisal
 
 要判斷：
 - 值不值得
@@ -53,7 +64,7 @@
 - 功能很多，但與使用者情境無關
 - 只說便宜，不說適配
 
-### 5) Intrusiveness And Friction
+### 6) Intrusiveness And Friction
 
 要判斷：
 - 有沒有被打擾

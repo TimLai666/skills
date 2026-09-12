@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**23 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**24 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -553,7 +553,9 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **原文位置：** [主檔:20](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/psychological-trigger-marketing/SKILL.md:20)、[主檔:76](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/psychological-trigger-marketing/SKILL.md:76)、[主檔:121](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/psychological-trigger-marketing/SKILL.md:121)、[主檔:135](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/psychological-trigger-marketing/SKILL.md:135)、[主檔:161](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/psychological-trigger-marketing/SKILL.md:161)。
 
-- [ ] **45. sor-marketing-strategy**（高優先）
+- [x] **45. sor-marketing-strategy**（高優先）
+
+  **已完成：** 保留完整 S/O/R 分析，合併重複措施表；取消固定項數與 30 天排程，參考文件依工作需求讀取。補齊第六項品牌態度，保留理論、案例與衡量方法，解除固定專項工具名稱，移除案例 Prompt 段落，文件改名為 references/05-application-scenarios.md，定位為七種應用情境與分析重點，主檔引用同步更新。信任與侵擾依實際效果分析，不另做道德評分。
 
   **可以改哪裡：** 泛 KPI/A-B 測試/CRM 觸發與排除單一實驗互相競爭；三類措施加 sor_map/策略行動等重複敘述；每類至少三因子與完整三十天計畫強制；四份 references 不分任務全讀。
 

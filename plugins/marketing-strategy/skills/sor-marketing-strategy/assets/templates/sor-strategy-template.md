@@ -1,161 +1,64 @@
 # S-O-R Strategy Template
 
-## 0) Context
+完整分析 S、O、R。延伸段落依使用者需求填寫，不固定措施數量或執行期間。
+
+## Context
 
 - Brand / Offer:
 - Target Audience:
-- Business Goal:
+- Business Goal / Desired Response:
 - Channel Context:
-- Desired Response:
-- Funnel Stage:
-- Current Stimuli:
-- Available Metrics:
+- Current Stimuli / Available Evidence:
 - Constraints:
 
-## 1) Executive Summary
+## 主要判斷
 
-- 關鍵判斷 1:
-- 關鍵判斷 2:
-- 關鍵判斷 3:
+說明問題、依據與建議優先序。
 
-## 2) S-O-R Map
+## S-O-R 分析與措施
 
-### Stimulus
+| 現有問題 | S：刺激調整 | O：目前狀態與預期變化 | R：目標行為 | 作用理由與證據／假設 | 前導訊號與結果衡量 | 負責人（有執行需求時） |
+| --- | --- | --- | --- | --- | --- | --- |
+|  |  |  |  |  |  |  |
 
-| Type | Current Stimulus | Gap Or Risk | Proposed Change |
-| --- | --- | --- | --- |
-| sensory |  |  |  |
-| informational |  |  |  |
-| social |  |  |  |
-| technical |  |  |  |
-| situational |  |  |  |
+三段不可留白或只填類別名稱。資料不足時記錄缺口及驗證方式，列數依實際問題決定。
 
-### Organism
+## 通路安排（有跨通路需求時）
 
-| Lens | Current State | Desired Shift | Evidence Or Assumption | Triggering Stimulus |
-| --- | --- | --- | --- | --- |
-| cognitive |  |  |  |  |
-| emotional |  |  |  |  |
-| attitude_brand_affinity |  |  |  |  |
-| trust_risk |  |  |  |  |
-| value_appraisal |  |  |  |  |
-| intrusiveness_friction |  |  |  |  |
-
-### Response
-
-| Level | Primary Metric | Leading Indicators | Guardrails |
-| --- | --- | --- | --- |
-| attention |  |  |  |
-| engagement |  |  |  |
-| conversion |  |  |  |
-| repurchase |  |  |  |
-| advocacy |  |  |  |
-
-## 3) S/O/R 三段具體措施
-
-### Stimulus Design Measures
-
-| Measure | Objective | Audience/Channel | Success Signal |
+| 通路 | 訊息作用 | 時機 | 與其他接觸點的銜接 |
 | --- | --- | --- | --- |
 |  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
 
-### Organism Influence Measures
+## 實驗計畫（有測試需求時）
 
-| Measure | Target Psychology Shift | Evidence Or Assumption | Success Signal |
-| --- | --- | --- | --- |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-
-### Response Measurement Measures
-
-| Measure | Response Level | Metric Definition | Decision Threshold |
-| --- | --- | --- | --- |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-
-## 4) Strategy Actions
-
-| Objective | Stimulus Change | Expected Organism Shift | Target Response | Owner |
-| --- | --- | --- | --- | --- |
-|  |  |  |  |  |
-|  |  |  |  |  |
-|  |  |  |  |  |
-
-## 5) Channel Plan
-
-| Channel | Message Role | Stimulus Type | Timing | Success Signal |
-| --- | --- | --- | --- | --- |
-|  |  |  |  |  |
-|  |  |  |  |  |
-|  |  |  |  |  |
-
-## 6) KPI Ladder
-
-| Goal | Leading Metric | Result Metric | Guardrail | Window |
-| --- | --- | --- | --- | --- |
-|  |  |  |  |  |
-|  |  |  |  |  |
-
-## 7) Experiment Plan
-
-| Hypothesis | Control | Variant | Primary Metric | Guardrails | Decision Rule |
+| 假設 | 對照與改動 | 結果指標 | 前導訊號 | 需觀察的副作用 | 決策規則 |
 | --- | --- | --- | --- | --- | --- |
 |  |  |  |  |  |  |
-|  |  |  |  |  |  |
 
-## 8) Optimization Loop
+## 成效回看與調整（有優化需求時）
 
-### Response Data To Review
+- 要回看的資料：
+- 低效刺激與判斷依據：
+- 調整動作及預期影響：
+- 下一個待驗證假設：
 
-- Data Point 1:
-- Data Point 2:
-- Data Point 3:
+## 文案方向（有文案需求時）
 
-### Low Efficiency Stimuli
+- 主要阻力與訴求：
+- 訊息角度：
+- 支持證據：
+- CTA 方向：
 
-| Stimulus | Why Low Efficiency | Evidence |
+要求成稿時接著完成成品。
+
+## 效果限制與資料缺口
+
+| 問題 | 對結果的影響 | 處理或驗證方式 |
 | --- | --- | --- |
 |  |  |  |
-|  |  |  |
 
-### Tuning Actions
+## 執行安排（有排程需求時）
 
-| Action | Expected Impact | Owner | ETA |
+| 實際期間 | 行動 | 負責人 | 交付內容 |
 | --- | --- | --- | --- |
 |  |  |  |  |
-|  |  |  |  |
-
-### Next Test
-
-- Hypothesis:
-- Control:
-- Variant:
-- Primary Metric:
-- Guardrails:
-
-## 9) Message Strategy Brief
-
-- Core Tension:
-- Message Angles:
-- Proof Points:
-- CTA Directions:
-
-## 10) Risks And Ethics
-
-| Risk | Why It Matters | Mitigation | Validation Needed |
-| --- | --- | --- | --- |
-|  |  |  |  |
-|  |  |  |  |
-
-## 11) Next 30 Day Actions
-
-| Week | Action | Owner | Deliverable |
-| --- | --- | --- | --- |
-| W1 |  |  |  |
-| W2 |  |  |  |
-| W3 |  |  |  |
-| W4 |  |  |  |
