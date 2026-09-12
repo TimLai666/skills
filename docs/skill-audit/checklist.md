@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**41 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**42 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -125,7 +125,11 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/business-strategy/skills/red-flag-contract-scanner/SKILL.md:3)、[主檔:25](/Users/timlai/Developer/skills/plugins/business-strategy/skills/red-flag-contract-scanner/SKILL.md:25)、[主檔:58](/Users/timlai/Developer/skills/plugins/business-strategy/skills/red-flag-contract-scanner/SKILL.md:58)、[主檔:66](/Users/timlai/Developer/skills/plugins/business-strategy/skills/red-flag-contract-scanner/SKILL.md:66)、[主檔:72](/Users/timlai/Developer/skills/plugins/business-strategy/skills/red-flag-contract-scanner/SKILL.md:72)、[主檔:76](/Users/timlai/Developer/skills/plugins/business-strategy/skills/red-flag-contract-scanner/SKILL.md:76)、[主檔:134](/Users/timlai/Developer/skills/plugins/business-strategy/skills/red-flag-contract-scanner/SKILL.md:134)、[主檔:159](/Users/timlai/Developer/skills/plugins/business-strategy/skills/red-flag-contract-scanner/SKILL.md:159)。
 
-- [ ] **06. swot-analysis**（高優先）
+- [x] **06. swot-analysis**（高優先）
+
+  **完成修改：** 完整分析維持預設，明確限定需求時局部交付。承接適用的外部資料，缺少總體環境證據時才補 PESTEL，保留階段一「情況 A」的交接位置。修正機會的能力補強條件、威脅時間視窗及優劣勢排除條件。依實質關聯配對，跨象限比較候選，保留三項評分並釐清可行性、時間餘裕、同分與資料不足的處理。合併重複交付，零候選與單一候選依實際結果呈現。skill 1.2.0、business-strategy plugin 1.8.0，README 已同步。使用者已驗收並要求提交、推送。
+
+  **驗證：** quick_validate、YAML／JSON、description、59 個 skill／README 數量、PESTEL 交接位置及 git diff --check 通過。27 組三項評分組合的總分範圍檢查通過。獨立文件推演涵蓋局部分類、已有外部資料與能力補強、零候選、單一候選及跨象限同分未定。這是文件與邏輯驗證，沒有量測模型效果。以下保留初次審查紀錄，採用範圍以上述修改為準。
 
   **可以改哪裡：** 觸發範圍含 PEST 與一般競爭策略；無論證據是否足夠都強制先跑 PESTEL 並停下；窮舉所有元素配對、固定選一主策略與放棄清單；策略定調卡重複輸出。
 
