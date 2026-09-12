@@ -2,247 +2,102 @@
 name: business-model-architect
 description: >-
   This skill MUST be used when designing, evaluating, or refining a business
-  model with nine elements, and SHOULD be used for new products, pivots,
-  monetization, and go-to-market decisions. Starts with Epicenter Selection
-  (震央選擇) — choosing one of four innovation starting points (資源／產品／顧客／財務導向) to
-  anchor design before filling the nine boxes.
+  model (商業模式設計／商模重構／九要素), and SHOULD be used for new products,
+  pivots, monetization, and go-to-market decisions that require coordinated
+  choices about customer value, delivery, revenue, and costs.
 metadata:
-  version: "1.1.1"
+  version: "1.2.0"
 ---
 
 # Business Model Architect
 
 ## Overview
 
-用高密度策略推演設計可執行的商業模式，並以固定順序完成 `What -> Who -> How` 九要素。  
-預設輸出語言為繁體中文；若使用者明確指定其他語言，再切換。
-
-## When to Use
-
-Use when:
-- 使用者要你「設計商業模式」或「重做商業模式」。
-- 任務包含九要素：價值主張、目標客群、通路、顧客關係、收益流、關鍵資源、關鍵活動、關鍵合作夥伴、成本結構。
-- 需要比較多個商模選項、找差異化策略、或規劃 30 天驗證實驗。
-- 涉及市場切入、定價與收益、或商業可行性評估。
-
-Do not use:
-- 只需要單純文案潤稿，且不涉及商業模式設計。
-- 純技術除錯或與商業策略無關的任務。
+從商業模式的創新起點（震央）展開策略推演，建立九要素互相支持、可執行且可驗證的商模。
+預設提供完整分析，只有使用者明確縮小需求（例如只調整通路、只比較收費方式或只算成本）時才縮小交付；局部修改仍檢查受影響要素。
+預設使用台灣繁體中文，依使用者指定切換語言。
 
 ## Input Contract
 
-必要欄位（缺一不可）:
-- `product_or_service`: 產品或服務描述
-- `target_customer_context`: 目標客群與使用情境
-- `market_context`: 市場、競品與替代方案現況
-- `constraints`: 時間、預算、法規、能力邊界
-- `goal_kpi`: 成功指標（營收、留存、轉換、毛利等）
-- `scope_boundary`: 產品/服務提供範疇與不做範圍
-- `current_wt_state`: 現況弱勢與外部威脅（WT）摘要
-- `control_levers_context`: 可調動資源、能力、流程與合作槓桿
+從使用者提供的資料盤點以下內容，不要求逐欄填表：
 
-建議欄位（可選）:
-- `innovation_epicenter`: 選擇創新起點（資源導向／產品導向／顧客導向／財務導向），未填則由系統根據現況推薦
-- `pricing_context`
-- `distribution_constraints`
-- `existing_assets`
-- `team_capabilities`
-- `strategic_horizon`
+- 產品或服務、目標客群與使用情境。
+- 市場、競品及替代方案。
+- 時間、預算、法規與能力限制。
+- 成功指標及評估期間。
+- 提供範疇與不做範圍。
+- 現況弱勢與外部威脅。
+- 可調動的資源、能力、流程與合作關係。
+
+承接已提供的定價、通路、資產、團隊能力與策略期間。使用者未指定震央時，依現況推薦並說明理由。
 
 ## Data Sufficiency Gate
 
-若必要欄位缺失，先輸出 `MissingDataOutput`，不得直接產出完整商模。
+只追問會實質改變本次設計、且無法由既有資料判斷的缺口，說明它影響哪個決策。
+可獨立完成的部分繼續推進；需以假設推進時，標明假設、錯誤後果與驗證方式。
+使用者不允許假設時，受影響部分保留待確認，不填造資料。
+未驗證的商模可以完整呈現為待驗證方案，但不得宣稱已證實可行。
+需要釐清輸入時讀 [資料盤點與追問](references/01-intake-and-constraint-gate.md)。
 
-```json
-{
-  "missing_fields": [],
-  "why_needed": {},
-  "questions_to_user": [],
-  "temporary_assumptions": [],
-  "assumption_risks": []
-}
-```
+## Workflow
 
-規則:
-- 問題要短、可回答、可直接推進下一步。
-- 若必須先假設，需明確標記 `temporary_assumptions` 與對應風險。
-- 缺資料時最多先做「暫行版」框架，不得宣稱已完成可落地方案。
+以下為完整分析流程。局部任務沿用已知震央與商模，只執行相關設計、連動檢查與驗收；不重新選震央或追加無關策略及實驗。
+
+### 1. 選擇震央與設計重心
+
+讀 [創新策略引擎](references/03-innovation-strategy-engine.md) 的震央選擇，依條件選擇資源、產品、顧客或財務導向。
+通常選一個主震央；已有驗證基礎且多個起點互相驅動時，可列主、次震央並解釋關係。
+指出核心要素、次要要素及確實需要暫緩的要素，核心數量依商模決定。
+
+### 2. 推演差異化並設計九要素
+
+依震央從核心要素向外推導，可反向檢查與迭代。
+完整分析讀 [九要素設計與一致性](references/02-nine-element-design-sequence.md)，局部調整讀受影響部分。
+用 [創新策略引擎](references/03-innovation-strategy-engine.md) 的反事實、差異化切入點與競爭替代方法建立可驗證策略。
+七張臉孔可在檢查盲點時選用相關視角，無須逐一扮演或輸出角色章節。
+
+完整分析涵蓋九要素，各要素說明設計、成立理由及執行方式。
+核心要素另深入說明作用機制、關鍵取捨與成立條件；暫緩要素列原因及補充條件。
+最後依 What → Who → How 整理報告，呈現順序不限制設計順序。
+
+### 3. 檢查整體一致性與可行性
+
+完整分析讀 [通路與收益](references/04-channel-revenue-design-playbook.md) 及 [成本、風險與可行性](references/05-cost-risk-feasibility-checks.md)；
+局部調整只讀涉及的文件。
+串起定位與服務邊界、價值交付、收益、成本與利潤形成路徑，檢查資源配置及合作控制點。
+從供給、價值、需求、財務四構面檢查落差、衝突及調整，不重新複製九要素內容。
+
+盤點弱勢與威脅；有實際轉型需求時，讀創新策略引擎的 WT-to-SO 模組，
+把壓力點連到商模調整、目標優勢或機會及驗證里程碑。不能假定威脅必然能轉為機會。
+
+### 4. 安排驗證與交付
+
+針對核心假設與重大風險安排實驗，依重要性、成本及取得訊號的速度排序。
+策略與實驗數量以涵蓋關鍵問題為準，不湊數，也不因固定上限刪掉必要項目。
+依本案決策窗口、資源與驗證週期安排近期、接續、後續行動；使用者指定 30 天時依該期間規劃。
+交付前讀 [驗收規準](references/06-output-template-and-rubric.md) 並檢查結果。
 
 ## Output Contract
 
-最終輸出必須包含以下九個主體（全數必填）:
-- `epicenter_focus`（震央定錨：說明選擇哪個震央、為什麼、哪些要素是核心、哪些可暫緩）
-- `business_model_9_elements`
-- `strategic_differentiation_map`
-- `assumption_and_risk_register`
-- `30_day_validation_experiments`
-- `priority_roadmap`
-- `business_model_foundation`
-- `dimension_alignment_matrix`
-- `operating_model_core`
-- `wt_to_so_transition`
+完整報告使用唯一的 [報告模板](assets/templates/business-model-canvas-report.md)，包含：
 
-### 0) `epicenter_focus`（震央定錨）
+- 本案目標、範圍、限制與震央選擇。
+- 九要素及核心要素的深入設計。
+- 差異化策略、可驗證假說、作用機制、防禦性與風險。
+- 整體一致性分析：定位、獲利路徑、資源控制，以及四構面的落差與調整。
+- 假設、錯誤後果、早期訊號及因應方式。
+- 驗證實驗的對應要素、方法、成功指標、決策規則及期間。
+- 有依賴關係與里程碑的優先行動安排。
+- 涉及轉型時的弱勢／威脅到目標狀態路徑。
 
-**震央**（Epicenter）是商業模式設計的起點選擇，避免九格均等填寫、失去策略重心。
-
-四種震央類型：
-- **資源導向**：從既有的基礎建設、能力或合夥關係出發，往外擴展商業模式
-- **產品導向**：從新的價值主張出發，往通路、客戶關係、收益模式延伸
-- **顧客導向**：從目標客群的需求/痛點/便利性出發，往前反推資源與活動
-- **財務導向**：從新的收益流或成本結構出發，重新設計整個商業模式
-
-輸出必須包含：
-- `chosen_epicenter`: 選擇的震央類型
-- `rationale`: 選擇理由（結合輸入條件推論，不得純粹複述定義）
-- `core_elements`: 本次設計的核心要素（2-3 個，必須深度設計）
-- `secondary_elements`: 次要要素（跟著核心推導，不強求完整）
-- `deferred_elements`: 暫緩要素（明確說明暫緩原因，允許留白）
-- `epicenter_to_nine_element_map`: 說明震央如何驅動各要素的填寫順序與邏輯
-
-**重要規則**：
-- 若使用者未指定震央，根據 `existing_assets`、`control_levers_context`、`constraints` 推薦最合理的震央，並說明理由
-- 九要素仍須全填，但核心要素須有更深度的設計；次要要素可較簡要；暫緩要素可標示「待驗證後補充」
-- 禁止假裝所有九格同等重要——必須明確說明哪 2-3 格是這個商模的真正核心
-
-### 1) `business_model_9_elements`
-
-必須依序輸出 1-9，且不得跳序：
-1. `value_proposition`
-2. `target_customers`
-3. `channels`
-4. `customer_relationships`
-5. `revenue_streams`
-6. `key_resources`
-7. `key_activities`
-8. `key_partners`
-9. `cost_structure`
-
-每一要素至少包含:
-- `design`
-- `why_this_works`
-- `execution_notes`
-
-### 2) `strategic_differentiation_map`
-
-至少 3 個差異化策略，每個策略必含:
-- `strategy_name`
-- `core_hypothesis`
-- `mechanism`
-- `defensibility`
-- `key_risks`
-
-### 3) `assumption_and_risk_register`
-
-每筆至少包含:
-- `assumption`
-- `risk_if_wrong`
-- `early_signal`
-- `mitigation`
-
-### 4) `30_day_validation_experiments`
-
-至少 3 個實驗，每個實驗必含:
-- `experiment_name`
-- `target_element`
-- `method`
-- `success_metric`
-- `decision_rule`
-
-### 5) `priority_roadmap`
-
-固定分為:
-- `Now`（0-30 天）
-- `Next`（31-90 天）
-- `Later`（90 天以上）
-
-### 6) `business_model_foundation`
-
-固定包含:
-- `positioning_scope`: 市場定位、服務邊界、明確不做項目
-- `profit_logic`: 收益來源、成本結構、利潤形成路徑
-- `strategy_control`: 內部資源/能力配置與外部合作控制點
-
-### 7) `dimension_alignment_matrix`
-
-必須輸出四構面，且每構面固定三個欄位:
-- `supply`: `current_design` / `gap` / `action`
-- `value`: `current_design` / `gap` / `action`
-- `demand`: `current_design` / `gap` / `action`
-- `finance`: `current_design` / `gap` / `action`
-
-### 8) `operating_model_core`
-
-固定包含:
-- `value_model`
-- `revenue_model`
-- `profit_model`
-- `tension_points`
-- `adjustment_levers`
-
-### 9) `wt_to_so_transition`
-
-固定包含:
-- `wt_diagnosis`
-- `business_model_adjustments`
-- `so_target_state`
-- `signal_milestones`
-
-## Workflow (Fixed)
-
-Step 0. Seven Faces Lens（內部推演）  
-- 使用「七張臉孔」做視角檢查，僅用來補強策略完整性；不得形成獨立輸出章節。
-
-Step 0.5. 震央選擇（Epicenter Selection）  
-- 根據 `innovation_epicenter`（若有）或從 `existing_assets`、`control_levers_context`、`constraints` 推導最適震央。  
-- 明確標記核心要素（2-3 個）、次要要素、暫緩要素。  
-- 震央決定後，九要素的設計深度與填寫順序必須與震央一致。  
-- 禁止在震央選定後又回頭把所有格子均等對待。
-
-Step 1. 資料閘門  
-- 先檢查必要欄位，缺資料則輸出 `MissingDataOutput`。
-
-Step 2. 創新策略推演與 WT 盤點  
-- 先建立差異化假說與 `wt_diagnosis`，再回填到九要素，避免產出同質化商模。  
-- 差異化策略必須與選定震央對齊。
-
-Step 3. 依序完成九要素  
-- 嚴格依 `What -> Who -> How` 順序，不跳步、不合併。  
-- 核心要素（震央相關）需含 `design`、`why_this_works`、`execution_notes`、`depth_note`（深度說明）。  
-- 次要要素含 `design`、`why_this_works`、`execution_notes` 即可。  
-- 暫緩要素可標示原因與觸發補充的條件，不強求完整設計。
-
-Step 4. 擴充輸出層整合  
-- 產出 `business_model_foundation`、`dimension_alignment_matrix`、`operating_model_core`、`wt_to_so_transition`。
-
-Step 5. 一致性與可行性檢核  
-- 檢查九要素、四構面、營運核心鏈路是否互相支持，且可追溯到輸入條件。  
-- 特別檢查：核心要素是否真的比次要要素設計更深？震央邏輯是否貫穿全文？
-
-Step 6. 產出行動化結果  
-- 輸出風險登錄、30 天驗證實驗、`Now/Next/Later` 路線圖與 `wt_to_so_transition` 里程碑。  
-- 30 天驗證實驗應優先針對核心要素的假設設計，而非均分九格。
+使用自然標題與表格，不強制英文鍵名。使用者要求結構化資料時再依指定格式呈現。
+局部交付只提供指定內容與必要連動影響，不能因模板自動擴成完整報告。
 
 ## Quality Rules
 
-- **震央規則**：必須選定一個震央，且核心要素的設計深度必須明顯高於次要要素；禁止九格均等。
-- 不得只給抽象建議；每個要素都要有可執行動作。
-- 至少提出 3 個差異化策略，且各自有可驗證假說。
-- 明確區分「已知事實」與「策略假設」。
-- 若有高不確定性，優先給低成本、快速驗證實驗。
-- 任何結論都需可追溯到輸入條件與檢核邏輯。
-- 所有輸出必須使用固定鍵名；不得自行增減主體名稱。
-- `strategic_differentiation_map`、`30_day_validation_experiments` 至少 3 筆、最多 5 筆。
-- `dimension_alignment_matrix` 每一構面僅可包含 `current_design`、`gap`、`action` 三鍵。
-- `business_model_foundation` 每個欄位最多 3 點；`operating_model_core` 每個欄位最多 2 點。
-- 不得輸出工作筆記、推理過程、修改日誌或自我敘述。
-
-## References
-
-- Intake 與缺資料模板: [references/01-intake-and-constraint-gate.md](./references/01-intake-and-constraint-gate.md)
-- 九要素順序與定義: [references/02-nine-element-design-sequence.md](./references/02-nine-element-design-sequence.md)
-- 創新策略引擎: [references/03-innovation-strategy-engine.md](./references/03-innovation-strategy-engine.md)
-- 通路與收益流策略: [references/04-channel-revenue-design-playbook.md](./references/04-channel-revenue-design-playbook.md)
-- 成本與可行性檢核: [references/05-cost-risk-feasibility-checks.md](./references/05-cost-risk-feasibility-checks.md)
-- 輸出模板與評分: [references/06-output-template-and-rubric.md](./references/06-output-template-and-rubric.md)
-- 可重用報告骨架: [assets/templates/business-model-canvas-report.md](./assets/templates/business-model-canvas-report.md)
+- 區分事實、策略假設與未知，結論可追溯到資料或明示前提。
+- 九要素連貫，核心要素的深入程度由作用機制、取捨與驗證條件證明，不靠篇幅。
+- 策略要說明客戶為何轉換、優勢如何形成，不能只貼「創新」或「差異化」標籤。
+- 對資源、需求、收益與成本的承諾須有依據，缺證據的部分保留驗證條件。
+- 實驗結果必須能支持繼續、調整或停止的決策。
+- 不輸出工作筆記、內部推理過程、修改日誌或自我敘述。

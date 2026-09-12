@@ -1,90 +1,21 @@
-# Output Template and Rubric
+# Output Review Criteria
 
-## Final Output Template
+報告格式只維護於 [報告模板](../assets/templates/business-model-canvas-report.md)，本檔用於交付前驗收。
+依使用者要求的範圍檢查，不以章節數、英文鍵名或策略筆數計分。
 
-```markdown
-# 商業模式設計結果
+## Review Criteria
 
-## Executive Summary
-- 問題定義：
-- 目標客群：
-- 核心差異化：
-- 30 天關鍵目標：
+- **設計重心**：震央有本案依據。多點導向交代主次關係，核心要素有作用機制、取捨與成立條件。
+- **九要素連貫**：完整分析涵蓋九要素的設計、理由及執行方式；暫緩項有原因與補充條件。局部調整交代必要連動影響。
+- **差異化**：策略有可驗證假說、客戶轉換理由、防禦性及風險，數量足以涵蓋重要選擇。
+- **可行性**：定位與服務邊界清楚，價值交付、收益、成本與利潤路徑一致，資源及合作控制點可取得或有驗證安排。
+- **四構面**：供給、價值、需求、財務都經檢查，指出實際落差、張力與調整；不得為了填欄捏造問題。
+- **證據界線**：已知事實、假設及未知可區分，重大缺口未被藏起來，未驗證結果未被寫成已成立。
+- **驗證與行動**：實驗連到核心假設，具方法、成功指標、決策規則及合理期間；行動次序反映依賴與資源。
+- **轉型路徑**：涉及轉型時，弱勢與威脅對應調整、目標狀態及可觀察里程碑，不能只宣稱轉為優勢。
 
-## business_model_9_elements
-1. value_proposition
-2. target_customers
-3. channels
-4. customer_relationships
-5. revenue_streams
-6. key_resources
-7. key_activities
-8. key_partners
-9. cost_structure
+## Completion
 
-## strategic_differentiation_map
-- Strategy A
-- Strategy B
-- Strategy C
-
-## assumption_and_risk_register
-- Assumption / Risk / Signal / Mitigation
-
-## 30_day_validation_experiments
-- Experiment 1
-- Experiment 2
-- Experiment 3
-
-## priority_roadmap
-- Now
-- Next
-- Later
-
-## business_model_foundation
-- positioning_scope
-- profit_logic
-- strategy_control
-
-## dimension_alignment_matrix
-- supply: current_design / gap / action
-- value: current_design / gap / action
-- demand: current_design / gap / action
-- finance: current_design / gap / action
-
-## operating_model_core
-- value_model
-- revenue_model
-- profit_model
-- tension_points
-- adjustment_levers
-
-## wt_to_so_transition
-- wt_diagnosis
-- business_model_adjustments
-- so_target_state
-- signal_milestones
-```
-
-## Rubric (0-100)
-
-- 結構完整性（30 分）  
-九要素順序正確，且 9 個輸出主體齊全、鍵名正確。
-
-- 差異化與升維品質（25 分）  
-差異化策略至少 3 個；`wt_to_so_transition` 具明確轉換邏輯與里程碑。
-
-- 可行性與控制力（25 分）  
-`business_model_foundation`、`dimension_alignment_matrix`、`operating_model_core` 彼此一致且可執行。
-
-- 驗證能力（20 分）  
-30 天實驗具成功指標與決策規則，並可回扣調整動作。
-
-## Pass Criteria
-
-- 總分 >= 75
-- 九要素順序錯誤直接不通過
-- 任一輸出主體缺失直接不通過
-- 少於 3 個差異化策略直接不通過
-- 缺少 `wt_to_so_transition` 或 `30_day_validation_experiments` 直接不通過
-- 若輸出獨立「七張臉孔章節」直接不通過
-- 若包含工作筆記、推理過程、修改日誌或自我敘述直接不通過
+存在未處理的重大矛盾、不可追溯的關鍵承諾、或無法判斷結果的實驗時，修正後再交付。
+資料限制無法消除時，明示受影響結論與待驗證條件，可以交付待驗證方案，但不宣稱已證實可行。
+使用者只要求局部內容時，以該範圍驗收。交付物不含工作筆記、內部推理過程或角色扮演章節。

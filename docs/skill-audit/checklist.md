@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**37 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**38 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -67,7 +67,7 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **驗證：** quick_validate、YAML／JSON、引用、圍欄、模板欄位、skill／README 數量及 git diff --check 通過。三種文件情境推演涵蓋完整配置、只做分類及缺資料不允許假設；並修正追問清單仍可能重複索取原始市佔的問題。
 
-- [ ] **02. business-model-architect**（高優先）
+- [x] **02. business-model-architect**（高優先）
 
   **可以改哪裡：** 八個必要輸入連 WT 都列缺一不可；宣稱九個主體實列十個；四份擴充輸出重述九要素；震央決定順序卻另強制不得跳序；固定至少三策略三實驗與七張臉孔擴大每次工作。
 
@@ -76,6 +76,10 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
   **應保留：** 九要素連貫、核心要素較深入、事實與假設區分、具成功指標的驗證實驗。
 
   **原文位置：** [主檔:34](/Users/timlai/Developer/skills/plugins/business-strategy/skills/business-model-architect/SKILL.md:34)、[主檔:73](/Users/timlai/Developer/skills/plugins/business-strategy/skills/business-model-architect/SKILL.md:73)、[主檔:99](/Users/timlai/Developer/skills/plugins/business-strategy/skills/business-model-architect/SKILL.md:99)、[主檔:110](/Users/timlai/Developer/skills/plugins/business-strategy/skills/business-model-architect/SKILL.md:110)、[主檔:159](/Users/timlai/Developer/skills/plugins/business-strategy/skills/business-model-architect/SKILL.md:159)、[主檔:191](/Users/timlai/Developer/skills/plugins/business-strategy/skills/business-model-architect/SKILL.md:191)、[主檔:226](/Users/timlai/Developer/skills/plugins/business-strategy/skills/business-model-architect/SKILL.md:226)。
+
+  **完成修改：** 完整分析仍為預設，僅明確縮小需求時局部交付。保留四種震央、主次關係、推導例句與核心深入設計，取消固定核心格數及設計順序矛盾。輸入改為盤點，缺口只影響相關結論。整合重複分析與報告模板，策略數量、實驗時程與敏感度幅度依本案，保留方法與驗證條件。skill 1.2.0、business-strategy plugin 1.3.0，介面 default_prompt 保留。使用者已確認接受並要求提交、推送。
+
+  **驗證：** quick_validate、YAML／JSON、引用、圍欄、skill／README 數量與 git diff --check 通過。完整分析、局部調整及缺資料情境完成文件推演，並補明局部任務不重新選震央或追加無關策略與實驗；未宣稱完成模型行為實測。
 
 - [ ] **03. decision-bias-quality-control**（中優先）
 

@@ -1,8 +1,8 @@
 # Nine-Element Design Sequence
 
-## Rule: Strict Order
+## Design and Presentation Order
 
-必須依序完成 `What -> Who -> How`，不可跳序、不可反推代替。
+依震央從核心要素推導，可反向檢查與迭代。下列 `What -> Who -> How` 是報告整理順序，不是設計的固定步驟；完整分析涵蓋全部要素，局部需求檢查受影響要素。
 
 ## What
 
@@ -64,19 +64,17 @@
 
 ## Four-Dimension Mapping
 
-九要素完成後，必須同步映射到四構面:
+完整分析以四構面檢查九要素的相互支持關係，整合於報告的一致性分析:
 - `supply`: key_resources / key_activities / key_partners
 - `value`: value_proposition
 - `demand`: target_customers / channels / customer_relationships
 - `finance`: revenue_streams / cost_structure
 
-每一構面都要輸出:
-- `current_design`: 目前設計如何運作
-- `gap`: 與目標狀態的差距
-- `action`: 30 天內的調整動作
+每一構面說明支持關係、實際落差或未知及調整方式，引用九要素即可，不重複設計。
+調整時程依本案期間與前置條件安排。
 
 ## Cross-Check Rules
 
 - 四構面映射必須可追溯到九要素原始內容，不可另起爐灶。
-- `finance` 的 `action` 必須對應 `revenue_streams` 或 `cost_structure` 的具體調整。
-- `supply` 的 `action` 必須對應 `control_levers_context`，避免提出無法調動的方案。
+- 財務調整必須對應收益流或成本結構。
+- 供給調整必須對應可調動資源，或明示取得資源的先決條件。

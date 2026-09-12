@@ -2,8 +2,8 @@
 
 ## Objective
 
-在填九要素前先建立差異化路徑，避免產出「可行但平庸」的商業模式。  
-此外需把 `current_wt_state` 轉成可執行的 `wt_to_so_transition`，確保策略升維可驗證。
+透過差異化路徑設計並反覆檢查九要素。完整分析使用 A–C 的問題檢查替代選擇，不必分別輸出各模組。
+涉及實際轉型時再用 D 建立弱勢與威脅到目標狀態的路徑。
 
 ---
 
@@ -63,7 +63,7 @@
 
 ## Internal Lens: Seven Faces
 
-用七種角色視角檢查策略盲點（僅內部推演，不輸出成獨立章節）:
+需要檢查盲點時選用相關角色視角，無須逐一扮演或輸出角色章節:
 - 資深高階主管：產業重構與資源重配
 - 內部創業家：新技術與新商模結合
 - 創業家：未被滿足需求的切入設計
@@ -113,29 +113,24 @@
 
 ### Module D: WT-to-SO Transition
 
-把弱勢與威脅轉為強勢與機會:
-- `wt_diagnosis`: 明確列出 1-3 個關鍵 WT 壓力點
+有轉型需求時，判斷哪些弱勢或威脅可透過調整改善，不能預設都能轉為優勢或機會:
+- `wt_diagnosis`: 列出有依據的關鍵弱勢與威脅
 - `business_model_adjustments`: 對應九要素與四構面的調整
 - `so_target_state`: 轉換後的目標優勢與機會位置
-- `signal_milestones`: 30/60/90 天訊號里程碑
+- `signal_milestones`: 依本案驗證週期安排訊號里程碑，30/60/90 天僅為可調整範例
 
 輸出限制:
 - 每個 WT 壓力點必須至少對應 1 個商模調整動作。
 - 每個調整動作必須至少對應 1 個驗證指標。
 
-## Differentiation Strategy Output (Minimum 3)
+## Differentiation Strategy Output
 
-每個策略必含:
-- `strategy_name`
-- `core_hypothesis`
-- `mechanism`
-- `defensibility`
-- `key_risks`
-- `first_test`
+依 [報告模板](../assets/templates/business-model-canvas-report.md) 的差異化策略表呈現，數量由關鍵選擇決定。
+首次驗證可引用實驗表，避免重複敘述。
 
 ## Prioritization Rubric
 
-以 1-5 分評估每個策略:
+比較策略的新穎性、可行性、防禦性及取得訊號的時間。需要量化排序時，可用 1-5 分評估並說明各分數依據:
 - `novelty`
 - `feasibility`
 - `defensibility`
