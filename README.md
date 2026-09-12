@@ -77,7 +77,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | `psychological-trigger-marketing` | 想產出更有轉換力的行銷角度、CTA、campaign hooks、促發點。 |
 | `maslow-five-needs-marketing` | 完整分析 Maslow 五層受眾需求，再依證據決定主次訴求、投入順序與訊息方向。 |
 | `content-growth-studio` | 依自然語意處理內容分析、主題發想、影片標題、文章與社群改編，或設計內容生產流程，配合受眾與通路改善觸及、閱讀及互動。 |
-| `threads-viral-growth` | 想在 Threads 平台產出高互動爆文、設計社群貼文策略、趨勢研究與發文劇本。 |
+| `threads-viral-growth` | 撰寫或改善 Threads 與一般社群文案，新稿與改寫皆先查四類來源，再設計切角、語氣與互動；依需求提供排程和成效分析。 |
 | `experiential-guerrilla-marketing` | 想規劃快閃、品牌體驗與游擊活動，設計受眾參與方式、現場執行安排，並依活動目標評估成效。 |
 
 ### `service-innovation` — 服務設計與創新

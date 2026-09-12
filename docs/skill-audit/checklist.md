@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**24 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**25 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -565,15 +565,19 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/sor-marketing-strategy/SKILL.md:3)、[主檔:79](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/sor-marketing-strategy/SKILL.md:79)、[主檔:95](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/sor-marketing-strategy/SKILL.md:95)、[主檔:150](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/sor-marketing-strategy/SKILL.md:150)、[主檔:214](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/sor-marketing-strategy/SKILL.md:214)。
 
-- [ ] **46. threads-viral-growth**（高優先）
+- [x] **46. threads-viral-growth**（高優先）
 
-  **可以改哪裡：** 泛社群詞及未指定平台即啟動 Threads；任何潤稿都強制趨勢查詢、候選湊三、七步流程/固定五件套/十五分鐘劇本；主檔常駐時間表與缺來源算法百分比，且權重順序前後不同。
+  **已完成並經使用者確認：** 保留一般社群文案的自然語意觸發，未指定平台時使用共通方法。新稿與既有材料改寫皆先查滿 Threads 平台討論、網路搜尋、競品／同類帳號、跨平台時事四類來源。來源受阻須說明缺口，不能算已查完；不因任務簡單或已有素材省略研究。
 
-  **建議改法：** 限定 Threads 寫作/經營；時事/趨勢型才要求即時研究，已給材料改寫可直接做；主檔留需求→取材→成稿→核對，模板/排程/互動按需求 reference；去除定時久候與候選硬配額，數字/最佳時間改可查來源與待測假設；交付只含需求相關內容。
+  **依討論採用的簡化：** 取消固定研究耗時、候選／留言配額、篇幅硬上限與每篇完整經營包。主檔集中流程、品質與閱讀時機，50 個開頭例句、五種結構、六種情緒與完整案例保留。快速指南的獨有短稿移入案例集後移除，語氣 prompt 段改成資料使用方法，圖卡製作 prompt 保留。
 
-  **應保留：** 可直接使用的台灣語氣稿、與受眾/主體連結、資料來源、真實互動與成效驗證，不保證爆文。
+  **證據與一致性修正：** 核對 QSearch 原始研究，修正時段排名並移除無來源權重表；保留 Buffer 42% 觀察及 Berger／Milkman 情緒研究的適用範圍。移除無依據成效保證，行銷手法依事實與實際反效果判斷。Views 與觸及人數分開，模板取消固定成效門檻。skill 1.2.0、marketing-strategy plugin 1.7.0，README 描述同步。
 
-  **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/threads-viral-growth/SKILL.md:3)、[主檔:29](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/threads-viral-growth/SKILL.md:29)、[主檔:36](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/threads-viral-growth/SKILL.md:36)、[主檔:43](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/threads-viral-growth/SKILL.md:43)、[主檔:83](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/threads-viral-growth/SKILL.md:83)、[主檔:118](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/threads-viral-growth/SKILL.md:118)、[主檔:173](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/threads-viral-growth/SKILL.md:173)、[主檔:200](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/threads-viral-growth/SKILL.md:200)、[主檔:222](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/threads-viral-growth/SKILL.md:222)、[主檔:285](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/threads-viral-growth/SKILL.md:285)。
+  **驗證：** quick_validate、YAML／JSON、30 個相對連結與錨點、git diff --check 通過。逐句比對50個原有Hook例句完整保留，五種結構、六種情緒、三個完整案例與移入短稿均存在。現有skill數量與README表格／開頭均為61；審查進度沿用原始62項，本項已經使用者驗收。獨立規則走查四個情境後修正跨平台入口、受阻處理與少樣本結論的歧義，未實際執行貼文研究或驗證成效。使用者已確認並要求提交、推送；未同步安裝版本。
+
+  **初次建議未採用部分：** 不限縮為僅Threads任務，不取消既有材料研究，也不將四類來源改成任選。舊建議不作後續執行依據。
+
+  **目前位置：** [主流程](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/threads-viral-growth/SKILL.md:29)、[四類來源研究](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/threads-viral-growth/references/01-trend-research.md:12)、[數據口徑](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/threads-viral-growth/assets/analytics-template.md:5)。
 
 ### service-innovation
 
