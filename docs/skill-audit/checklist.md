@@ -6,6 +6,28 @@
 
 依據：[Eric Provencher：Rethinking skills and prompts for GPT-6 Astra](https://x.com/pvncher/status/2095991462416490862)。文章提醒縮短並精確描述適用情境、只在需要時讀取細節、減少過度固定的流程，以及清楚界定完成條件和需要停下來的決策。下列各項是對本 repo 的審查判斷，不是作者對這些 skills 的評語。
 
+## 共通調整：Suggested Prompt 與 commit 訊息
+
+依使用者要求，移除以下 15 個 skills 的 Suggested Prompt／Suggested Prompts 段落，並同步移除 psychological-trigger-marketing 驗證清單對該段的要求。這次共通調整不代表各 skill 的個別審查已完成，未驗收項目維持未勾選。
+
+- [maslow-five-needs-marketing](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/maslow-five-needs-marketing/SKILL.md)
+- [psychological-trigger-marketing](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/psychological-trigger-marketing/SKILL.md)
+- [sor-marketing-strategy](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/sor-marketing-strategy/SKILL.md)
+- [landing-page-studio](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/landing-page-studio/SKILL.md)
+- [open-slide-studio](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/open-slide-studio/SKILL.md)
+- [bcg-growth-share-matrix](/Users/timlai/Developer/skills/plugins/business-strategy/skills/bcg-growth-share-matrix/SKILL.md)
+- [decision-bias-quality-control](/Users/timlai/Developer/skills/plugins/business-strategy/skills/decision-bias-quality-control/SKILL.md)
+- [business-model-architect](/Users/timlai/Developer/skills/plugins/business-strategy/skills/business-model-architect/SKILL.md)
+- [service-design-workshop](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-design-workshop/SKILL.md)
+- [scamper](/Users/timlai/Developer/skills/plugins/service-innovation/skills/scamper/SKILL.md)
+- [service-innovation-workshop](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-innovation-workshop/SKILL.md)
+- [orchestrating-mixed-methods](/Users/timlai/Developer/skills/plugins/customer-insight/skills/orchestrating-mixed-methods/SKILL.md)
+- [customer-journey-mapper](/Users/timlai/Developer/skills/plugins/customer-insight/skills/customer-journey-mapper/SKILL.md)
+- [customer-persona-framer](/Users/timlai/Developer/skills/plugins/customer-insight/skills/customer-persona-framer/SKILL.md)
+- [theory-analysis](/Users/timlai/Developer/skills/plugins/customer-insight/skills/theory-analysis/SKILL.md)
+
+commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/software-engineering-guidelines/SKILL.md#commit-messages)，ship-it 在建立 commit 前引用。使用者明確指示優先，其次專案規範；未指定格式時使用 Conventional Commits，未指定語言時以英文撰寫。所有修改的 skills 與六個所屬 plugins 均調升版本。
+
 ## 建議先處理的五個
 
 | 順序 | 項目 | 先處理的理由 |

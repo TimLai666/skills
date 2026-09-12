@@ -8,7 +8,7 @@ description: >-
   offers, launches, limited-time promotions, and Traditional Chinese marketing
   for Taiwan audiences.
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Psychological Trigger Marketing
@@ -180,9 +180,3 @@ Gate 規則：
 
 - Trigger 定義與案例：[references/01-trigger-playbook.md](./references/01-trigger-playbook.md)
 - Channel 套用矩陣：[references/02-application-matrix.md](./references/02-application-matrix.md)
-
-## Suggested Prompts
-
-- `Use $psychological-trigger-marketing to design a Taiwan Traditional Chinese campaign angle and CTA set for a limited-time offer.`
-- `Use $psychological-trigger-marketing to turn this product offer into a high-conversion landing page messaging strategy in Traditional Chinese.`
-- `Use $psychological-trigger-marketing to create a trigger stack, headline options, and CTA directions for this promotion without inventing fake scarcity or fake proof.`

@@ -7,7 +7,7 @@ description: >-
   whenever the user does not specify a method or the work needs both
   measurement and explanation.
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Orchestrating Mixed Methods
@@ -196,10 +196,3 @@ measurement artifact, or segment heterogeneity.
 - Routing rules and tie-breakers: [references/01-routing-rules.md](./references/01-routing-rules.md)
 - Mixed-route sequencing and conflict handling: [references/02-sequencing-and-integration.md](./references/02-sequencing-and-integration.md)
 - Pressure scenarios and validation prompts: [references/03-validation-scenarios.md](./references/03-validation-scenarios.md)
-
-## Suggested Prompt
-
-Use `$orchestrating-mixed-methods` to choose the right qualitative,
-quantitative, or mixed-methods route for this research task, emit a
-`MethodRoutingDecision`, and explain the sequencing without forcing a false
-either-or choice.

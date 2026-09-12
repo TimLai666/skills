@@ -6,7 +6,7 @@ description: >-
   廣告、CRM、落地頁、電商、會員、回購、KPI、A/B 測試 ideas into a structured marketing strategy,
   psychology map, measurement plan, or experiment brief.
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # S-O-R 行銷策略
@@ -219,10 +219,3 @@ Response 依商業成熟度拆成五級：
 4. 依 [04-response-metrics-and-experiments.md](./references/04-response-metrics-and-experiments.md) 連到 KPI、tracking 與實驗。
 5. 需要場景化輸出時，套用 [05-use-cases-and-prompts.md](./references/05-use-cases-and-prompts.md)。
 6. 需要快速填表時，使用 [sor-strategy-template.md](./assets/templates/sor-strategy-template.md)。
-
-## Suggested Prompts
-
-- `請用 $sor-marketing-strategy 分析這個落地頁的刺激、心理機制與轉換問題。`
-- `我們想提升會員回購，請用 S-O-R 模型設計 CRM 與 KPI ladder。`
-- `請用 S-O-R 拆解這個品牌活動為什麼有聲量卻沒轉單。`
-- `請用 $sor-marketing-strategy 先做策略與 message brief，文案先不要直接成稿。`

@@ -13,7 +13,7 @@ description: >-
   used without a local Node.js environment. 觸發詞：open-slide、網頁簡報、簡報網站、簡報部署、線上簡報、presenter
   mode。
 metadata:
-  version: "1.0.2"
+  version: "1.0.3"
 ---
 
 # Open Slide Studio
@@ -102,7 +102,3 @@ metadata:
 | 靜態站建置 | `pnpm build`（產 `dist/`） |
 | 預覽建置結果 | `pnpm preview` |
 | 更新內建 skills | `pnpm up @open-slide/core && pnpm sync:skills` |
-
-## Suggested Prompt
-
-Use `$open-slide-studio` to turn a deck request into an open-slide workspace: route the delivery format, bridge design-studio visuals in as a theme, then hand authoring to the workspace's built-in skills.

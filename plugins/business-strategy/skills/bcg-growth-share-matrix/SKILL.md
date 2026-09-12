@@ -8,7 +8,7 @@ description: >-
   capital allocation, portfolio prioritization, or deciding whether to invest,
   maintain, harvest, reposition, or exit.
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # BCG 成長佔有率矩陣
@@ -225,7 +225,3 @@ relative_market_share = market_share / largest_competitor_share
 - 現代化限制與組合邏輯：[references/04-modern-caveats-and-portfolio-logic.md](./references/04-modern-caveats-and-portfolio-logic.md)
 - 常見用例與 prompts：[references/05-use-cases-and-prompts.md](./references/05-use-cases-and-prompts.md)
 - 輸出模板：[assets/templates/bcg-portfolio-analysis-template.md](./assets/templates/bcg-portfolio-analysis-template.md)
-
-## Suggested Prompt
-
-Use `$bcg-growth-share-matrix` to analyze a group or product portfolio in Traditional Chinese, classify each business into Cash Cows, Stars, Question Marks, or Dogs, show the relative market share logic, and recommend portfolio-level capital allocation with caveats and next-step actions.

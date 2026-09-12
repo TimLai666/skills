@@ -9,7 +9,7 @@ description: >-
   when the user asks for 情緒分數, 情緒曲線, 加減分原因, sparkline, or wants emotion
   scoring added to an existing CJM.
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Customer Journey Mapper
@@ -291,7 +291,3 @@ Emotion score example (same persona, scores + factors):
 | 關係建立 | 5 分 | ＋0.5 每週菜單有變化不膩；＋0.5 推薦給同事獲得認同感 | （無） |
 
 ← 最大跳升：考慮/研究 → 決策/購買（+1.5 分），Aha Moment = 首週折扣消除試錯顧慮
-
-## Suggested Prompt
-
-Use `$customer-journey-mapper` to create the final Traditional Chinese customer journey map from `顧客輪廓` and `產品或服務`, or from a `handoff_to_customer_journey_mapper` block, using a transposed Markdown table where `動機` appears before `行動`. If emotion scores are requested, activate the Emotion Score Module to produce a sparkline row and a per-stage detail table with plus/minus factors.

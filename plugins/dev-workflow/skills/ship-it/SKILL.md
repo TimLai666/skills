@@ -9,7 +9,7 @@ allowed-tools:
   - Grep
   - AskUserQuestion
 metadata:
-  version: "1.4.0"
+  version: "1.4.1"
 ---
 
 ## Step 1 — Confirm scope and project rules
@@ -28,6 +28,8 @@ Inspect working-tree changes and outgoing commits. Include only the intended
 work. Proceed with already authorized commits without asking again; do not
 silently stash, discard or include unrelated changes. If the work is on the base
 branch, establish a suitable PR branch without resetting existing work.
+
+When creating commits, follow the [commit-message rules](../software-engineering-guidelines/SKILL.md#commit-messages) before writing the message.
 
 After setting `_SHIP_REMOTE`, `_SHIP_BASE` and `_SHIP_BRANCH` to verified values:
 

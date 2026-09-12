@@ -14,7 +14,7 @@ description: >-
   which is attribute-level and needs the handoff steps in
   references/06-stp-handoff.md.
 metadata:
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Theory Analysis
@@ -91,8 +91,3 @@ metadata:
 | 某個理論的構面定義與判準 | [02](references/02-theory-product-positioning.md) / [03](references/03-theory-purchase-motivation.md) / [04](references/04-theory-wom-motivation.md) |
 | 完整範例（三理論同時套用） | [05-worked-example-turbocharger.md](references/05-worked-example-turbocharger.md) |
 | 串接 review-mining-stp | [06-stp-handoff.md](references/06-stp-handoff.md) |
-
-## Suggested Prompt
-
-- `Use $theory-analysis to code these evidence items against purchase motivation theory and return JSON + Markdown in Traditional Chinese.`
-- `請用 $theory-analysis 同時以產品定位理論與口碑動機理論分析這批證據，逐句標註並附原文引文。`

@@ -7,7 +7,7 @@ description: >-
   service design brief, blueprint-ready structure, touchpoint analysis, or
   prototype and validation next steps rather than only theory review.
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Service Design Workshop
@@ -76,7 +76,3 @@ metadata:
 - 把服務設計寫成單純 customer journey：缺少前後台、服務架構與實證。
 - 把方法名詞堆滿：沒有回到題目的痛點、場域與利害關係人。
 - 只寫理想體驗：沒有執行限制、營運支撐或驗證方法。
-
-## Suggested Prompt
-
-Use `$service-design-workshop` to turn a service design challenge into a Traditional Chinese workshop output with problem framing, stakeholders, service architecture, frontstage/backstage touchpoints, and prototype validation steps.

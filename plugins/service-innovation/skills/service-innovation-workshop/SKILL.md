@@ -8,7 +8,7 @@ description: >-
   opportunity framing, or validation planning rather than only concept
   definitions.
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Service Innovation Workshop
@@ -78,7 +78,3 @@ metadata:
 - 把服務創新寫成單一促銷活動：沒有流程、體驗或服務內容變化。
 - 只講技術新不新：沒有說為誰解決什麼需求。
 - 直接挑一個方案：沒有先分類機會來源，也沒有比較替代概念。
-
-## Suggested Prompt
-
-Use `$service-innovation-workshop` to turn a service innovation challenge into Traditional Chinese concept options, a recommended direction, a prototype test plan, and a risk check.

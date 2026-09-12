@@ -6,7 +6,7 @@ description: >-
   especially for
   persona、人物誌、顧客輪廓、使用者輪廓、目標客群、5W1H、接觸點盤點、顧客旅程前置分析、或需要簡報化的顧客研究摘要。
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Customer Persona Framer
@@ -185,8 +185,3 @@ When information is unknown:
 - make `情緒` a real state or transition, not a marketing adjective
 - make `metrics` observable, such as click-through, consultation rate, trial start, repeat use, or support resolution
 - slide-ready mode should shorten phrasing, not change the substance
-
-## Suggested Prompts
-
-- `Use $customer-persona-framer to create a Traditional Chinese persona profile from 產品或服務 and 目標客群.`
-- `Use $customer-persona-framer to create a Traditional Chinese journey-framing brief with persona, 5W1H, and a handoff block for customer-journey-mapper.`

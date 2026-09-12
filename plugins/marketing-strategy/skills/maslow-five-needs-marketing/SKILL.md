@@ -5,7 +5,7 @@ description: >-
   marketing and copy messaging frameworks based on Maslow needs, including
   五情疊加行銷、想打動消費者、訂定文案方向、主訴求設計、CTA 設計、跨通路訊息框架、品牌故事訴求、品牌忠誠提升與會員策略。
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # 馬斯洛五需求行銷策略
@@ -189,9 +189,3 @@ Handoff：
 7. 若需求是完整成稿，將骨架轉交 `$copywriting` 生成長文案。
 8. 依 [05-output-template-and-scorecard.md](./references/05-output-template-and-scorecard.md) 完成最終輸出與評分。
 9. 需要快速填表時，使用 [five-needs-strategy-template.md](./assets/templates/five-needs-strategy-template.md)。
-
-## Suggested Prompt
-
-- `我想打動消費者，請用五層需求幫我定文案方向與 CTA。`
-- `請用 $maslow-five-needs-marketing 幫我做跨通路訊息框架（IG 廣告 + 落地頁）。`
-- `我要提升會員升級，請給我尊重層與自我實現層的文案骨架。`

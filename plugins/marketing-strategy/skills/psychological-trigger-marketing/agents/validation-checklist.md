@@ -21,7 +21,6 @@
   - `Trigger Selection Rules`
   - `Output Contract`
   - `Hard Rules`
-  - `Suggested Prompts`
 - `references/01-trigger-playbook.md` 包含六種 trigger
 - `references/02-application-matrix.md` 包含 channel 與目標的套用表
 - `agents/` 包含三個 pressure scenario 與一份 checklist

@@ -6,7 +6,7 @@ description: >-
   facilitation, and personal coaching. MUST trigger on requests such as
   重大決策、偏誤檢查、提案審查、決策會議引導、決策教練、go/no-go 決策。
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Decision Bias Quality Control
@@ -128,7 +128,3 @@ metadata:
 - 不可只給結論不給計算過程。
 - 不可把單一觀點誤當團隊共識。
 - 必須標註假設與不確定性來源。
-
-## Suggested Prompt
-
-Use `$decision-bias-quality-control` to evaluate this high-stakes decision in dual-track mode with full 12-question scoring and dynamic risk thresholds.

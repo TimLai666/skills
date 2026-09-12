@@ -7,7 +7,7 @@ description: >-
   (震央選擇) — choosing one of four innovation starting points (資源／產品／顧客／財務導向) to
   anchor design before filling the nine boxes.
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Business Model Architect
@@ -246,7 +246,3 @@ Step 6. 產出行動化結果
 - 成本與可行性檢核: [references/05-cost-risk-feasibility-checks.md](./references/05-cost-risk-feasibility-checks.md)
 - 輸出模板與評分: [references/06-output-template-and-rubric.md](./references/06-output-template-and-rubric.md)
 - 可重用報告骨架: [assets/templates/business-model-canvas-report.md](./assets/templates/business-model-canvas-report.md)
-
-## Suggested Prompt
-
-Use `$business-model-architect` to design a complete business model in Traditional Chinese. The workflow starts with **Epicenter Selection** (震央選擇) — choosing one of four starting points (resource-driven, offer-driven, customer-driven, finance-driven) to anchor the design before filling the nine elements. Core epicenter elements receive deep design; secondary elements follow logically; deferred elements are explicitly noted. Output includes the fixed nine-element sequence (`What -> Who -> How`), the four mandatory expansion outputs, and a WT-to-SO transition path with at least three 30-day validation experiments.

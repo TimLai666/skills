@@ -8,7 +8,7 @@ description: >-
   wants to explore multiple creative angles for an existing
   object/service/business model.
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # SCAMPER 奔馳法創意思考工具
@@ -81,7 +81,3 @@ metadata:
 - priority_innovations 和七維度內容重複，缺乏整合性判斷。
 - 忽略 constraints，提出不切實際的方案。
 - 過度集中在 Substitute 和 Eliminate，忽略 Adapt 和 Rearrange 的潛力。
-
-## Suggested Prompt
-
-Use `$scamper` to apply the SCAMPER creative thinking framework to a product, service, or concept and generate structured innovation ideas in Traditional Chinese.

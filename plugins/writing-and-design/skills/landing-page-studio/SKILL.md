@@ -9,7 +9,7 @@ description: >-
   comes from the design-studio style library; this skill owns conversion
   structure, autonomous iteration, and delivery contracts.
 metadata:
-  version: "2.0.4"
+  version: "2.0.5"
 ---
 
 # Landing Page Studio
@@ -176,7 +176,3 @@ metadata:
 4. 執行多輪優化（若開啟）
 5. 產出 `GenerationOutput`
 6. 附 `qa_report` 與 `asset_sources`
-
-## Suggested Prompt
-
-`Use $landing-page-studio with style_direction from the design-studio style library, output_mode=single-file-html, autonomy_mode=multi-iteration, animation_level=high, and motion_preference=respect-reduced-motion.`
