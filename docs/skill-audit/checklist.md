@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**25 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**26 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -581,15 +581,19 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
 ### service-innovation
 
-- [ ] **47. ecosystem-map-and-blueprint**（中優先）
+- [x] **47. ecosystem-map-and-blueprint**（中優先）
 
-  **可以改哪裡：** 兩套圖型教材一起載入，案例和清單重複；泛服務設計／接觸點觸發。所有情境要求跨部門共同參與，不適合個人資料草稿。
+  **已完成並經使用者確認：** 保留服務設計、流程、接觸點與參與者關係的自然語意觸發。主檔依需求選圖並明列閱讀時機，兩套完整方法與案例分別移入 references。
 
-  **建議改法：** 觸發收斂兩種圖的製作／審查；先選圖型再讀所需結構和案例。跨部門協作放正式驗證階段，草稿標待查證者；缺口診斷不預設導入科技，允許減少流程。
+  **依討論採用的簡化：** 合併重複工具選擇與協作規則，允許先用材料做草稿，正式作業依據須經相關角色驗證。缺口不預設靠科技解決，可減少步驟或改善交接。
 
-  **應保留：** 參與者、價值交換、前後台與支援區分、方向與缺口、未證實資料標示。
+  **完整性要求：** 保留生態系地圖與服務藍圖完整檢查清單，逐項區分已確認、待確認、不適用及理由。只取消案例專屬項目的強制套用，不省略人、組織、地點、系統、各類交換及藍圖各層的檢視。未知不能當成不適用。
 
-  **原文位置：** [主檔:4](/Users/timlai/Developer/skills/plugins/service-innovation/skills/ecosystem-map-and-blueprint/SKILL.md:4)、[主檔:27](/Users/timlai/Developer/skills/plugins/service-innovation/skills/ecosystem-map-and-blueprint/SKILL.md:27)、[主檔:75](/Users/timlai/Developer/skills/plugins/service-innovation/skills/ecosystem-map-and-blueprint/SKILL.md:75)、[主檔:153](/Users/timlai/Developer/skills/plugins/service-innovation/skills/ecosystem-map-and-blueprint/SKILL.md:153)、[主檔:171](/Users/timlai/Developer/skills/plugins/service-innovation/skills/ecosystem-map-and-blueprint/SKILL.md:171)、[主檔:200](/Users/timlai/Developer/skills/plugins/service-innovation/skills/ecosystem-map-and-blueprint/SKILL.md:200)。
+  **定義與案例：** 修正為五個內容層與三條分界線，支援流程包含內部團隊。數位接觸點須完整，Tech Layer 是否獨立按需求判斷。配餐與 YouBike 案例保留，後者標明來源不可追溯的教學情境。沒有 Suggested Prompt 同類殘留。skill 1.2.0、service-innovation plugin 2.1.0。定位未改變，README 原列描述適用。
+
+  **驗證：** quick_validate、YAML／JSON、兩個相對連結、16 項完整性檢查及 git diff --check 通過。skill 數與 README 表格／總數均為 61。已檢視草稿缺資料、非數位服務、內部支援及案例套用的規則一致性，未執行真實服務工作坊。使用者已驗收並要求提交、推送，未同步安裝版本。
+
+  **目前位置：** [主檔](../../plugins/service-innovation/skills/ecosystem-map-and-blueprint/SKILL.md)、[生態系地圖](../../plugins/service-innovation/skills/ecosystem-map-and-blueprint/references/ecosystem-map.md)、[服務藍圖](../../plugins/service-innovation/skills/ecosystem-map-and-blueprint/references/service-blueprint.md)。
 
 - [ ] **48. scamper**（中優先）
 
