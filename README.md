@@ -85,7 +85,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | Skill | 適合什麼需求 |
 | --- | --- |
 | `ecosystem-map-and-blueprint` | 想用生態系地圖拆解服務參與者與價值交換，或用服務藍圖展示前台後台運作流程。 |
-| `service-design-workshop` | 想把服務設計題目轉成可執行的工作坊輸出，包含問題框架、利害關係人、服務架構、接觸點與驗證步驟。 |
+| `service-design-workshop` | 規劃或改善服務設計，整理問題、利害關係人、服務架構、接觸點與驗證計畫，支援完整工作坊及局部修改。 |
 | `service-innovation-case-study` | 想把服務創新案例做成可教學、可討論、可演練的分析輸出，快速萃取關鍵洞察與可複用策略。 |
 | `service-innovation-workshop` | 想把服務創新機會轉成多個概念選項、原型測試與風險檢查。 |
 | `scamper` | 想對現有產品、服務、流程或商業模式套用 SCAMPER 奔馳法，從七個思維維度系統化產出創新構想與優先方案。 |

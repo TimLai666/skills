@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**27 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**28 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -609,15 +609,19 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **目前位置：** [主檔](../../plugins/service-innovation/skills/scamper/SKILL.md)、[方法](../../plugins/service-innovation/skills/scamper/references/01-dimensions-and-questions.md)、[演練](../../plugins/service-innovation/skills/scamper/references/02-practice-and-advanced.md)、[案例](../../plugins/service-innovation/skills/scamper/references/03-case-studies.md)、[模板](../../plugins/service-innovation/skills/scamper/references/04-output-templates.md)。
 
-- [ ] **49. service-design-workshop**（中優先）
+- [x] **49. service-design-workshop**（中優先）
 
-  **可以改哪裡：** 服務藍圖、顧客體驗、利害關係人皆觸發；固定兩項輸入、3–5 假設、六段輸出，局部問題走全套。
+  **已完成並經使用者確認：** 保留自然語意觸發，適用完整服務設計、工作坊與局部改善。單獨的 persona、旅程圖、生態系地圖或藍圖交由可用專用技能，完整任務可搭配使用。
 
-  **建議改法：** 限定服務設計工作坊，單張圖交專用技能；輸入以足以界定目標和場域為準。六段放完整模板，局部修改只交相關部分；流程與輸出合為階段成果對照。
+  **依討論採用的簡化：** 取消兩項輸入及 3–5 假設配額，以問題、對象與場域是否足夠判斷。流程與成果合併成階段對照，完整任務涵蓋全套，局部修改處理相關階段及受影響交接。三份參考文件均明列閱讀時機，原則、方法與提問保留。
 
-  **應保留：** 顧客／營運雙視角、接觸點對應前後台、原型對象與成功訊號。
+  **模板與驗證：** 分開後台活動與支援流程，補上角色、交接內容及對象。逐階段檢查完整性，取消填一項即可的門檻。原型驗證補上成功訊號、判斷依據與未達預期時的調整，保留五個驗證問題並提供假設示例。
 
-  **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-design-workshop/SKILL.md:3)、[主檔:22](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-design-workshop/SKILL.md:22)、[主檔:37](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-design-workshop/SKILL.md:37)、[主檔:39](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-design-workshop/SKILL.md:39)、[主檔:47](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-design-workshop/SKILL.md:47)。
+  **設定與版本：** agents/openai.yaml 的 default_prompt 是介面呼叫文字，保留原設定。skill 1.2.0、service-innovation plugin 2.3.0，README 同步描述完整及局部需求。
+
+  **驗證：** quick_validate、YAML／JSON、三個相對連結、Markdown 圍欄與 git diff --check 通過。方法、原則與介面設定比對 Git 確認未變，skill 數與 README 表格／總數均為 61。逐項走查完整設計、局部接觸點修改與缺資料草稿的規則，未執行真實工作坊或使用者測試。使用者已驗收並要求提交、推送，未同步安裝版本。
+
+  **目前位置：** [主檔](../../plugins/service-innovation/skills/service-design-workshop/SKILL.md)、[模板](../../plugins/service-innovation/skills/service-design-workshop/references/service-design-output-templates.md)。
 
 - [ ] **50. service-innovation-case-study**（高優先）
 
