@@ -16,7 +16,7 @@
     {
       "name": "business-strategy",
       "source": "./plugins/business-strategy",
-      "description": "商業策略與評估：商業模式設計、BCG 矩陣、PESTEL、SWOT、決策偏誤檢查、合約紅旗掃描。"
+      "description": "商業策略與評估：商業模式設計、BCG 矩陣、PESTEL、SWOT、決策偏誤檢查。"
     },
     {
       "name": "customer-insight",

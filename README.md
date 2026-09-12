@@ -1,6 +1,6 @@
 # Agent Skills
 
-60 個 agent skills，分成 10 個 plugins，這個 repo 同時是 Claude Code plugin marketplace。
+59 個 agent skills，分成 10 個 plugins，這個 repo 同時是 Claude Code plugin marketplace。
 
 ## 安裝方式
 
@@ -54,7 +54,6 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | `pestel-analysis` | 想做嚴謹的 PESTEL / 外部環境掃描，作為 SWOT 或策略規劃前置分析。 |
 | `swot-analysis` | 想做完整 SWOT 策略分析、外部環境掃描與 SO/ST/WO/WT 策略碰撞。 |
 | `decision-bias-quality-control` | 想在高風險決策、提案審查、go/no-go 判斷前做偏誤檢查，也可讓 AI 自行查核、交叉審查並修正方案。 |
-| `red-flag-contract-scanner` | 想對合約、租約、服務條款、聘僱契約等進行「紅旗條款」與不利條件掃描，並轉化為白話建議。 |
 
 ### `customer-insight` — 顧客研究與洞察
 

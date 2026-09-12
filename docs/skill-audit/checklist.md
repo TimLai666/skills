@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**40 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**41 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -109,7 +109,13 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/business-strategy/skills/pestel-analysis/SKILL.md:3)、[主檔:41](/Users/timlai/Developer/skills/plugins/business-strategy/skills/pestel-analysis/SKILL.md:41)、[主檔:122](/Users/timlai/Developer/skills/plugins/business-strategy/skills/pestel-analysis/SKILL.md:122)、[主檔:167](/Users/timlai/Developer/skills/plugins/business-strategy/skills/pestel-analysis/SKILL.md:167)、[主檔:203](/Users/timlai/Developer/skills/plugins/business-strategy/skills/pestel-analysis/SKILL.md:203)、[主檔:243](/Users/timlai/Developer/skills/plugins/business-strategy/skills/pestel-analysis/SKILL.md:243)、[主檔:272](/Users/timlai/Developer/skills/plugins/business-strategy/skills/pestel-analysis/SKILL.md:272)。
 
-- [ ] **05. red-flag-contract-scanner**（中優先）
+- [x] **05. red-flag-contract-scanner**（中優先）
+
+  **已依使用者要求刪除並經驗收：** 移除 skill 主檔、六份參考文件與兩份模板。內容主要是常見審閱清單與報告格式，缺乏經驗證的額外效益，參考文件另有錯誤法規與無來源斷言。原文可從 Git 歷史取得。
+
+  **驗證：** JSON 解析、59 個 skill／README 列數／AGENTS.md 數量一致及 git diff --check 通過。除了本項歷史紀錄，沒有剩餘引用。使用者已要求提交、推送。
+
+  **同步調整：** README 移除項目，README 與 AGENTS.md 的現有 skill 數量改為 59。business-strategy plugin 與 marketplace 描述移除合約紅旗掃描，plugin 升至 1.7.0。審查分母維持 62，本機已安裝版本不在這次刪除範圍。以下保留初次審查紀錄。
 
   **可以改哪裡：** description 堆疊契約類型與關鍵詞；主檔內嵌整份報告模板；超過三十頁直接當可能不完整、首輪強制問格式且已有預設；硬綁 /mnt/skills/public/docx 與 message_compose_v1。
 
