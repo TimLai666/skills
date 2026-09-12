@@ -6,8 +6,8 @@
 
 | 元件 | 工具 | 限制 |
 |---|---|---|
-| 硬碟健康 | `smartctl` | 大致準確 |
-| 硬碟壞磁區 | `badblocks` | 唯讀掃描安全；寫入測試會洗資料 |
+| 硬碟健康 | `smartctl` | 無法讀取或未支援時為未知；通過也不能排除故障 |
+| 硬碟壞磁區 | `badblocks` | 唯讀也增加負載；疑似故障碟先映像 |
 | 記憶體 | `memtester`（OS 內）/ memtest86+（boot） | OS 內測試覆蓋率有限，正式測要 boot memtest86+ |
 | CPU 溫度 | `sensors` (lm-sensors) | 簡單可靠 |
 | GPU / 顯示卡 | `lspci`, `lshw` | 只能識別與基本資訊 |
@@ -55,13 +55,13 @@ sudo smartctl -a -d sat /dev/sdb
 | `Reallocated_Sector_Ct` (5) | > 0 警惕；增加中 → 立刻備份 |
 | `Current_Pending_Sector` (197) | > 0 警惕 |
 | `Offline_Uncorrectable` (198) | > 0 嚴重 |
-| `UDMA_CRC_Error_Count` (199) | > 100 → SATA 線/接觸問題 |
+| `UDMA_CRC_Error_Count` (199) | 觀察是否持續增加，並檢查線材與連接 |
 | `Reported_Uncorrect` (187) | > 0 嚴重 |
 | `Power_On_Hours` (9) | 看碟使用時間 |
-| `Wear_Leveling_Count` (177, SSD) | SSD 壽命指標，接近 0 表示快寫滿了 |
+| `Wear_Leveling_Count` (177, SSD) | 廠商定義不同，須按型號解讀 |
 
 SSD 多看：
-- `Media_Wearout_Indicator` / `SSD_Life_Left`：剩餘壽命 %
+- `Media_Wearout_Indicator` / `SSD_Life_Left`：可能表示磨耗或剩餘量，依廠商定義核對
 - `Total_LBAs_Written`：累計寫入量
 
 範例輸出片段（要警惕的）：
@@ -74,7 +74,11 @@ ID# ATTRIBUTE_NAME          FLAG     VALUE WORST THRESH TYPE      UPDATED  WHEN_
 
 `FAILING_NOW` 或 `WHEN_FAILED` 是過去式都嚴重。
 
+SMART 無法讀取、USB 轉接器不支援或屬性缺漏時，狀態是未知。NVMe 需查看其健康紀錄、Critical Warning、Media Errors 與 Percentage Used，不能套用 ATA 屬性編號。
+
 ### 自我測試
+
+先完成必要資料備份；有 I/O 錯誤、異音或惡化跡象時不要加做測試，直接接 [映像救援](08-data-recovery.md)。只有穩定裝置且診斷需要時才手動啟動。
 
 ```bash
 # 短測（幾分鐘）
@@ -88,29 +92,29 @@ sudo smartctl -t long /dev/sda
 sudo smartctl -l selftest /dev/sda
 ```
 
-自我測試是硬碟韌體跑的，不是 Linux 跑的。可以一邊跑一邊用電腦。
+自我測試是硬碟韌體跑的，不是 Linux 跑的。會增加裝置負載，應避免同時執行救援讀取。
 
-「Completed without error」→ OK；其他結果都要警惕。
+「Completed without error」表示該次測試未報錯，不是整體健康保證；中斷、未完成與錯誤須分別判讀。
 
 ## 壞磁區掃描：badblocks
 
 ```bash
-# 唯讀掃描（安全）
+# 僅用於已備份且無故障跡象的裝置，唯讀仍會讀完整個範圍
 sudo badblocks -sv /dev/sda3
 
 # 結果：
 # Checking blocks 0 to N
-# Pass completed, 0 bad blocks found.    ← 健康
+# Pass completed, 0 bad blocks found.    ← 這次掃描未發現壞區
 # 或：
 # Pass completed, 17 bad blocks found.   ← 有問題
 ```
 
 注意：
 - `-w` 是寫入測試會洗光資料，**不要用**
-- `-n` non-destructive write 試比較安全但慢且還是寫
+- `-n` 會寫入再還原，救援原碟不使用
 - 壞區數量大量增加 → 整碟在死亡邊緣
 
-### 找壞區的具體位置給之後修
+### 記錄錯誤位置
 
 ```bash
 sudo badblocks -sv /dev/sda3 -o /tmp/badblocks-sda3.txt
@@ -118,7 +122,7 @@ sudo badblocks -sv /dev/sda3 -o /tmp/badblocks-sda3.txt
 cat /tmp/badblocks-sda3.txt
 ```
 
-跟 NTFS metadata 同步要回 Windows 跑 `chkdsk /r`，Linux 無對應工具。
+跟 NTFS metadata 同步要回 Windows 跑 `chkdsk /r`，Linux 無對應工具。這不是故障原碟應先執行的步驟。
 
 ## 記憶體測試
 
@@ -168,7 +172,7 @@ Win+R → `mdsched.exe` → Restart now。Microsoft 自己的記憶體診斷。
 
 ```bash
 sudo apt install lm-sensors
-sudo sensors-detect    # 自動偵測 sensor，按 YES 一路下
+sudo sensors-detect    # 僅在感測器未識別時依硬體選擇探測項目
 sensors
 ```
 
@@ -230,6 +234,8 @@ radeontop
 
 ## 整體 stress test
 
+完成資料保全後，依症狀選測試負載並監看溫度；不把壓力測試當成每案必跑。救援碟或故障磁碟仍連接時，不加入磁碟 I/O 壓力負載。
+
 ```bash
 sudo apt install stress-ng
 
@@ -266,7 +272,7 @@ dmesg -T | grep -iE 'error|fail|critical' | tail -50
 # [12345.679] critical medium error
 ```
 
-這種訊息基本上是硬碟在死。立刻切到 ddrescue 模式。
+這些錯誤可能來自媒體、線材、供電或控制器。先停止修復與全面掃描，保全資料並依 [08](08-data-recovery.md) 評估映像；再辨識故障來源。
 
 ## 系統開機異常表單
 
@@ -291,55 +297,21 @@ journalctl -b -1
 
 仍偵測不到 → 韌體壞掉或 SSD 死了。某些品牌（Crucial、Samsung 等）有 power-cycle recovery 程序，查該型號的官方文件。
 
-### SSD 過保固期 = 壽命到了
+### SSD 磨耗與 TRIM
 
-NAND 寫入次數有上限。看 `Total_LBAs_Written` / 製造商保證寫入量（TBW）。接近或超過就規劃換新。
+保固到期不等於壽命耗盡。核對該型號的寫入量、磨耗指標、媒體錯誤及實際症狀，再判斷是否換新。救已刪除資料時不要執行 TRIM；它可能使仍可救的內容不可讀。
 
-### TRIM 沒啟用
-
-SSD 用久變慢的常見原因。Windows 那邊問題，但 Linux 救援期間可以看 TRIM 設定：
-
-```bash
-sudo fstrim --dry-run /mnt/win    # NTFS 不支援，會錯誤；只是檢查邏輯
-```
-
-實際 Windows 那邊讓使用者跑：
+若救援完成後要檢查 Windows 的刪除通知設定，可在 Windows 執行：
 
 ```cmd
-# 看 TRIM 狀態
 fsutil behavior query DisableDeleteNotify
-# 結果為 0 = TRIM 啟用，1 = 停用
-
-# 啟用
-fsutil behavior set DisableDeleteNotify 0
 ```
+
+回傳 0 表示對應檔案系統的刪除通知未停用，不代表整條儲存路徑必然已成功處理 TRIM；後續依實際裝置與 Windows 設定處理。
 
 ## 完整硬體健檢腳本
 
-`scripts/disk-health-report.sh` 把上面的 smartctl / SMART self-test 自動做完，輸出一份報告。詳見該檔。
-
-如果使用者報告「電腦會自己關機 / 隨機當機」，但不確定是什麼，這個流程：
-
-```bash
-# 1. 硬碟 SMART
-for d in /dev/sd? /dev/nvme?n?; do
-    [ -b "$d" ] || continue
-    echo "=== $d ==="
-    sudo smartctl -H "$d"
-done
-
-# 2. 看溫度
-sensors
-
-# 3. 開壓力測試，邊跑邊看
-stress-ng --cpu $(nproc) --vm 2 --vm-bytes 1G --timeout 600s &
-watch -n 2 sensors
-
-# 4. 跑記憶體測試（要重開機進 memtest86+）
-
-# 5. 看 dmesg 有沒有 I/O error
-dmesg -T | grep -iE 'error|fail'
-```
+[disk-health-report.sh](../scripts/disk-health-report.sh) 收集既有 SMART 資料，不自動啟動自我測試或 badblocks。依當機症狀選擇本頁的溫度、記憶體或負載測試；有磁碟錯誤時先處理資料保全。
 
 # 何時該叫使用者送修
 

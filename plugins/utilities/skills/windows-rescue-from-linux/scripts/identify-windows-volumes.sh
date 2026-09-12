@@ -5,6 +5,13 @@
 # 用法：sudo bash identify-windows-volumes.sh
 
 set -u
+PROBE=false
+case "${1:-}" in
+    "") ;;
+    --probe) PROBE=true ;;
+    *) echo "用法：sudo bash $0 [--probe]（確認磁碟適合讀取後才探查內容）"; exit 2 ;;
+esac
+
 
 if [[ $EUID -ne 0 ]]; then
     echo "請用 sudo 跑" >&2
@@ -56,6 +63,11 @@ for PART in "${ALL_PARTS[@]}"; do
     SIZE=$(lsblk -nbo SIZE "$DEV" 2>/dev/null | head -1)
     SIZE_HUMAN=$(numfmt --to=iec --suffix=B --format="%.1f" "$SIZE" 2>/dev/null || echo "?")
 
+    if ! $PROBE; then
+        printf '%s  type=%s label=%s partlabel=%s size=%s\n' "$DEV" "$FSTYPE" "$LABEL" "$PARTLABEL" "$SIZE_HUMAN"
+        continue
+    fi
+
     # BitLocker
     if [[ "$FSTYPE" == "BitLocker" ]] || dd if="$DEV" bs=8 count=1 2>/dev/null | grep -q "FVE-FS"; then
         BITLOCKER_PARTS[$DEV]="$SIZE_HUMAN, label=$LABEL"
@@ -78,11 +90,11 @@ for PART in "${ALL_PARTS[@]}"; do
             if mount -t vfat -o ro "$DEV" "$TMPMOUNT" 2>/dev/null; then
                 if [[ -d "$TMPMOUNT/EFI" ]] || [[ -d "$TMPMOUNT/efi" ]]; then
                     EFI_PARTS[$DEV]="$SIZE_HUMAN, label=$LABEL"
-                    umount "$TMPMOUNT" 2>/dev/null
+                    umount "$TMPMOUNT" 2>/dev/null || { echo "卸載失敗：$TMPMOUNT" >&2; exit 1; }
                     rmdir "$TMPMOUNT"
                     continue
                 fi
-                umount "$TMPMOUNT" 2>/dev/null
+                umount "$TMPMOUNT" 2>/dev/null || { echo "卸載失敗：$TMPMOUNT" >&2; exit 1; }
             fi
             rmdir "$TMPMOUNT"
         fi
@@ -101,11 +113,11 @@ for PART in "${ALL_PARTS[@]}"; do
                 if [[ -f "$TMPMOUNT/Recovery/WindowsRE/Winre.wim" ]] || \
                    find "$TMPMOUNT" -maxdepth 3 -name "Winre.wim" -print -quit 2>/dev/null | grep -q .; then
                     RECOVERY_PARTS[$DEV]="$SIZE_HUMAN, label=$LABEL"
-                    umount "$TMPMOUNT" 2>/dev/null
+                    umount "$TMPMOUNT" 2>/dev/null || { echo "卸載失敗：$TMPMOUNT" >&2; exit 1; }
                     rmdir "$TMPMOUNT"
                     continue
                 fi
-                umount "$TMPMOUNT" 2>/dev/null
+                umount "$TMPMOUNT" 2>/dev/null || { echo "卸載失敗：$TMPMOUNT" >&2; exit 1; }
             fi
             rmdir "$TMPMOUNT"
         fi
@@ -124,11 +136,17 @@ for PART in "${ALL_PARTS[@]}"; do
                 fi
                 WIN_PARTS[$DEV]="$SIZE_HUMAN, label=$LABEL$BUILD"
             fi
-            umount "$TMPMOUNT" 2>/dev/null
+            umount "$TMPMOUNT" 2>/dev/null || { echo "卸載失敗：$TMPMOUNT" >&2; exit 1; }
         fi
         rmdir "$TMPMOUNT"
     fi
 done
+
+if ! $PROBE; then
+    echo "目前僅列出分割區資料，尚未檢查 Windows 或 EFI 內容。"
+    echo "有異音、讀取錯誤或掉線時先做映像救援。確認適合探查後，再加 --probe 辨識內容。"
+    exit 0
+fi
 
 # 4. 輸出分類結果
 print_section() {
@@ -153,45 +171,10 @@ print_section "Windows Recovery 分割區（含 Winre.wim）" "$YELLOW" RECOVERY
 print_section "BitLocker 加密分割區（需 recovery key 解密）" "$RED" BITLOCKER_PARTS
 print_section "Windows Dynamic Disk（需 ldmtool 處理）" "$RED" DYNAMIC_PARTS
 
-# 5. 提供建議的掛載指令
-echo -e "${BOLD}==== 建議的掛載指令 ====${NC}"
-echo ""
+# 5. 多個候選須對照磁碟、分割區 UUID 與安裝內容，不自行選第一個。
+echo "對照上面的裝置型號、序號、分割區與 Windows 內容，確認目標後執行："
+echo 'sudo bash scripts/mount-windows-safe.sh /dev/已確認的分割區 /mnt/win'
 
-if [[ ${#WIN_PARTS[@]} -gt 0 ]]; then
-    echo -e "${GREEN}# 建議第一步：唯讀掛載 Windows 系統碟${NC}"
-    echo "sudo mkdir -p /mnt/win"
-    for k in "${!WIN_PARTS[@]}"; do
-        echo "sudo mount -t ntfs-3g -o ro $k /mnt/win   # 唯讀，安全"
-        echo ""
-        echo -e "${YELLOW}# 確認看得到 Windows 後，如果要修改：${NC}"
-        echo "# sudo umount /mnt/win"
-        echo "# sudo mount -t ntfs-3g -o rw,remove_hiberfile $k /mnt/win"
-        break
-    done
-    echo ""
-fi
-
-if [[ ${#EFI_PARTS[@]} -gt 0 ]]; then
-    echo -e "${BLUE}# 修開機問題時需要掛 EFI 分割區${NC}"
-    echo "sudo mkdir -p /mnt/efi"
-    for k in "${!EFI_PARTS[@]}"; do
-        echo "sudo mount -t vfat -o ro $k /mnt/efi"
-        break
-    done
-    echo ""
-fi
-
-if [[ ${#BITLOCKER_PARTS[@]} -gt 0 ]]; then
-    echo -e "${RED}# 偵測到 BitLocker 加密碟，先弄到 recovery key${NC}"
-    echo "# 取得 key 後："
-    echo "sudo mkdir -p /mnt/bitlocker /mnt/win"
-    for k in "${!BITLOCKER_PARTS[@]}"; do
-        echo "sudo dislocker -V $k -p<48-digit-recovery-key> -- /mnt/bitlocker"
-        echo "sudo mount -t ntfs-3g -o loop,ro /mnt/bitlocker/dislocker-file /mnt/win"
-        break
-    done
-    echo ""
-fi
 
 # 6. 警告與提醒
 echo -e "${BOLD}==== 警告與提醒 ====${NC}"
@@ -216,25 +199,9 @@ for DISK in $(lsblk -d -nro NAME -e 7,11 | grep -v loop); do
 done
 
 echo ""
-echo "Hibernation 檢查："
-for k in "${!WIN_PARTS[@]}"; do
-    TMPMOUNT=$(mktemp -d)
-    if mount -t ntfs-3g -o ro "$k" "$TMPMOUNT" 2>/dev/null; then
-        if [[ -f "$TMPMOUNT/hiberfil.sys" ]]; then
-            HSIZE=$(stat -c%s "$TMPMOUNT/hiberfil.sys" 2>/dev/null || echo 0)
-            if [[ "$HSIZE" -gt 1048576 ]]; then
-                echo -e "  $k: ${YELLOW}hiberfil.sys 存在（$(numfmt --to=iec --suffix=B "$HSIZE")），rw 掛載時要加 remove_hiberfile${NC}"
-            fi
-        fi
-        umount "$TMPMOUNT" 2>/dev/null
-    fi
-    rmdir "$TMPMOUNT"
-done
-
-echo ""
 echo -e "${BOLD}盤點完成${NC}"
 echo ""
 echo "下一步建議："
 echo "  • 看 references/02-symptom-triage.md 確認故障類型"
 echo "  • 看 references/03-mount-windows.md 安全掛載"
-echo "  • 不確定狀況時，先 ro 掛載 + rsync 救資料到外接碟"
+echo "  • 有硬體故障跡象時，先映像救援，再檢查副本"

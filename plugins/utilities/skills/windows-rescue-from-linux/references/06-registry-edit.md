@@ -1,9 +1,10 @@
 # 06 — Registry 編輯（密碼重設、服務停用、帳號操作）
 
-從 Linux 編輯 Windows registry 主要靠兩個工具：
+從 Linux 檢查與編輯 Windows registry：
 
 - **chntpw**：互動式、最適合密碼重設、SAM/SYSTEM hive 操作
-- **hivexsh**：腳本化、適合精確修改特定 key/value
+- **hivexsh**：唯讀巡覽 key/value
+- **hivexregedit**：匯出與合併精確的 key/value 變更
 
 ## Registry hive 位置
 
@@ -24,38 +25,31 @@
 /mnt/win/Users/USERNAME/NTUSER.DAT
 ```
 
-## 動手前必做：備份
+## 共通準備與還原
+
+先讀 [01 安全原則](01-safety-principles.md) 與 [03 掛載](03-mount-windows.md)。唯讀檢查原 hive，在外接健康磁碟保留原始 hive 與同名交易日誌，另建工作副本；不要直接編輯唯一原件。以下假設 `/media/external/rescue/registry/` 是本案新建目錄。
 
 ```bash
-cd /mnt/win/Windows/System32/config
-sudo cp SAM SAM.bak.$(date +%Y%m%d)
-sudo cp SYSTEM SYSTEM.bak.$(date +%Y%m%d)
-sudo cp SOFTWARE SOFTWARE.bak.$(date +%Y%m%d)
+mkdir -p /media/external/rescue/registry
+sudo cp -a /mnt/win/Windows/System32/config/SYSTEM \
+    /media/external/rescue/registry/SYSTEM.original
+sudo cp -a /media/external/rescue/registry/SYSTEM.original \
+    /media/external/rescue/registry/SYSTEM.work
 ```
 
-弄壞了：
-
-```bash
-sudo cp SAM.bak.YYYYMMDD SAM
-```
-
-## 掛載方式
-
-可以唯讀讀內容、確認要改什麼。實際改的時候要 rw 掛載：
-
-```bash
-sudo umount /mnt/win
-sudo mount -t ntfs-3g -o remove_hiberfile,rw /dev/sda3 /mnt/win
-```
+實際要改 SAM、SOFTWARE 或 NTUSER.DAT 時，以對應 hive 套用此步驟。修改後重新開啟副本、匯出並比對，確認只有預定 key/value 改變。依 03 切換可寫掛載後，再備份並將驗證過的副本寫回原檔，保留原有檔案與 NTFS 權限；同步、卸載後測試。失敗就由備份還原本次修改，勿繼續疊加猜測。髒 hive 或未完成的交易日誌須先處理，不能靠清除休眠檔修復 registry。
 
 ## chntpw：密碼重設與帳號操作
 
 ### 重設使用者密碼
 
-```bash
-cd /mnt/win/Windows/System32/config
+離線清除本機密碼前，確認 EFS 檔案、憑證與保存的認證是否另有復原方式；重設密碼可能使它們無法解密。
 
-sudo chntpw -i SAM
+```bash
+cd /media/external/rescue/registry
+
+# 已依上節建立 SAM.original 與 SAM.work
+sudo chntpw -i SAM.work
 ```
 
 進到選單：
@@ -127,36 +121,14 @@ Select: [q] >
 
 ### 「我用的是 Microsoft 帳號（線上）登入」
 
-chntpw 只能改本機帳號密碼，沒辦法改 Microsoft 帳號（線上）的密碼。處理方式：
-
-選項 A：把該帳號轉成本機帳號
-```
-chntpw 主選單 → 9 (Registry editor)
-> cd SAM\SAM\Domains\Account\Users\<RID>
-# 找 F 或 V 值改動 ── 較複雜，不建議新手做
-```
-
-選項 B（推薦）：啟用 Administrator（內建管理員，本機帳號），用它登入，再從 Windows 內部改 Microsoft 帳號
-
-```
-chntpw -i SAM
-> 1
-> Administrator
-> 1   # 清空密碼
-> 2   # unlock + enable
-> q
-> q
-> y   # 寫入
-```
-
-選項 C：直接到 https://account.microsoft.com 線上改 MSA 密碼，不用碰到本機 registry。
+chntpw 不能重設 Microsoft 帳號的線上密碼。使用官方帳號復原流程；若目標是本機資料救援，改走 [08 資料救援](08-data-recovery.md)。啟用另一個本機管理員不會復原原帳號的加密金鑰。
 
 ### 啟用隱藏的 Administrator
 
 Windows 預設裝完會把內建 Administrator 帳號停用。要啟用：
 
 ```
-chntpw -i SAM
+chntpw -i SAM.work
 > 1
 > Administrator
 > 2   # Unlock and enable
@@ -169,7 +141,7 @@ chntpw -i SAM
 ### 把使用者升為管理員
 
 ```
-chntpw -i SAM
+chntpw -i SAM.work
 > 1
 > <username>
 > 3   # Promote to administrator
@@ -181,216 +153,104 @@ chntpw -i SAM
 帳號被「太多次登入失敗」鎖住：
 
 ```
-chntpw -i SAM
+chntpw -i SAM.work
 > 1
 > <username>
 > 2   # Unlock
 > q ...
 ```
 
-## hivexsh：精確修改
+## 唯讀檢查與精確修改
 
-chntpw 適合互動，hivexsh 適合知道路徑就直接改。
+需要修改服務、惡意啟動項或 ProfileList 時，都使用本節的副本合併流程。`hivexsh setval` 會替換目前 key 的**全部 values**，不適合當成單值更新；`hivexregedit --merge` 保留未指定的其他 values 與子 key。
 
-### 安裝
+Debian / Ubuntu 的 `hivexsh` 在 `libhivex-bin`，`hivexregedit` 在 `libwin-hivex-perl`。安裝後以 `command -v hivexregedit` 確認工具可用。
 
 ```bash
-sudo apt install libhivex-bin
+sudo apt install libhivex-bin libwin-hivex-perl
 ```
 
-### 唯讀檢查
+### 找到實際 ControlSet
 
 ```bash
+sudo hivexregedit --export \
+    /media/external/rescue/registry/SYSTEM.original '\Select'
+```
+
+依 `Current` 決定 `ControlSet001`、`ControlSet002` 等路徑，同時記下 `Default`、`LastKnownGood`。離線 hive 沒有可直接編輯的 `CurrentControlSet` 別名。
+
+### 唯讀巡覽
+
+```text
 sudo hivexsh /mnt/win/Windows/System32/config/SYSTEM
-
-# 在 hivexsh 提示下
-> ls
-> cd ControlSet001
-> ls
-> cd Services
-> ls
-> cd Eventlog
-> lsval        # 列出 values
-> exit
-```
-
-操作邏輯：
-
-- `ls` 列子 key
-- `cd <key>` 進去
-- `cd ..` 回上層
-- `lsval` 列當前 key 的 value
-- `exit` 不存檔離開
-
-### 可寫修改
-
-```bash
-sudo hivexsh -w /mnt/win/Windows/System32/config/SYSTEM
-> commit    # 在做完所有修改後存檔
-```
-
-### 停用問題服務（不讓它在開機時載入）
-
-服務在 `ControlSet001\Services\<服務名>`。`Start` 值控制啟動類型：
-
-| Start 值 | 意義 |
-|---|---|
-| 0 | Boot（kernel-level driver） |
-| 1 | System |
-| 2 | Auto |
-| 3 | Manual |
-| 4 | Disabled |
-
-把問題服務改成 4：
-
-```bash
-sudo hivexsh -w /mnt/win/Windows/System32/config/SYSTEM
-> cd ControlSet001\Services\<服務名>
+> cd ControlSet001\Services\Eventlog
 > lsval
-# 看現有 Start 值
-> setval 1
-Type of value? dword
-Value to assign? 4
-Name of value? Start
-> commit
-> exit
-```
-
-或一行 setval（看 hivex 版本可能不同）。如果 setval 互動式語法在你版本上不一樣：
-
-```bash
-hivexget /mnt/win/Windows/System32/config/SYSTEM \
-    'ControlSet001\Services\ServiceName' 'Start'
-
-# 用 hivexml 整個 dump 出來改完再 import 也行
-```
-
-### 場景：driver 載入後黑屏
-
-某次 Windows Update 後裝了爛 driver，每次開機載入就黑屏。從 Linux 停用該 driver：
-
-```bash
-# 找出嫌疑 driver
-ls /mnt/win/Windows/System32/drivers/*.sys -lt | head -20
-# 看最近修改的，跟事件發生時間對得起來的
-
-# 假設是 BadDriver.sys，對應服務名通常是 BadDriver
-sudo hivexsh -w /mnt/win/Windows/System32/config/SYSTEM
-> cd ControlSet001\Services\BadDriver
-> lsval
-> setval ... Start = 4 (disabled)
-> commit
-> exit
-
-# 也可以連 .sys 一起移走（不要刪，搬到別處先）
-sudo mkdir /tmp/quarantine
-sudo mv /mnt/win/Windows/System32/drivers/BadDriver.sys /tmp/quarantine/
-```
-
-### 場景：移除惡意自動啟動
-
-惡意軟體最常見的 persistence 在：
-
-- `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
-- `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`
-- `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`（在 NTUSER.DAT）
-
-```bash
-# 看 HKLM 的 Run
-sudo hivexsh /mnt/win/Windows/System32/config/SOFTWARE
-> cd Microsoft\Windows\CurrentVersion\Run
-> lsval
-# 看到不認識的項目
-> exit
-
-# 確認後刪除
-sudo hivexsh -w /mnt/win/Windows/System32/config/SOFTWARE
-> cd Microsoft\Windows\CurrentVersion\Run
-> del-val MalwareName
-> commit
-> exit
-```
-
-也要看每個使用者的 NTUSER.DAT：
-
-```bash
-for user_dat in /mnt/win/Users/*/NTUSER.DAT; do
-    echo "=== $user_dat ==="
-    sudo hivexsh "$user_dat" <<EOF
-cd Software\Microsoft\Windows\CurrentVersion\Run
-lsval
-EOF
-done
-```
-
-詳見 `07-malware-cleanup.md`。
-
-## chntpw 的 Registry Editor（選項 9）
-
-chntpw 主選單按 9 進到通用 registry editor，模仿 regedit 操作：
-
-```
-> cd HKLM\System\ControlSet001\Services
-> ls
-> cat /tmp/keys.txt   # 文字輸出至檔案
 > cd ..
-> ...
+> ls
+> exit
 ```
 
-用法跟 hivexsh 差不多，但介面互動性較好。
+`ls` 列子 key，`lsval` 列 values。範例的 ControlSet 必須換成本案值。從 hive 根目錄開始輸入完整相對路徑，或用 `cd \` 回根目錄再切換。
 
-## 嚴重損壞：RegBack 還原（Windows 10 1803 之前才能用）
+### 修改一個值：停用已確認有問題的服務
+
+`Start` 值：0 = Boot、1 = System、2 = Auto、3 = Manual、4 = Disabled。先用事件紀錄、傾印與 `ImagePath` 對上服務，不以檔名相似就停用開機必要的儲存驅動。
+
+以下假設已確認 `ControlSet001\Services\BadDriver` 是要停用的服務。將 `.reg` 存為 UTF-8、Unix 換行；這是給 hivexregedit 的輸入格式。
 
 ```bash
-ls /mnt/win/Windows/System32/config/RegBack/
-# 如果有 SAM、SYSTEM、SOFTWARE 等檔案 → 是舊版備份
+sudo hivexregedit --export /media/external/rescue/registry/SYSTEM.work \
+    '\ControlSet001\Services\BadDriver' \
+    > /media/external/rescue/registry/service.before.reg
 
-cd /mnt/win/Windows/System32/config
+cat > /media/external/rescue/registry/change.reg <<'EOF'
+Windows Registry Editor Version 5.00
 
-# 對照大小，太小（< 1KB）表示沒實際備份
-ls -lh
-ls -lh RegBack/
+[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\BadDriver]
+"Start"=dword:00000004
+EOF
 
-# 還原：先備份當前，再從 RegBack 複製
-sudo cp SAM SAM.broken.$(date +%Y%m%d)
-sudo cp SYSTEM SYSTEM.broken.$(date +%Y%m%d)
-sudo cp SOFTWARE SOFTWARE.broken.$(date +%Y%m%d)
+sudo hivexregedit --merge --prefix 'HKEY_LOCAL_MACHINE\SYSTEM' \
+    /media/external/rescue/registry/SYSTEM.work \
+    /media/external/rescue/registry/change.reg
 
-sudo cp RegBack/SAM .
-sudo cp RegBack/SYSTEM .
-sudo cp RegBack/SOFTWARE .
+sudo hivexregedit --export /media/external/rescue/registry/SYSTEM.work \
+    '\ControlSet001\Services\BadDriver' \
+    > /media/external/rescue/registry/service.after.reg
+diff -u /media/external/rescue/registry/service.before.reg \
+    /media/external/rescue/registry/service.after.reg
 ```
 
-Windows 10 1803+ 起 Microsoft 預設關掉 RegBack 自動備份（檔案還在但都是 0 byte）。確認檔案大小再做。
+檢查每個命令狀態；`diff` 回傳 1 表示有差異，必須確認只改了 `Start`，2 表示檢查失敗。匯出整個 hive 前後比較可確認其他 key 未受影響。所有檢查通過才寫回；不因 merge exit 0 就省略比對。
+
+### 刪除一個惡意啟動值
+
+在 SOFTWARE 工作副本上，以同一流程合併下列內容；prefix 改為 `HKEY_LOCAL_MACHINE\SOFTWARE`。保留其他合法啟動項。
+
+```reg
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run]
+"MalwareName"=-
+```
+
+刪除整個 key 的語法是 `[-HKEY_LOCAL_MACHINE\SOFTWARE\完整路徑]`，會連子 key 刪除，只有確認整個分支都是本案要移除的內容才使用。不要以刪除整個 IFEO key 取代刪除惡意 `Debugger` 值。
+
+修改 NTUSER.DAT 時 prefix 使用 `HKEY_CURRENT_USER`，其餘方法相同。其他持續啟動位置見 [07 惡意軟體清除](07-malware-cleanup.md)。
+
+依據：[hivexregedit 手冊](https://libguestfs.org/hivexregedit.1.html)、[合併與單值刪除實作](https://github.com/libguestfs/hivex/blob/master/perl/lib/Win/Hivex/Regedit.pm)、[hivexsh 手冊](https://libguestfs.org/hivexsh.1.html)。
+
+## 嚴重損壞：RegBack 還原
+
+先唯讀列出 `Windows/System32/config/RegBack`，核對備份日期、非零大小及能否解析。Windows 10 1803 起預設不再自動備份 registry；新版也可能由管理員另外啟用，因此不能只憑系統版本或檔名判斷可用。
+
+若有已知良好的備份，先依共通流程保留目前 hive 與交易日誌，再還原確認的備份組。整組 registry 回退會影響備份之後的帳號、服務與安裝狀態，不能只用「檔案大於 1 KB」判定有效，也不要每案都直接覆蓋 SAM、SYSTEM、SOFTWARE。
 
 ## 故障排除
 
-### chntpw 抱怨 hive 是 dirty
+### Hive 無法開啟或寫回
 
-```
-hivex: hivex_open: Mounted dirty file
-```
-
-NTFS 在 Windows 端沒乾淨關機。重新掛載：
-
-```bash
-sudo umount /mnt/win
-sudo mount -t ntfs-3g -o remove_hiberfile,rw /dev/sda3 /mnt/win
-```
-
-### 改完 commit 沒寫入
-
-權限問題：
-
-```bash
-# 確認 hive 檔案不是 read-only
-ls -la /mnt/win/Windows/System32/config/SAM
-sudo chattr -i /mnt/win/Windows/System32/config/SAM    # 通常不需要
-
-# 確認 mount 是 rw
-mount | grep /mnt/win
-# 應該包含 rw
-```
+先確認讀取錯誤、hive 格式、權限與掛載狀態。保留 hive 及其 `.LOG1`、`.LOG2` 等日誌供復原工具或 WinRE 處理；不要把 registry 交易未完成誤當 NTFS dirty，也不要盲目清除 immutable 屬性或休眠檔。副本不能正常重新開啟就不要寫回。
 
 ### 改完開機還是不行
 
@@ -398,9 +258,9 @@ mount | grep /mnt/win
 - Windows 在開機時用 LastKnownGood 機制可能回滾你的改動
 - 改錯地方了
 
-打 ControlSet001 跟 CurrentControlSet 一樣。但要看 `HKLM\SYSTEM\Select`：
+ControlSet001 不一定是正在使用的控制集，要看 `HKLM\SYSTEM\Select`：
 
-```bash
+```text
 sudo hivexsh /mnt/win/Windows/System32/config/SYSTEM
 > cd Select
 > lsval
@@ -411,39 +271,6 @@ sudo hivexsh /mnt/win/Windows/System32/config/SYSTEM
 
 如果 Current 是 2，就要改 `ControlSet002` 才有效。
 
-## 完整流程：忘記密碼
+## 密碼重設後驗證
 
-```bash
-# 1. 確認哪個是 Windows 系統碟
-sudo blkid
-lsblk -f
-
-# 2. 唯讀掛載確認資料還在
-sudo mkdir -p /mnt/win
-sudo mount -t ntfs-3g -o ro /dev/sda3 /mnt/win
-ls /mnt/win/Users/   # 確認看得到使用者
-
-# 3. 備份使用者重要資料（保險）
-sudo rsync -avh --info=progress2 /mnt/win/Users/USERNAME/Desktop \
-    /mnt/win/Users/USERNAME/Documents \
-    /media/external/backup/
-
-# 4. 卸載，可寫重掛
-sudo umount /mnt/win
-sudo mount -t ntfs-3g -o remove_hiberfile,rw /dev/sda3 /mnt/win
-
-# 5. 備份 SAM
-cd /mnt/win/Windows/System32/config
-sudo cp SAM SAM.bak.$(date +%Y%m%d)
-
-# 6. 跑 chntpw
-sudo chntpw -i SAM
-# 進選單 → 1 → 輸入帳號 → 1 (清密碼) → q → q → y
-
-# 7. 卸載
-cd
-sudo umount /mnt/win
-
-# 8. 告訴使用者：重開機後登入留空密碼按 Enter，
-#    進去後立刻去設定→帳戶→登入選項 重設密碼
-```
+完成前述備份、帳號確認與 chntpw 操作後，正常卸載再試本機登入。能登入後重新設定密碼，確認重要資料與加密內容仍可用。登入失敗時核對帳號類型與修改是否保存，不重複清除其他帳號密碼。

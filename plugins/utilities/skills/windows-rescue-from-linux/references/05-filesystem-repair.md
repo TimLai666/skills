@@ -1,6 +1,6 @@
 # 05 — 檔案系統與分割表修復
 
-NTFS 修復、分割表壞掉的救援、磁碟看不到分割區的恢復。
+NTFS 修復、分割表壞掉的救援、磁碟看不到分割區的恢復。操作前先讀 [01 安全原則](01-safety-principles.md) 與 [03 掛載](03-mount-windows.md)。有 I/O 錯誤、斷線或硬體退化跡象時，先依 [08 資料救援](08-data-recovery.md) 製作映像，再對副本修復。
 
 ## ntfsfix 的能力與限制
 
@@ -16,7 +16,7 @@ NTFS 修復、分割表壞掉的救援、磁碟看不到分割區的恢復。
 - MFT 損壞
 - 索引損壞
 
-修不了的東西最終要 Windows 端的 `chkdsk /f /r`，但 ntfsfix 先把表面狀態整理好，能讓 Windows 重新進去跑 chkdsk。
+較完整的 NTFS 修復需交給 Windows 的 `chkdsk /f`；`/r` 會額外掃描磁區，依硬體狀況與備份決定是否需要。ntfsfix 可能讓磁碟區重新掛載，並安排 Windows 下次檢查，不能保證可開機。
 
 ## ntfsfix 操作
 
@@ -41,7 +41,7 @@ NTFS volume version is 3.1.
 NTFS partition /dev/sda3 was processed successfully.
 ```
 
-→ OK，可以掛 rw 試。
+→ 工具處理完成，先唯讀重掛確認檔案可讀；仍需 Windows 端檢查。
 
 ```
 Volume is corrupt. You should run chkdsk.
@@ -53,26 +53,21 @@ Volume is corrupt. You should run chkdsk.
 Failed to read $MFT: Input/output error
 ```
 
-→ 壞磁區。直接跳 `08-data-recovery.md` 的 ddrescue。
+→ 讀取失敗，可能涉及磁碟、線材或控制器。停止原碟修復，改走 [08 資料救援](08-data-recovery.md)。
 
 ## 修不動時的 workaround
 
 ntfsfix 失敗但磁碟硬體 OK 時，幾個方向：
 
-### A. 強制清 dirty bit
+### A. dirty 旗標
 
-ntfsfix 修不了通常是因為 NTFS 標記為 dirty 太嚴重。可以強制清 dirty 旗標讓 Windows 認為一切正常——但這只是表面工夫，Windows 進去後還是會在背景觸發 chkdsk：
+`ntfsfix -d` 只有在磁碟區能修復並掛載時才清除 dirty 旗標，不是強制略過損壞。一般修復保留預設安排 Windows 檢查的行為，不把清旗標當成修復成功。
 
-```bash
-# 不建議常規使用，但作為「先讓 Windows 進去再說」的招數
-sudo ntfsfix -d /dev/sda3
-```
+### B. 複製到健康磁碟後清除舊壞磁區清單
 
-### B. 重新整理 logfile
+`ntfsfix -b` 清除 NTFS 記錄的壞磁區清單，用於已從故障碟複製到健康新碟的磁碟區。它不修復實體磁區，也不是清理 logfile 的選項；不要拿原故障碟反覆執行。
 
-```bash
-sudo ntfsfix -b /dev/sda3
-```
+依據：[ntfsfix 手冊](https://manpages.debian.org/bookworm/ntfs-3g/ntfsfix.8.en.html)。
 
 ### C. 從備份的 boot sector 還原
 
@@ -95,9 +90,9 @@ sudo dd if=/dev/sda3 bs=512 count=1 2>/dev/null | xxd | head
 
 跳到後面的 testdisk 章節。
 
-### E. 投降，回 Windows
+### E. 使用 Windows 檢查
 
-老實告訴使用者：需要 Windows 安裝媒體 → 命令提示字元 → `chkdsk C: /f /r`。Linux 真的修不動嚴重 NTFS 損壞。
+需 Windows 端檢查時，依 [13 Windows 修復](13-when-linux-cannot-fix.md) 確认 WinRE 磁碟代號，再對已備份的磁碟區執行 chkdsk。
 
 ## 分割表壞掉
 
@@ -127,8 +122,9 @@ sudo gdisk /dev/sda
 或直接：
 
 ```bash
-sudo sgdisk -e /dev/sda   # 把 backup GPT 移到磁碟末端（修被截斷的）
-sudo sgdisk -b /tmp/gpt-backup.bin /dev/sda   # 備份目前 GPT
+sudo sgdisk -b /media/external/gpt-backup.bin /dev/sda   # 先備份目前 GPT
+# 僅在磁碟容量改變、備份 GPT 位置不符且已核對分割範圍時：
+sudo sgdisk -e /dev/sda   # 把 backup GPT 移到目前磁碟末端
 ```
 
 ### 分割區整個不見：testdisk
@@ -160,9 +156,9 @@ testdisk 是互動式工具，流程：
 ### 重要：testdisk 寫之前一定要備份分割表
 
 ```bash
-sudo sfdisk -d /dev/sda > /tmp/sda-pt-backup-$(date +%Y%m%d).txt
+sudo sfdisk -d /dev/sda > /media/external/sda-pt-backup-$(date +%Y%m%d).txt
 # 寫錯了 → 還原
-sudo sfdisk /dev/sda < /tmp/sda-pt-backup-YYYYMMDD.txt
+sudo sfdisk /dev/sda < /media/external/sda-pt-backup-YYYYMMDD.txt
 ```
 
 ## NTFS undelete（救剛刪除的檔案）
@@ -171,8 +167,7 @@ sudo sfdisk /dev/sda < /tmp/sda-pt-backup-YYYYMMDD.txt
 
 ```bash
 sudo testdisk /dev/sda3
-# Analyse → 選分割區 → 按 P 進去看檔案結構
-# 紅色標記的是已刪除的
+# Advanced → 選 NTFS 分割區 → Undelete
 # 選好按 c 複製到別處（不要回原碟，會覆蓋掉資料）
 ```
 
@@ -193,47 +188,13 @@ sudo ntfsundelete /dev/sda3 -u -m '*.docx' -d /media/external/recovered/
 
 注意：刪除後磁碟有寫入過，被覆蓋的位置就回不來了。**越早救成功率越高**。
 
-## 壞磁區掃描
+## 壞磁區與 $LogFile 損壞
 
-```bash
-# 唯讀掃描（安全，不會寫）
-sudo badblocks -sv /dev/sda3
+疑似故障原碟不先跑整碟 badblocks 或長測試，唯讀掃描也會增加負荷。先參照 [09 硬體診斷](09-hardware-diagnostics.md) 判斷，再依 [08 資料救援](08-data-recovery.md) 把可讀資料救到健康媒體。
 
-# 結果類似：
-# Reading and comparing: done
-# Pass completed, X bad blocks found. (X/X/0 errors)
-```
+`badblocks -n` 是會寫入的讀寫測試，不會替 NTFS 更新 `$BadClus`；不能拿它當修復指令。已完成備份、需要驗證可汰換的測試磁碟時，才另外安排表面測試。
 
-有壞磁區的話：
-
-```bash
-# 把 NTFS metadata 標記這些位置不可用
-# 先掛 -o ro 確認資料還在再做這步
-sudo umount /mnt/win
-
-# 在 NTFS 標記壞區（讀寫掛載的相反操作）
-sudo badblocks -nsv /dev/sda3 > /tmp/badblocks.txt   # non-destructive write test，慢
-# 不要用 -wsv！會洗掉資料
-```
-
-NTFS 自己有 `$BadClus` 處理壞磁區。Linux 沒有完美對應的工具更新它。最終 Windows 端跑 `chkdsk /r` 比較可靠。
-
-實務做法：
-1. badblocks -sv 確認真有壞磁區
-2. SMART 看數量趨勢
-3. 壞磁區多且在成長 → 不修，買新硬碟，先 ddrescue 救資料
-4. 壞磁區少且穩定 → ddrescue 救資料、整碟 dump 後在新碟上跑 NTFS
-
-## $LogFile 損壞
-
-Windows 沒乾淨關機留下的 $LogFile 不一致是最常見的 dirty 原因。`ntfsfix` 會清掉。
-
-如果 ntfsfix 抱怨 logfile：
-
-```bash
-sudo ntfsfix -d /dev/sda3   # 清 dirty
-sudo ntfsfix -b /dev/sda3   # 清 logfile bad sectors（如有）
-```
+`$LogFile` 是 NTFS 交易日誌。一般 ntfsfix 已會重設日誌；報錯時保留原始輸出，依錯誤判斷檔案系統或硬體問題，不連續堆疊 `-d`、`-b` 當作萬用修復。
 
 ## 處理「Cannot read MFT, mft=0」
 
@@ -248,56 +209,30 @@ testdisk 可以嘗試從 MFT mirror 還原：
 
 ```bash
 sudo testdisk /dev/sda3
-# Advanced → Boot
-# Backup BS：用 backup boot sector 還原 main
-# Rebuild BS：完全重建（風險高）
+# Advanced → 選 NTFS 分割區 → Boot → Repair MFT
+# 比較 MFT 與 MFTMirr；先確認哪份可用，再決定修復方向
 ```
 
-兩個都失敗 → ddrescue 整碟，丟掉這顆硬碟。
+若是讀取錯誤，先救映像再處理；若硬體可讀但結構仍無法修復，在副本上進行檔案救援。結構損壞本身不代表硬碟必須丟棄。
 
 ## ntfsclone（NTFS 專用映像）
 
 當你想完整備份 NTFS（比 dd 智慧、只 copy used space）：
 
 ```bash
-# 整個分割區存成檔案
+# 存為 ntfsclone 專用映像，不能直接 loop mount
 sudo ntfsclone --save-image -o /media/external/win.img /dev/sda3
 
-# 還原
+# 還原會覆寫指定分割區；先確認目標與備份
 sudo ntfsclone --restore-image --overwrite /dev/sda3 /media/external/win.img
 ```
 
 優點：略過 free space，比 dd 快很多、檔案小。
 缺點：需要 NTFS 結構完整（dirty 太嚴重會失敗）。碟在壞時用 ddrescue 不是這個。
 
-## 完整流程範例
+## 症狀範例：UNMOUNTABLE_BOOT_VOLUME
 
-「Windows 開機後跳 UNMOUNTABLE_BOOT_VOLUME 藍白字」：
+先區分「讀不到磁區」與「可讀但 NTFS 結構不一致」。前者先救映像，後者在完成備份後執行本節的 ntfsfix 檢查與必要修復。若仍失敗，依 boot sector、MFT 或分割表證據選 TestDisk，或交給 Windows chkdsk，避免把所有工具依序跑一遍。
 
-```bash
-# 1. SMART 確認硬體
-sudo smartctl -H /dev/sda
 
-# 2. 唯讀掛載看資料
-sudo mount -t ntfs-3g -o ro /dev/sda3 /mnt/win
-ls /mnt/win/Users/
-
-# 3. 備份重要資料
-sudo rsync -avh --info=progress2 /mnt/win/Users/USERNAME/ /media/external/backup/
-
-# 4. 卸載
-sudo umount /mnt/win
-
-# 5. ntfsfix
-sudo ntfsfix --no-action /dev/sda3
-sudo ntfsfix /dev/sda3
-
-# 6. 試 rw 掛載
-sudo mount -t ntfs-3g /dev/sda3 /mnt/win
-# 成功 → 卸載讓 Windows 上次自然走 chkdsk
-sudo umount /mnt/win
-
-# 7. 告訴使用者重開機。Windows 進到桌面前可能會自動跑一次 chkdsk，那是正常的
-```
-
-修不動的話依次往下：testdisk → ddrescue → Windows 安裝媒體 chkdsk。
+TestDisk 操作依據：[NTFS 開機磁區與 MFT 修復](https://www.cgsecurity.org/wiki/Advanced_NTFS_Boot_and_MFT_Repair)、[NTFS undelete](https://www.cgsecurity.org/wiki/Undelete_files_from_NTFS_with_TestDisk)。

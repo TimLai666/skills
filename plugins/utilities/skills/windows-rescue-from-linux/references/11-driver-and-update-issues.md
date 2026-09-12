@@ -1,6 +1,6 @@
 # 11 · Driver 與 Windows Update 卡死的處理
 
-> **核心觀念**：Windows 升級或裝 driver 之後開不了機，從 Linux 端能做的有兩件事 —— 把卡住的 update 中止讓 Windows 能正常進入桌面、把壞 driver 的 .sys 移除讓系統不去 load 它。其他 driver 重裝、SFC 修復這些 Linux 做不到，得回到 Windows 內處理。
+> 從 Linux 先查事件紀錄、更新紀錄與 driver 服務設定，針對有證據的故障停用服務或替換檔案。完整更新回復、driver 安裝與元件存放區修復交由 Windows 工具處理。共通備份與掛載見 [01](01-safety-principles.md)、[03](03-mount-windows.md)，registry 變更先讀 [06](06-registry-edit.md)。
 
 ---
 
@@ -11,82 +11,18 @@
 | 「Working on updates / 請勿關閉電腦」轉圈圈幾小時 | update 的 pending operation 卡住 |
 | 「Undoing changes made to your computer」反覆 | update 安裝失敗回滾失敗 |
 | 開機後一進桌面又重開 | post-update 階段失敗 |
-| BSOD 0xC1900101 / 0x80070005 / WHEA after update | driver 不相容 |
+| 更新錯誤 0xC1900101 / 0x80070005，或更新後 WHEA 藍畫面 | 分別可能涉及驅動、存取權限或硬體；需保留實際錯誤紀錄 |
 | Windows 開機跳「Failure configuring updates」 | servicing stack 出錯 |
 
 ---
 
-## 2. 中止 pending update
+## 2. 調查與回復未完成的更新
 
-掛起 Windows 系統碟（必須 `rw`，所以要先處理 hibernation，參見 [03-mount-windows.md](03-mount-windows.md)）：
+唯讀檢查 `Windows/Logs/CBS/CBS.log`、`Windows/Logs/DISM/dism.log`、`Windows/WinSxS/pending.xml` 與 Setup 事件紀錄，對照故障時間、套件名稱及錯誤碼。`pending.xml` 存在只代表有待完成操作，不能直接推論它造成卡死。
 
-```bash
-sudo mount -t ntfs-3g -o rw,remove_hiberfile /dev/sda3 /mnt/win
-```
-
-### 2.1 移除 pending.xml（最常見有效的招）
-
-```bash
-cd /mnt/win/Windows/WinSxS/
-ls -la pending.xml 2>/dev/null && echo "EXISTS"
-
-# 不要直接刪，先改名留後路
-sudo mv pending.xml pending.xml.bak-$(date +%Y%m%d)
-```
-
-> **為什麼有效**：`pending.xml` 是 Windows 在 boot 期間要繼續做的 update 操作清單。卡住就是因為它指向一個做不完的操作。改名後 Windows 進系統會抱怨上次 update 沒裝完，但至少能進得去，再從 Settings 重跑 update。
-
-### 2.2 清空 SoftwareDistribution\Download
-
-```bash
-cd /mnt/win/Windows/SoftwareDistribution/
-ls Download/
-# 看看裡面有什麼，通常是一堆 KB 編號的資料夾
-
-# 整個資料夾改名（不是刪）
-sudo mv Download Download.bak-$(date +%Y%m%d)
-sudo mkdir Download
-sudo chmod 755 Download
-```
-
-進去 Windows 後它會重新下載 update。
-
-### 2.3 處理 PendingFileRenameOperations
-
-```bash
-# 看 SYSTEM hive 裡有沒有開機要做的檔案改名
-cd /mnt/win/Windows/System32/config
-sudo hivexsh SYSTEM
-# 在 hivexsh 裡：
-> cd ControlSet001\Control\Session Manager
-> lsval
-# 找 PendingFileRenameOperations
-# 如果有而且看起來怪（指向不存在路徑），可以清掉：
-> del-val PendingFileRenameOperations
-> commit
-> quit
-```
-
-> 動 registry 前**一定先備份 SYSTEM hive**：`sudo cp SYSTEM SYSTEM.bak`
-
-### 2.4 解開 servicing 卡死的更複雜流程
-
-```bash
-cd /mnt/win/Windows/
-
-# 1. 把 ETL log 清掉（卡 servicing 常見原因）
-sudo find Logs/CBS -name "*.log" -exec mv {} {}.bak \;
-
-# 2. 砍掉 SessionsPending 旗標
-cd /mnt/win/Windows/WinSxS
-sudo mv poqexec.log poqexec.log.bak 2>/dev/null
-
-# 3. 看 reboot.xml / setup.xml 卡住的單子
-ls -la *.xml
-# 把可疑的都改名
-```
-
----
+- 需要回復未完成的 servicing 操作時，使用 [13](13-when-linux-cannot-fix.md) 的 WinRE / DISM 路線；保留 XML 與日誌，不以改名所有 XML、刪除 CBS 紀錄或 poqexec.log 取代更新回復。
+- 若證據只指向下載快取損壞，回 Windows 停止更新服務後處理 `SoftwareDistribution\Download`。這不能撤銷已進入安裝階段的更新。
+- `SYSTEM\ControlSet00N\Control\Session Manager` 的 `PendingFileRenameOperations` 可能同時包含多個合法操作。唯讀匯出後，對照來源、目的檔案及安裝紀錄；需要排除個別操作時保留其餘成對項目與 REG_MULTI_SZ 型別，依 [06 的副本合併流程](06-registry-edit.md) 驗證。不把整個值清掉當作通用解法。
 
 ## 3. 找出有問題的 driver
 
@@ -101,8 +37,13 @@ pip install python-evtx --user
 sudo apt install python3-evtx
 
 # 看 System log
-python3 -m Evtx.Evtx /mnt/win/Windows/System32/winevt/Logs/System.evtx \
-    | grep -A 5 -i "driver\|crash\|stop" | head -100
+python3 - /mnt/win/Windows/System32/winevt/Logs/System.evtx <<'PYEVTX'
+import sys
+from Evtx.Evtx import Evtx
+with Evtx(sys.argv[1]) as log:
+    for record in log.records():
+        print(record.xml())
+PYEVTX
 ```
 
 關鍵 Event ID：
@@ -136,91 +77,52 @@ ls /mnt/win/Windows/Minidump/
 | DRIVER_IRQL_NOT_LESS_OR_EQUAL (0xD1) | 任一 driver，看附帶的 .sys |
 | SYSTEM_THREAD_EXCEPTION_NOT_HANDLED (0x7E) | 同上 |
 | VIDEO_TDR_FAILURE (0x116) | 顯卡 driver（nvlddmkm.sys / amdkmdag.sys / igdkmd64.sys） |
-| KMODE_EXCEPTION_NOT_HANDLED (0x1E) | 多半是顯卡或網卡 |
+| KMODE_EXCEPTION_NOT_HANDLED (0x1E) | 核心模式例外，需看傾印才能縮小到 driver 或其他原因 |
 | PAGE_FAULT_IN_NONPAGED_AREA (0x50) | RAM 壞或記憶體相關 driver |
 | INACCESSIBLE_BOOT_DEVICE (0x7B) | 儲存控制器 driver（intelide / iaStorAC / nvme） |
 
 ---
 
-## 4. 把壞 driver 移除
+## 4. 停用已確認有問題的 driver
 
-> **不要直接刪 .sys**！先停用 service 讓 Windows 不去 load，再把 .sys 搬走（不是刪）。這樣有問題還能搬回來。
+### 4.1 對應 service 與檔案
 
-### 4.1 找出 driver 對應的 service 名
+在實際使用的 ControlSet 下查 `Services`，以 `ImagePath` 對應 `.sys`，記下原 `Start`、相依服務及是否為開機必要的儲存驅動。修改方法使用 [06 的單值合併範例](06-registry-edit.md)，保留其他 values。
 
-```bash
-# 用 hivexsh 看 Services
-cd /mnt/win/Windows/System32/config
-sudo cp SYSTEM SYSTEM.bak  # 必備動作
-sudo hivexsh -w SYSTEM
-> cd ControlSet001\Services
-> ls
-# 找你想停的 driver service 名（通常跟 .sys 檔名一樣或相近）
-```
+例如，傾印與事件紀錄都指向 `nvlddmkm.sys`，且 `ImagePath` 確認對應 `nvlddmkm` 時，才把該服務的 `Start` 改為 4。近期修改時間只用來找候選，不足以單獨決定停用。
 
-範例：要停掉 `nvlddmkm.sys`（NVIDIA 顯卡 driver）
+### 4.2 是否需要搬走 .sys
 
-```
-> cd nvlddmkm
-> lsval
-# 看 Start 值：0=boot 1=system 2=auto 3=manual 4=disabled
-> setval 1
-Start
-dword:00000004
-> commit
-> quit
-```
+先測試單一服務變更。只有仍有其他載入路徑、且已確認要隔離該檔案時，才在外接健康磁碟保留原檔、路徑與雜湊，再移出原位置。缺少 driver 本身也可能讓開機失敗，不把搬檔當成每次停用的固定下一步。
 
-或用單行：
-
-```bash
-sudo hivexsh -w SYSTEM <<'EOF'
-cd ControlSet001\Services\nvlddmkm
-setval 1
-Start
-dword:00000004
-commit
-EOF
-```
-
-### 4.2 搬走 .sys 檔
-
-```bash
-# 建一個隔離資料夾
-sudo mkdir -p /mnt/win/Rescue-quarantine
-sudo mv /mnt/win/Windows/System32/drivers/nvlddmkm.sys \
-        /mnt/win/Rescue-quarantine/
-
-# 確認搬走了
-ls /mnt/win/Windows/System32/drivers/nvlddmkm.sys 2>/dev/null || echo "OK gone"
-```
+如果問題是 driver 檔案損壞而非不相容，可依主檔的映像檔案替換路線提取候選檔；安裝完整 driver 套件仍需 Windows。
 
 ### 4.3 重開測試
 
 如果 Windows 能進入桌面：
-- 顯卡會變 Microsoft Basic Display Adapter，解析度很低，正常的
+- 顯卡可能改用 Microsoft Basic Display Adapter；確認顯示功能與登入狀況
 - 進 Device Manager 把問題 driver uninstall 乾淨
 - 從官網下載新版 driver 重裝
 
 如果還是進不去：
-- 搬回來：`sudo mv /mnt/win/Rescue-quarantine/nvlddmkm.sys /mnt/win/Windows/System32/drivers/`
+- 若有搬檔，從本案備份恢復該檔案與原路徑
 - 把 Service Start 改回原值
-- 換懷疑下一個 driver
+- 對照測試結果重新判讀傾印與事件紀錄，再決定下一個候選
 
-### 4.4 一些常見惡名昭彰的 driver
+### 4.4 常見檔名與用途
 
-| 檔名 | 廠商/用途 | 出包頻率 |
-|---|---|---|
-| `nvlddmkm.sys` | NVIDIA 顯卡 | 高（windows update 推錯版本） |
-| `amdkmdag.sys` / `atikmdag.sys` | AMD 顯卡 | 高 |
-| `iaStorA.sys` / `iaStorAC.sys` | Intel RST 儲存 | 中（升 Windows 後不相容） |
-| `Netwtw0X.sys` | Intel 無線網卡 | 中 |
-| `bcmwl63a.sys` | Broadcom 無線網卡 | 中 |
-| `ndis.sys` | 通用網路堆疊（這壞通常是其他 driver 連帶） | — |
-| `tcpip.sys` | TCP/IP 堆疊（同上） | — |
-| `igdkmd64.sys` | Intel 內顯 | 低 |
-| `Killer*` | Killer 網卡 | 高 |
-| `RTKVHD64.sys` | Realtek 音效 | 低 |
+| 檔名 | 廠商/用途 |
+|---|---|
+| `nvlddmkm.sys` | NVIDIA 顯卡 |
+| `amdkmdag.sys` / `atikmdag.sys` | AMD 顯卡 |
+| `iaStorA.sys` / `iaStorAC.sys` | Intel RST 儲存 |
+| `Netwtw0X.sys` | Intel 無線網卡 |
+| `bcmwl63a.sys` | Broadcom 無線網卡 |
+| `ndis.sys` | 通用網路堆疊（這壞通常是其他 driver 連帶） |
+| `tcpip.sys` | TCP/IP 堆疊（同上） |
+| `igdkmd64.sys` | Intel 內顯 |
+| `Killer*` | Killer 網卡 |
+| `RTKVHD64.sys` | Realtek 音效 |
 
 ---
 
@@ -235,7 +137,7 @@ Windows 把所有裝過的 driver 存在 `DriverStore`，移除 .sys 只是停�
   ...
 ```
 
-從 Linux 動這個資料夾沒意義，**只在 Windows 內用 `pnputil` 操作**：
+可唯讀檢查套件來源與內容；解除安裝套件由 Windows 的 `pnputil` 處理。以下 oem15.inf 須換成本案已核對的套件：
 
 ```cmd
 pnputil /enum-drivers
@@ -244,57 +146,9 @@ pnputil /delete-driver oem15.inf /uninstall /force
 
 ---
 
-## 6. 完整流程範例：升級到新版 Windows 11 後 BSOD
+## 6. 範例：更新後出現 WHEA 藍畫面
 
-```bash
-# 場景：使用者開機就 BSOD WHEA_UNCORRECTABLE_ERROR，剛裝完 Windows Update
-
-# 1. 掛載
-sudo mkdir -p /mnt/win
-sudo mount -t ntfs-3g -o rw,remove_hiberfile /dev/nvme0n1p3 /mnt/win
-
-# 2. 看最近裝了什麼
-python3 -m Evtx.Evtx /mnt/win/Windows/System32/winevt/Logs/Setup.evtx 2>/dev/null \
-    | grep -i "installed\|kb" | tail -20
-
-# 3. 看哪些 driver 最近改過
-sudo find /mnt/win/Windows/System32/drivers/ -name "*.sys" -mtime -3 -ls
-
-# 4. 砍掉 pending.xml 讓 update 不卡
-cd /mnt/win/Windows/WinSxS/
-sudo mv pending.xml pending.xml.bak 2>/dev/null
-
-# 5. 清 SoftwareDistribution
-cd /mnt/win/Windows/
-sudo mv SoftwareDistribution SoftwareDistribution.bak
-sudo mkdir SoftwareDistribution
-
-# 6. 看 Minidump 確認壞的 driver（如果有）
-ls -la /mnt/win/Windows/Minidump/
-
-# 7. 假設懷疑是 Intel WiFi driver
-cd /mnt/win/Windows/System32/config
-sudo cp SYSTEM SYSTEM.bak
-sudo hivexsh -w SYSTEM <<'EOF'
-cd ControlSet001\Services\Netwtw10
-setval 1
-Start
-dword:00000004
-commit
-EOF
-
-# 8. 搬走 .sys
-sudo mkdir -p /mnt/win/Rescue-quarantine
-sudo mv /mnt/win/Windows/System32/drivers/Netwtw10.sys /mnt/win/Rescue-quarantine/
-
-# 9. 卸載
-cd /
-sudo umount /mnt/win
-
-# 10. 拔 USB 重開測試
-```
-
----
+保留 STOP code、傾印、更新紀錄與硬體診斷。WHEA 優先調查硬體回報的錯誤，不因剛更新就停用 Wi-Fi driver。若傾印明確指向某個非開機必要的 driver，再用上述單一服務變更測試；沒有這項證據就不順手清更新快取或移除 pending.xml。
 
 ## 7. Linux 完全做不到的（要回 Windows）
 
@@ -304,10 +158,10 @@ sudo umount /mnt/win
 | `DISM /RestoreHealth` 修復 Component Store | 同上 |
 | 重裝 driver（含註冊到 Device Manager） | 要走 PnP Manager |
 | 解除安裝特定 Windows Update（KBxxxxxxx） | 要走 WUSA / DISM |
-| Reset This PC / In-place upgrade | 要 WinRE 環境 |
+| Reset This PC / In-place upgrade | 前者可走 WinRE，保留應用程式的就地升級需從可運作的 Windows 啟動 |
 | 重建 Driver Store | 要 pnputil |
 
-這些情境的解法：準備 Windows 安裝媒體（ISO 燒進 Ventoy），從那個 USB 開機進 WinRE 處理。詳見 [13-when-linux-cannot-fix.md](13-when-linux-cannot-fix.md)。
+準備 Windows 安裝媒體，依任務選 WinRE 或可運作的 Windows 內執行。詳見 [13-when-linux-cannot-fix.md](13-when-linux-cannot-fix.md)。
 
 ---
 
@@ -315,19 +169,19 @@ sudo umount /mnt/win
 
 ### `mv: cannot move ... Operation not permitted`
 - 沒用 `sudo`
-- 沒 `rw` 掛載（hibernation 沒清）
+- 掛載仍是唯讀，或 NTFS / 權限狀態不允許寫入
 - BitLocker 沒解（檔系是加密的）
 
 ### 改完 registry 開機還是一樣
-- 確認改的是 `ControlSet001` 而不是 `ControlSet002`
 - 看 `Select\Current` 確認 Windows 用哪個 ControlSet
 - 確認 service 名沒打錯
-- 寫完有 `commit`
+- 工作副本合併成功、比對符合預期，並已寫回正確原檔
 
-### 改完 pending.xml 後 Windows 抱怨「修復系統失敗」
-- 正常，按取消跳過，進到桌面後跑 Settings → Update 重跑
-- 真的進不去就把 pending.xml.bak 改回 pending.xml
+### 先前手動移動過 pending.xml
+- 保留目前狀態與原始備份，使用 WinRE 的 servicing 工具檢查，不能把修復失敗訊息當成正常。
 
 ### Update 卡更深（DISM 等級的損壞）
-- Linux 做不到，需要 Windows ISO 走 in-place upgrade
+- 依 13 使用 WinRE 修復；可進 Windows 後才考慮保留應用程式的就地升級
 - 或 Reset This PC（保留檔案）
+
+事件檔讀取 API 依據：[python-evtx](https://github.com/williballenthin/python-evtx)。

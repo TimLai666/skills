@@ -1,238 +1,72 @@
-# 01 — 安全準則（必讀）
+# 01 — 安全準則
 
-救援的本質是「在已經壞的系統上動手，希望它更好不是更壞」。每個操作都有風險。這份是完整的安全清單，每次救援前都該過一遍。
+實機救援前讀這份。各修復參考共用此處的裝置確認、備份與授權規則。
 
-## 三條最高鐵則
-
-### 1. 先備份再修
-
-任何寫入動作前必須有備份。沒備份過就 `ntfsfix`、`chntpw`、`testdisk write` 是新手最常犯的錯。
-
-最低標準：使用者資料夾完整 rsync 到外接碟。
-較高標準：整個 Windows 系統碟用 `ntfsclone` 或 `ddrescue` 做完整映像。
-最高標準：兩份備份在不同實體裝置上。
-
-### 2. 不確定就停手
-
-每個指令執行前問自己：
-- 它會寫入哪個裝置？
-- 如果寫錯了，能救回來嗎？
-- 我清楚每個 flag 的意思嗎？
-
-任何一題答不出來就先停，去查清楚。多花十分鐘查文件，勝過五秒鐘把人家資料毀掉。
-
-### 3. 不要在掛載中的磁碟上做檔案系統操作
-
-`ntfsfix /dev/sda3` 但 `/dev/sda3` 還掛在 `/mnt/win` 上——這會直接損毀 NTFS 結構。一定先 `umount`。
+## 確認目標與讀寫順序
 
 ```bash
-# 確認掛載狀態
-mount | grep -E 'sd|nvme'
-
-# 確認沒人在用該磁碟
-sudo lsof /mnt/win
-
-# 卸載
-sudo umount /mnt/win
-# 卸不掉時看是誰在用
-sudo fuser -vm /mnt/win
-```
-
-## 讀寫順序：永遠先 ro
-
-第一次掛載一律 read-only：
-
-```bash
-sudo mount -t ntfs-3g -o ro /dev/sda3 /mnt/win
-```
-
-這樣即使指令打錯也不會寫到使用者磁碟。先確認：
-- 檔案系統能讀
-- 重要資料還在
-- 症狀對得上你的判斷
-
-需要寫入時才 `umount` 之後重新 `rw` 掛載：
-
-```bash
-sudo umount /mnt/win
-sudo mount -t ntfs-3g -o rw /dev/sda3 /mnt/win
-```
-
-## 裝置名稱對到位
-
-最容易出大事的錯誤：寫錯 `/dev/sdX`。
-
-```bash
-# 出事前永遠先看清楚
-lsblk -f -o NAME,FSTYPE,LABEL,SIZE,MOUNTPOINT,UUID
-
-# 用 UUID 比較安全
+lsblk -o NAME,TYPE,FSTYPE,LABEL,SIZE,MOUNTPOINTS,UUID,MODEL,SERIAL
 sudo blkid
-
-# nvme 是 /dev/nvme0n1 + 分割區 /dev/nvme0n1p1 不是 /dev/nvme0n11
-ls /dev/nvme* 2>/dev/null
+sudo fdisk -l
 ```
 
-判斷哪個是 Windows 系統碟的方法：
-- 通常是最大的 NTFS 分割區
-- 通常含有 `/Windows/System32` 資料夾（掛載後 `ls /mnt/win/Windows/System32` 確認）
-- LABEL 常常是 `Windows`、`OS`、`SYSTEM`
+對應 Windows 碟、救援 USB 與備份碟的實體裝置，含 RAID、LVM 或 loop 背後的來源。分割區大小、名稱只能縮小候選，Windows 目錄與 EFI 開機項才是後續核對依據。掛載步驟集中在 [03](03-mount-windows.md)，BitLocker 在 [10](10-bitlocker.md)。
 
-EFI 分割區：
-- 100-500MB 大小
-- FAT32
-- LABEL 常為 `EFI`、`SYSTEM`、`ESP`
-- 有 `/EFI/Microsoft/Boot/` 資料夾
+第一次掛載唯讀，確認要修改的檔案與症狀有關才改為可寫。只救資料不需要可寫掛載。`hiberfil.sys` 存在不表示正在休眠；依掛載驅動的訊息判斷，放棄休眠狀態前說明未存工作會遺失。
 
-Recovery 分割區：
-- 約 500MB-1GB
-- NTFS
-- LABEL 為 `Recovery`、`WinRE`
-- 含有 `Recovery/WindowsRE/Winre.wim`
-
-## SMART 警告就先停
-
-`sudo smartctl -H /dev/sdX` 顯示 `FAILED` 或 `failing_now`，或 `-a` 看到：
-- `Reallocated_Sector_Ct` > 0 且在增加
-- `Current_Pending_Sector` > 0
-- `Offline_Uncorrectable` > 0
-- `Reported_Uncorrect` > 0
-
-**不要再對這顆碟動任何寫入**。每多寫一次都讓僅存資料更危險。流程改成：
-
-1. `ddrescue` 把碟整個 dump 成檔案
-2. 後續所有操作都對 dump 出來的映像檔做，不碰實體碟
-
-詳見 `08-data-recovery.md` 的 ddrescue 章節。
-
-## BitLocker 偵測
-
-掛載 NTFS 前先看 `blkid` 有沒有 `TYPE="BitLocker"`：
+`ntfsfix`、檔案系統修復與分割表寫入前，卸載受影響的卷。卸載失敗先找出使用者：
 
 ```bash
-sudo blkid /dev/sda3
-# 如果回 TYPE="BitLocker" 就不要用 ntfs-3g 掛
+sudo fuser -vm /mnt/win
+sudo lsof /mnt/win
+sudo umount /mnt/win
 ```
 
-硬幹會什麼都看不到、誤以為磁碟壞掉。看 `10-bitlocker.md`。
+不要把 lazy／強制卸載當成寫入已完成的證明，也不要在仍被使用的裝置上繼續修復。
 
-## Hibernation 與 Fast Startup
+## 壞碟先處理資料
 
-Windows 沒乾淨關機（hibernation、fast startup 都算）時，NTFS 是 dirty 狀態。`ntfs-3g` 預設拒絕讀寫掛載。
+異音、反覆掉線、讀取卡死、I/O 錯誤、SMART 失敗或待處理磁區都是切換資料救援的依據。SMART 取不到或顯示 PASSED，不能排除實體故障。
+
+有故障疑慮時停止一般全碟掃描、壓力測試和原碟修復，讀 [08 資料救援](08-data-recovery.md)。評估 `ddrescue` 映像或專業救援；有嚴重異音、快速惡化且資料無替代時，不以更多重試賭資料。映像、mapfile 和修復用副本放在健康的其他實體裝置。
+
+## 備份與還原要對應改動
+
+先確認重要資料已有可讀備份；備份方法與映像格式見 [08](08-data-recovery.md)。再保存本次會變動的檔案或結構：
+
+| 操作 | 寫入前保存什麼 | 如何退回 |
+|---|---|---|
+| Registry 編輯 | 整個受影響 hive；在副本上編輯驗證 | 還原原 hive，相關交易紀錄依 [06](06-registry-edit.md) 處理 |
+| 替換個別系統檔 | 原檔內容、雜湊及必要的 NTFS 中繼資料 | [15](15-image-file-replacement.md) 的原檔還原與比較 |
+| EFI／BCD 修復 | 受影響的 ESP 內容與本機 BCD | 還原本機備份，不能拿別台的 BCD 覆蓋 |
+| 改 UEFI 開機項 | `efibootmgr -v` 的裝置、路徑、順序 | 依紀錄還原項目與順序 |
+| NTFS 修復 | 未修改的分割區映像 | 從映像建立新的修復副本 |
+| 分割表修改 | 分割表匯出及必要的整碟映像 | 確認原磁碟識別與幾何後還原 |
+
+例如將分割表存到已確認的外接備份位置：
 
 ```bash
-# 錯誤訊息會是：
-# The disk contains an unclean file system (0, 0).
-# The file system wasn't safely closed on Windows. Fix it and try again.
+sudo sfdisk -d /dev/sda > /mnt/backup/sda-partition-table.txt
 ```
 
-選項：
-- **唯讀讀資料就好**：`-o ro` 可以無視
-- **強制讀寫**：`-o remove_hiberfile` 會把 hibernation state 丟掉（使用者重開機時會「冷開機」，未存的工作會掉）
-- **更安全**：在 Windows 還能進去的情況下叫使用者 `shutdown /s /f /t 0` 完整關機
+備份副檔名或檔案存在不代表備份完整。檢查命令退出狀態、容量、可讀性，以及該格式實際如何還原。不要覆蓋唯一的原始備份。
 
-```bash
-# 唯讀（最安全）
-sudo mount -t ntfs-3g -o ro /dev/sda3 /mnt/win
+## 寫入授權
 
-# 強制讀寫（讓使用者明白會丟掉未存工作）
-sudo mount -t ntfs-3g -o remove_hiberfile /dev/sda3 /mnt/win
-```
+修復前說明確切裝置／路徑、修改內容、主要風險、備份與還原方式。已有明確授權就依範圍執行；目標、操作或風險改變時才補確認。一般唯讀查詢不用逐個指令詢問。
 
-注意：Fast Startup 跟 hibernation 是同一機制（hiberfil.sys）。使用者「明明有關機」但磁碟還是 dirty 是這個原因。
+以下操作需要具體授權：
 
-## 寫入 registry 前複製整個 hive
-
-`chntpw`、`hivexsh` 都能毀 hive，毀完開機會直接死透。
-
-```bash
-cd /mnt/win/Windows/System32/config
-
-# 至少把要動的那個 hive 備份
-sudo cp SAM SAM.bak.$(date +%Y%m%d)
-sudo cp SYSTEM SYSTEM.bak.$(date +%Y%m%d)
-sudo cp SOFTWARE SOFTWARE.bak.$(date +%Y%m%d)
-
-# 更完整：整個 config 資料夾打包
-sudo tar czf /tmp/registry-backup-$(date +%Y%m%d).tar.gz .
-```
-
-弄壞了就 `cp SAM.bak SAM`。
-
-## destructive 指令清單（執行前要兩段式確認）
-
-這些操作改完原狀基本上回不去，每個都要跟使用者覆述一次再執行：
-
-| 指令 | 風險 |
+| 操作 | 要說清楚的影響 |
 |---|---|
-| `dd if=X of=/dev/sdX` | 寫錯目標 = 整個磁碟資料消失 |
-| `mkfs.*` | 重新格式化、資料全失 |
-| `fdisk` / `gdisk` / `parted` 任何寫入動作 | 分割表寫錯 = 看似空碟 |
-| `ntfsfix` | 一般安全，但極少數情況會讓 NTFS 更壞 |
-| `testdisk` 的 Write 模式 | 改分割表，寫錯難救 |
-| `chntpw -e` / `hivexsh -w` | 改 registry，弄壞開不了機 |
-| `rm` 於 `/mnt/win/Windows/` | 不用解釋 |
-| `rsync --delete` | 目標端的東西會被刪 |
-| `mount -o remove_hiberfile` | 使用者未存工作會消失 |
-| `dislocker` 寫入模式 | BitLocker 卷有風險 |
-| `clamscan --remove` | 自動刪檔，可能誤刪 |
+| `dd`／映像還原到裝置、`mkfs`、分割表寫入 | 可能覆蓋分割區或資料 |
+| `ntfsfix`、registry 或系統檔替換 | 會改變現有系統，失敗可能更難開機 |
+| 移除或隔離掃描命中、`rsync --delete` | 會刪除或移走指定檔案 |
+| `remove_hiberfile` | 放棄 Windows 休眠狀態與未存工作 |
+| BitLocker 寫入、Secure Boot／韌體設定修改 | 可能影響解鎖或開機，需要保留金鑰與原設定 |
 
-兩段式確認的標準腳本：
+## 救援紀錄與停止條件
 
-> 「我接下來要執行 `<指令>`。它會 `<具體效果>`。如果寫錯會 `<最壞情況>`。目標是 `<裝置/路徑>`，我已經確認過這是正確的因為 `<理由>`。確定要執行嗎？」
+紀錄由使用者或接手技師讀取，保存在指定外接碟／持續性儲存區。記下裝置識別、症狀與證據、備份位置、命令與結果、修改前後差異、還原方式。只記必要內容，不收錄密碼或 recovery key。
 
-使用者答「確定 / yes / 繼續」之後再執行。
-
-## 修壞了的退路
-
-幾乎每個操作都該有「退路」：
-
-| 操作 | 退路 |
-|---|---|
-| 改 registry | 改前 cp 出 `.bak`，弄壞 cp 回去 |
-| `ntfsfix` | 改前用 `ntfsclone` 做映像 |
-| 改分割表 | testdisk 的 List 模式只看不改；要寫前用 `sfdisk -d` 備份分割表 |
-| 修 BCD | 改前 `cp BCD BCD.bak` |
-| `efibootmgr` 刪項 | `efibootmgr -v` 留下原本完整列表的截圖 |
-
-備份分割表：
-
-```bash
-# 備份
-sudo sfdisk -d /dev/sda > /tmp/sda-partition-table.txt
-# 還原
-sudo sfdisk /dev/sda < /tmp/sda-partition-table.txt
-```
-
-## 紀錄日誌
-
-每次救援都留紀錄。出事可以回溯、修不好可以給技師看。
-
-```bash
-# 開始救援時
-RESCUE_LOG=/tmp/rescue-$(date +%Y%m%d-%H%M).log
-script -a "$RESCUE_LOG"
-# 所有後續操作都會被記錄
-# 結束時 Ctrl-D 退出 script
-```
-
-或手寫筆記寫到 `~/rescue-notes-YYYYMMDD.md`，每動一步寫一句：
-```
-14:32 - 確認 /dev/sda3 是 Windows 系統碟（含 /Windows/System32）
-14:35 - smartctl -H /dev/sda 結果 PASSED
-14:37 - rsync /mnt/win/Users/john/ → /media/external/backup/
-14:50 - 備份完成，95GB
-14:52 - ntfsfix /dev/sda3 → NTFS volume version 3.1, ok
-...
-```
-
-## 什麼時候該叫停
-
-不要硬撐到把事情弄更糟。下列情況該停下來：
-
-1. **三次同樣的修法都失敗** —— 不是你的方法，是症狀理解錯了，重新分流
-2. **使用者顯得疲憊或催促** —— 急著修最容易出錯，先停手讓他冷靜
-3. **SMART 開始劣化** —— 操作過程中 reallocated sector 數字在跳，碟在加速死亡，立刻切到 ddrescue 模式
-4. **連續兩個 reference 都解決不了** —— 可能是 `13-when-linux-cannot-fix.md` 的場景，需要 Windows 媒體進 WinRE
-
-停下來不丟臉。把已經做過的事告訴使用者，建議下一步（送修、買新硬碟、找 Windows 安裝媒體），是負責的做法。
+同一方法失敗且沒有新證據，就先還原試改、重新分流。硬碟惡化、備份失敗、裝置無法確定或碰到 Windows 原生修復需求時，停止相應寫入，交代剩餘問題與可繼續的資料救援，必要時讀 [13](13-when-linux-cannot-fix.md)。

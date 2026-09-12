@@ -20,11 +20,7 @@ sudo dd if=/dev/sda3 bs=512 count=1 2>/dev/null | hexdump -C | head -2
 # BitLocker 簽章：-FVE-FS- (2D 46 56 45 2D 46 53 2D)
 ```
 
-| 開頭簽章 | 加密狀態 |
-|---|---|
-| `EB 52 90 4E 54 46 53` | 一般 NTFS（沒加密） |
-| `2D 46 56 45 2D 46 53 2D` | BitLocker（傳統） |
-| `EB 58 90 2D 46 56 45 2D` | BitLocker To Go / Win8+ |
+簽章位於磁區內，不能把表面十六進位片段當成版本分類。結合 `blkid`、分割區位置與 dislocker 的中繼資料判讀。
 
 ---
 
@@ -41,7 +37,7 @@ sudo dd if=/dev/sda3 bs=512 count=1 2>/dev/null | hexdump -C | head -2
 
 **Recovery key 長相**：`123456-234567-345678-456789-567890-678901-789012-890123`（8 組 6 位數字，總共 48 位）
 
-> **TPM-only BitLocker 的特殊狀況**：如果加密時只綁 TPM 沒設密碼，沒有 recovery key 純粹靠 TPM。這種情況**只能回原機開機**，從 Linux 真的解不開。Windows 啟用 BitLocker 時其實還是會強制備份 recovery key，使用者只是忘記在哪。
+> **TPM-only BitLocker 的特殊狀況**：如果加密時只綁 TPM 沒設密碼，沒有 recovery key 純粹靠 TPM。這種情況**只能回原機開機**，從 Linux 真的解不開。先查帳號、組織與既有備份紀錄，不能假定金鑰一定已保存。
 
 ---
 
@@ -60,10 +56,8 @@ sudo apt install dislocker fuse3
 sudo mkdir -p /mnt/bitlocker /mnt/win
 
 # 2. 用 recovery key 解開（推薦做法，最不會出包）
-sudo dislocker -V /dev/sda3 \
-    -p123456-234567-345678-456789-567890-678901-789012-890123 \
-    -- /mnt/bitlocker
-# 注意：-p 後面**直接接 recovery key 不要加空格**
+sudo dislocker -r -V /dev/sda3 -p -- /mnt/bitlocker
+# -p 不帶值，依提示輸入，避免金鑰出現在命令列、shell history 或報告
 # 解開後 /mnt/bitlocker/ 會出現 dislocker-file（這是虛擬的 NTFS 映像）
 
 # 3. 把 dislocker-file 當 loopback 掛起來
@@ -78,45 +72,38 @@ ls /mnt/win
 
 ```bash
 # 用 User Password（使用者每次開機輸入的密碼，不是登入密碼）
-sudo dislocker -V /dev/sda3 -u -- /mnt/bitlocker
+sudo dislocker -r -V /dev/sda3 -u -- /mnt/bitlocker
 # 互動式詢問密碼
 
 # 用 .BEK 檔（USB 啟動金鑰，少見）
-sudo dislocker -V /dev/sda3 -f /path/to/key.bek -- /mnt/bitlocker
+sudo dislocker -r -V /dev/sda3 -f /path/to/key.bek -- /mnt/bitlocker
 
 # 用 FVEK（Full Volume Encryption Key，從 memory dump 救出來的，超罕見）
-sudo dislocker -V /dev/sda3 -K /path/to/fvek.bin -- /mnt/bitlocker
+sudo dislocker -r -V /dev/sda3 -k /path/to/fvek.bin -- /mnt/bitlocker
 ```
 
 ---
 
-## 4. 寫入模式（高風險）
+## 4. 在映像副本上修復
 
-預設 dislocker 是讀寫，但**寫入 BitLocker 容器很容易出包**。如果只是要救資料，永遠用 `ro`：
+資料讀取同時使用 dislocker `-r` 與 NTFS 掛載 `ro`。dislocker 的虛擬 NTFS 寫入會回寫底層 BitLocker 容器；要修復時先依 [08 的映像流程](08-data-recovery.md) 保留原始映像與 mapfile，另建工作副本。
 
-```bash
-sudo mount -t ntfs-3g -o loop,ro /mnt/bitlocker/dislocker-file /mnt/win
-```
-
-如果非寫不可（例如要修 registry、要 chntpw）：
+確認工作副本來源、類型與需要修復的項目後，先卸載唯讀檢查時的兩層掛載。以下假設副本是**單一 BitLocker 分割區的原始映像**，可直接交給 dislocker：
 
 ```bash
-# 1. 先把整顆 BitLocker 區段做 ddrescue 映像（強烈建議）
-sudo ddrescue -f -n /dev/sda3 /mnt/external/bitlocker.img /mnt/external/bitlocker.log
-
-# 2. 在映像上跑 dislocker
-sudo losetup -fP --show /mnt/external/bitlocker.img
-# 假設回 /dev/loop0
-sudo dislocker -V /dev/loop0 -p<key> -- /mnt/bitlocker
-sudo mount -t ntfs-3g -o loop,rw,remove_hiberfile /mnt/bitlocker/dislocker-file /mnt/win
-
-# 3. 改完之後完全卸載
 sudo umount /mnt/win
 sudo umount /mnt/bitlocker
-sudo losetup -d /dev/loop0
+# 工作副本已依 08 建立；這次允許回寫副本
+sudo dislocker -V /mnt/external/bitlocker-work.img -p -- /mnt/bitlocker
+sudo mount -t ntfs-3g -o loop,rw /mnt/bitlocker/dislocker-file /mnt/win
+# 只執行已選定的修復；完成後依序卸載
+sudo umount /mnt/win
+sudo umount /mnt/bitlocker
 ```
 
-**為什麼這麼麻煩？**：BitLocker 寫入時若中斷（拔線、藍屏、kernel panic），整個磁碟可能直接 unrecoverable。在映像上操作壞了大不了重來。
+若是**整碟原始映像**，先以 `losetup --find --partscan --show` 連接工作副本，從 `lsblk` 確認加密分割區，再把該 `/dev/loopXpY` 傳給 `-V`；最後另行解除 loop 裝置。唯讀檢查原始映像時，losetup 也加 `--read-only`。
+
+遇到休眠或不乾淨狀態造成拒寫，接 [03 掛載排錯](03-mount-windows.md) 判斷；不為了掛載成功直接丟棄休眠資料。副本上修改成功不代表原機已修好，需交代結果要如何使用或還原；還原回原裝置須另確認來源、目標及備份。
 
 ---
 
@@ -124,10 +111,10 @@ sudo losetup -d /dev/loop0
 
 BitLocker 解開只是把加密的 NTFS 變成可讀的 NTFS。後續的修復一樣走原本流程：
 
-- 檔案系統有問題 → 走 [05-filesystem-repair.md](05-filesystem-repair.md)，但 `ntfsfix` 跑在 `/mnt/bitlocker/dislocker-file` 這個 loopback 上而不是真實裝置
+- 檔案系統有問題 → 走 [05-filesystem-repair.md](05-filesystem-repair.md)，先卸載 NTFS，再對可寫工作副本的 `dislocker-file` 建立 loop 裝置，確認它未掛載後處理；不能對加密的原始裝置直接執行 NTFS 工具
 - 改 registry → 走 [06-registry-edit.md](06-registry-edit.md)
 - 救資料 → 走 [08-data-recovery.md](08-data-recovery.md)
-- 修 boot → 走 [04-boot-repair.md](04-boot-repair.md)（但 EFI 分割區通常沒加密，可以直接動）
+- 修 boot → 走 [04-boot-repair.md](04-boot-repair.md)（EFI 分割區通常未加密，仍須確認所屬 Windows 磁碟並備份）
 
 ---
 
@@ -135,7 +122,7 @@ BitLocker 解開只是把加密的 NTFS 變成可讀的 NTFS。後續的修復�
 
 ### `dislocker: cannot find BitLocker metadata`
 - 確認分割區真的是 BitLocker（`blkid`）
-- BitLocker To Go（USB 隨身碟）用 `dislocker-fuse` 或加 `-O 65536` 偏移
+- 整碟映像先依分割表找對分割區；`-O` 是以位元組表示的實際分割區偏移，只在已確認偏移時使用，不套固定數字
 - 磁碟有實體損壞 → 先 ddrescue 出來再說
 
 ### `Cannot mount: invalid argument`
@@ -151,59 +138,21 @@ BitLocker 解開只是把加密的 NTFS 變成可讀的 NTFS。後續的修復�
 ### `cannot mount file system; Operation not permitted`
 - 確認你是 root（`sudo`）
 - FUSE 沒裝起來：`sudo apt install fuse3`
-- 確認 /etc/fuse.conf 有 `user_allow_other`（多半預設就有）
+- 依實際 FUSE 錯誤檢查權限與套件版本；沒有使用 `allow_other` 時不必為此修改全域設定
 
 ---
 
-## 7. 完整流程範例：救一台 BitLocker 加密的當機 Windows
+## 7. 資料救援的交接
 
-```bash
-# 場景：使用者公司電腦藍屏起不來，BitLocker 開著，IT 給了 recovery key
-
-# 1. 識別磁碟
-sudo lsblk -f
-# /dev/nvme0n1p1 vfat       EFI
-# /dev/nvme0n1p2            (Microsoft reserved)
-# /dev/nvme0n1p3 BitLocker  (Windows)
-# /dev/nvme0n1p4 ntfs       Recovery
-
-# 2. 先做完整 image（救命的時候 5 分鐘也要花）
-sudo ddrescue -f -n /dev/nvme0n1p3 /mnt/external/win-bitlocker.img \
-    /mnt/external/win-bitlocker.log
-
-# 3. 解開
-sudo mkdir -p /mnt/bitlocker /mnt/win
-sudo losetup -fP --show /mnt/external/win-bitlocker.img
-# 假設 /dev/loop0
-sudo dislocker -V /dev/loop0 \
-    -p<48-digit-recovery-key> -- /mnt/bitlocker
-
-# 4. 唯讀掛載先確認看得到東西
-sudo mount -t ntfs-3g -o loop,ro /mnt/bitlocker/dislocker-file /mnt/win
-ls /mnt/win/Users
-# OK，看到使用者資料夾了
-
-# 5. 救資料（不修系統的話到這就夠了）
-sudo rsync -aHv --info=progress2 \
-    /mnt/win/Users/Alice/Documents/ \
-    /mnt/external/Alice-Documents/
-
-# 6. 如果要修系統，重掛 rw
-sudo umount /mnt/win
-sudo mount -t ntfs-3g -o loop,rw,remove_hiberfile \
-    /mnt/bitlocker/dislocker-file /mnt/win
-
-# 7. 收尾
-sudo umount /mnt/win
-sudo umount /mnt/bitlocker
-sudo losetup -d /dev/loop0
-```
+解開並唯讀掛載後，依 [08 的 rsync 與驗證步驟](08-data-recovery.md) 選取需要的資料。磁碟異常時先映像再解密；只需要資料時，驗證備份後即可停止。結束時先卸載 `/mnt/win`，再卸載 `/mnt/bitlocker`，最後解除本案建立的 loop 裝置。
 
 ---
 
 ## 8. 提醒使用者
 
-- BitLocker 不是壞東西，**沒它你資料早被拿走了**。修好後鼓勵繼續開著
-- Recovery key 一定要備份到**手機 + 雲端 + 列印**至少兩種以上
-- 如果用 Microsoft 帳號登入 Windows，BitLocker 預設會自動上傳金鑰到該帳號，這是預設行為不是被盜
+- 修復後確認 BitLocker 保護狀態與復原金鑰備份
+- Recovery key 存放在能於原機故障時取得的安全位置
+- 確認這台裝置的金鑰是否已備份至個人帳號或組織，不把使用帳號登入視為備份成功證據
 - 公司電腦不要自己關 BitLocker，會違反公司政策
+
+參數依據：[dislocker 官方手冊](https://github.com/Aorimn/dislocker/blob/master/man/linux/dislocker-fuse.1)。

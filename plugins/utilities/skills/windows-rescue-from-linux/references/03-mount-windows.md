@@ -25,11 +25,13 @@ sda
 
 | 分割區 | 特徵 |
 |---|---|
-| Windows 系統 | NTFS、最大、LABEL 常為 OS/Windows/SYSTEM、含 `/Windows/System32/` |
-| EFI System Partition (ESP) | FAT32、100-500MB、含 `/EFI/Microsoft/Boot/` |
+| Windows 系統 | NTFS、LABEL 可作線索，核對 `/Windows/System32/` |
+| EFI System Partition (ESP) | 核對 ESP 分割區類型及開機項指向，通常 FAT32，含 `/EFI/Microsoft/Boot/` |
 | Microsoft Reserved (MSR) | 16MB、無檔案系統，不用掛 |
 | Recovery | NTFS、500MB-1GB、LABEL Recovery/WinRE、含 `Recovery/WindowsRE/Winre.wim` |
 | BitLocker | `blkid` 會顯示 `TYPE="BitLocker"` |
+
+掛載前依 [01 安全準則](01-safety-principles.md) 確認裝置與健康狀態。
 
 ## 第一次掛載永遠 read-only
 
@@ -57,7 +59,7 @@ Windows fully (no hibernation or fast restarting), or mount the volume
 read-only with the 'ro' mount option.
 ```
 
-選一：
+先依驅動訊息確認是否為休眠造成的拒絕。只有 `hiberfil.sys` 存在，不能據此清除休眠狀態。依用途選擇：
 
 ### 選項 A：唯讀讀就好（救資料時用）
 
@@ -116,7 +118,7 @@ sudo dd if=/dev/sda3 bs=512 count=1 2>/dev/null | hexdump -C | head -2
 
 ```bash
 sudo mkdir -p /mnt/efi
-sudo mount /dev/sda1 /mnt/efi   # FAT32 不用 ntfs-3g
+sudo mount -o ro /dev/sda1 /mnt/efi   # FAT32 不用 ntfs-3g
 
 # 看結構
 ls /mnt/efi/EFI/
@@ -142,7 +144,7 @@ ls /mnt/recovery/Recovery/WindowsRE/
 # Winre.wim, ReAgent.xml, boot.sdi, ...
 ```
 
-`Winre.wim` 是 Windows Recovery Environment 的映像檔，內含 sfc/DISM/chkdsk 等工具。Linux 解不開 .wim 但可以用 `wimlib`：
+`Winre.wim` 是 Windows Recovery Environment 的映像檔，內含 sfc/DISM/chkdsk 等工具。Linux 可用 `wimlib` 查看或提取其中檔案：
 
 ```bash
 sudo apt install wimtools
@@ -180,10 +182,10 @@ Failed to mount '/dev/sda3': Invalid argument
 sudo mount -t ntfs-3g -o ro /dev/sda3 /mnt/win
 
 # 要寫入（registry 修改、檔案修改）
-sudo mount -t ntfs-3g -o remove_hiberfile,rw /dev/sda3 /mnt/win
+sudo mount -t ntfs-3g -o rw /dev/sda3 /mnt/win
 
 # 看 EFI
-sudo mount /dev/sda1 /mnt/efi
+sudo mount -o ro /dev/sda1 /mnt/efi
 
 # uid/gid 比較順手（讓 ntfs 上的檔案看起來像本機使用者擁有）
 sudo mount -t ntfs-3g -o ro,uid=$(id -u),gid=$(id -g) /dev/sda3 /mnt/win
@@ -198,8 +200,7 @@ sudo umount /mnt/win
 # 卸不掉看誰在用
 sudo fuser -vm /mnt/win
 sudo lsof /mnt/win
-# 確定沒人後再強制
-sudo umount -l /mnt/win    # lazy umount
+# 結束使用該掛載點的程序後，重試正常 umount
 ```
 
 `umount` 成功才算真的「寫回去」了。沒卸就直接拔碟或重開——資料會 corrupt。
@@ -210,9 +211,7 @@ sudo umount -l /mnt/win    # lazy umount
 
 NTFS 結構毀損嚴重，ntfs-3g 連結構都讀不出來。流程：
 
-1. 立刻 `umount`
-2. `sudo ntfsfix /dev/sda3`（會嘗試修小毛病）
-3. 還不行→ `08-data-recovery.md` 的 ddrescue 章節，先做映像再說
+先檢查 Live 環境記憶體與 kernel 錯誤，不能只靠此訊息判定 NTFS 損壞。有讀取錯誤或結構疑慮時卸載，依 [08](08-data-recovery.md) 先保存映像，再在修復副本診斷。
 
 ### 「Invalid argument」
 
@@ -230,7 +229,7 @@ NTFS 結構毀損嚴重，ntfs-3g 連結構都讀不出來。流程：
 ls: reading directory '/mnt/win/Users': Input/output error
 ```
 
-`dmesg` 看實際磁碟 I/O 錯誤。幾乎一定是壞磁區。立刻 `umount` 並切到 ddrescue 流程。
+用 `dmesg` 檢查錯誤，磁碟、傳輸線、外接盒或控制器都可能造成 I/O error。先停止一般讀寫，卸載並依 [08](08-data-recovery.md) 評估映像救援。
 
 ```bash
 sudo umount /mnt/win

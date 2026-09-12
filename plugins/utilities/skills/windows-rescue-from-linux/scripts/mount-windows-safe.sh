@@ -2,7 +2,7 @@
 # mount-windows-safe.sh
 # 互動式安全掛載 Windows 系統碟
 # 1. 預設 ro，確認看得到才考慮 rw
-# 2. 自動處理 hibernation
+# 2. 回報休眠掛載錯誤，不清除休眠資料
 # 3. 偵測 BitLocker
 # 用法：sudo bash mount-windows-safe.sh [/dev/sdXN] [/mnt/win]
 
@@ -65,7 +65,7 @@ if [[ "$FSTYPE" == "BitLocker" ]] || dd if="$DEV" bs=8 count=1 2>/dev/null | gre
     echo "解開步驟："
     echo "  1. 取得 48 位 recovery key（從 account.microsoft.com 等）"
     echo "  2. sudo mkdir -p /mnt/bitlocker $MNT"
-    echo "  3. sudo dislocker -V $DEV -p<recovery-key> -- /mnt/bitlocker"
+    echo "  3. sudo dislocker -r -V $DEV -p -- /mnt/bitlocker  # 依提示輸入復原密碼"
     echo "  4. sudo mount -t ntfs-3g -o loop,ro /mnt/bitlocker/dislocker-file $MNT"
     echo ""
     echo "詳見 references/10-bitlocker.md"
@@ -80,40 +80,28 @@ if [[ "$FSTYPE" != "ntfs" ]]; then
 fi
 
 # 7. 建立掛載點
-mkdir -p "$MNT"
+mountpoint -q "$MNT" && { err "掛載點已被使用"; exit 1; }
+mkdir -p "$MNT" || exit 1
+ERR_FILE=$(mktemp) || exit 1
+trap 'rm -f "$ERR_FILE"' EXIT
 
 # 8. 永遠先 ro 掛
 echo ""
 echo "[第一階段] 唯讀掛載..."
-if mount -t ntfs-3g -o ro "$DEV" "$MNT" 2>/tmp/mount-err; then
-    ok "ro 掛載成功：$DEV → $MNT"
-else
-    ERR_MSG=$(cat /tmp/mount-err)
-    err "ro 掛載失敗：$ERR_MSG"
-    echo ""
-    if echo "$ERR_MSG" | grep -q "hibernated\|hiberfile"; then
-        warn "系統處於 hibernation 狀態"
-        echo "可以用 ro 強制掛（資料看得到，但要記得這是 hibernation 時的快照）"
-        read -rp "用 -o ro,force 強制 ro 掛載？[y/N] " ans
-        if [[ "$ans" =~ ^[Yy]$ ]]; then
-            mount -t ntfs-3g -o ro,force "$DEV" "$MNT" || { err "還是失敗"; exit 1; }
-            ok "強制 ro 掛載成功"
-        else
-            echo "其他選項："
-            echo "  • 開回 Windows 跑 shutdown /s /f 完整關機，再來試"
-            echo "  • sudo mount -t ntfs-3g -o remove_hiberfile $DEV $MNT  ← 寫入，會丟 hibernation 內未存的資料"
-            exit 1
-        fi
-    elif echo "$ERR_MSG" | grep -q "unclean\|dirty"; then
-        warn "NTFS 是 dirty 狀態（沒乾淨卸載過）"
-        echo "可以試 ntfsfix 處理（會寫入！），或先 ro 看狀況："
-        echo "  sudo ntfsfix --no-action $DEV    # dry run，不會寫"
-        echo "  sudo ntfsfix $DEV                # 實際修"
-        exit 1
-    else
-        echo "其他錯誤，看完整訊息：cat /tmp/mount-err"
+if mount -t ntfs-3g -o ro "$DEV" "$MNT" 2>"$ERR_FILE"; then
+    OPTIONS=$(findmnt -nro OPTIONS --target "$MNT") || { err "無法確認掛載選項"; exit 1; }
+    if [[ ",$OPTIONS," != *,ro,* ]]; then
+        err "實際掛載未確認為唯讀，停止後續讀取，請檢查掛載狀態"
         exit 1
     fi
+    ok "ro 掛載成功：$DEV → $MNT"
+else
+    ERR_MSG=$(cat "$ERR_FILE")
+    err "ro 掛載失敗：$ERR_MSG"
+    echo ""
+    echo "先依 references/03-mount-windows.md 判斷掛載錯誤。"
+    echo "若有 I/O 錯誤或硬體故障，先做映像；需要寫入修復時先備份。"
+    exit 1
 fi
 
 # 9. 確認看得到 Windows
@@ -138,14 +126,9 @@ if ! $WIN_OK; then
     ls "$MNT" | head -20
 fi
 
-# 10. 偵測 hibernation
+# 10. 檔案存在不足以判定正在休眠
 if [[ -f "$MNT/hiberfil.sys" ]]; then
-    HSIZE=$(stat -c%s "$MNT/hiberfil.sys" 2>/dev/null || echo 0)
-    HSIZE_HUMAN=$(numfmt --to=iec --suffix=B "$HSIZE" 2>/dev/null || echo "?")
-    if [[ "$HSIZE" -gt 1048576 ]]; then
-        warn "hiberfil.sys 存在（$HSIZE_HUMAN），系統可能是 hibernation/fast startup 狀態"
-        echo "   如果之後要 rw 掛載，要加 remove_hiberfile 參數"
-    fi
+    echo "hiberfil.sys 存在；休眠狀態須依掛載診斷判斷。"
 fi
 
 # 11. 提示下一步
@@ -160,20 +143,13 @@ echo "  📁 看資料："
 echo "     ls $MNT/Users/"
 echo ""
 echo "  💾 備份資料（推薦先做）："
-echo "     bash $(dirname "$0")/backup-user-data.sh /dev/EXT_DISK"
+echo "     sudo bash \"$(dirname "$0")/backup-user-data.sh\" \"$MNT\" /mnt/external/backup"
 echo ""
 echo "  🔬 看 registry / 事件日誌（ro 也能讀）："
 echo "     sudo hivexsh $MNT/Windows/System32/config/SOFTWARE"
-echo "     python3 -m Evtx.Evtx $MNT/Windows/System32/winevt/Logs/System.evtx"
+echo "     事件日誌解析見 boot-diagnostic.sh"
 echo ""
-echo "  ✏  如果之後需要修改（寫入）："
-echo "     sudo umount $MNT"
-read -p "" -t 0 && true  # 補空行
-if [[ -f "$MNT/hiberfil.sys" ]]; then
-    echo "     sudo mount -t ntfs-3g -o rw,remove_hiberfile $DEV $MNT"
-else
-    echo "     sudo mount -t ntfs-3g -o rw $DEV $MNT"
-fi
+echo "  需要修改時，先確認備份與修復目標，再依 references/03-mount-windows.md 切換掛載模式。"
 echo ""
 echo "  ⏏  卸載："
 echo "     sudo umount $MNT"

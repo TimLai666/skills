@@ -1,22 +1,22 @@
-# 13 · Linux 救不了的時候
+# 13 — Windows 原生修復工具交接
 
 > **核心觀念**：誠實面對 Linux 端的極限。有些事必須 Windows 自己的 servicing 堆疊才能做。準備好 Windows 安裝媒體（ISO 燒進 Ventoy）和 WinRE 環境，並且知道每個指令的對應位置，才不會把使用者卡死在「沒辦法救」的死巷。
 
 ---
 
-## 1. Linux 完全做不到的清單
+## 1. 需要 Windows 原生工具的工作
 
 | 任務 | 為什麼 Linux 做不到 | 必須的 Windows 環境 |
 |---|---|---|
 | `sfc /scannow` 系統檔完整性檢查 | sfc 走 Windows Component Servicing API | WinRE 或 Windows 內 |
 | `DISM /RestoreHealth` 修 Component Store | 同上 | WinRE + Windows ISO |
 | 安裝/重裝 driver 並註冊到 PnP | 走 PnP Manager / SetupAPI | Windows 內 |
-| 解除特定 KB 更新（`wusa /uninstall`） | 走 Windows Update Agent | WinRE 或 Windows 內 |
+| 解除特定 KB 更新 | Windows 內可用 wusa，離線使用 DISM | Windows 或 WinRE |
 | Reset This PC（保留/不保留檔案） | 走 WinRE 內建流程 | WinRE |
-| In-place upgrade（修復安裝） | 要跑 setup.exe | Windows 內或 ISO |
+| In-place upgrade（修復安裝） | 要在執行中的 Windows 啟動 setup.exe | 能進 Windows，另備相容 ISO |
 | 從 WinSxS 嚴重損壞恢復（pending operation 卡死無法清） | 要 Servicing Stack | WinRE + ISO |
 | 重建 Driver Store | 走 `pnputil` | Windows 內 |
-| 修復嚴重損壞的 winlogon.exe / csrss.exe | 要 sfc/DISM | WinRE |
+| 多個相依系統組件或元件儲存區損壞 | SFC／DISM 處理版本與元件關係 | WinRE |
 | 修 WMI Repository（壞掉的話） | 要 `winmgmt /resetrepository` | Windows 內 |
 | TPM-only BitLocker 解密 | 沒 TPM 沒辦法解 | 原機 + Windows |
 | Storage Spaces 池修復 | 要 Storage Spaces 服務 | Windows 內 |
@@ -24,29 +24,31 @@
 
 ---
 
+個別檔案的提取與替換可以從 Linux 嘗試，包含告知版本差異後的試改，見 [15](15-image-file-replacement.md)。單檔複製不等於重建元件儲存區或完成正式更新。
+
 ## 2. 準備 Windows 安裝媒體
 
-把 Windows 11 ISO 放進你的救援 USB（Ventoy 多開機）是必備動作：
+本案需要 Windows 原生修復工具時，準備對應架構與用途的官方安裝媒體：
 
 ### 下載 ISO
 
 - 官方：https://www.microsoft.com/zh-tw/software-download/windows11
 - 選「下載 Windows 11 磁碟映像（ISO）」
-- 24H2 或更新版本
+- 核對目標版本、架構、語言與修復用途
 
 ### 放進 Ventoy
 
 ```bash
 # 救援 USB 已經是 Ventoy（參見 00-rescue-usb-preparation.md）
 # Ventoy 的儲存分割區會自動 mount，丟 ISO 進去就行
-cp ~/Downloads/Win11_24H2_TraditionalChinese_x64.iso /media/$USER/Ventoy/
+cp /path/to/Windows.iso /media/$USER/Ventoy/
 ```
 
 開機時 Ventoy 選單會列出 ISO，選它就能進 Windows 安裝環境。
 
 ### Win10/Win11 通用 vs 特定版本
 
-- 救人時帶 **Win10 22H2** 和 **Win11 24H2** 兩個 ISO（涵蓋大部分情境）
+- 依目標 Windows 準備來源，修復來源與離線系統的更新層級、語言及版本需求見 [Microsoft 說明](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/configure-a-windows-repair-source?view=windows-11)。
 - 注意：Windows 安裝媒體版本要**相同或更新**於要修的系統，**不能用更舊版**做 in-place upgrade
 
 ---
@@ -67,7 +69,7 @@ cp ~/Downloads/Win11_24H2_TraditionalChinese_x64.iso /media/$USER/Ventoy/
 - 按住 Shift 點重新啟動 → 自動進 WinRE
 
 如果連登入都進不去：
-- 強制中斷開機 3 次（按電源鍵切電）→ 第 4 次會自動進 Windows Recovery
+- 優先使用安裝媒體的「修復您的電腦」，避免反覆強制斷電加重既有故障。
 
 ---
 
@@ -88,7 +90,7 @@ exit
 bcdedit | find "osdevice"
 ```
 
-下面範例假設 Windows 在 `D:\`、EFI 分割區是 `S:\`。
+下面範例假設 Windows 在 `D:\`、EFI 分割區是 `S:\`。先用 `dir D:\Windows` 確認，ESP 由 `diskpart` 查核後指派代號。命令依診斷選用，不把所有修復連續執行。
 
 ### 4.2 修 boot（對應 Linux 的 efibootmgr）
 
@@ -116,12 +118,12 @@ bcdboot D:\Windows /s S: /f UEFI /l zh-tw
 
 ```cmd
 :: 對離線系統跑（D:\ 是要修的 Windows）
-sfc /scannow /offbootdir=D:\ /offwindir=D:\Windows
+sfc /scannow /offbootdir=S:\ /offwindir=D:\Windows
 ```
 
-跑完看結果：
-- `did not find any integrity violations` → 沒事
-- `successfully repaired` → 修好了
+此例 `S:` 是已確認的離線開機分割區，實際代號依配置調整。跑完看結果：
+- `did not find any integrity violations` → 此次檢查未找到完整性問題
+- `successfully repaired` → SFC 報告已修復，另測試原故障
 - `found corrupt files but was unable to fix some` → 走 DISM
 
 ### 4.4 DISM（修 Component Store）
@@ -137,6 +139,9 @@ dism /Image:D:\ /Cleanup-Image /ScanHealth
 :: ISO 多半在 E:\ 或 F:\，先找
 dir E:\sources\install.*
 
+:: 先查來源中的 index，以下 1 僅為已選定 index 的例子
+dism /Get-WimInfo /WimFile:E:\sources\install.wim
+
 :: install.wim 或 install.esd
 dism /Image:D:\ /Cleanup-Image /RestoreHealth /Source:WIM:E:\sources\install.wim:1 /LimitAccess
 :: 如果是 esd：
@@ -148,17 +153,17 @@ dism /Image:D:\ /Cleanup-Image /RestoreHealth /Source:ESD:E:\sources\install.esd
 dism /Get-WimInfo /WimFile:E:\sources\install.wim
 ```
 
-通常 index 1 是 Home，2 是 Home N，... 6 是 Pro 等，看清單挑跟使用者授權對應的版本。
+依實際清單選對應版本、架構與語言，不假設 Home／Pro 永遠在固定 index。DISM 成功後再跑 SFC，最後測試開機。
 
 ### 4.5 chkdsk（檔案系統檢查，比 ntfsfix 強）
 
 ```cmd
-chkdsk D: /f /r
+chkdsk D: /f
 :: /f 修錯誤
-:: /r 找壞磁區並嘗試讀回（耗時很久）
+:: 有必要讀取壞磁區時才評估 /r，先保存映像
 ```
 
-> Linux 的 `ntfsfix` 只能處理輕量問題，**chkdsk 才是 NTFS 的官方檢查工具**。但 chkdsk 對嚴重壞道會試著 read 然後 mark bad，這跟 ddrescue 邏輯衝突 —— 如果你 SMART 看到壞道**已經爆很多**，先 ddrescue 出來再說，不要直接 chkdsk。
+> Linux 的 `ntfsfix` 只能處理輕量問題，**chkdsk 才是 NTFS 的官方檢查工具**。但 chkdsk 對嚴重壞道會試著 read 然後 mark bad，這跟 ddrescue 邏輯衝突 —— 如果磁碟有實體故障疑慮，先 ddrescue 出來再說，不要直接 chkdsk。
 
 ### 4.6 解除 KB 更新
 
@@ -173,21 +178,22 @@ dism /Image:D:\ /Get-Packages /Format:Table
 dism /Image:D:\ /Remove-Package /PackageName:Package_for_RollupFix~31bf3856ad364e35~amd64~~22621.1928.1.6
 ```
 
-把 PackageName 換成你要移的（從上面 list 找最近裝的）。
+把 PackageName 換成經日誌、失敗時序與套件資訊確認相關的完整名稱，不只憑「最近安裝」選擇。
 
-### 4.7 啟用 Administrator 帳號
+### 更新未完成導致無法開機
+
+當更新日誌與開機失敗時序支持回復待完成操作時，保存備份後，在 WinRE 對已安裝但無法開機的 Windows 執行：
 
 ```cmd
-:: 在 WinRE 內，掛載 SAM hive 改 registry
-reg load HKLM\TempSAM D:\Windows\System32\config\SAM
-:: 改 Administrator F value（複雜）...
-:: 比較簡單：先進 Safe Mode
-
-:: 或在 WinRE 直接：
-net user Administrator /active:yes
+:: D:\ 已核對是離線 Windows，不是目前執行的 WinRE（通常為 X:\）
+dism /Image:D:\ /Cleanup-Image /RevertPendingActions
 ```
 
-但 `net user` 在 WinRE 通常會說「找不到網路服務」，這時要走 Linux 的 chntpw（[06-registry-edit.md](06-registry-edit.md)）。
+這會回復先前 servicing 的全部待完成操作，不是只刪某個 XML。確認結果後重開測試，不對執行中的 Windows 或 WinRE 映像本身使用。依據：[Microsoft DISM 選項](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/dism-operating-system-package-servicing-command-line-options?view=windows-11)。
+
+### 4.7 帳號修復
+
+WinRE 中的 `net user` 不會自動操作離線 Windows 的 SAM。要修本機帳號，依 [06 Registry 編輯](06-registry-edit.md) 的授權與 hive 流程處理，不使用未完成的 SAM 位元組修改範例。
 
 ---
 
@@ -209,7 +215,7 @@ WinRE → 疑難排解 → 重設此電腦
 
 ## 6. In-place Upgrade（修復安裝）
 
-如果系統壞但能進桌面（哪怕不穩定），**這是最佳修復方式**：
+如果系統壞但能進桌面（哪怕不穩定），可評估修復安裝：
 
 1. 進 Windows
 2. 掛載 ISO 或解開 ISO 到資料夾
@@ -218,8 +224,8 @@ WinRE → 疑難排解 → 重設此電腦
 5. 走完安裝流程（會花 30-60 分鐘）
 
 **效果**：
-- 系統檔全部換新
-- 個人檔案、App、設定**全部保留**
+- 由安裝程式修復／更新系統
+- 選擇保留個人檔案與應用程式後，以安裝程式最終確認畫面為準，先保存備份
 - 比 Reset This PC 溫和很多
 
 **前提**：
@@ -235,32 +241,15 @@ WinRE → 疑難排解 → 重設此電腦
 
 當 Linux 修不好、WinRE 修不好、in-place upgrade 失敗，剩下的就是重灌。重灌前的 Linux 端準備工作：
 
+依 [08](08-data-recovery.md) 完成重要資料備份與可讀性驗證，並保存應用程式資料、所需授權資訊及重新安裝清單。Windows 授權是否可重新啟用，依實際版本與授權狀態確認，不從主機型號推斷。
+
 ```bash
-# 1. 用 Linux 端把所有重要資料備份到外接碟
-sudo mount -t ntfs-3g -o ro /dev/sda3 /mnt/win
-
-# 整個 Users 資料夾備份（最保險）
-sudo rsync -aHv --info=progress2 \
-    --exclude='AppData/Local/Temp' \
-    --exclude='AppData/Local/Microsoft/Windows/INetCache' \
-    /mnt/win/Users/ \
-    /mnt/external/Users-backup-$(date +%Y%m%d)/
-
-# 2. 也要救：
-# - C:\ProgramData\ 裡的特定 App 設定（看 App 而定）
-# - 應用程式的 license key（很多在 registry，先記下來）
-
-# 3. 看 Windows 授權形式（OEM key 嵌在 BIOS 不用記）
-sudo dmidecode -s system-product-name
-sudo dmidecode -s system-manufacturer
-# OEM key 不用記，重灌會自動激活
-
-# 4. 列出已裝的 App（重灌後參考）
-ls /mnt/win/Program\ Files/ /mnt/win/Program\ Files\ \(x86\)/ \
+# 供重裝時參考，目錄清單不等於完整安裝清單
+ls /mnt/win/'Program Files'/ /mnt/win/'Program Files (x86)'/ \
     > /mnt/external/installed-apps-list.txt
 ```
 
-備份完才能安心重灌。
+確認重灌磁碟與要保留的分割區，取得重灌授權後再執行。
 
 ---
 
@@ -275,7 +264,7 @@ ls /mnt/win/Program\ Files/ /mnt/win/Program\ Files\ \(x86\)/ \
 | 改密碼 | `chntpw` | `net user` |
 | 看 driver 載入 | 看 `services` registry | `Get-WindowsDriver` (DISM) |
 | 移除 driver | 改 Service Start=4 | `pnputil /delete-driver` |
-| 系統檔修復 | （無） | `sfc /scannow` |
+| 個別系統檔替換 | [15 映像提取與替換](15-image-file-replacement.md) | SFC／DISM |
 | Component Store 修復 | （無） | `DISM /RestoreHealth` |
 | 救資料 | `rsync` / `ddrescue` | `robocopy` |
 | 病毒掃描 | `clamav` | Defender / 第三方 |
@@ -294,8 +283,7 @@ ls /mnt/win/Program\ Files/ /mnt/win/Program\ Files\ \(x86\)/ \
 |---|---|
 | 嚴重 rootkit / bootkit 感染 | 信任邊界完全瓦解，修了也不知道乾不乾淨 |
 | 勒索病毒（含活躍 payload） | 同上，且 backup 也可能被加密 |
-| 嚴重 WinSxS 損壞 + 沒有同版本 ISO | 修起來時間比重灌長很多 |
-| 系統超過 5 年沒重灌過 + 慢到爆 | 累積太多垃圾，重灌讓使用體驗好太多 |
+| 元件修復反覆失敗，且使用者接受重裝代價 | 比較取得修復來源、還原備份及重裝的實際成本 |
 | 磁碟壞道大量出現 | 救資料後換新碟，舊碟不要繼續用 |
 | 使用者本來就要換新電腦 | 沒必要花時間 |
 
@@ -303,70 +291,8 @@ ls /mnt/win/Program\ Files/ /mnt/win/Program\ Files\ \(x86\)/ \
 
 ---
 
-## 10. 完整流程範例：使用者堅持要修不想重灌
+## 10. 交接與驗證
 
-```bash
-# 場景：使用者說「我有重要工作不能重灌，硬修」
-# Linux 端發現：WinSxS 嚴重損壞，pending.xml 移除後還是進不去
+向使用者提供已確認的 Windows／ESP 代號、診斷與備份位置、建議執行的修復命令，以及成功／失敗後如何處理。能進入 Windows 才提供修復安裝；無法開機時先走 WinRE 或資料還原。
 
-# 1. 先確定資料安全（Linux 端能做）
-sudo mount -t ntfs-3g -o ro /dev/sda3 /mnt/win
-sudo rsync -aHv --info=progress2 \
-    /mnt/win/Users/$USER/Documents/ \
-    /mnt/external/safe-backup/
-
-# 2. 跟使用者確認「資料備份完成」後才動手
-
-# 3. 拔 USB 重開，這次選 Windows 11 ISO（Ventoy 多開機）
-
-# 4. 進 WinRE → Command Prompt
-diskpart
-list volume
-# 確定 Windows 在哪個 letter，假設 D:
-exit
-
-# 5. 試 sfc
-sfc /scannow /offbootdir=D:\ /offwindir=D:\Windows
-
-# 6. 走 DISM 修 Component Store
-dism /Image:D:\ /Cleanup-Image /CheckHealth
-dism /Image:D:\ /Cleanup-Image /ScanHealth
-dism /Get-WimInfo /WimFile:E:\sources\install.wim
-dism /Image:D:\ /Cleanup-Image /RestoreHealth \
-     /Source:WIM:E:\sources\install.wim:6 /LimitAccess
-# 跑很久（30 分鐘起跳）
-
-# 7. 再跑一次 sfc
-sfc /scannow /offbootdir=D:\ /offwindir=D:\Windows
-
-# 8. 修 boot
-bcdboot D:\Windows /s S: /f UEFI
-
-# 9. 重開機看能不能進
-# 如果還是不行 → 進 Windows 跑 in-place upgrade（最終）
-# 還是不行 → 跟使用者說「資料有備份了，重灌吧」
-```
-
----
-
-## 11. 跟使用者溝通的話術
-
-當你判斷要走 Windows ISO / 重灌時：
-
-```
-您的問題在 Linux 救援環境下沒辦法完整修復，必須走以下其中一條：
-
-  選項 A：用 Windows 安裝媒體進入 WinRE，跑 sfc 和 DISM 修復系統檔
-         耗時約 1-2 小時，成功率約 70%，您的資料和 App 都會留著。
-
-  選項 B：In-place upgrade（修復安裝），保留檔案和 App 重裝 Windows
-         耗時約 1 小時，成功率 90%+，極少數情況某些 App 要重新設定。
-
-  選項 C：乾淨重灌
-         耗時約 30 分鐘 + 重裝 App 時間，成功率 100%，App 全部要重裝。
-
-我已經幫您把 Documents / Desktop / Pictures / 瀏覽器資料備份到外接碟，
-不管選哪條都不會掉資料。建議從 A 試起。
-```
-
-誠實、給選項、講清楚代價，使用者會自己選對的那條。
+回報實際命令結果、日誌與開機測試。不要編造成功率、耗時或「一定不掉資料」的承諾。資料備份、元件修復、正常開機分別確認；重灌也無法解決未處理的硬體故障。

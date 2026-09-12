@@ -145,7 +145,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | Skill | 適合什麼需求 |
 | --- | --- |
 | `defuddle` | 想從 HTML 網頁提取乾淨的 Markdown 內容，移除廣告與導航列。 |
-| `windows-rescue-from-linux` | 想用 Linux Live USB 救援無法開機或受損的 Windows 電腦，修復 BCD/UEFI、NTFS、BitLocker、資料救援與密碼重設。 |
+| `windows-rescue-from-linux` | 用 Linux 救援 Windows，將完整系統與工具預裝至 USB 救援碟，處理開機、NTFS、BitLocker、資料與帳號問題，也能從 Windows 映像提取檔案替換損壞的系統組件。 |
 
 ## Repo 結構
 

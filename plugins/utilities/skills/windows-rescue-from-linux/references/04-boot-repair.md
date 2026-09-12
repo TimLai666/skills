@@ -8,6 +8,8 @@ Windows 開不了機最常見的原因之一是 bootloader 損壞。這份涵蓋
 - 舊的 Legacy BIOS + MBR
 - 雙系統（裝完 Linux 後 Windows 不見了 / 反之）
 
+寫入前共用 [01 安全準則](01-safety-principles.md)。先以 [03](03-mount-windows.md) 唯讀掛載確認的 Windows 與 ESP，保存受影響開機檔與開機項。
+
 ## 開機階段釐清
 
 Windows 開機鏈：
@@ -37,8 +39,7 @@ Windows 開機鏈：
 
 # 從磁碟結構判斷 Windows 是用哪個
 sudo fdisk -l /dev/sda
-# GPT + 含 EFI System Partition → UEFI
-# MBR + 含 active 分割區 → Legacy
+# GPT／ESP、MBR／active 是線索，再核對 Windows 開機檔與韌體開機項
 ```
 
 如果 Linux 是 UEFI 開機但 Windows 之前是 Legacy 開機（或反之）——這也會造成「看不到 Windows」。BIOS 設定改回對應的模式才會看到。
@@ -74,7 +75,7 @@ Boot0002* UEFI: USB...
 
 ```bash
 sudo mkdir -p /mnt/efi
-sudo mount /dev/sda1 /mnt/efi    # sda1 = ESP
+sudo mount -o ro /dev/sda1 /mnt/efi    # sda1 = ESP
 ls /mnt/efi/EFI/Microsoft/Boot/bootmgfw.efi
 # 應該要有
 ```
@@ -108,26 +109,20 @@ ls /mnt/efi/EFI/Microsoft/Boot/
 # 結果：空的，或只有 BCD 沒有 bootmgfw.efi
 ```
 
-從 Windows 系統碟的備份位置複製：
+先查看本機 `Windows/Boot/EFI/bootmgfw.efi` 是否可讀，與目標架構及錯誤相符。若本機來源也損壞，可從 Windows 映像取檔，完整提取、版本比較、備份與還原流程見 [15](15-image-file-replacement.md)。
+
+ESP 檔案替換時，先保存現有 ESP 的受影響內容，再重新掛為可寫，只複製已確認需要的檔案：
 
 ```bash
-# 系統碟也要掛起來
-sudo mount -t ntfs-3g -o ro /dev/sda3 /mnt/win
-
-# Windows 安裝後會在這裡留一份
-ls /mnt/win/Windows/Boot/EFI/
-# bootmgfw.efi, bootmgr.efi, memtest.efi, ...
-
-# 複製回 EFI 分割區（需要可寫掛載）
+# 此例已確認來源可用、目標是本機 ESP，並完成備份及授權
 sudo umount /mnt/efi
 sudo mount -o rw /dev/sda1 /mnt/efi
 sudo mkdir -p /mnt/efi/EFI/Microsoft/Boot/
-sudo cp /mnt/win/Windows/Boot/EFI/bootmgfw.efi /mnt/efi/EFI/Microsoft/Boot/
-sudo cp /mnt/win/Windows/Boot/EFI/bootmgr.efi /mnt/efi/EFI/Microsoft/Boot/
-sudo cp -r /mnt/win/Windows/Boot/EFI/* /mnt/efi/EFI/Microsoft/Boot/
-sudo cp -r /mnt/win/Windows/Boot/Fonts /mnt/efi/EFI/Microsoft/Boot/
-sudo cp -r /mnt/win/Windows/Boot/Resources /mnt/efi/EFI/Microsoft/Boot/
+sudo cp -- /mnt/win/Windows/Boot/EFI/bootmgfw.efi /mnt/efi/EFI/Microsoft/Boot/bootmgfw.efi
+sudo cmp -- /mnt/win/Windows/Boot/EFI/bootmgfw.efi /mnt/efi/EFI/Microsoft/Boot/bootmgfw.efi
 ```
+
+不要因此複製整個 EFI 樹或覆蓋 BCD。若開機環境大幅缺失，轉 WinRE 的 `bcdboot` 重建，而不是逐個猜要補的檔案。
 
 ### 修復場景 4：BCD 不見 / 損壞
 
@@ -172,10 +167,6 @@ sudo cp /backup/BCD.bak /mnt/efi/EFI/Microsoft/Boot/BCD
 
 詳見 `13-when-linux-cannot-fix.md`。
 
-**D. Linux 端最小重建**
-
-如果連 Windows 安裝媒體都沒有，可以試這個 hack：用 `chntpw` 或 `hivexsh` 從一個健康的 Windows 抓 BCD 範本，改成這台機器的路徑——不建議，太容易出錯。
-
 ## Legacy BIOS / MBR 路徑
 
 老電腦或刻意設 Legacy 模式的：
@@ -188,16 +179,14 @@ sudo dd if=/dev/sda bs=512 count=1 2>/dev/null | xxd | tail
 
 ### MBR 損壞修復
 
+先核對 [ms-sys 官方說明](https://ms-sys.sourceforge.net/) 與本機 `ms-sys --help`。發行版不一定提供此套件，不直接假定 `apt install ms-sys` 可用。先保存 MBR 與分割表，再選實際符合系統的 MBR 類型。
+
 ```bash
-# 確認 ms-sys 工具有裝
-sudo apt install mbr ms-sys
-
-# Windows 7 / 8 / 10 / 11 用通用 MBR
-sudo ms-sys -m /dev/sda
-
-# 或更指定
-sudo ms-sys --mbr7 /dev/sda    # Windows 7+
+# 例：已確認是 Windows 7 風格的 MBR 開機碼修復
+sudo ms-sys --mbr7 /dev/sda
 ```
+
+`--mbr7`／`-7` 寫的是整顆磁碟的 MBR，不是分割區的 NTFS boot sector。不要混用磁碟與分割區參數。
 
 但要注意：純寫 MBR 不會復活 BCD。如果 BCD 也掛了，要連 BCD 一起救（同 UEFI 路徑的 BCD 章節）。
 
@@ -234,7 +223,7 @@ sudo os-prober
 # 應該回 /dev/sda1:Windows Boot Manager:Windows:efi 或類似
 ```
 
-如果 os-prober 找到了但 GRUB menu 沒顯示，編輯 `/etc/default/grub`：
+如果 os-prober 找到了但 GRUB menu 沒顯示，在已安裝的 Linux 系統內處理；若從 Live USB 操作，先依下節掛載該系統並 chroot。編輯目標系統的 `/etc/default/grub`：
 
 ```bash
 sudo nano /etc/default/grub
@@ -246,7 +235,7 @@ sudo update-grub
 
 ### 場景：裝完 Windows 後 Linux 不見了（Windows 把 ESP 的東西蓋掉）
 
-Windows 安裝會把 EFI 中其他項目都關掉，只留自己。Linux 救援碟開機後：
+先確認是開機順序改變、開機項消失，還是 EFI 檔案遺失。Linux 救援碟開機後：
 
 ```bash
 # 確認 ubuntu 的 EFI 還在
@@ -278,50 +267,9 @@ update-grub
 exit
 ```
 
-## 完整修復流程範例
+## 驗證
 
-「Windows 11 開機顯示 BOOTMGR is missing」：
-
-```bash
-# 1. 識別磁碟
-sudo blkid
-# 假設 /dev/sda1 是 ESP, /dev/sda3 是 Windows
-
-# 2. SMART 確認硬體 OK
-sudo smartctl -H /dev/sda
-
-# 3. 唯讀掛載確認資料還在
-sudo mkdir -p /mnt/win /mnt/efi
-sudo mount -t ntfs-3g -o ro /dev/sda3 /mnt/win
-sudo mount /dev/sda1 /mnt/efi
-ls /mnt/win/Users/
-
-# 4. 備份使用者資料（保險）
-sudo rsync -avh --info=progress2 /mnt/win/Users/USERNAME/ /media/external/backup/
-
-# 5. 檢查 EFI 結構
-ls /mnt/efi/EFI/Microsoft/Boot/
-# 缺 bootmgfw.efi → 場景 3
-
-# 6. 卸載 EFI，可寫重掛
-sudo umount /mnt/efi
-sudo mount -o rw /dev/sda1 /mnt/efi
-sudo mkdir -p /mnt/efi/EFI/Microsoft/Boot/
-sudo cp /mnt/win/Windows/Boot/EFI/bootmgfw.efi /mnt/efi/EFI/Microsoft/Boot/
-sudo cp -r /mnt/win/Windows/Boot/EFI/* /mnt/efi/EFI/Microsoft/Boot/
-sudo cp -r /mnt/win/Windows/Boot/Fonts /mnt/efi/EFI/Microsoft/Boot/
-
-# 7. 補 UEFI 開機項
-sudo efibootmgr -c -d /dev/sda -p 1 \
-    -L "Windows Boot Manager" \
-    -l "\EFI\Microsoft\Boot\bootmgfw.efi"
-
-# 8. 同步 + 卸載
-sudo sync
-sudo umount /mnt/efi /mnt/win
-
-# 9. 跟使用者說可以重開機試
-```
+按實際改動檢查檔案內容、BCD 可讀性或 `efibootmgr -v` 的裝置與路徑。正常卸載後測試 Windows；仍失敗時保存完整錯誤，還原本次試改並按開機階段重新診斷。
 
 ## 常見錯誤
 
@@ -335,10 +283,10 @@ Linux 是 Legacy 模式開機進來的，efibootmgr 跑不了。重開機進 BIO
 
 ### 改完還是不開
 
-- BIOS 裡的 Secure Boot：開啟狀態會檢查 signed bootloader。Windows 系統用 signed，沒問題。但如果你動了什麼，可能要暫時關 Secure Boot 測。
+- BIOS 裡的 Secure Boot：開啟狀態會檢查 signed bootloader。檢查來源簽章、版本及韌體是否撤銷該載入器。不要把停用 Secure Boot 當成一般修復步驟，確有測試需要時說明影響並取得授權。
 - Fast Boot：BIOS 的 Fast Boot 會跳過完整初始化，可能跳過你的 USB。關掉。
 - CSM (Compatibility Support Module)：開啟會讓 UEFI 模擬 BIOS。Windows 是 UEFI 裝的話 CSM 要關。
 
 ### `efibootmgr -c` 出現「Could not create variable」
 
-NVRAM 空間不足或主機板的怪毛病。可以先 `efibootmgr -B -b XXXX` 刪掉沒用的舊項目，騰出空間再 -c。
+NVRAM 空間不足或主機板的怪毛病。先查明實際錯誤。只有確認某項確實不再使用、保存原項目並取得刪除授權後，才用 `efibootmgr -B -b XXXX` 移除該項。

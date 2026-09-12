@@ -18,7 +18,7 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 REPORT_DIR="/tmp/disk-health-$(date +%Y%m%d-%H%M%S)"
-mkdir -p "$REPORT_DIR"
+mkdir -p "$REPORT_DIR" || exit 2
 
 echo -e "${BOLD}==== 磁碟健康總檢 ====${NC}"
 echo "時間：$(date)"
@@ -64,24 +64,27 @@ for DEV in "${DEVICES[@]}"; do
         echo ""
     } | tee -a "$OUT"
 
-    # SMART 是否支援
-    if ! smartctl -i "$DEV" 2>/dev/null | grep -q "SMART support is:"; then
-        echo -e "${YELLOW}⚠ 不支援 SMART 或讀不到（可能是 USB 外接盒 / 虛擬磁碟）${NC}" | tee -a "$OUT"
+    # 一次唯讀收集，保留 smartctl 位元狀態碼；NVMe 不使用 ATA 支援字串判定。
+    SMART_DATA=$(smartctl -a "$DEV" 2>&1)
+    SMART_STATUS=$?
+    printf '%s\n' "$SMART_DATA" >> "$OUT"
+    if (( SMART_STATUS & 7 )); then
+        echo "⚠ SMART 資料不完整或無法讀取，不能判定健康" | tee -a "$OUT"
         HEALTH_SUMMARY[$DEV]="UNKNOWN"
-        echo ""
         continue
     fi
 
-    if ! smartctl -i "$DEV" 2>/dev/null | grep -q "SMART support is: Enabled"; then
-        echo "  嘗試啟用 SMART..."
-        smartctl -s on "$DEV" 2>/dev/null || true
-    fi
-
     # 健康狀態
-    HEALTH=$(smartctl -H "$DEV" 2>/dev/null | grep -i "overall-health\|test result" | tail -1)
+    HEALTH=$(printf '%s\n' "$SMART_DATA" | grep -i "overall-health\|test result" | tail -1)
     echo "" | tee -a "$OUT"
     echo "[健康狀態]" | tee -a "$OUT"
-    if echo "$HEALTH" | grep -qi "PASSED\|OK"; then
+    if (( SMART_STATUS & 24 )); then
+        echo "⚠ SMART 回報整體失敗或目前屬性低於臨界值（狀態碼 ${SMART_STATUS}）。" | tee -a "$OUT"
+        HEALTH_SUMMARY[$DEV]="FAILING"
+    elif (( SMART_STATUS & 224 )); then
+        echo "⚠ SMART 回報歷史臨界值、錯誤日誌或自我測試紀錄（狀態碼 ${SMART_STATUS}），須對照完整報告。" | tee -a "$OUT"
+        HEALTH_SUMMARY[$DEV]="WARN"
+    elif echo "$HEALTH" | grep -qi "PASSED\|OK"; then
         echo -e "  ${GREEN}$HEALTH${NC}" | tee -a "$OUT"
         HEALTH_SUMMARY[$DEV]="OK"
     elif echo "$HEALTH" | grep -qi "FAILED"; then
@@ -96,7 +99,7 @@ for DEV in "${DEVICES[@]}"; do
     # SMART 完整資訊
     echo "" >> "$OUT"
     echo "[完整 SMART 資訊]" >> "$OUT"
-    smartctl -a "$DEV" >> "$OUT" 2>&1
+    : # 原始資料已保存
 
     # 關鍵屬性分析
     echo "" | tee -a "$OUT"
@@ -118,18 +121,22 @@ for DEV in "${DEVICES[@]}"; do
     for ID in 5 10 184 187 188 196 197 198 199; do
         NAME="${CRITICAL[$ID]}"
         # 找這個屬性的 RAW value
-        LINE=$(smartctl -A "$DEV" 2>/dev/null | awk -v id="$ID" '$1==id {print}')
+        LINE=$(printf '%s\n' "$SMART_DATA" | awk -v id="$ID" '$1==id {print}')
         if [[ -n "$LINE" ]]; then
             RAW=$(echo "$LINE" | awk '{print $NF}' | sed 's/[^0-9].*//')
-            RAW=${RAW:-0}
+            if [[ ! "$RAW" =~ ^[0-9]+$ ]]; then
+                printf '  ? %-30s 原始值無法解析，請看完整報告\n' "$NAME" | tee -a "$OUT"
+                ((PROBLEMS++))
+                continue
+            fi
             if [[ "$RAW" -eq 0 ]]; then
                 printf "  ${GREEN}✓${NC} %-30s = %s\n" "$NAME" "$RAW" | tee -a "$OUT"
             elif [[ "$ID" -eq 199 ]]; then
                 # UDMA_CRC_Error 通常代表線材，不是碟本身
-                printf "  ${YELLOW}⚠${NC} %-30s = %s  ${YELLOW}(SATA 線材問題)${NC}\n" "$NAME" "$RAW" | tee -a "$OUT"
+                printf "  ${YELLOW}⚠${NC} %-30s = %s  ${YELLOW}(可能與傳輸連線有關，須對照趨勢)${NC}\n" "$NAME" "$RAW" | tee -a "$OUT"
                 ((PROBLEMS++))
             else
-                printf "  ${RED}✗${NC} %-30s = %s  ${RED}(磁碟有問題)${NC}\n" "$NAME" "$RAW" | tee -a "$OUT"
+                printf "  ${RED}✗${NC} %-30s = %s  ${RED}(需依廠商定義與變化判讀)${NC}\n" "$NAME" "$RAW" | tee -a "$OUT"
                 ((PROBLEMS++))
             fi
         fi
@@ -141,7 +148,7 @@ for DEV in "${DEVICES[@]}"; do
         echo "[SSD 特殊屬性]" | tee -a "$OUT"
 
         for ID in 173 177 233 241; do
-            LINE=$(smartctl -A "$DEV" 2>/dev/null | awk -v id="$ID" '$1==id {print}')
+            LINE=$(printf '%s\n' "$SMART_DATA" | awk -v id="$ID" '$1==id {print}')
             if [[ -n "$LINE" ]]; then
                 NAME=$(echo "$LINE" | awk '{print $2}')
                 RAW=$(echo "$LINE" | awk '{print $NF}' | sed 's/[^0-9].*//')
@@ -152,21 +159,21 @@ for DEV in "${DEVICES[@]}"; do
 
         # 健康百分比（NVMe）
         if [[ "$DEV" =~ nvme ]]; then
-            HEALTH_USED=$(smartctl -a "$DEV" 2>/dev/null | grep -i "Percentage Used" | awk '{print $NF}' | tr -d '%')
-            if [[ -n "$HEALTH_USED" ]]; then
+            HEALTH_USED=$(printf '%s\n' "$SMART_DATA" | grep -i "Percentage Used" | awk '{print $NF}' | tr -d '%')
+            if [[ "$HEALTH_USED" =~ ^[0-9]+$ ]]; then
                 if [[ "$HEALTH_USED" -lt 50 ]]; then
                     printf "  ${GREEN}NVMe 使用量: %s%%${NC}\n" "$HEALTH_USED" | tee -a "$OUT"
                 elif [[ "$HEALTH_USED" -lt 80 ]]; then
                     printf "  ${YELLOW}NVMe 使用量: %s%%${NC}\n" "$HEALTH_USED" | tee -a "$OUT"
                 else
-                    printf "  ${RED}NVMe 使用量: %s%% (接近壽命終點)${NC}\n" "$HEALTH_USED" | tee -a "$OUT"
+                    printf "  ${RED}NVMe 使用量: %s%% (耐久度估計，非剩餘壽命保證)${NC}\n" "$HEALTH_USED" | tee -a "$OUT"
                 fi
             fi
         fi
     fi
 
     # 使用時數
-    POH=$(smartctl -A "$DEV" 2>/dev/null | awk '$1==9 {print $NF}' | sed 's/[^0-9].*//')
+    POH=$(printf '%s\n' "$SMART_DATA" | awk '$1==9 {print $NF}' | sed 's/[^0-9].*//')
     if [[ -n "$POH" && "$POH" -gt 0 ]]; then
         DAYS=$((POH / 24))
         YEARS=$(echo "scale=1; $POH/8760" | bc 2>/dev/null || echo "?")
@@ -177,18 +184,21 @@ for DEV in "${DEVICES[@]}"; do
     # 上次自我測試
     echo "" | tee -a "$OUT"
     echo "[最近的自我測試]" | tee -a "$OUT"
-    smartctl -l selftest "$DEV" 2>/dev/null | tail -10 | head -7 | tee -a "$OUT"
+    printf '%s\n' "$SMART_DATA" | tail -10 | head -7 | tee -a "$OUT"
 
     # 結論
     echo "" | tee -a "$OUT"
     case "${HEALTH_SUMMARY[$DEV]}" in
         OK)
             if [[ $PROBLEMS -eq 0 ]]; then
-                echo -e "${GREEN}結論：磁碟健康${NC}" | tee -a "$OUT"
+                echo -e "${GREEN}結論：本次 SMART 未回報警告，仍須對照症狀${NC}" | tee -a "$OUT"
             else
                 echo -e "${YELLOW}結論：通過 SMART 整體判斷，但有 $PROBLEMS 項警告值${NC}" | tee -a "$OUT"
                 HEALTH_SUMMARY[$DEV]="WARN"
             fi
+            ;;
+        WARN)
+            echo "結論：SMART 有警告紀錄，不能只以 PASSED 判定健康。" | tee -a "$OUT"
             ;;
         FAILING)
             echo -e "${RED}結論：磁碟即將失效，立刻備份！${NC}" | tee -a "$OUT"
@@ -209,7 +219,7 @@ echo "==========================================${NC}"
 echo ""
 for DEV in "${!HEALTH_SUMMARY[@]}"; do
     case "${HEALTH_SUMMARY[$DEV]}" in
-        OK)      echo -e "  ${GREEN}✓${NC} $DEV  健康" ;;
+        OK)      echo -e "  ${GREEN}✓${NC} $DEV  SMART 未回報警告" ;;
         WARN)    echo -e "  ${YELLOW}⚠${NC} $DEV  有警告值，建議盡早備份" ;;
         FAILING) echo -e "  ${RED}✗${NC} $DEV  即將失效，立刻 ddrescue" ;;
         *)       echo -e "  ${YELLOW}?${NC} $DEV  狀態不明" ;;
@@ -220,9 +230,11 @@ echo ""
 # 4. 給建議
 HAS_FAILING=false
 HAS_WARN=false
+HAS_UNKNOWN=false
 for STATUS in "${HEALTH_SUMMARY[@]}"; do
     [[ "$STATUS" == "FAILING" ]] && HAS_FAILING=true
     [[ "$STATUS" == "WARN" ]] && HAS_WARN=true
+    [[ "$STATUS" == "UNKNOWN" ]] && HAS_UNKNOWN=true
 done
 
 if $HAS_FAILING; then
@@ -230,12 +242,19 @@ if $HAS_FAILING; then
     echo "  sudo ddrescue -f -n /dev/<failing_disk> /mnt/external/disk-image.img /mnt/external/disk.log"
     echo "  詳見 references/08-data-recovery.md"
 elif $HAS_WARN; then
-    echo -e "${YELLOW}建議：警告值偶爾出現可能還能撐，但建議近期更換${NC}"
+    echo -e "${YELLOW}建議：先備份，再對照警告的時間、類型與症狀，判斷是否需更換${NC}"
     echo "  • 在下次大型工作前完整備份"
-    echo "  • 跑長時間自我測試確認：sudo smartctl -t long /dev/<disk>"
+    echo "  • 若有讀取錯誤、異音或掉線，先做映像救援，不加跑長測試"
+elif $HAS_UNKNOWN; then
+    echo "部分磁碟狀態不明；確認工具、介面與讀取錯誤後再判斷。"
 else
-    echo -e "${GREEN}建議：磁碟看起來健康，正常救援流程即可${NC}"
+    echo -e "${GREEN}建議：SMART 未回報警告；這不排除硬體故障${NC}"
 fi
 
 echo ""
 echo "完整報告：$REPORT_DIR/"
+
+$HAS_FAILING && exit 1
+$HAS_UNKNOWN && exit 2
+$HAS_WARN && exit 1
+exit 0

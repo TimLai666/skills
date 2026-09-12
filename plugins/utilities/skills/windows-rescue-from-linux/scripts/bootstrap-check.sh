@@ -49,20 +49,12 @@ if grep -q "boot=live\|boot=casper" /proc/cmdline 2>/dev/null; then
     echo -e "  ${GREEN}✓${NC} 看起來在 Live USB 環境"
 fi
 
-# 網路
-echo ""
-echo -e "${BOLD}[網路]${NC}"
-if ping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1; then
-    echo -e "  ${GREEN}✓${NC} 網際網路可達"
-    ((ok++))
-else
-    echo -e "  ${RED}✗${NC} 沒網路（會擋下載病毒碼、安裝套件、AI 對話）"
-    ((fail++))
-fi
+# 離線不妨礙已備妥工具的救援；下載時再以實際服務確認連線。
+echo "網路需求依本次操作判斷，未進行連線測試。"
 
 # ---- 核心救援工具（5 大金剛）----
 echo ""
-echo -e "${BOLD}[核心救援工具 - 必裝]${NC}"
+echo -e "${BOLD}[常用救援工具，依本案需求選用]${NC}"
 check ntfsfix   "ntfsfix"   "sudo apt install ntfs-3g"
 check chntpw    "chntpw"    "sudo apt install chntpw"
 check testdisk  "testdisk"  "sudo apt install testdisk"
@@ -78,38 +70,29 @@ check clamscan   "clamscan"   "sudo apt install clamav"
 check dislocker  "dislocker"  "sudo apt install dislocker"
 check efibootmgr "efibootmgr" "sudo apt install efibootmgr"
 check rsync      "rsync"      "sudo apt install rsync"
-check tmux       "tmux"       "sudo apt install tmux  ← 長時間任務必裝"
+check tmux       "tmux"       "sudo apt install tmux"
 
 # ---- AI agent 環境 ----
 echo ""
 echo -e "${BOLD}[AI Agent 環境]${NC}"
 
-# Node.js
-if command -v node >/dev/null 2>&1; then
-    NODE_VER=$(node -v | sed 's/v//')
-    NODE_MAJOR=$(echo "$NODE_VER" | cut -d. -f1)
-    if [[ "$NODE_MAJOR" -ge 18 ]]; then
-        printf "  ${GREEN}✓${NC} %-15s v%s\n" "node" "$NODE_VER"
-        ((ok++))
+echo "AI 工具是選用項目；已有可用代理程式時不必另裝。"
+for cmd in node npm claude codex; do
+    if command -v "$cmd" >/dev/null 2>&1; then
+        echo "  $cmd: $(command -v "$cmd")"
     else
-        printf "  ${YELLOW}⚠${NC} %-15s v%s (太舊，需要 >= 18)\n" "node" "$NODE_VER"
-        ((warn++))
+        echo "  $cmd: 未安裝（選用）"
     fi
-else
-    printf "  ${RED}✗${NC} %-15s 缺失  ${YELLOW}→ 見 references/00-rescue-usb-preparation.md §4${NC}\n" "node"
-    ((fail++))
-fi
-
-check npm    "npm"    "Node.js 內建，裝 Node 就有"
-check claude "claude" "npm install -g @anthropic-ai/claude-code"
-check codex  "codex"  "npm install -g @openai/codex (可選)"
+done
 
 # Skill 在不在
 echo ""
 echo -e "${BOLD}[Skill 安裝狀態]${NC}"
 SKILL_PATHS=(
     "$HOME/.claude/skills/windows-rescue-from-linux"
-    "$HOME/.config/codex/skills/windows-rescue-from-linux"
+    "$HOME/.codex/skills/windows-rescue-from-linux"
+    "$HOME/.agents/skills/windows-rescue-from-linux"
+    "$(cd "$(dirname "$0")/.." && pwd)"
     "./windows-rescue-from-linux"
 )
 SKILL_FOUND=false
@@ -131,36 +114,6 @@ echo -e "${BOLD}======================================"
 echo -e "  結論：${GREEN}$ok 通過${NC} / ${YELLOW}$warn 警告${NC} / ${RED}$fail 缺失${NC}"
 echo -e "======================================${NC}"
 
-# 建議
-echo ""
-if [[ $fail -eq 0 && $warn -eq 0 ]]; then
-    echo -e "${GREEN}${BOLD}✓ 環境完整，可以開始救援${NC}"
-    echo ""
-    echo "下一步：跟 Claude 講使用者的狀況，照 SKILL.md「症狀分流」流程走"
-elif [[ $fail -gt 0 ]]; then
-    echo -e "${YELLOW}${BOLD}⚠ 有 $fail 個工具缺失${NC}"
-    echo ""
-    echo "建議跑安裝腳本（會問每一塊要不要裝）："
-    echo ""
-    echo "  sudo bash scripts/install-rescue-tools.sh"
-    echo ""
-    echo "或一次裝完："
-    echo ""
-    echo "  sudo bash scripts/install-rescue-tools.sh --full"
-else
-    echo -e "${YELLOW}有 $warn 個警告，但可以開始救援${NC}"
-fi
-
-# 給 agent 的 hint
-if [[ -n "${CLAUDECODE:-}${CODEX:-}" ]]; then
-    echo ""
-    echo "---"
-    echo "AGENT HINT:"
-    if [[ $fail -gt 0 ]]; then
-        echo "  - 主動詢問使用者是否要跑 install-rescue-tools.sh"
-        echo "  - 不要在沒得到使用者明確 yes 之前 sudo apt install"
-    fi
-    if ! $SKILL_FOUND; then
-        echo "  - 提醒使用者把 skill symlink 到 ~/.claude/skills/"
-    fi
-fi
+echo "缺少工具不代表無法救援。依症狀分流，只安裝本次需要的工具。"
+echo "安裝方式見 references/00-rescue-usb-preparation.md。"
+exit 0

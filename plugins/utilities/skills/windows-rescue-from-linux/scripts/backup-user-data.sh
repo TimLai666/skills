@@ -4,7 +4,7 @@
 # 用法：sudo bash backup-user-data.sh [windows_mount] [backup_target]
 # 範例：sudo bash backup-user-data.sh /mnt/win /mnt/external/rescue-$(date +%Y%m%d)
 
-set -u
+set -uo pipefail
 
 if [[ $EUID -ne 0 ]]; then
     echo "請用 sudo 跑" >&2
@@ -47,21 +47,43 @@ if [[ -z "$TARGET" ]]; then
 fi
 
 # 3. 確認目標不是同顆 Windows 碟
-TARGET_PARENT=$(df --output=source "$(dirname "$TARGET")" 2>/dev/null | tail -1)
-WIN_SOURCE=$(df --output=source "$WIN_MNT" 2>/dev/null | tail -1)
-if [[ "$TARGET_PARENT" == "$WIN_SOURCE" ]]; then
-    echo -e "${RED}✗ 備份目標跟來源在同一顆碟！${NC}"
-    echo "  Windows 碟：$WIN_SOURCE"
-    echo "  目標所在：$TARGET_PARENT"
-    echo "請插外接碟或網路儲存後再試"
+# Resolve existing ancestors before creating anything. Trace all parent devices,
+# including device-mapper / RAID members, so separate partitions cannot pass.
+for TOOL in findmnt lsblk realpath rsync; do
+    command -v "$TOOL" >/dev/null || { echo "缺少 $TOOL" >&2; exit 1; }
+done
+WIN_MNT=$(realpath -e -- "$WIN_MNT") || exit 1
+TARGET=$(realpath -m -- "$TARGET") || exit 1
+ANCESTOR="$TARGET"
+while [[ ! -e "$ANCESTOR" ]]; do ANCESTOR=$(dirname -- "$ANCESTOR"); done
+WIN_SOURCE=$(findmnt -n -o SOURCE -T "$WIN_MNT") || exit 1
+TARGET_SOURCE=$(findmnt -n -o SOURCE -T "$ANCESTOR") || exit 1
+physical_disks() {
+    lsblk -s -n -r -p -o NAME,TYPE -- "$1" | awk '$2 == "disk" {print $1}' | sort -u
+}
+WIN_DISKS=$(physical_disks "$WIN_SOURCE") || exit 1
+TARGET_DISKS=$(physical_disks "$TARGET_SOURCE") || exit 1
+if [[ -z "$WIN_DISKS" || -z "$TARGET_DISKS" ]]; then
+    echo "無法確認來源與目標的實體磁碟。請先確認儲存對應關係，再使用手動備份流程。" >&2
     exit 1
 fi
+while IFS= read -r DISK; do
+    if printf '%s\n' "$TARGET_DISKS" | grep -Fxq -- "$DISK"; then
+        echo "備份目標與 Windows 來源共用實體磁碟：$DISK" >&2
+        exit 1
+    fi
+done <<< "$WIN_DISKS"
+OPTIONS=$(findmnt -n -o OPTIONS -T "$WIN_MNT") || exit 1
+case ",$OPTIONS," in *,ro,*) ;; *) echo "請先將 Windows 來源以唯讀掛載" >&2; exit 1;; esac
 
 # 4. 確認空間夠
-USERS_SIZE_KB=$(du -sk "$WIN_MNT/Users" 2>/dev/null | awk '{print $1}' || echo 0)
+USERS_SIZE_KB=$(du -sk "$WIN_MNT/Users" | awk '{print $1}') || { echo "來源讀取失敗" >&2; exit 1; }
+[[ "$USERS_SIZE_KB" =~ ^[0-9]+$ ]] || { echo "無法讀取來源大小，請先檢查讀取錯誤" >&2; exit 1; }
 USERS_SIZE_HUMAN=$(numfmt --to=iec --from-unit=Ki --suffix=B "$USERS_SIZE_KB" 2>/dev/null || echo "?")
-mkdir -p "$TARGET"
+mkdir -p "$TARGET" || exit 1
 AVAIL_KB=$(df --output=avail "$TARGET" 2>/dev/null | tail -1 || echo 0)
+AVAIL_KB="${AVAIL_KB//[[:space:]]/}"
+[[ "$AVAIL_KB" =~ ^[0-9]+$ ]] || { echo "無法取得目標空間" >&2; exit 1; }
 AVAIL_HUMAN=$(numfmt --to=iec --from-unit=Ki --suffix=B "$AVAIL_KB" 2>/dev/null || echo "?")
 
 echo ""
@@ -104,9 +126,12 @@ if [[ "$SELECT" == "all" ]]; then
     SELECTED_USERS=("${USERS[@]}")
 else
     for n in $SELECT; do
-        idx=$((n-1))
+        [[ "$n" =~ ^[1-9][0-9]*$ && ${#n} -le 6 ]] || { echo "使用者編號無效" >&2; exit 1; }
+        idx=$((10#$n-1))
         if [[ $idx -ge 0 && $idx -lt ${#USERS[@]} ]]; then
             SELECTED_USERS+=("${USERS[$idx]}")
+        else
+            echo "使用者編號超出範圍" >&2; exit 1
         fi
     done
 fi
@@ -125,6 +150,7 @@ echo "  [3] 完整模式：整個 Users\\<名字>\\ 全備（排除 Temp 暫存�
 echo ""
 read -rp "選擇模式 [1/2/3]（預設 2）：" MODE
 MODE="${MODE:-2}"
+[[ "$MODE" =~ ^[123]$ ]] || { echo "備份模式無效" >&2; exit 1; }
 
 # 7. 設定 rsync excludes
 COMMON_EXCLUDES=(
@@ -152,7 +178,7 @@ echo "  模式：$MODE"
 echo ""
 
 LOG="$TARGET/backup-log-$(date +%Y%m%d-%H%M%S).txt"
-mkdir -p "$TARGET"
+mkdir -p "$TARGET" || exit 1
 
 {
     echo "=== Windows User Data Backup ==="
@@ -162,7 +188,14 @@ mkdir -p "$TARGET"
     echo "Mode:    $MODE"
     echo "Users:   ${SELECTED_USERS[*]}"
     echo ""
-} > "$LOG"
+} > "$LOG" || exit 1
+
+copy_data() {
+    if ! rsync "$@" 2>&1 | tee -a "$LOG"; then
+        echo "備份未完成：rsync 或日誌寫入失敗，請查看 $LOG" >&2
+        exit 1
+    fi
+}
 
 for USER in "${SELECTED_USERS[@]}"; do
     SRC="$WIN_MNT/Users/$USER"
@@ -170,7 +203,7 @@ for USER in "${SELECTED_USERS[@]}"; do
 
     echo ""
     echo -e "${YELLOW}[$USER]${NC}"
-    mkdir -p "$DST"
+    mkdir -p "$DST" || exit 1
 
     case "$MODE" in
         1)
@@ -178,9 +211,9 @@ for USER in "${SELECTED_USERS[@]}"; do
             for FOLDER in Desktop Documents Downloads Pictures Videos Music Favorites; do
                 if [[ -d "$SRC/$FOLDER" ]]; then
                     echo "  → $FOLDER"
-                    rsync -aH --info=progress2 --no-i-r \
+                    copy_data -aH --info=progress2 --no-i-r \
                         "${COMMON_EXCLUDES[@]}" \
-                        "$SRC/$FOLDER/" "$DST/$FOLDER/" 2>&1 | tee -a "$LOG"
+                        "$SRC/$FOLDER/" "$DST/$FOLDER/"
                 fi
             done
             ;;
@@ -190,9 +223,9 @@ for USER in "${SELECTED_USERS[@]}"; do
             for FOLDER in Desktop Documents Downloads Pictures Videos Music Favorites Links Contacts; do
                 if [[ -d "$SRC/$FOLDER" ]]; then
                     echo "  → $FOLDER"
-                    rsync -aH --info=progress2 --no-i-r \
+                    copy_data -aH --info=progress2 --no-i-r \
                         "${COMMON_EXCLUDES[@]}" \
-                        "$SRC/$FOLDER/" "$DST/$FOLDER/" 2>&1 | tee -a "$LOG"
+                        "$SRC/$FOLDER/" "$DST/$FOLDER/"
                 fi
             done
 
@@ -207,35 +240,35 @@ for USER in "${SELECTED_USERS[@]}"; do
                 if [[ -d "$SRC/$BROWSER" ]]; then
                     BROWSER_NAME=$(echo "$BROWSER" | awk -F/ '{print $(NF-1)}')
                     echo "  → 瀏覽器: $BROWSER_NAME"
-                    rsync -aH --info=progress2 --no-i-r \
+                    copy_data -aH --info=progress2 --no-i-r \
                         "${COMMON_EXCLUDES[@]}" \
-                        "$SRC/$BROWSER/" "$DST/AppData-browser-$BROWSER_NAME/" 2>&1 | tee -a "$LOG"
+                        "$SRC/$BROWSER/" "$DST/AppData-browser-$BROWSER_NAME/"
                 fi
             done
 
             # Outlook
             if [[ -d "$SRC/AppData/Local/Microsoft/Outlook" ]]; then
                 echo "  → Outlook 資料"
-                rsync -aH --info=progress2 --no-i-r \
-                    "$SRC/AppData/Local/Microsoft/Outlook/" "$DST/Outlook/" 2>&1 | tee -a "$LOG"
+                copy_data -aH --info=progress2 --no-i-r \
+                    "$SRC/AppData/Local/Microsoft/Outlook/" "$DST/Outlook/"
             fi
             if [[ -d "$SRC/AppData/Roaming/Microsoft/Outlook" ]]; then
-                rsync -aH --info=progress2 --no-i-r \
-                    "$SRC/AppData/Roaming/Microsoft/Outlook/" "$DST/Outlook-roaming/" 2>&1 | tee -a "$LOG"
+                copy_data -aH --info=progress2 --no-i-r \
+                    "$SRC/AppData/Roaming/Microsoft/Outlook/" "$DST/Outlook-roaming/"
             fi
             if [[ -d "$SRC/AppData/Roaming/Microsoft/Signatures" ]]; then
                 echo "  → Outlook 簽名"
-                rsync -aH --info=progress2 --no-i-r \
-                    "$SRC/AppData/Roaming/Microsoft/Signatures/" "$DST/Outlook-signatures/" 2>&1 | tee -a "$LOG"
+                copy_data -aH --info=progress2 --no-i-r \
+                    "$SRC/AppData/Roaming/Microsoft/Signatures/" "$DST/Outlook-signatures/"
             fi
             ;;
 
         3)
             # 完整模式
             echo "  → 整個 Users\\$USER\\ 備份（排除 Temp/Cache）"
-            rsync -aH --info=progress2 --no-i-r \
+            copy_data -aH --info=progress2 --no-i-r \
                 "${COMMON_EXCLUDES[@]}" \
-                "$SRC/" "$DST/" 2>&1 | tee -a "$LOG"
+                "$SRC/" "$DST/"
             ;;
     esac
 done
@@ -247,11 +280,11 @@ echo -e "${YELLOW}[ProgramData / 系統共用]${NC}"
 # ProgramData 裡常有重要 App 資料
 if [[ -d "$WIN_MNT/ProgramData" ]]; then
     echo "  → 重要 ProgramData 項目"
-    mkdir -p "$TARGET/ProgramData"
+    mkdir -p "$TARGET/ProgramData" || exit 1
     for ITEM in "Microsoft Office" "Adobe" "LINE" "obs-studio" "Steam" "Origin" "Epic"; do
         if [[ -d "$WIN_MNT/ProgramData/$ITEM" ]]; then
-            rsync -aH --info=progress2 --no-i-r \
-                "$WIN_MNT/ProgramData/$ITEM/" "$TARGET/ProgramData/$ITEM/" 2>&1 | tee -a "$LOG"
+            copy_data -aH --info=progress2 --no-i-r \
+                "$WIN_MNT/ProgramData/$ITEM/" "$TARGET/ProgramData/$ITEM/"
         fi
     done
 fi
@@ -277,6 +310,6 @@ echo ""
 
 # 11. 完整性建議
 echo "建議下一步："
-echo "  • 立即驗證備份：cd $TARGET && ls -la"
+echo "  • 抽查重要檔案可開啟，並核對選定範圍的檔案數量、大小與雜湊"
 echo "  • 把備份再複製到另一顆碟（3-2-1 原則）"
 echo "  • 重灌前再做一次完整檢查"

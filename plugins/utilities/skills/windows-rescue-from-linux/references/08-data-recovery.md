@@ -12,14 +12,14 @@
 | 狀況 | 對應方法 |
 |---|---|
 | 磁碟健康、檔案系統正常、就是想備份 | rsync 或 ntfsclone |
-| 磁碟健康、檔案系統有問題 | 先 ntfsclone 做映像，在映像上動 |
+| 磁碟健康、檔案系統有問題 | 先 ddrescue 做原始映像，在副本上處理 |
 | 磁碟在壞（SMART 警告、有怪聲、I/O error） | ddrescue **務必** |
 | 想救剛刪除的檔案 | testdisk / ntfsundelete（檔案還在原處） |
-| 想救已被覆蓋或檔案系統毀掉的檔案 | photorec / foremost（檔案 carving） |
+| 檔案系統毀掉，但資料區可能仍在 | photorec / foremost（檔案 carving） |
 
 ## 一般備份：rsync
 
-最常用、最安全。
+磁碟穩定且檔案系統可讀時使用。先依 [安全原則](01-safety-principles.md) 確認來源與目標為不同實體儲存裝置；有 I/O 錯誤時改走下方 ddrescue 流程。
 
 ```bash
 # 唯讀掛載來源
@@ -63,54 +63,60 @@ sudo rsync -avh --info=progress2 \
 
 ```bash
 for user in /mnt/win/Users/*/; do
+    [[ -d "$user" ]] || continue
     name=$(basename "$user")
     [ "$name" = "Public" ] && continue
     [ "$name" = "Default" ] && continue
     [ "$name" = "All Users" ] && continue
     echo "Backing up $name..."
-    sudo rsync -avh --info=progress2 "$user" "/mnt/backup/$(date +%Y%m%d)/$name/"
+    sudo rsync -avh --info=progress2 "$user" "/mnt/backup/$(date +%Y%m%d)/$name/" || break
 done
 ```
 
-備份特定關鍵資料夾（最小集合）：
+備份特定關鍵資料夾（依本案需求選擇）：
 
 ```bash
-USER=USERNAME
-DEST=/mnt/backup/$(date +%Y%m%d)/$USER
+RESCUE_USER=USERNAME
+DEST=/mnt/backup/$(date +%Y%m%d)/$RESCUE_USER
 sudo mkdir -p "$DEST"
 
 for sub in Desktop Documents Downloads Pictures Videos Music; do
+    [[ -d "/mnt/win/Users/$RESCUE_USER/$sub" ]] || continue
     sudo rsync -avh --info=progress2 \
-        "/mnt/win/Users/$USER/$sub/" \
-        "$DEST/$sub/"
+        "/mnt/win/Users/$RESCUE_USER/$sub/" \
+        "$DEST/$sub/" || break
 done
 
 # 瀏覽器資料（Chrome / Edge）
 sudo rsync -avh \
-    "/mnt/win/Users/$USER/AppData/Local/Google/Chrome/User Data/" \
+    "/mnt/win/Users/$RESCUE_USER/AppData/Local/Google/Chrome/User Data/" \
     "$DEST/Chrome_UserData/"
 
 sudo rsync -avh \
-    "/mnt/win/Users/$USER/AppData/Local/Microsoft/Edge/User Data/" \
+    "/mnt/win/Users/$RESCUE_USER/AppData/Local/Microsoft/Edge/User Data/" \
     "$DEST/Edge_UserData/"
 
 # Outlook PST/OST
 sudo rsync -avh \
-    "/mnt/win/Users/$USER/AppData/Local/Microsoft/Outlook/" \
+    "/mnt/win/Users/$RESCUE_USER/AppData/Local/Microsoft/Outlook/" \
     "$DEST/Outlook/"
 ```
 
-## 整碟映像：ntfsclone vs ddrescue 怎麼選
+rsync 回傳非零代表有未完成或錯誤，保留日誌並查明原因後才判定完成。核對選定範圍的數量、大小，抽查重要檔案能開啟；需要內容比對時再核對雜湊。互動式選取與失敗處理見 [backup-user-data.sh](../scripts/backup-user-data.sh)。
+
+## 映像：ntfsclone vs ddrescue 怎麼選
 
 | 工具 | 適用場景 | 優點 | 缺點 |
 |---|---|---|---|
 | `ntfsclone` | 磁碟健康、NTFS 結構完整、只想備份用到的空間 | 只 copy used space，快、檔案小 | 結構毀掉就跑不了 |
 | `ddrescue` | 磁碟在壞、結構毀掉、有 I/O error | 容錯強、可重試、map 檔紀錄進度 | 整碟 dump 含 free space，慢 |
-| `dd` | 簡單測試 | 內建到處有 | 一遇到 error 就停或無限重試，慢且傷碟 |
+| `dd` | 簡單測試 | 內建到處有 | 缺少 ddrescue 的 mapfile 與多階段救援控制 |
 
 **碟有任何懷疑就用 ddrescue，不要用 dd**。
 
 ## ntfsclone 範例
+
+`--save-image` 產生專用格式，不能直接 loop mount；只適用健康且結構可解析的 NTFS 分割區。還原至裝置會覆寫該分割區，須先確認目標與授權。
 
 ```bash
 # 必須先 umount
@@ -123,9 +129,8 @@ sudo ntfsclone --save-image -o /mnt/backup/win.img /dev/sda3
 sudo ntfsclone --restore-image --overwrite /dev/sdc1 /mnt/backup/win.img
 
 # 還原到映像檔內（讓你用 loop mount 後讀）
-# 先準備一個跟原分割區同樣大的空檔
-truncate -s 500G /mnt/backup/win-raw.img
-sudo ntfsclone --restore-image --overwrite /mnt/backup/win-raw.img /mnt/backup/win.img
+# 輸出到新的原始映像檔，大小由原映像決定
+sudo ntfsclone --restore-image --output /mnt/backup/win-raw.img /mnt/backup/win.img
 sudo mount -o loop,ro /mnt/backup/win-raw.img /mnt/win-restored
 ```
 
@@ -133,53 +138,30 @@ sudo mount -o loop,ro /mnt/backup/win-raw.img /mnt/win-restored
 
 **核心觀念**：壞碟越讀越壞。ddrescue 用三階段策略：先撈簡單能讀的、再花時間慢慢試難讀的、不會卡在某個壞區無限重試。
 
-### 基本流程
+### 擷取流程
+
+先確認來源磁碟及所有分割區未掛載，目的地在另一顆健康磁碟且空間足夠。以下 `/dev/sda` 是整碟來源；只取單一分割區時須改用該分割區，並記錄映像種類。映像與 mapfile 成對保留，續跑時核對磁碟身分與原參數。
 
 ```bash
-sudo apt install gddrescue   # 套件叫 gddrescue，指令叫 ddrescue
-
-# 必須有：
-# 1. 來源 = 壞的 Windows 系統碟 /dev/sda
-# 2. 目的 = 一顆全新或夠大的硬碟，或一個大的映像檔
-# 3. mapfile = 紀錄進度，可以中斷後續跑
-
-# 整碟 dump 到映像檔（外接碟空間要夠）
-sudo ddrescue -d -r0 /dev/sda /mnt/backup/sda.img /mnt/backup/sda.map
-
-# 完成後第二次跑（再試之前失敗的區段）
-sudo ddrescue -d -r3 /dev/sda /mnt/backup/sda.img /mnt/backup/sda.map
-
-# 更激進（最多花時間搶救剩餘壞區）
-sudo ddrescue -d -r5 -R /dev/sda /mnt/backup/sda.img /mnt/backup/sda.map
+# 第一輪跳過 scraping，優先取得容易讀取的區段
+sudo ddrescue -n /dev/sda /mnt/backup/sda.img /mnt/backup/sda.map
+sudo ddrescuelog -t /mnt/backup/sda.map
 ```
 
-選項：
+第一輪後依未救出量、錯誤變化、溫度與異音決定是否重試。來源惡化或資料價值高時停止並交專業救援。來源穩定且仍有值得救的區段，才用同一組映像與 mapfile 做有限重試：
 
-| flag | 意義 |
+```bash
+sudo ddrescue -d -r1 /dev/sda /mnt/backup/sda.img /mnt/backup/sda.map
+```
+
+| 選項 | 用途 |
 |---|---|
-| `-d` | direct I/O（繞過 OS 快取，比較準） |
-| `-r N` | 失敗時重試 N 次（第一次設 0 先快速 copy 能讀的） |
-| `-R` | reverse direction（從尾巴開始讀） |
-| `-n` | 不 split bad blocks（更省事第一次用） |
-| `-c N` | cluster size（預設 64 sector） |
+| `-n` | 跳過 scraping 階段，不逐區刮取難讀資料 |
+| `-d` | 直接讀取來源，受裝置與扇區對齊限制；不支援時查明錯誤再調整 |
+| `-r N` | 重試 pass 數量，依救援狀況設定 |
+| `-R` | 反向讀取，可在有理由調整方向時使用 |
 
-### 多階段策略（救命用）
-
-```bash
-# Stage 1: 快速撈所有能讀的（不浪費時間在壞區）
-sudo ddrescue -f -n -d /dev/sda /mnt/backup/sda.img /mnt/backup/sda.map
-
-# Stage 2: 切割壞區域，多試幾次能讀的
-sudo ddrescue -d -r3 /dev/sda /mnt/backup/sda.img /mnt/backup/sda.map
-
-# Stage 3: 反方向讀（有時讀寫頭往不同方向能多救一點）
-sudo ddrescue -d -r3 -R /dev/sda /mnt/backup/sda.img /mnt/backup/sda.map
-
-# Stage 4: 大絕招（會花很久）
-sudo ddrescue -d -r20 /dev/sda /mnt/backup/sda.img /mnt/backup/sda.map
-```
-
-期間如果磁碟越來越燙、噪音越來越大 → 停手，可能要進無塵實驗室。一般使用者到 stage 2 結束就差不多了。
+不需對一般映像檔加 `-f`。該選項允許覆寫裝置類型的輸出，不能用它略過目的地確認。
 
 ### ddrescue 進度判讀
 
@@ -194,11 +176,11 @@ pct rescued:  56.25%, read errors:        7,  remaining time:      1h 23m
                               time since last successful read:          5s
 ```
 
-- **rescued**：已救出量（%多少最重要）
+- **rescued**：已成功讀取量；比例不能證明重要檔案完整
 - **non-tried**：還沒讀的（會繼續減少）
 - **non-trimmed**：讀過但有些 sector 失敗，沒去細分（後面 stage 處理）
 - **non-scraped**：細分後的，每個 sector 試讀失敗
-- **bad-sector**：確定壞掉的 sector
+- **bad-sector**：目前未成功讀出的 sector，不代表後續必然無法讀取
 
 ### 映像存哪？空間需求？
 
@@ -210,22 +192,31 @@ pct rescued:  56.25%, read errors:        7,  remaining time:      1h 23m
 
 不要 dump 到 USB 隨身碟（太慢且 USB 隨身碟也容易出問題）。
 
-### ddrescue 完成後
+### 擷取後：保留原始映像，唯讀取檔，修復用副本
 
 ```bash
-# 看 mapfile 統計
 sudo ddrescuelog -t /mnt/backup/sda.map
-
-# 試 mount 救出來的映像
-sudo losetup -fP --show /mnt/backup/sda.img    # 顯示 /dev/loopX
-sudo lsblk /dev/loopX                          # 看分割區
-sudo mount -t ntfs-3g -o ro /dev/loopXpY /mnt/recovered/
-
-# 在 recovered 映像上跑後續修復（不會傷原本壞掉的硬碟）
-sudo ntfsfix /dev/loopXpY    # 範例
+# 整碟映像需要分割區掃描；記錄回傳的 loop 裝置
+sudo losetup --read-only --find --partscan --show /mnt/backup/sda.img
+sudo lsblk /dev/loopX
+sudo mount -t ntfs-3g -o ro /dev/loopXpY /mnt/recovered
+# 依前節 rsync 選取資料並驗證
+sudo umount /mnt/recovered
+sudo losetup -d /dev/loopX
 ```
 
-之後所有 ntfsfix、testdisk、chntpw 等動作都對映像做。原本的壞硬碟封存或丟掉。
+單一分割區映像使用 `losetup --read-only --find --show`，掛載回傳的 `/dev/loopX` 本身，沒有 `pY`。完成唯讀取檔後，若仍需修復 NTFS：
+
+```bash
+# 確認輸出副本尚不存在、目的地空間足夠
+sudo cp --reflink=auto --sparse=always --no-clobber /mnt/backup/sda.img /mnt/backup/sda-work.img
+# 若副本已存在，先確認來源與內容，不沿用未知副本
+sudo losetup --find --partscan --show /mnt/backup/sda-work.img
+# 確認回傳裝置與目標分割區皆未掛載，再依 05 選擇必要修復
+# sudo ntfsfix /dev/loopYpZ
+```
+
+只修改工作副本，保留原始映像與 mapfile；中斷、失敗或修復惡化時可重新建立副本。來源壞碟先封存，未確認資料完整前不要處置。BitLocker 映像另接 [加密磁碟處理](10-bitlocker.md)。
 
 ## 救已刪除檔案：兩種思路
 
@@ -242,7 +233,7 @@ sudo ntfsundelete /dev/sda3 -u -m '*.docx' -d /media/external/recovered/
 
 # testdisk：互動式、視覺化
 sudo testdisk /dev/sda
-# Analyse → 選分割區 → P 進去看檔案 → 紅色是刪除的 → c 複製到別處
+# Advanced → 選 NTFS 分割區 → Undelete → 選檔案複製到其他磁碟
 ```
 
 成功率高的條件：
@@ -267,47 +258,23 @@ sudo apt install foremost
 sudo foremost -t doc,docx,xls,xlsx,pdf,jpg,png -i /dev/sda3 -o /media/external/foremost/
 ```
 
-PhotoRec 找到的檔案不會帶原檔名（metadata 已失）。會是 `f1234567.docx` 這樣的命名。但內容會在。
+PhotoRec 找到的檔案不會帶原檔名（metadata 已失）。會是 `f1234567.docx` 這樣的命名。能否恢復內容取決於資料是否仍存在、是否碎片化及工具支援；已覆寫的位元無法藉此找回。
 
 **輸出目錄一定要在外接碟，不能在原碟**：寫入會覆蓋掉還沒救到的資料。
 
 PhotoRec 跑得很慢（整碟掃描），可能要幾小時到一天。準備好等。
 
-## 為了救資料而救資料：最小流程
+## 只救資料時的停止點
 
-「電腦壞了，我只要把照片救出來，系統不修了」：
-
-```bash
-# 1. 先 SMART 確認碟的狀態
-sudo smartctl -H /dev/sda
-sudo smartctl -a /dev/sda | grep -E "Reallocated|Pending|Uncorrectable"
-
-# 健康 → 走 rsync 流程
-
-# 健康但檔案系統有問題 → ntfsclone 做映像，loop mount 救資料
-sudo ntfsclone --save-image -o /mnt/backup/win.img /dev/sda3
-# 然後 mount 那個映像來救
-
-# 不健康 → ddrescue 整碟
-sudo ddrescue -d -n /dev/sda /mnt/backup/sda.img /mnt/backup/sda.map
-sudo ddrescue -d -r3 /dev/sda /mnt/backup/sda.img /mnt/backup/sda.map
-# 之後 loop mount 在 sda.img 上救資料
-
-# 2. 救完驗證
-ls -lh /mnt/backup/...
-# 抽幾個檔案打開看內容是不是真的（不是 0 byte 或損毀）
-
-# 3. 至少做兩份備份（不同實體裝置）
-sudo cp -a /mnt/backup/USERNAME /mnt/backup2/
-```
+能讀取且已核對所需檔案，就不必繼續修系統。依前述分流選擇 rsync 或映像取檔，驗證重要檔案後，將成果另存到第二個實體裝置。
 
 ## 防止以後再發生：教育使用者
 
 救完之後跟使用者談談備份：
 
 - **3-2-1 原則**：3 份備份，2 種媒介，1 份離線/異地
-- **雲端不算備份**：同步不是備份（同步刪除會同步生效）
-- **自動化**：手動備份十次有八次會忘，設好排程
+- **同步不等於獨立備份**：同步不是備份（同步刪除會同步生效）
+- **自動化**：減少依賴臨時手動操作，設好排程
 - **定期測試**：備份救得回來才算備份
 
 具體建議：
@@ -319,7 +286,7 @@ sudo cp -a /mnt/backup/USERNAME /mnt/backup2/
 
 ### ddrescue 中斷不能續
 
-map 檔損壞。檢查：
+先核對來源裝置、映像路徑、權限、空間與 map 檔是否一致。檢查 map 檔：
 
 ```bash
 ddrescuelog -t /mnt/backup/sda.map

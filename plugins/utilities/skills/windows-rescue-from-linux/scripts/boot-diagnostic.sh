@@ -22,7 +22,7 @@ WIN_MNT="${1:-/mnt/win}"
 EFI_MNT="${2:-/mnt/efi}"
 
 REPORT_DIR="/tmp/boot-diagnostic-$(date +%Y%m%d-%H%M%S)"
-mkdir -p "$REPORT_DIR"
+mkdir -p "$REPORT_DIR" || exit 1
 REPORT="$REPORT_DIR/report.md"
 
 # 開頭
@@ -48,7 +48,7 @@ echo -e "${BOLD}[1] 韌體模式檢查${NC}"
         echo "目前 Linux 開機是 **UEFI** 模式"
         echo ""
         echo "**這顆 Live USB 是用 UEFI 開機**，但要修的 Windows 系統可能是 UEFI 也可能是 Legacy，"
-        echo "後面看分割表會知道。"
+        echo "須再對照分割表、開機檔與 BCD。"
     else
         echo "目前 Linux 開機是 **Legacy/BIOS** 模式"
         echo ""
@@ -71,26 +71,21 @@ echo -e "${BOLD}[2] 偵測 Windows 系統碟與分割表${NC}"
     fdisk -l 2>/dev/null | grep -E "^Disk /dev/|^Disklabel type:|^Device " | head -40
     echo '```'
     echo ""
-    echo "**Disklabel type** = `gpt` 代表 UEFI 系統；`dos` 代表 Legacy/MBR 系統。"
+    echo '**Disklabel type** 顯示分割表格式（gpt / dos）；Windows 開機方式仍須對照開機檔與 BCD。'
     echo ""
 } | tee -a "$REPORT"
 echo ""
 
-# 找 EFI 分割區
+# 僅讀取呼叫者確認並掛載的 ESP，不掃描其他磁碟或自行挑選。
 EFI_PART=""
-for P in $(lsblk -nrpo NAME,FSTYPE | awk '$2=="vfat" {print $1}'); do
-    TMP=$(mktemp -d)
-    if mount -t vfat -o ro "$P" "$TMP" 2>/dev/null; then
-        if [[ -d "$TMP/EFI" ]]; then
-            EFI_PART="$P"
-            umount "$TMP"
-            rmdir "$TMP"
-            break
-        fi
-        umount "$TMP"
-    fi
-    rmdir "$TMP"
-done
+EFI_STATUS="unknown"
+if mountpoint -q "$EFI_MNT"; then
+    EFI_PART=$(findmnt -nro SOURCE --target "$EFI_MNT")
+fi
+EFI_ENTRIES=""
+if command -v efibootmgr >/dev/null && [[ -d /sys/firmware/efi/efivars ]]; then
+    if EFI_ENTRIES=$(efibootmgr -v 2>&1) && [[ -n "$EFI_ENTRIES" ]]; then EFI_STATUS="read"; fi
+fi
 
 # ============================================
 # 3. efibootmgr 輸出
@@ -99,16 +94,16 @@ echo -e "${BOLD}[3] UEFI 開機項清單${NC}"
 {
     echo "## 3. UEFI 開機項（efibootmgr）"
     echo ""
-    if command -v efibootmgr >/dev/null && [[ -d /sys/firmware/efi/efivars ]]; then
+    if [[ "$EFI_STATUS" == "read" ]]; then
         echo '```'
-        efibootmgr -v 2>&1 || echo "efibootmgr 執行失敗"
+        printf '%s\n' "$EFI_ENTRIES"
         echo '```'
         echo ""
         # 解析
-        if efibootmgr -v 2>/dev/null | grep -qi "Windows Boot Manager"; then
+        if printf '%s\n' "$EFI_ENTRIES" | grep -qi "Windows Boot Manager"; then
             echo "✓ 找到 **Windows Boot Manager** 項目"
         else
-            echo "✗ **沒找到 Windows Boot Manager！** 這就是開不了機的原因之一。"
+            echo "✗ **沒找到 Windows Boot Manager！** 須先對照韌體選單與實際開機方式。"
             echo ""
             echo "修法（要先確認 EFI 分割區與 Windows 系統碟）："
             echo '```bash'
@@ -124,12 +119,13 @@ echo -e "${BOLD}[3] UEFI 開機項清單${NC}"
         echo ""
 
         # BootOrder
-        BOOTORDER=$(efibootmgr 2>/dev/null | grep BootOrder | awk '{print $2}')
+        BOOTORDER=$(printf '%s\n' "$EFI_ENTRIES" | grep BootOrder | awk '{print $2}')
         if [[ -n "$BOOTORDER" ]]; then
             echo "**目前 BootOrder：** $BOOTORDER"
         fi
     else
-        echo "efibootmgr 不能用（沒裝或不是 UEFI 開機）"
+        echo "UEFI 開機項未知：工具未安裝、介面不可用或讀取失敗。"
+        [[ -n "$EFI_ENTRIES" ]] && printf '%s\n' "$EFI_ENTRIES"
     fi
     echo ""
 } | tee -a "$REPORT" >/dev/null
@@ -143,15 +139,7 @@ echo -e "${BOLD}[4] EFI 分割區內容${NC}"
     echo "## 4. EFI 分割區內容"
     echo ""
 
-    if [[ -z "$EFI_PART" ]] && [[ ! -d "$EFI_MNT/EFI" ]]; then
-        # 試掛 EFI_MNT
-        if [[ -n "$EFI_PART" ]]; then
-            mkdir -p "$EFI_MNT"
-            mount -t vfat -o ro "$EFI_PART" "$EFI_MNT" 2>/dev/null && MOUNTED_EFI=1
-        fi
-    fi
-
-    if [[ -d "$EFI_MNT/EFI" ]]; then
+    if [[ -n "$EFI_PART" && -d "$EFI_MNT/EFI" ]]; then
         echo "EFI 分割區掛載於：$EFI_MNT"
         echo ""
         echo '```'
@@ -176,7 +164,7 @@ echo -e "${BOLD}[4] EFI 分割區內容${NC}"
         done
         echo ""
     elif [[ -n "$EFI_PART" ]]; then
-        echo "找到 EFI 分割區 $EFI_PART，但沒掛起來。"
+        echo "已掛載 $EFI_PART，但未見 EFI 目錄，需確認選取的是正確 ESP。"
         echo ""
         echo "掛載指令："
         echo '```bash'
@@ -184,7 +172,7 @@ echo -e "${BOLD}[4] EFI 分割區內容${NC}"
         echo "sudo mount -t vfat -o ro $EFI_PART $EFI_MNT"
         echo '```'
     else
-        echo "沒偵測到 EFI 分割區 —— 可能是 Legacy/MBR 系統。"
+        echo "未提供可讀取的已掛載 ESP；尚未判定 Windows 的開機方式。"
     fi
     echo ""
 } | tee -a "$REPORT" >/dev/null
@@ -239,11 +227,11 @@ echo -e "${BOLD}[5] Windows 系統碟檢查${NC}"
         if [[ -d "$WIN_MNT/Windows/Prefetch" ]]; then
             LAST_BOOT=$(stat -c%y "$WIN_MNT/Windows/Prefetch/NTOSBOOT-B00DFAAD.pf" 2>/dev/null | cut -d. -f1)
             if [[ -n "$LAST_BOOT" ]]; then
-                echo "### 上次成功開機時間"
+                echo "### 開機預讀檔修改時間"
                 echo ""
                 echo "**$LAST_BOOT**"
                 echo ""
-                echo "（從 \`Prefetch/NTOSBOOT.pf\` 的 mtime 推算）"
+                echo "（這是預讀檔最近修改的紀錄，不能證明 Windows 曾成功開機。）"
                 echo ""
             fi
         fi
@@ -255,9 +243,9 @@ echo -e "${BOLD}[5] Windows 系統碟檢查${NC}"
                 HSIZE_HUMAN=$(numfmt --to=iec --suffix=B "$HSIZE")
                 echo "### Hibernation 狀態"
                 echo ""
-                echo "⚠ \`hiberfil.sys\` 存在（$HSIZE_HUMAN）—— 系統處於 hibernation 或 Fast Startup 狀態"
+                echo "⚠ \`hiberfil.sys\` 存在（$HSIZE_HUMAN）—— 僅憑檔案存在不能判定正在休眠"
                 echo ""
-                echo "rw 掛載時要加 \`remove_hiberfile\` 參數。"
+                echo "是否休眠應依掛載錯誤與系統狀態判斷。"
                 echo ""
             fi
         fi
@@ -267,13 +255,9 @@ echo -e "${BOLD}[5] Windows 系統碟檢查${NC}"
             PSIZE=$(stat -c%s "$WIN_MNT/Windows/WinSxS/pending.xml")
             echo "### ⚠ pending.xml 存在"
             echo ""
-            echo "\`Windows/WinSxS/pending.xml\` ($PSIZE bytes) —— Windows 卡在 update 中"
+            echo "\`Windows/WinSxS/pending.xml\` ($PSIZE bytes) —— 存在待處理的元件作業"
             echo ""
-            echo "如果開機卡「Working on updates / 正在處理更新」，這就是原因。處理："
-            echo '```bash'
-            echo "sudo mv $WIN_MNT/Windows/WinSxS/pending.xml \\"
-            echo "        $WIN_MNT/Windows/WinSxS/pending.xml.bak"
-            echo '```'
+            echo "需對照更新事件與 CBS 日誌，不能只憑此檔案認定更新故障或移動它。"
             echo "詳見 references/11-driver-and-update-issues.md"
             echo ""
         fi
@@ -290,54 +274,18 @@ echo -e "${BOLD}[6] 開機 driver 與服務狀態${NC}"
     echo ""
 
     if [[ -f "$WIN_MNT/Windows/System32/config/SYSTEM" ]]; then
-        # 找出哪個是 Current ControlSet
-        CURRENT=$(hivexsh "$WIN_MNT/Windows/System32/config/SYSTEM" <<'EOF' 2>/dev/null
+        if command -v hivexsh >/dev/null; then
+            echo '```'
+            hivexsh "$WIN_MNT/Windows/System32/config/SYSTEM" <<'EOF' || echo "SYSTEM hive 讀取失敗"
 cd Select
 lsval
 EOF
-)
-        echo '```'
-        echo "$CURRENT" | head -10
-        echo '```'
-        echo ""
-
-        echo "### Start=0 (boot driver) 的服務"
-        echo ""
-        echo "這些 driver 在 Windows 啟動最早期 load。任何一個壞了都會 BSOD。"
-        echo ""
-
-        # 暫存腳本
-        TMPCMD=$(mktemp)
-        cat > "$TMPCMD" <<'EOSH'
-cd ControlSet001\Services
-ls
-EOSH
-
-        # 取得所有 services
-        SVC_LIST=$(hivexsh "$WIN_MNT/Windows/System32/config/SYSTEM" < "$TMPCMD" 2>/dev/null | tail -n +2)
-        rm "$TMPCMD"
-
-        echo '```'
-        # 對每個 service 查 Start value
-        BOOT_DRIVERS=()
-        for SVC in $SVC_LIST; do
-            START=$(hivexsh "$WIN_MNT/Windows/System32/config/SYSTEM" <<EOF 2>/dev/null | grep -i "^Start" | head -1
-cd ControlSet001\\Services\\$SVC
-lsval
-EOF
-)
-            if echo "$START" | grep -q "dword:0x0\b\|dword:0x00000000"; then
-                BOOT_DRIVERS+=("$SVC")
-            fi
-        done
-
-        printf '  %s\n' "${BOOT_DRIVERS[@]}" 2>/dev/null | head -30 || echo "(取不到清單)"
-        echo '```'
-        echo ""
-
-        echo "如果系統開機卡在 logo 或 BSOD INACCESSIBLE_BOOT_DEVICE，"
-        echo "通常是其中某個 boot driver（特別是儲存控制器類）出問題。"
-        echo ""
+            echo '```'
+            echo "依 Select\\Current 選擇 ControlSet00N，再檢查 Services 的 Start、ImagePath 與相應檔案。"
+            echo "Start=0 表示早期載入；是否造成開機失敗仍須對照錯誤碼與事件，不能直接停用。"
+        else
+            echo "未安裝 hivexsh，略過登錄資料讀取。"
+        fi
         echo "處理方式見 references/11-driver-and-update-issues.md"
         echo ""
     else
@@ -362,9 +310,21 @@ echo -e "${BOLD}[7] Windows 事件日誌（最近 BSOD / 開機失敗）${NC}"
             echo ""
             echo '```'
             # 撈關鍵 ID
-            python3 -m Evtx.Evtx "$EVTX" 2>/dev/null | \
-                grep -B 2 -A 10 -E "EventID.*>(41|1001|6008|219|7000|7026)<" | \
-                tail -150 | head -100 || echo "(沒抓到關鍵事件)"
+            python3 - "$EVTX" <<'PYEVTX' || echo "事件日誌解析失敗"
+import sys
+from collections import deque
+from xml.etree import ElementTree as ET
+from Evtx.Evtx import Evtx
+recent = deque(maxlen=20)
+with Evtx(sys.argv[1]) as log:
+    for record in log.records():
+        xml = record.xml()
+        event = ET.fromstring(xml)
+        event_id = event.find("{*}System/{*}EventID")
+        if event_id is not None and event_id.text in {"41", "1001", "6008", "219", "7000", "7026"}:
+            recent.append(xml)
+print("\n".join(recent) if recent else "未找到指定事件；不能據此排除故障。")
+PYEVTX
             echo '```'
             echo ""
             echo "**事件 ID 解讀：**"
@@ -415,41 +375,34 @@ echo -e "${BOLD}[8] 自動診斷推測${NC}"
     POSSIBLE=()
 
     # 用前面收集的資訊推測
-    if ! efibootmgr -v 2>/dev/null | grep -qi "Windows Boot Manager"; then
+    if [[ "$EFI_STATUS" == "read" ]] && ! printf '%s\n' "$EFI_ENTRIES" | grep -qi "Windows Boot Manager"; then
         POSSIBLE+=("UEFI 開機項裡沒有 Windows Boot Manager → 用 efibootmgr 重新註冊（references/04-boot-repair.md 場景 1）")
     fi
 
-    if [[ -d "$EFI_MNT/EFI" ]] && [[ ! -f "$EFI_MNT/EFI/Microsoft/Boot/bootmgfw.efi" ]]; then
+    if [[ -n "$EFI_PART" && -d "$EFI_MNT/EFI" ]] && [[ ! -f "$EFI_MNT/EFI/Microsoft/Boot/bootmgfw.efi" ]]; then
         POSSIBLE+=("EFI 分割區裡的 bootmgfw.efi 不見了 → 從 Windows 系統碟複製回來（references/04-boot-repair.md 場景 3）")
     fi
 
     if [[ -f "$WIN_MNT/Windows/WinSxS/pending.xml" ]]; then
-        POSSIBLE+=("pending.xml 存在 → Windows Update 卡住，移除它（references/11-driver-and-update-issues.md）")
-    fi
-
-    if [[ -f "$WIN_MNT/hiberfil.sys" ]]; then
-        HSIZE=$(stat -c%s "$WIN_MNT/hiberfil.sys" 2>/dev/null || echo 0)
-        if [[ "$HSIZE" -gt 1048576 ]]; then
-            POSSIBLE+=("hiberfil.sys 大檔存在 → Fast Startup 卡住，rw 掛時加 remove_hiberfile")
-        fi
+        POSSIBLE+=("pending.xml 存在 → 對照 CBS 與更新事件，判斷是否有未完成作業（references/11-driver-and-update-issues.md）")
     fi
 
     if [[ ${#POSSIBLE[@]} -gt 0 ]]; then
-        echo "**根據收集到的資訊，最有可能的問題：**"
+        echo "**根據收集到的資訊，待交叉查證的線索：**"
         echo ""
         for P in "${POSSIBLE[@]}"; do
             echo "- $P"
         done
     else
-        echo "沒偵測到明顯的開機問題訊號。"
+        echo "目前未取得足以確定原因的線索；未掛載、未安裝工具或讀取失敗的項目仍屬未知。"
         echo ""
         echo "**可能的方向：**"
         echo "- 開機後黑屏：看 driver 載入失敗（references/02-symptom-triage.md）"
-        echo "- 卡 Windows logo：跑 ntfsfix（references/05-filesystem-repair.md）"
+        echo "- 卡 Windows logo：依錯誤與日誌判斷開機、驅動或檔案系統問題（references/05-filesystem-repair.md）"
         echo "- 隨機 BSOD：跑 SMART + memtest86+ 排查硬體（references/09-hardware-diagnostics.md）"
     fi
     echo ""
-    echo "**永遠的安全提醒：動手修之前先 ddrescue/rsync 救資料！**"
+    echo "**寫入前備份受影響資料；硬體故障時先做映像。**"
 } | tee -a "$REPORT" >/dev/null
 
 # ============================================
@@ -457,15 +410,11 @@ echo -e "${BOLD}[8] 自動診斷推測${NC}"
 # ============================================
 echo ""
 echo -e "${GREEN}${BOLD}=========================================="
-echo "  診斷完成"
+echo "  診斷資料收集結束（缺少的項目見報告）"
 echo "==========================================${NC}"
 echo ""
 echo "完整報告：$REPORT"
+echo "Live USB 重新啟動前，將報告複製到持久儲存裝置。"
 echo ""
 echo "用 less 或編輯器看："
 echo "  less $REPORT"
-
-# 清理暫時掛的 EFI
-if [[ "${MOUNTED_EFI:-0}" == "1" ]]; then
-    umount "$EFI_MNT" 2>/dev/null
-fi

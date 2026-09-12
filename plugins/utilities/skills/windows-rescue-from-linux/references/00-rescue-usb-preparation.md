@@ -1,419 +1,94 @@
-# 00 · 救援碟準備 + Bootstrap
+# 00 — 救援碟準備
 
-> **這份要做的事**：把一支 USB 隨身碟做成「裝好工具的救援碟」。一次做好以後拿著就能修任何 Windows。
->
-> **本份文件分三層**：
-> 1. **§1-3**：實體準備（USB、Ubuntu Live、必裝套件）
-> 2. **§4-6**：Node.js + Claude Code + Codex 安裝（讓 AI agent 在 USB 上能跑）
-> 3. **§7-9**：把這個 skill 裝進 Claude Code、驗證、離線備援
+在使用者要製作救援 USB，或現場缺少本次所需工具時讀這份。已能操作的環境沿用，不必為了救援重新安裝 AI CLI。
 
----
+## 完整安裝到 USB
 
-## 1. 硬體需求
+製作目標是把完整 Linux 系統安裝到 USB，系統、開機載入器、救援工具與設定都保存在該 USB，插到相容電腦即可開機使用。下列 Live 媒體只能作為安裝來源或既有救援環境，不能以 ISO 寫入、Ventoy 或持續性 Live USB 代替本次完整安裝。
 
-- **USB 3.0 隨身碟**，建議 **64GB 以上**（要塞 Ubuntu + 工具 + persistence + Windows ISO）
-- 32GB 也能用但很擠，16GB 不夠
-- **品質很重要**：救援時讀寫很頻繁，廉價碟容易壞。SanDisk Extreme / Samsung BAR / Kingston DataTraveler Max 等 USB 3.2 規格穩
-- **另一支 USB 或外接硬碟**專用來放備份出來的資料，救援碟不該變成倉庫
-- **可選**：手機網路熱點（無線網路裝完套件時要用）
+安裝來源與目標 USB 分開。依目標電腦的架構、UEFI／Legacy 與 Secure Boot 需求，查閱所選發行版的官方安裝文件；可使用另一份安裝媒體，或支援所需架構與 USB 存取的虛擬機執行安裝。
 
----
+容量須涵蓋系統、工具、更新與所需映像，另備健康外接碟存救援資料。安裝前核對 USB 型號、序號與既有內容。
 
-## 2. 做一支 Ubuntu Live USB
+需要 Windows 原生工具時，帶入合適的官方安裝 ISO，見 [13](13-when-linux-cannot-fix.md)。要從映像提取系統檔，見 [15](15-image-file-replacement.md)。
 
-兩種做法，**強烈推薦做法 A（Ventoy）**：
+## 由 AI 製作救援 USB
 
-### 做法 A：Ventoy 多開機 + persistence（最有彈性）
+使用者同意代為製作後，由 AI 執行下載、工具準備、寫入與驗證，不只交付操作教學。依目前電腦的作業系統、可用權限與 USB 存取能力，查閱映像及製作工具的官方說明，選擇受支援的方式；缺少工具時由 AI 在授權範圍內安裝或使用可攜版本。
 
-優點：同一支 USB 能塞多個 ISO（Ubuntu + Kaspersky Rescue + Hiren's PE + Windows ISO），開機選單挑。
+1. 確認救援目標的架構與開機需求，取得適用映像，核對官方提供的雜湊或簽章。製作端可以是 Windows、macOS 或 Linux，不把下方 Linux 套件安裝命令直接套到其他系統。
+2. 列出目標 USB 的裝置路徑、型號、容量、可取得的序號及現有分割區／內容，說明寫入方式與會清除的範圍，取得此目標與清除範圍的同意。已有明確授權就沿用；「同意製作」本身不代表任意一顆磁碟都可清除。
+3. 清除前先把 USB 所有分割區中的資料完整備份到另一顆實體磁碟，包含隱藏檔與保留資料所需的中繼資料，不只備份常見文件。先確認目的地容量與格式足夠，在獨立目錄保存，避免覆蓋既有備份；需要保留完整分割區結構或無法以檔案方式完整保存時，建立整碟映像。檢查備份命令結果，核對檔案清單與內容雜湊，或驗證映像內容可讀。備份位置與驗證結果須記錄；有讀取錯誤、加密內容無法驗證、空間不足或未完整備份時，停止清除，先處理備份問題。
+4. 安裝前再次核對裝置身分。系統分割區、EFI 分割區與開機載入器都指定到目標 USB，避免安裝器使用製作端的內部磁碟。依官方方式配置可攜式開機，不依賴製作電腦獨有的開機項。失敗時保留錯誤並查明原因，不自動改寫另一顆磁碟。
+5. 進入 USB 上已安裝的系統，由 AI 完成下方工具與離線環境準備，再驗收開機及功能，完成同步並安全退出。無法進入該系統或完成驗證時明列未完成項目，不能只因安裝器成功就稱為可直接使用。
 
-**準備（在另一台健康電腦做）：**
-1. 下載 Ventoy：https://www.ventoy.net/
-2. 跑 `Ventoy2Disk.sh` 或 `Ventoy2Disk.exe`，把 USB 格式化成 Ventoy 格式
-3. 下載 [Ubuntu 24.04 LTS Desktop ISO](https://ubuntu.com/download/desktop)
-4. **直接把 .iso 複製到 USB**（Ventoy 把整支 USB 當 ISO 倉庫，不用解壓）
+若環境無法存取 USB 或取得必要權限，說明具體阻礙，只把無法代做的步驟交給使用者，不宣稱製作完成。
 
-**開 persistence 讓改動保留下來：**
-- Ventoy 預設 Live 模式重開會清空。要保留套件安裝必須建 persistence 檔。
-- Ubuntu：建 `ubuntu.dat` 同名 persistence 檔（用 `Ventoy/CreatePersistentImg.sh`）
-- 詳見 Ventoy 官網「Persistence」章節
+## 在 USB 系統內備齊工具
 
-**也順便丟下去的 ISO（建議）：**
-- `kasperskyrescue.iso` — Kaspersky 救援碟，掃毒能力遠勝 ClamAV
-- `Win11_24H2_TraditionalChinese_x64.iso` — Windows 安裝媒體（Linux 修不了時切過去走 WinRE）
-- `systemrescue-amd64.iso` — 預裝救援工具的 distro，備援
+以下操作須在 USB 上安裝的 Linux 系統中完成，不能只裝在製作端電腦。預裝工具先驗證，缺少的由 AI 補齊，不把工具安裝留到救援現場。一般救援碟涵蓋磁碟辨識與健康檢查、NTFS、備份與映像、開機與 registry、BitLocker、掃毒及 Windows 映像取檔；明確限定用途時依約定範圍準備。
 
-### 做法 B：直接把 Ubuntu 安裝到 USB（更穩定但失彈性）
+將完整 skill（含 references 與 scripts）保存在 USB 系統，供現場 agent 或人員讀取；使用 AI CLI 時再依下節設定其發現路徑。
 
-```
-1. 用 Ubuntu ISO 開機
-2. 選 Install Ubuntu
-3. 在「Installation type」選 Something else（手動）
-4. 把目標「安裝裝置」和「bootloader 安裝位置」都選到 USB
-   ⚠ 千萬不要選到主機硬碟！
-5. 走完安裝，下次用 USB 開機就跟一般 Ubuntu 一樣（可裝套件、改設定、留檔）
-```
-
-優點：每次開機環境一致，Claude Code / Codex / API key 都會保留。
-缺點：USB 損耗較大、不能裝其他 ISO。
-
----
-
-## 3. 第一次開機 + 裝套件
-
-開機後選 **Try Ubuntu**（不要 Install），進到桌面後開 Terminal，**確認有網路**（手機熱點或網路線都行），然後：
-
-### 最快做法：用我們的腳本
+在 skill 資料夾執行：
 
 ```bash
-# 假設這個 skill 資料夾已經放在 USB 上
-cd ~/windows-rescue-from-linux  # 或你解壓的位置
-sudo bash scripts/install-rescue-tools.sh
+bash scripts/bootstrap-check.sh
+sudo bash scripts/install-rescue-tools.sh --help
 ```
 
-腳本會：
-1. 更新 apt
-2. 一次裝所有救援工具（NTFS / chntpw / testdisk / ddrescue / smartctl / clamav / dislocker / efibootmgr / hivexsh ...）
-3. 初始化 ClamAV 病毒碼
-4. 偵測溫度感應器
-5. 驗證每個工具可用
+環境檢查只盤點，不把所有工具缺項都當成故障。依本次用途選安裝群組，或讀 [14 工具目錄](14-cli-tools-catalog.md) 找個別套件。Debian／Ubuntu 套件名稱須以現有套件庫查核；其他發行版使用自己的套件管理器。
 
-### 手動做法（懶人一行）
+安裝前呈現套件範圍與套件管理器預估的下載量、空間，沿用使用者已授權的範圍。安裝失敗就回報缺項，不能以「指令跑完」當成已安裝。
+
+病毒碼更新是掃毒準備的一部分，另依 [07](07-malware-cleanup.md) 執行。不要在一般工具安裝後自動停止服務、探測硬體或掃描 Windows 磁碟。
+
+## AI CLI 是選用配備
+
+使用者需要在 USB 上執行 AI CLI 才安裝，沿用偏好的產品與認證方式。可從另一台電腦協助，不要求兩套 CLI 並存。
+
+- Claude Code：依 [官方設定文件](https://code.claude.com/docs/en/setup) 選受支援的安裝方式。
+- Codex：依 [官方 CLI 安裝說明](https://developers.openai.com/codex/cli/) 取得對應平台的安裝方式。
+- 使用 npm 安裝時，依該 CLI 當前要求準備 Node.js，可由 [Node.js 官方下載](https://nodejs.org/en/download) 取得受支援版本。不要固定沿用過時的 Node 或模型版本。
+
+安裝後檢查所選 CLI 的 `--version`，完成登入並實際驗證可對話。不要印出 API key、認證檔或把它們收進救援紀錄。持續性 USB 上的登入資料也會保留，依實際使用方式管理存取。
+
+Skill 安裝沿用該 agent 已設定的發現路徑。Claude Code 使用 `~/.claude/skills/`；Codex 可使用 `~/.agents/skills/`。先檢查目錄與既有版本，再複製完整 skill 資料夾。確認 agent 能依「Windows 開不了機」「救資料」等自然需求找到它，不要求使用者每次指定檔案路徑。
+
+## 離線準備
+
+交付前須已安裝所需工具及相依項目，斷網也能執行本機救援功能。下列套件快取供補裝或修復備用，不能代替預裝。
+
+預先在與救援系統相同版本、架構的乾淨環境準備套件及全部相依項目，再離線演練一次安裝。單純在已裝好工具的機器跑 `apt --download-only`，可能漏掉已滿足的依賴。
 
 ```bash
-sudo apt update && sudo apt install -y \
-    ntfs-3g chntpw libhivex-bin testdisk gddrescue \
-    smartmontools nvme-cli hdparm \
-    parted gdisk dosfstools mtools partclone \
-    efibootmgr grub-efi-amd64-bin grub-common os-prober \
-    clamav clamav-freshclam rkhunter \
-    dislocker fuse3 cryptsetup \
-    foremost p7zip-full \
-    python3-evtx wimtools cabextract \
-    tmux screen mc pv pigz rsync rclone \
-    htop iotop nethogs \
-    lshw hwinfo dmidecode pciutils usbutils inxi \
-    lm-sensors memtester stress-ng \
-    curl wget openssh-client magic-wormhole \
-    vim nano less tree \
-    python3-pip git build-essential
+# 在相符的準備環境，下載本次需要的套件及依賴
+sudo apt-get update
+sudo apt-get --download-only install ntfs-3g rsync smartmontools gddrescue wimtools
 ```
 
-工具的詳細用途見 [14-cli-tools-catalog.md](14-cli-tools-catalog.md)。
-
----
-
-## 4. 安裝 Node.js（Claude Code / Codex 必備）
-
-Claude Code 和 Codex CLI 都是 npm 套件，**需要 Node.js 18 或更新**。Ubuntu 24.04 預設套件庫的 `nodejs` 版本可能太舊，建議走 NodeSource 拿穩定新版。
-
-### 方法 A：NodeSource（推薦，最穩定）
+把下載的 `.deb` 與所需依賴放到 USB，製作時先在該系統演練從本機套件目錄安裝：
 
 ```bash
-# 加 NodeSource 的 apt repo（指定 Node 20.x LTS）
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-
-# 裝 nodejs（npm 內建）
-sudo apt install -y nodejs
-
-# 驗證
-node --version    # 應該 v20.x.x
-npm --version     # 應該 10.x.x
+sudo apt install ./*.deb
 ```
 
-### 方法 B：nvm（最有彈性，可切多版本）
+若套件管理器仍要從網路下載，表示快取不完整，不要聲稱離線準備完成。`npm pack` 也不保證打包所有依賴與平台執行檔；AI CLI 優先預裝到持續性環境並測試重開機，不維護另一套未驗證的離線打包流程。
+
+離線安裝成功不代表雲端 AI 可以離線對話。無網路時可照事先保存的救援步驟與 references 操作；有手機熱點再恢復連線。
+
+## 救援碟驗收
+
+移除安裝媒體，在相容測試機或 VM 從目標 USB 開機，確認根目錄及開機所需分割區來自 USB，且不依賴製作端內部磁碟。VM 測試不能代替待救援實機的韌體與硬體相容性驗證。
+
+重新開機後確認工具、skill、設定與測試檔仍存在。用測試檔或映像驗證必要功能，斷網測試本機工具，核對病毒碼與所需修復來源已備妥。需要 USB 上的 AI 操作時，還須驗證所選 CLI、skill 載入及連線。交付時列出通過項目與實機相容性待驗證部分，不把未驗證的環境稱為可直接使用。這些檢查不對故障 Windows 磁碟寫入。
+
+長時間工作可用：
 
 ```bash
-# 裝 nvm（不需要 sudo，裝到 ~/.nvm）
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-
-# 重新載入 shell（或開新 terminal）
-source ~/.bashrc
-
-# 裝 Node 20 LTS
-nvm install 20
-nvm use 20
-nvm alias default 20
-
-# 驗證
-node --version
+tmux new -s rescue
+# Ctrl+B、D 暫離，重新連線後接回：
+tmux attach -t rescue
 ```
 
-### 方法 C：apt 預設套件（最簡單但可能版本舊）
-
-```bash
-sudo apt install -y nodejs npm
-node --version    # 確認 >= 18，太舊的話換方法 A
-```
-
-### 方法 D：直接 binary（離線備援）
-
-如果救援當下沒網路、或 NodeSource 連不上：
-
-```bash
-# 在有網路的電腦先下載 binary tarball
-wget https://nodejs.org/dist/v20.18.0/node-v20.18.0-linux-x64.tar.xz
-# 複製到救援 USB
-
-# 在 USB 上解壓到自己家目錄
-mkdir -p ~/local
-tar -xJf node-v20.18.0-linux-x64.tar.xz -C ~/local/
-# 加進 PATH
-echo 'export PATH="$HOME/local/node-v20.18.0-linux-x64/bin:$PATH"' >> ~/.bashrc
-source ~/.bashrc
-
-# 驗證
-node --version
-```
-
-> **方法 D 是最重要的離線備援**。建議事前就先把 Node binary 放在救援 USB 上，現場沒網路也能起得來。
-
-### npm 全域路徑設定（避免 sudo）
-
-直接 `sudo npm install -g` 會把套件裝到 `/usr/local/lib`，下次 Live 開機可能消失。建議：
-
-```bash
-# 設定 npm 全域目錄在家目錄
-mkdir -p ~/.npm-global
-npm config set prefix '~/.npm-global'
-echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.bashrc
-source ~/.bashrc
-```
-
-之後 `npm install -g` 不用 sudo，也會跟著家目錄 persistence 保留。
-
----
-
-## 5. 安裝 Claude Code
-
-```bash
-npm install -g @anthropic-ai/claude-code
-
-# 驗證
-claude --version
-```
-
-### 首次設定
-
-```bash
-claude
-```
-
-第一次跑會引導：
-- **方式一**：用 Anthropic 帳號登入（適合 Claude Pro/Max 使用者）
-- **方式二**：用 API key（從 https://console.anthropic.com 取得，pay-as-you-go）
-
-設定檔位置：
-- 認證：`~/.claude/.credentials.json`
-- 設定：`~/.claude/settings.json`
-
-**USB persistence 場景特別注意**：上面這些檔案要存在 USB 的 persistence 區，下次開機才會在。如果是 Ventoy persistence，預設家目錄就在 persistence 區，沒問題。
-
-### 設定預設模型（可選）
-
-```bash
-# 在 ~/.claude/settings.json
-{
-  "model": "claude-opus-4-7"
-}
-```
-
-救援場景建議用 Opus（推理品質好），Sonnet 也行（快、便宜）。
-
----
-
-## 6. 安裝 Codex CLI（OpenAI，可選）
-
-如果你習慣用 OpenAI 的 agent，或想兩個都裝來互相備援：
-
-```bash
-npm install -g @openai/codex
-
-# 驗證
-codex --version
-
-# 首次跑會問 API key（從 https://platform.openai.com/api-keys 取得）
-codex
-```
-
-兩個 CLI 並存沒問題，分別存在不同設定檔。救援時哪個有 quota / 連得上就用哪個。
-
----
-
-## 7. 把這個 skill 裝進 Claude Code
-
-```bash
-# Claude Code 預設 skill 路徑
-mkdir -p ~/.claude/skills
-
-# 解壓 skill zip 到該位置
-unzip ~/Downloads/windows-rescue-from-linux.zip -d ~/.claude/skills/
-
-# 確認
-ls ~/.claude/skills/windows-rescue-from-linux/SKILL.md
-```
-
-Claude Code 啟動後會自動掃描 `~/.claude/skills/`。跟它說「Windows 開不了機」「ntfsfix」「chntpw」「BitLocker 救援」等關鍵字就會載入這個 skill。
-
-### Codex 的 skill 位置
-
-Codex 的 skill 機制和 Claude Code 不同（截至 2026 年仍在演進）。最簡單作法：把整個 skill 資料夾放到專案根目錄，跟 Codex 說「讀 `windows-rescue-from-linux/SKILL.md` 並照它做」。
-
----
-
-## 8. 驗證救援碟可用
-
-裝完後一次性檢查：
-
-```bash
-# 工具齊全（不該有任何一行說「not found」）
-for tool in ntfsfix chntpw hivexsh testdisk photorec ddrescue \
-            smartctl clamscan dislocker efibootmgr rsync \
-            tmux node claude; do
-    if command -v "$tool" >/dev/null; then
-        printf "  ✓ %-12s %s\n" "$tool" "$(command -v "$tool")"
-    else
-        printf "  ✗ %-12s MISSING\n" "$tool"
-    fi
-done
-
-# ClamAV 病毒碼有更新（要網路）
-sudo freshclam
-
-# Node + Claude Code 通的
-node --version
-claude --version
-
-# USB 自身健康
-sudo smartctl -a /dev/sdX   # X = 你救援碟的字母（通常不是 USB 而是看不到 SMART，正常）
-```
-
-全部 ✓ 就 OK，這支救援碟可以走天下。
-
----
-
-## 9. 離線備援（沒網路的現場）
-
-很多救援場景到現場才發現沒網路（壞主機不能上、客戶網路壞、機房沒 Wi-Fi）。**事前準備好離線備援**：
-
-### 9.1 預先下載的東西放在 USB 上
-
-```
-USB-root/
-├── ventoy/                         # Ventoy 開機檔（自動產生）
-├── ubuntu-24.04-desktop-amd64.iso  # 開機用
-├── kasperskyrescue.iso             # 離線掃毒（不用網路病毒碼會舊但能用）
-├── Win11_24H2_zh-TW_x64.iso        # Windows 安裝媒體
-├── offline-binaries/
-│   ├── node-v20.18.0-linux-x64.tar.xz   # Node binary（4.7 節方法 D）
-│   ├── claude-code-offline.tgz          # npm pack 出來的 tarball
-│   └── apt-cache/                       # 預先下載的 .deb 套件
-└── windows-rescue-from-linux/      # 這個 skill 整包
-```
-
-### 9.2 預先快取 apt 套件
-
-在有網路的環境執行一次：
-
-```bash
-# 把所有救援工具的 .deb 檔下載到一個資料夾（不安裝）
-mkdir -p ~/apt-cache && cd ~/apt-cache
-sudo apt update
-sudo apt install --download-only -y \
-    ntfs-3g chntpw libhivex-bin testdisk gddrescue \
-    smartmontools dislocker fuse3 efibootmgr clamav \
-    foremost python3-evtx tmux pv rsync
-
-# .deb 都在 /var/cache/apt/archives/
-cp /var/cache/apt/archives/*.deb ~/apt-cache/
-# 把這資料夾複製到 USB
-```
-
-之後在沒網路的救援現場：
-
-```bash
-cd /media/$USER/Ventoy/offline-binaries/apt-cache
-sudo dpkg -i *.deb
-sudo apt-get install -f   # 修依賴關係
-```
-
-### 9.3 預先 `npm pack` Claude Code
-
-在有網路的電腦：
-```bash
-npm install -g npm-pack-all
-mkdir ~/claude-code-bundle && cd ~/claude-code-bundle
-npm pack @anthropic-ai/claude-code
-# 這會在當前目錄產生 anthropic-ai-claude-code-X.Y.Z.tgz
-# 包含所有依賴
-```
-
-複製到 USB，之後離線安裝：
-```bash
-npm install -g ./anthropic-ai-claude-code-X.Y.Z.tgz
-```
-
-> **限制**：Claude Code 跑起來還是需要連 api.anthropic.com 才能對話。離線 install 解決的是「裝不起來」的問題，不是「沒網路也能對話」。
-
-### 9.4 救援場景沒網路怎麼辦
-
-如果**現場真的完全沒網路**而又需要 AI 協助：
-
-1. **手機熱點分享**：救援時連手機 4G/5G 熱點
-2. **預先離線討論**：之前先在有網路時跟 Claude 把要做的事討論完，存成步驟筆記 (.md)，到現場照著做
-3. **走純人工**：照本份 skill 的 `references/` 文件操作（人類版救援手冊）
-
----
-
-## 10. 額外建議
-
-1. **建一個 `~/rescue-toolbox/` 資料夾**：放救援腳本、之前累積的紀錄、常用 registry 範本、客戶聯絡資訊等
-2. **準備自己的測試環境**：找一台不重要的舊筆電或 VM 當練習對象。沒練過就在使用者實機上動容易出事
-3. **印出緊急流程紙本**：BIOS 沒設好 USB 開機順序時連 Linux 都進不去，先把「進 BIOS → 改開機順序 → 從 USB 開機」這幾步印出來夾在 USB 旁
-4. **記錄常見品牌的 BIOS 熱鍵**：
-   - HP: F9 / Esc
-   - Dell: F12
-   - Lenovo: F12 / Nano Button
-   - ASUS: F8 / Esc
-   - Acer: F12
-   - MSI: F11
-   - Apple Mac: 開機按住 Option
-
----
-
-## 11. Agent 自動 Bootstrap 模式
-
-> **這節是給 AI agent（Claude Code / Codex）看的**
-
-如果使用者剛把這個 skill 載進來，你（agent）應該主動檢查環境狀態。檢查順序：
-
-```bash
-# 1. 在哪？
-cat /etc/os-release | head -3
-[ -d /sys/firmware/efi ] && echo "UEFI" || echo "Legacy"
-
-# 2. 救援工具齊嗎？
-for t in ntfsfix chntpw testdisk ddrescue smartctl efibootmgr dislocker; do
-    command -v "$t" >/dev/null && echo "✓ $t" || echo "✗ $t MISSING"
-done
-
-# 3. Node.js + Claude Code（你自己）跑起來嗎？
-node --version 2>/dev/null || echo "✗ Node.js MISSING"
-which claude 2>/dev/null || echo "✗ Claude Code MISSING"
-
-# 4. 有沒有網路？
-ping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1 && echo "✓ Internet" || echo "✗ No Internet"
-```
-
-根據結果：
-
-| 狀況 | 你要主動做 |
-|---|---|
-| 工具有缺 + 有網路 | 問使用者是否要跑 `scripts/install-rescue-tools.sh`，得到 yes 就跑 |
-| 工具有缺 + 沒網路 | 提醒使用者：「目前沒網路。可以開手機熱點，或從 USB 上的 offline-binaries 安裝。」 |
-| Node 缺 + 你還能讀指令 | 表示你（agent）是用其他方式跑的（例如另一台機器 SSH）。提醒使用者裝 Node 的方式（§4 方法 A 或 D） |
-| 全 OK | 進到 SKILL.md 的「症狀分流」階段 |
-
-**不要默默裝東西**。每次裝套件都要先告訴使用者「我要跑 `sudo apt install ...`，這會花約 X 分鐘並占用 Y MB 空間。可以嗎？」
-
-詳細的安全規則見 [01-safety-principles.md](01-safety-principles.md)。
+`tmux` 只保護連線中斷，斷電或系統當機仍會中止。映像工作的 mapfile 與備份須存到持續性裝置，續作方法見 [08](08-data-recovery.md)。

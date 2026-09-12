@@ -2,30 +2,32 @@
 
 > **核心觀念**：使用者登入後變成 Temp Profile、桌面是空的、文件全不見 —— 多半是 `NTUSER.DAT` 損壞或 ProfileList 指向錯地方。從 Linux 端能做兩件事：救出舊 profile 的資料、修 ProfileList registry 讓 Windows 重新指認 profile。重建乾淨的新 profile 必須回到 Windows 才能完整完成（建立帳號需要 Windows API），Linux 只能搬資料。
 
+備份與掛載先讀 [01](01-safety-principles.md)、[03](03-mount-windows.md)；所有 hive 修改使用 [06 的工作副本合併與比對流程](06-registry-edit.md)。
+
 ---
 
 ## 1. 症狀識別
 
-| 症狀 | 多半原因 |
+| 症狀 | 待查方向 |
 |---|---|
 | 「You've been signed in with a temporary profile」 | NTUSER.DAT 損壞 / ProfileList 指錯 |
 | 桌面空了，預設背景，所有設定都不見 | 同上 |
 | 「The User Profile Service failed the sign-in」 | ProfileList 裡的 SID 標 `.bak` |
-| 登入很慢然後桌面空 | NTUSER.DAT 大到爆 / loaded 失敗 |
+| 登入很慢然後桌面空 | hive 讀取、磁碟或設定載入失敗 |
 | 進桌面後特定 App 開不起來 | 該 App 在 NTUSER.DAT 的設定壞了 |
-| 「Group Policy Client service failed sign-in」 | NTUSER.DAT 嚴重損壞 |
+| 「Group Policy Client service failed sign-in」 | 群組原則服務、權限或 hive 載入問題 |
 
 ---
 
 ## 2. 先弄懂 ProfileList 結構
 
-```bash
+```text
 # 掛 Windows
 sudo mount -t ntfs-3g -o ro /dev/sda3 /mnt/win
 
 # Profile 列表在 SOFTWARE hive
 cd /mnt/win/Windows/System32/config
-sudo cp SOFTWARE SOFTWARE.bak  # 備份
+# 依 06 把 hive 與日誌備份到外接健康磁碟
 
 sudo hivexsh SOFTWARE
 > cd Microsoft\Windows NT\CurrentVersion\ProfileList
@@ -47,89 +49,41 @@ HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\
 
 每個 SID 底下有：
 - `ProfileImagePath` = `C:\Users\Alice`（指向 profile 資料夾）
-- `State` = 0 表示正常，0x8000 / 0x0001 / 0x0080 表示有問題
-- `RefCount` = 載入次數
+- `State` = profile 狀態旗標，非零不一定表示損壞
+- `RefCount` = 參照計數，並非每次登入累積的次數
 - `Flags` = 帳號類型
 
 ---
 
-## 3. 修 ProfileList：拿掉 `.bak`
+## 3. 修 ProfileList
 
-**最常見的修法**：Windows 看到 SID 有兩個項目（`S-1-5-21-...` 和 `S-1-5-21-....bak`），優先用 `.bak` 那個但路徑可能指錯，所以給 Temp Profile。
+先匯出問題 SID 與同名 `.bak` 分支，檢查 `ProfileImagePath` 指向的資料夾、NTUSER.DAT 是否可讀、原使用者 SID 與服務事件紀錄。兩個分支存在不代表 `.bak` 多餘，不能直接刪除或假設 Windows 會自動合併。
 
-```bash
-cd /mnt/win/Windows/System32/config
-sudo cp SOFTWARE SOFTWARE.bak
+### 路徑或狀態值錯誤
 
-# 進去看狀況
-sudo hivexsh -w SOFTWARE
-> cd Microsoft\Windows NT\CurrentVersion\ProfileList
-> ls
-# 找到問題使用者的 SID，例如：
-#   S-1-5-21-1234567890-1234567890-1234567890-1001
-#   S-1-5-21-1234567890-1234567890-1234567890-1001.bak  ← 多餘的
+若證據已確認正確資料夾是 `C:\Users\Alice`，在 SOFTWARE 工作副本合併對應變更。以下 SID 為範例，需換成實際使用者；只放入本案確認需要修改的值。
 
-# 看兩個分別指到哪
-> cd S-1-5-21-1234567890-1234567890-1234567890-1001
-> lsval
-# ProfileImagePath: "C:\Users\TEMP"（指錯了）
-> cd ..
-> cd S-1-5-21-1234567890-1234567890-1234567890-1001.bak
-> lsval
-# ProfileImagePath: "C:\Users\Alice"（這才是正確的）
+```reg
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\S-1-5-21-1234567890-1234567890-1234567890-1001]
+"ProfileImagePath"=hex(2):43,00,3a,00,5c,00,55,00,73,00,65,00,72,00,73,00,5c,00,41,00,6c,00,69,00,63,00,65,00,00,00
+"State"=dword:00000000
 ```
 
-### 解法 A：把 `.bak` 改名回正常 SID
+`hex(2)` 保留 REG_EXPAND_SZ 型別，上例編碼的是 `C:\Users\Alice`。更換路徑時重新產生 UTF-16LE 加結尾零位元的資料，不沿用範例位元組。若只修正 `State`，省略路徑那一列；先查其非零原因，不能把所有非零狀態清成 0。
 
-`hivexsh` 沒有 rename key 的直接指令，要先記下 `.bak` 的 values，刪掉沒 `.bak` 的，再把 `.bak` 改名。
-
-**但 hivexsh 也不能改 key 名**。比較簡單的做法是：
-
-```
-> cd S-1-5-21-1234567890-1234567890-1234567890-1001
-> setval 1
-ProfileImagePath
-string:C:\Users\Alice
-> setval 1
-State
-dword:00000000
-> commit
+```python
+# 將已確認的 Windows 路徑轉為 .reg 的 REG_EXPAND_SZ 資料
+path = r"C:\Users\Alice"
+print('"ProfileImagePath"=hex(2):' + ','.join(f'{b:02x}' for b in (path + '\0').encode('utf-16le')))
 ```
 
-也就是**直接把沒 `.bak` 的那個指到正確路徑、State 清零**，然後讓 Windows 自己處理 `.bak` 那個（Windows 開機看到 `.bak` 通常會自己合併或丟）。
+依 [06](06-registry-edit.md) 合併並匯出前後差異，確保 `Flags`、`Sid` 等其他資料保留。
 
-如果想保險點，把 `.bak` 那個 key 整個刪掉：
+### 正確設定都在 `.bak` 分支
 
-```
-> cd ..
-> del-node S-1-5-21-1234567890-1234567890-1234567890-1001.bak
-> commit
-```
-
-### 解法 B：State 值清零
-
-有時候 SID 沒兩個版本，但 State 值不是 0：
-
-```
-> cd S-1-5-21-1234567890-1234567890-1234567890-1001
-> lsval
-# State: 0x00008000  ← 有問題
-> setval 1
-State
-dword:00000000
-> commit
-```
-
-State 的位元意義（部分）：
-- `0x0001` (PROFILE_MANDATORY)
-- `0x0002` (PROFILE_USE_CACHE)
-- `0x0004` (PROFILE_NEW_LOCAL)
-- `0x0080` (PROFILE_TEMPORARY) ← 強制變 temp profile
-- `0x8000` (PROFILE_GUEST_USER)
-
-設成 0 就是「正常 profile，沒有特殊狀態」。
-
----
+需要更名整個 SID 分支時，優先在另一個管理員帳號或 WinRE 載入 SOFTWARE 後，用 Registry Editor 對照並改名，保留衝突分支的匯出備份。若在 Linux 做，須完整匯出來源分支、將 key 路徑改成確認的目的 SID，再於工作副本合併並逐項比對子 key 與所有型別、值。先處理目的分支衝突，確認新分支完整後才移除舊分支；不要只抄 ProfileImagePath 與 State 重建整個 SID。
 
 ## 4. NTUSER.DAT 損壞處理
 
@@ -146,90 +100,41 @@ ls -la /mnt/win/Users/Alice/NTUSER.DAT*
 
 ### 4.1 看 NTUSER.DAT 健不健康
 
-```bash
+```text
 sudo cp /mnt/win/Users/Alice/NTUSER.DAT /tmp/test-ntuser.dat
 
 # 試著 load
 sudo hivexsh /tmp/test-ntuser.dat
 > ls
-# 如果出來是 Software / Console / Control Panel 等就 OK
+# 能讀出這些 key 只代表可解析，不能證明全部設定與交易狀態完整
 # 如果報錯 "hivex_open: bad magic"，hive 損壞
 ```
 
 ### 4.2 用備份還原
 
-Windows 沒有 NTUSER.DAT 的自動備份機制（不像 RegBack），但有兩個地方可能有舊版：
+保留 NTUSER.DAT 與所有同名交易日誌，再從已知良好的使用者備份或 Windows 還原點復原。`.LOG1` / `.LOG2` 是交易日誌，不能當成整份 hive 複製；需要能重播 Windows registry 日誌的工具。只會列出 hive 內容的工具不等於能重播日誌。
 
-```bash
-# 1. NTUSER.DAT.LOG1/LOG2 不是備份，是 transaction log
-#    但可以用 reglookup 等工具搭配 .LOG 還原損壞的 .DAT
-sudo apt install registry-tools  # reglookup 在這
-sudo reglookup -i /mnt/win/Users/Alice/NTUSER.DAT | head
+### 4.3 重置 NTUSER.DAT
 
-# 2. System Restore Point（如果開著）
-ls /mnt/win/System\ Volume\ Information/
-# 但這個從 Linux 解非常麻煩，不值得
-```
+重置會丟失此 hive 內的使用者與應用程式設定。優先依下一節在 Windows 建立新 profile 並搬資料，讓 Windows 建立正確權限與帳號關聯。
 
-### 4.3 重置該使用者的 NTUSER.DAT（破壞性，先備份）
+若選擇以 Default 的 hive 嘗試重置，先完整備份原 NTUSER.DAT 與同名日誌、交易檔，確認 Default hive 可讀；將舊日誌移到備份位置而非刪除，再替換 hive 並保留目的檔案的 NTFS 權限。測試失敗需整組還原 hive 與日誌，不能混用新 hive 和舊交易檔。
 
-從 Default profile 複製一份乾淨的：
+### 4.4 Hive 異常增大
 
-```bash
-# 1. 備份原本壞的
-sudo cp /mnt/win/Users/Alice/NTUSER.DAT \
-        /mnt/win/Users/Alice/NTUSER.DAT.broken-$(date +%Y%m%d)
-
-# 2. 從 Default 拿一份新的（必須要 rw 掛載）
-sudo cp /mnt/win/Users/Default/NTUSER.DAT \
-        /mnt/win/Users/Alice/NTUSER.DAT
-
-# 3. 把 LOG 檔清掉（不一致就丟）
-sudo rm /mnt/win/Users/Alice/NTUSER.DAT.LOG1 \
-        /mnt/win/Users/Alice/NTUSER.DAT.LOG2 2>/dev/null
-sudo rm /mnt/win/Users/Alice/NTUSER.DAT*.blf 2>/dev/null
-sudo rm /mnt/win/Users/Alice/NTUSER.DAT*.regtrans-ms 2>/dev/null
-```
-
-**警告**：這會清掉 Alice 帳號的所有應用程式設定（瀏覽器、Office、桌面排列、捷徑等）。資料還在（D:\、Documents\、Desktop\），但開啟 Edge 會變初始狀態。
-
-### 4.4 移 hive size 超大的問題
-
-NTUSER.DAT 變肥（>200MB）會導致登入超慢：
-
-```bash
-ls -lh /mnt/win/Users/Alice/NTUSER.DAT
-# 健康範圍：1-50MB
-# 太大（200MB+）：通常某個 App 一直寫 registry
-```
-
-Linux 端沒辦法「壓縮」hive。要回到 Windows 用 PowerShell 重建：
-```powershell
-# Windows 內：
-Export-Item HKCU\... -Path D:\backup.reg  # 看狀況
-```
-
-或乾脆走 4.3 重置。
-
----
+檔案大小或成長速度可作為線索，但沒有通用的健康大小門檻。對照登入事件、近期安裝的應用程式與 hive 內容，找出是否有大量重複設定。不要只因超過某個 MB 數就重置；需整理 hive 時，備份後回 Windows 使用適合該問題的登錄工具，或建立新 profile。
 
 ## 5. 建立全新 profile 給使用者
 
 **Linux 端做不到完整建帳號**（需要 LSA / SAM API），但能幫使用者搬資料：
 
-### 5.1 在 Linux 端準備新資料夾
+### 5.1 讓 Windows 建立新 profile
 
-```bash
-# 從 Default 複製
-sudo cp -r /mnt/win/Users/Default /mnt/win/Users/Alice2
-```
+1. 在 Windows 用另一個管理員帳號建立新本機帳號 `Alice2`。
+2. 登入新帳號，讓 Windows 建立 profile 與權限。
+3. 從舊 Alice 的備份挑選資料搬入，避免整包覆蓋新的 AppData 與 hive。
 
-但 Windows 不會自動認這個資料夾，**還是要回到 Windows**：
-
-1. 開機進 Windows，用 Administrator 或另一個管理員帳號
-2. 控制台 → User Accounts → 建立新本機帳號 `Alice2`
-3. 登入新帳號讓 Windows 建立完整 profile
-4. 從原本 Alice 的資料夾搬資料過去（下節）
+目前無法登入時，Linux 先把資料備份到外接碟；單獨複製 Default 資料夾不會建立可登入的帳號。
 
 ### 5.2 從舊 profile 搬資料到新 profile
 
@@ -282,102 +187,21 @@ sudo rsync -aHv --info=progress2 \
 
 ## 6. ProfileImagePath 路徑被改錯
 
-例如使用者把 `C:\Users\Alice` 自己改名成 `C:\Users\Alice-old`，登入時 Windows 找不到。
+例如已確認使用者把 `C:\Users\Alice` 改成 `C:\Users\Alice-old`：若只是資料夾誤更名，備份並檢查目的名稱無衝突後改回原名。若確定要保留新路徑，依第 3 節修改 ProfileImagePath，並在 Windows 檢查其他應用程式的絕對路徑與 ACL。
 
-```bash
-sudo mount -t ntfs-3g -o rw,remove_hiberfile /dev/sda3 /mnt/win
+## 7. 範例：每次登入都是 Temp Profile
 
-# 修法 1：把資料夾改回原名
-sudo mv /mnt/win/Users/Alice-old /mnt/win/Users/Alice
-
-# 修法 2：改 registry 指到新路徑
-cd /mnt/win/Windows/System32/config
-sudo cp SOFTWARE SOFTWARE.bak
-sudo hivexsh -w SOFTWARE
-> cd Microsoft\Windows NT\CurrentVersion\ProfileList\S-1-5-21-...
-> setval 1
-ProfileImagePath
-string:C:\Users\Alice-old
-> commit
-```
-
----
-
-## 7. 完整流程範例：使用者一直進 Temp Profile
-
-```bash
-# 場景：Alice 每次登入都是 Temp Profile，桌面空白
-
-# 1. 掛 ro 先看狀況
-sudo mkdir -p /mnt/win
-sudo mount -t ntfs-3g -o ro /dev/sda3 /mnt/win
-
-# 2. 確認 Alice 的資料還在
-ls -la /mnt/win/Users/Alice/Desktop/
-ls -la /mnt/win/Users/Alice/Documents/
-# 還在 → 太好了，是 profile load 失敗不是檔案不見
-
-# 3. 看 ProfileList
-cd /mnt/win/Windows/System32/config
-sudo hivexsh SOFTWARE
-> cd Microsoft\Windows NT\CurrentVersion\ProfileList
-> ls
-# 找到兩個版本：
-#   S-1-5-21-XXX-1001
-#   S-1-5-21-XXX-1001.bak
-
-> cd S-1-5-21-XXX-1001
-> lsval
-# ProfileImagePath: "C:\Users\TEMP"   ← 錯
-# State: 0x8000                       ← 有問題
-
-> cd ..
-> cd S-1-5-21-XXX-1001.bak
-> lsval
-# ProfileImagePath: "C:\Users\Alice"  ← 對
-# State: 0
-> quit
-
-# 4. 重新 rw 掛載修
-sudo umount /mnt/win
-sudo mount -t ntfs-3g -o rw,remove_hiberfile /dev/sda3 /mnt/win
-cd /mnt/win/Windows/System32/config
-sudo cp SOFTWARE SOFTWARE.bak.$(date +%Y%m%d)
-
-# 5. 動手
-sudo hivexsh -w SOFTWARE <<'EOF'
-cd Microsoft\Windows NT\CurrentVersion\ProfileList
-del-node S-1-5-21-XXX-1001
-EOF
-
-# 把 .bak 那個改名成沒 .bak 的版本
-# 因為 hivexsh 不能 rename key，最簡單做法是把 .bak 的內容寫到沒 .bak 的位置：
-sudo hivexsh -w SOFTWARE <<'EOF'
-cd Microsoft\Windows NT\CurrentVersion\ProfileList\S-1-5-21-XXX-1001.bak
-lsval
-EOF
-# 記下 ProfileImagePath / Flags / State / Sid 等
-
-# 然後手動建回沒 .bak 的 key、設好值，再 del-node .bak 那個
-
-# 6. 卸載重開
-sudo umount /mnt/win
-```
-
-> 老實說：**ProfileList 的 `.bak` 處理在 hivexsh 裡很麻煩**，比較實用的做法是在 Windows 內走 WinRE → 命令提示字元 → `reg load` → `regedit` 圖形化處理。Linux 端能做的最有效一招是「**把 State 改 0**」，多半就夠了。
-
----
+先確認 Alice 原來的 Documents、Desktop 仍在，讀取 User Profile Service 的錯誤並比對 SID、路徑、NTUSER.DAT。如果路徑錯誤就修路徑；hive 不能解析則保留日誌並嘗試備份復原；ACL 問題交給 Windows 處理。修完一項測試登入，確認載入的是原 profile 與資料，不以桌面出現就判定完成。
 
 ## 8. 常見錯誤
 
 ### 改完 State 還是 Temp Profile
 - 確認 `ProfileImagePath` 真的指到正確路徑（看 `Users\Alice` 資料夾真的存在）
-- 確認沒有 `.bak` 版本同時存在（兩個都在 Windows 優先吃 `.bak`）
+- 對照 `.bak` 分支與事件紀錄，確認實際使用的 SID 設定
 - `Users\Alice` 的 NTFS ACL 可能不對（要回 Windows 用 `icacls` 修）
 
 ### 還原 NTUSER.DAT 後 Windows 還是說 profile 壞掉
-- 沒清 `.LOG1` `.LOG2` `.blf` 檔，這些檔記著舊 hive 的 transaction
-- 全部清掉再開機
+- 檢查是否混用了不同時點的 hive 與日誌，依備份整組復原
 
 ### hivexsh: 'bad magic' on NTUSER.DAT
 - NTUSER.DAT 本身嚴重損壞
@@ -385,7 +209,7 @@ sudo umount /mnt/win
 - 終極方案：建新帳號搬資料（5 節）
 
 ### 改了沒生效
-- 沒下 `commit` 就 `quit`
+- 工作副本合併或寫回失敗
 - 改錯 hive（NTUSER.DAT 是該使用者的，ProfileList 在 SOFTWARE）
 - 沒 rw 掛載
 
@@ -395,7 +219,7 @@ sudo umount /mnt/win
 
 修好 profile 後務必：
 
-- 建議使用者用 `OneDrive` 或其他雲端同步 Desktop / Documents（出包不會丟資料）
+- 建議使用者用 `OneDrive` 或其他雲端同步 Desktop / Documents（仍需保留可回復舊版的備份）
 - 啟用「System Restore」（雖然不是萬靈丹）
 - Outlook 使用者：定期把 PST 複製出來
 - Chrome / Edge：登入 Google / Microsoft 帳號讓 bookmark/密碼上雲

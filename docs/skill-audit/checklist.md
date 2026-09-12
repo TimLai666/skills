@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**33 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**34 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -731,7 +731,7 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **驗證：** JSON 解析、skill 數／README 列數／總數一致、引用檢查及 git diff --check 通過。除了本項歷史紀錄，沒有剩餘 folder-organizer 引用。使用者已要求提交、推送。本機已安裝版本未移除。
 
-- [ ] **57. windows-rescue-from-linux**（中優先）
+- [x] **57. windows-rescue-from-linux**（中優先）
 
   **可以改哪裡：** 已做好按症狀讀 reference，安全限制有必要；仍每次先全套 bootstrap、Node/Claude/skill安裝，再問症狀，與末段先問症狀互斥；一律五階段、每個sudo說明加雙確認增加負擔。通用驗證區同列 dry-run 和真正 ntfsfix 寫入。
 
@@ -740,6 +740,10 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
   **應保留：** 唯讀掛載、寫前備份/壞碟先映像、BitLocker金鑰、hive備份、破壞性動作確認及 Linux 無法修復的界線。
 
   **原文位置：** [主檔:28](/Users/timlai/Developer/skills/plugins/utilities/skills/windows-rescue-from-linux/SKILL.md:28)、[主檔:76](/Users/timlai/Developer/skills/plugins/utilities/skills/windows-rescue-from-linux/SKILL.md:76)、[主檔:94](/Users/timlai/Developer/skills/plugins/utilities/skills/windows-rescue-from-linux/SKILL.md:94)、[主檔:269](/Users/timlai/Developer/skills/plugins/utilities/skills/windows-rescue-from-linux/SKILL.md:269)。
+
+  **完成修改：** 分開救援碟準備與實機救援，按症狀讀參考、按需安裝工具，合併安全與授權規則。新增映像單檔提取、備份、替換與還原流程，版本不符仍可說明差異後試修。同步修正 registry 編輯、唯讀掛載、掃描與診斷腳本的錯誤判斷，補入使用者同意後由 AI 製作救援 USB 的下載、工具準備、目標確認、清除前完整備份、寫入與驗證流程，備份未驗證成功不清除。救援碟採完整系統安裝，工具與 skill 預裝在 USB 系統，驗收重開與離線功能，不以 Live USB 代替。更新 README；skill 1.2.3、utilities 1.4.3。
+
+  **驗證：** YAML／JSON、引用、138 段 shell 範例語法、8 支腳本語法與相關模擬測試通過。用 wimlib 實際建立並提取 WIM／ESD／SWM 測試映像，單檔內容一致，錯誤路徑與 index 會失敗。尚未實測 Windows 開機、實際 NTFS 系統檔替換與 hive 寫回，USB 完整安裝亦未實機驗證。使用者已確認接受並要求提交、推送。
 
 ### writing-and-design
 

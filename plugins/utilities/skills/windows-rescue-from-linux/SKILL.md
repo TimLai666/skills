@@ -1,281 +1,92 @@
 ---
 name: windows-rescue-from-linux
 description: >-
-  This skill MUST be used when repairing a broken Windows PC from a Linux Live
-  USB. Handles boot failure, BCD or UEFI corruption, NTFS damage, lost
-  partitions, forgotten passwords, malware infection, profile corruption,
-  BitLocker decryption, failing disks, and data backup before destructive
-  repair. Also bootstraps the rescue USB itself with Node.js, Claude Code, and
-  tools like ntfsfix, chntpw, testdisk, photorec, ddrescue, smartctl, clamav,
-  dislocker, efibootmgr. MUST trigger on Windows 開不了機, BSOD 救援, 救資料,
-  BitLocker, chntpw, ntfsfix, testdisk, photorec, ddrescue, BCD 修復, 重設 Windows
-  密碼, 離線掃毒, 隨身碟救援系統, Live USB rescue Windows, fix Windows from Ubuntu, 把
-  Ubuntu 弄成救援碟, 救援工具安裝. Default language is Traditional Chinese for Taiwan.
+  This skill MUST be used when rescuing an unbootable Windows PC from Linux,
+  preparing a Linux rescue USB, or extracting Windows image files to replace
+  damaged system components. Covers Windows 開不了機, BSOD 救援, 救資料,
+  BCD 修復, NTFS 損壞, BitLocker, 離線掃毒, 重設 Windows 密碼,
+  系統檔替換, Windows 映像提取, 隨身碟救援系統 and 救援工具安裝.
+  It SHOULD also be used when symptoms imply offline Windows recovery even
+  without naming a tool. Default language is Traditional Chinese for Taiwan.
 metadata:
-  version: "1.1.0"
+  version: "1.2.3"
 ---
 
-# Windows 救援工具箱（從 Linux Live USB 修 Windows）
+# Windows 救援工具箱（從 Linux 救援系統 修 Windows）
 
-這個 skill 假設你已經處在一個從隨身碟開機的 Linux 環境（Ubuntu / Debian / SystemRescue 都可以），目標是修一台壞掉的 Windows 電腦——它可能無法開機、藍底白字、忘記密碼、感染惡意軟體、或硬碟正在壞掉。
+## Overview
 
-你（Claude / Codex）跑在 Linux 上，沒辦法用 Windows 內建的 sfc、DISM、chkdsk、WinRE。你的工具是 Linux 那邊的 `ntfsfix`、`chntpw`、`testdisk`、`photorec`、`ddrescue`、`smartctl`、`clamav`、`dislocker`、`efibootmgr`、`hivexsh` 這些。這份 skill 就是怎麼把這套工具組合起來解決 Windows 問題。
+從 Linux 救援系統 診斷無法正常使用的 Windows，救出資料並依原因修復。也能準備救援碟，或從 Windows 映像提取個別檔案、替換故障系統中的損壞檔案。需要 Windows 原生修復工具時，交接到 WinRE。
 
-完整工具目錄（含安裝指令、用途、典型範例）見 [`references/14-cli-tools-catalog.md`](references/14-cli-tools-catalog.md)。
+## Input Contract
 
----
+先從對話與現有資料確認目標：準備救援碟、只救資料，或修復 Windows。實機救援需要知道卡住的畫面與錯誤代碼、最近變更、重要資料與備份位置，以及 Linux、Windows 磁碟和可用映像在哪裡。只補問會影響下一步的缺項，已有資訊直接沿用。
 
-## 🚀 階段零：Bootstrap 環境檢查（每次 skill 啟動先跑）
+## Workflow
 
-> **這是 agent 進入這個 skill 時的第一件事**。在問使用者症狀之前，先確認自己手上的工具齊不齊。
+### 1. 依目標進入
 
-跑體檢腳本：
+- **準備救援碟**：讀 [00-rescue-usb-preparation.md](references/00-rescue-usb-preparation.md)。使用者同意製作並確認目標 USB 與清除範圍後，由 AI 完成下載、工具準備、原有資料完整備份、USB 完整系統安裝、工具預裝與開機驗證；備份驗證通過後才清除 USB。交付目標是插入相容電腦即可使用，不能以 Live USB 代替或把工具安裝留到救援現場。這是獨立任務，不先要求故障電腦的症狀。
+- **實機救援**：先讀 [01-safety-principles.md](references/01-safety-principles.md)，確認目標磁碟、備份與硬體狀態。只需救資料時，完成資料驗證即可交付。
+- **缺工具或不確定用哪個**：讀 [14-cli-tools-catalog.md](references/14-cli-tools-catalog.md)，檢查本次會用的工具。可用 `bash scripts/bootstrap-check.sh` 盤點，缺少無關工具不阻擋救援。Node.js 與 AI CLI 只在使用者要於救援碟上執行它們時準備。
 
-```bash
-bash scripts/bootstrap-check.sh
-```
+### 2. 先辨識磁碟，再掛載
 
-腳本會回報核心工具（ntfsfix / chntpw / testdisk / photorec / ddrescue / smartctl ...）、Node.js / Claude Code 是否齊全、有無網路、是不是在 Live USB 環境。
+用 `lsblk`、`blkid` 與裝置型號、序號、UUID 對應 Windows 碟、救援 USB、備份碟。分割區大小與標籤只能當線索，還要核對 Windows 目錄、ESP 類型與開機項指向。
 
-### 根據結果決定下一步
+有異音、讀取卡住、I/O 錯誤或健康警示時，先讀 [08-data-recovery.md](references/08-data-recovery.md) 評估映像救援，停止一般全碟掃描與原碟修復。SMART 無法取得時標為未知。
 
-| 體檢結果 | agent 該做什麼 |
+BitLocker 先讀 [10-bitlocker.md](references/10-bitlocker.md) 解鎖。一般掛載讀 [03-mount-windows.md](references/03-mount-windows.md)，第一次唯讀。Linux 自己的 UEFI／Legacy 開機模式不能單獨判定 Windows 的安裝模式。
+
+### 3. 依症狀查閱與修復
+
+只讀本案相關參考。多重症狀或原因不明時讀 [02-symptom-triage.md](references/02-symptom-triage.md)，以日誌與檢查結果縮小原因。
+
+| 症狀或需求 | 何時讀哪份參考 |
 |---|---|
-| **全部 ✓** | 直接跳到下面「動手前必讀」、開始問使用者症狀 |
-| **核心工具缺 + 有網路** | 跟使用者說「你的救援環境少了 X、Y、Z，要我跑 `sudo bash scripts/install-rescue-tools.sh` 一次裝完嗎？」得到明確 yes 才執行 |
-| **核心工具缺 + 沒網路** | 告訴使用者：(1) 可以開手機熱點；(2) 從 USB 上的 `offline-binaries/` 用 dpkg 裝（見 `00-rescue-usb-preparation.md §9`）；(3) 純人工照 reference 操作 |
-| **Node.js 缺** | 提示使用者目前是用什麼方式跟 agent 對話（可能是另一台機 SSH 進來），看要不要在這台 Live USB 也裝個 Claude Code |
-| **Skill 沒在 ~/.claude/skills/** | 提醒使用者 symlink 過去，下次開新 Claude Code 才會自動載入 |
+| 壞碟、分割區讀不出、只救資料、救已刪檔案 | [08 資料救援](references/08-data-recovery.md)，區分檔案備份、映像與刪除檔救援 |
+| BOOTMGR missing、Windows Boot Manager 不見、BCD／EFI 損壞、雙系統選單異常 | [04 開機修復](references/04-boot-repair.md) |
+| NTFS 掛載失敗、容量異常、分割表或檔案系統錯誤 | [05 檔案系統修復](references/05-filesystem-repair.md) |
+| 忘記本機密碼、帳號鎖定、修改服務或 registry | [06 Registry 編輯](references/06-registry-edit.md)，寫入前備份整個 hive |
+| 中毒、瀏覽器綁架、不明自動啟動 | [07 惡意軟體清理](references/07-malware-cleanup.md)，先掃描再判斷處置 |
+| 隨機當機、RAM／CPU／磁碟健康疑慮 | [09 硬體診斷](references/09-hardware-diagnostics.md) |
+| 更新後無限重啟、疑似 driver 問題、INACCESSIBLE_BOOT_DEVICE | [11 驅動與更新](references/11-driver-and-update-issues.md)，依證據選擇修復 |
+| 暫存設定檔、使用者設定檔服務登入失敗 | [12 設定檔修復](references/12-profile-corruption.md) |
+| 系統組件損壞或遺失、有 ISO／WIM／ESD／SWM 或備份映像可取檔 | [15 映像檔案替換](references/15-image-file-replacement.md)，辨識來源、提取個別檔案並驗證替換 |
+| 需要 SFC、DISM、正式安裝 driver、重建 BCD 或重設系統 | [13 Windows 修復工具交接](references/13-when-linux-cannot-fix.md) |
 
-### 安裝救援工具的指令
+修復前依 [01 安全準則](references/01-safety-principles.md) 保存重要資料及受影響檔案／結構。說明確切修改與還原方式，沿用已授權範圍，不逐個 `sudo` 或同一操作重複確認。
 
-```bash
-# 互動式（每塊問一次，推薦）
-sudo bash scripts/install-rescue-tools.sh
+映像來源優先選與目標相符的版本。版本不符或無法完整確認時，也可說明差異、可能無效或引入新故障，讓使用者選擇備份後嘗試。依 [15](references/15-image-file-replacement.md) 保留可還原的替換路徑，不承諾一定能開機。
 
-# 只裝核心
-sudo bash scripts/install-rescue-tools.sh --core
+### 4. 驗證與交付
 
-# 含 Node.js + Claude Code
-sudo bash scripts/install-rescue-tools.sh --with-node
+按改動檢查結果：檔案替換比對內容、hive 修改核對目標值與其他值、EFI 修復核對檔案與開機項、備份核對命令結果及可讀性。`ntfsfix` 寫入屬於修復，不是通用驗證。修檔案系統前先卸載。
 
-# 全裝（不問）
-sudo bash scripts/install-rescue-tools.sh --full
-```
+完成寫入後正常卸載，再測試 Windows 開機與原故障。無法現場開機時明確列為待驗證。測試失敗先還原本次試改、重新診斷，不重複相同修法或接連換多個版本。
 
-詳細的 USB 準備、Node.js 多種安裝法、Claude Code / Codex 安裝、離線備援見 [`references/00-rescue-usb-preparation.md`](references/00-rescue-usb-preparation.md)。
+## Scripts
 
-### Agent 行為原則
+在 skill 資料夾執行，先看腳本的參數與輸出位置。腳本只協助操作，不能代替本案診斷。
 
-- **不要默默安裝**：每次裝套件都先問使用者「我要跑 X 指令，會花約 Y 分鐘、占用 Z MB 空間。可以嗎？」
-- **節省網路**：如果使用者只想解決一個小問題（例如改密碼），不用堅持把全套救援工具裝完。`chntpw` 一個套件就夠
-- **善用 tmux**：要跑 `ddrescue`、`photorec` 等長時間任務，永遠先 `tmux new -s rescue` 包起來。SSH 斷線 / Live USB 死機都不會把任務毀掉
-
----
-
-## ⚠️ 動手前必讀（鐵則）
-
-這幾條鐵則任何狀況都不能違反，違反一次可能就把資料毀掉：
-
-1. **先讀後寫**：第一次掛載 Windows 磁碟一律 `ro`（read-only）。確認資料還在、症狀對得上，才考慮可寫掛載。
-2. **動手前先備份**：任何寫入動作（ntfsfix、chntpw、删 pending.xml、清病毒）之前，至少把使用者重要資料 `rsync` 到外接碟。硬碟有 SMART 警告時，先 `ddrescue` 做整碟映像再說。
-3. **掛載中的磁碟不要修**：`ntfsfix`、`fsck`、`testdisk` 寫入模式，這些都要先 `umount`。
-4. **BitLocker 沒有金鑰先停手**：如果是 BitLocker 加密磁碟而使用者拿不出 recovery key，硬幹只會多寫垃圾資料。先去 https://account.microsoft.com/devices/recoverykey 找。
-5. **碟正在死別硬讀**：SMART 顯示有 reallocated/pending sector，或讀的時候卡死、有怪聲——立刻停掉，改用 `ddrescue` 做映像，之後在映像上動。原碟每多讀一次都可能把僅存的好磁區也死掉。
-6. **改 registry 前先複製整個 hive**：`cp SAM SAM.bak` 再 `chntpw`。
-7. **跟使用者確認再執行有破壞性的步驟**：「我接下來要把 hiberfil.sys 刪掉以便正常掛載，你確定 Windows 不需要保留待機狀態嗎？」這種確認永遠值得問。
-
-詳細的安全清單見 `references/01-safety-principles.md`。
-
----
-
-## 工作流程
-
-每次救援都照這個五階段走，不要跳：
-
-### 階段一：盤點環境
-
-先弄清楚你在哪、目標在哪、有什麼工具：
-
-```bash
-# 確認自己在 live USB 環境
-cat /etc/os-release
-lsb_release -a 2>/dev/null
-
-# 列出所有磁碟和分割區
-lsblk -f -o NAME,FSTYPE,LABEL,SIZE,MOUNTPOINT,UUID
-sudo fdisk -l
-sudo parted -l
-
-# 確認檔案系統類型（NTFS / FAT32 / BitLocker）
-sudo blkid
-
-# 確認是 UEFI 還是 Legacy BIOS 模式開機
-[ -d /sys/firmware/efi ] && echo "UEFI" || echo "Legacy BIOS"
-```
-
-把結果留下來——你要知道：
-- Windows 系統碟在哪個 `/dev/sdX` 或 `/dev/nvmeXnY`（通常是最大的 NTFS）
-- 有沒有 EFI 分割區（FAT32, ~100-500MB）
-- 有沒有 Recovery 分割區
-- 有沒有 BitLocker（`blkid` 會顯示 `TYPE="BitLocker"`）
-- 內部碟健康狀態（`sudo smartctl -H /dev/sdX`，不健康就先別動）
-
-### 階段二：症狀分流（重要）
-
-問使用者實際發生什麼事，照下面的「症狀 → 修復路徑」對應表決定要讀哪個 reference。**不要一次讀全部**，只讀對應的那幾個。
-
-### 階段三：備份
-
-幾乎所有情況都先做這一步。最少：
-
-```bash
-# 唯讀掛載
-sudo mkdir -p /mnt/win
-sudo mount -t ntfs-3g -o ro /dev/sdX1 /mnt/win
-
-# 備份使用者資料夾到外接碟
-sudo rsync -avh --info=progress2 \
-    /mnt/win/Users/USERNAME/ \
-    /media/USERNAME/external/backup-$(date +%Y%m%d)/
-```
-
-碟有疑慮時改用 `ddrescue`（見 `references/08-data-recovery.md`）。
-
-### 階段四：修復
-
-讀對應的 reference 後執行。每動一個破壞性指令都跟使用者覆述一次再執行。
-
-### 階段五：驗證
-
-修完先別重開 Windows，先在 Linux 這邊確認結果：
-
-```bash
-# 重新檢查檔案系統
-sudo umount /mnt/win
-sudo ntfsfix --no-action /dev/sdX1   # dry-run
-sudo ntfsfix /dev/sdX1
-
-# 重新看 SMART
-sudo smartctl -a /dev/sdX
-
-# 看 BCD / EFI 結構
-ls /mnt/efi/EFI/Microsoft/Boot/
-```
-
-之後請使用者重開機並回報狀況。如果還是壞，回到階段二重新分流——但這次有了更多線索。
-
----
-
-## 症狀 → 修復路徑
-
-> 找最接近使用者描述的那一行，讀對應的 reference 檔。多個症狀疊加時，**先處理優先級高的那個**（B級＞A級）。
-
-### B 級：先救命的（硬體 / 加密 / 資料）
-
-| 症狀 | 優先讀 |
+| 腳本 | 用途 |
 |---|---|
-| 硬碟有怪聲、讀取卡死、SMART 警告 | `08-data-recovery.md` → 先 `ddrescue` 做映像 |
-| BitLocker 加密、需要進到資料 | `10-bitlocker.md` |
-| 「我只想救資料，不修了」 | `08-data-recovery.md` |
-| 想救已刪除的檔案 | `08-data-recovery.md` →「PhotoRec / testdisk undelete」 |
+| [bootstrap-check.sh](scripts/bootstrap-check.sh) | 盤點環境與工具，不安裝 |
+| [install-rescue-tools.sh](scripts/install-rescue-tools.sh) | 依選定範圍安裝工具，準備救援碟時使用 |
+| [identify-windows-volumes.sh](scripts/identify-windows-volumes.sh) | 找 Windows、EFI、Recovery 候選分割區 |
+| [mount-windows-safe.sh](scripts/mount-windows-safe.sh) | 唯讀掛載 Windows 分割區 |
+| [backup-user-data.sh](scripts/backup-user-data.sh) | 把指定掛載點的使用者資料備份到另一個目的地 |
+| [disk-health-report.sh](scripts/disk-health-report.sh) | 讀取磁碟健康資訊與檢查限制 |
+| [boot-diagnostic.sh](scripts/boot-diagnostic.sh) | 收集開機檔案、EFI、registry 與日誌線索 |
+| [malware-quick-scan.sh](scripts/malware-quick-scan.sh) | 掃描常見位置並報告偵測結果，預設不移動檔案 |
 
-### A 級：開機 / 系統層級
+## Output Contract
 
-| 症狀 | 優先讀 |
-|---|---|
-| 開機顯示 BOOTMGR is missing / Operating System not found | `04-boot-repair.md` |
-| 開機卡在 Windows logo、轉圈無限轉、自動修復失敗 | `04-boot-repair.md` + `05-filesystem-repair.md` |
-| UEFI 找不到 Windows Boot Manager | `04-boot-repair.md` →「UEFI / efibootmgr」 |
-| 雙系統裝完 Linux 後 Windows 不見了 | `04-boot-repair.md` →「dual boot 修復」 |
-| 反覆藍底白字（BSOD）、`INACCESSIBLE_BOOT_DEVICE` | `05-filesystem-repair.md` + `11-driver-and-update-issues.md` |
-| Windows Update 安裝失敗無限重啟 | `11-driver-and-update-issues.md` →「移除 pending.xml」 |
-| 磁碟分割表壞掉、看不到 Windows 分割區 | `05-filesystem-repair.md` →「testdisk 修分割表」 |
+回報診斷依據、實際修改、備份／還原位置、驗證結果及尚未解決的問題。救援紀錄保存在使用者指定的外接碟或其他可持續保存的位置，供使用者或接手技師閱讀。腳本暫存在 `/tmp` 的報告須於重開前轉存；不把金鑰或密碼寫進紀錄。
 
-### A 級：帳號 / 設定檔
+## Quality Rules
 
-| 症狀 | 優先讀 |
-|---|---|
-| 忘記 Windows 密碼 | `06-registry-edit.md` →「password reset (chntpw)」 |
-| 帳號被鎖住 / 停用 | `06-registry-edit.md` →「帳號狀態」 |
-| 想啟用隱藏的 Administrator | `06-registry-edit.md` →「啟用內建管理員」 |
-| 登入後桌面空白、只看到暫存設定檔 | `12-profile-corruption.md` |
-| 「使用者設定檔服務登入失敗」 | `12-profile-corruption.md` |
-
-### A 級：惡意軟體
-
-| 症狀 | 優先讀 |
-|---|---|
-| 中毒 / 勒索病毒 / 開機就跳廣告 | `07-malware-cleanup.md` |
-| 瀏覽器被綁架、hosts 被改 | `07-malware-cleanup.md` →「hosts 與 DNS 還原」 |
-| 怪怪的程式每次開機自動啟動 | `07-malware-cleanup.md` →「自動啟動清理」 |
-
-### A 級：檔案系統 / 硬體
-
-| 症狀 | 優先讀 |
-|---|---|
-| `ntfs-3g` 掛載失敗 / 提示 hibernated | `03-mount-windows.md` |
-| 磁碟容量怪、檔案開啟錯誤、隨機檔案消失 | `05-filesystem-repair.md` + `09-hardware-diagnostics.md` |
-| 想知道 RAM/CPU/SSD 健康度 | `09-hardware-diagnostics.md` |
-| 系統很慢、想知道是不是硬碟壞了 | `09-hardware-diagnostics.md` |
-
-### 不知道發生什麼事
-
-跑 `scripts/boot-diagnostic.sh`，它會收集 BCD、EFI、最近的事件日誌（透過 chntpw + python），然後給你一個摘要。
-
----
-
-## Reference 檔索引
-
-> 按需讀取，不要一次全部讀。
-
-| 檔案 | 內容 |
-|---|---|
-| `00-rescue-usb-preparation.md` | 怎麼準備這支救援碟（USB、Ubuntu、套件、**Node.js / Claude Code / Codex 安裝**、離線備援） |
-| `01-safety-principles.md` | 詳細安全清單、什麼時候該停手 |
-| `02-symptom-triage.md` | 更細的症狀分流（含罕見組合） |
-| `03-mount-windows.md` | 掛載 NTFS、處理 hibernation、fast startup、BitLocker 偵測 |
-| `04-boot-repair.md` | UEFI / BCD / MBR / EFI 分割區、雙系統修復 |
-| `05-filesystem-repair.md` | ntfsfix、testdisk 修分割表、partition undelete |
-| `06-registry-edit.md` | chntpw 密碼重設、hivexsh 編輯、停用問題服務 |
-| `07-malware-cleanup.md` | clamav 離線掃描、autorun 清理、hosts 還原、排程工作檢查 |
-| `08-data-recovery.md` | rsync 備份、ddrescue 映像、PhotoRec 救刪除檔、testdisk undelete |
-| `09-hardware-diagnostics.md` | smartctl、badblocks、memtester、lshw、sensors |
-| `10-bitlocker.md` | dislocker 完整流程、recovery key 取得方式 |
-| `11-driver-and-update-issues.md` | pending.xml、SoftwareDistribution、問題 driver 移除 |
-| `12-profile-corruption.md` | NTUSER.DAT、ProfileList registry、重建使用者資料夾 |
-| `13-when-linux-cannot-fix.md` | 這些問題 Linux 救不了，要請使用者準備 Windows 安裝媒體 |
-| **`14-cli-tools-catalog.md`** | **完整 CLI 工具目錄：每個工具的 apt 安裝、用途、典型指令、限制（agent 想找工具先翻這份）** |
-
----
-
-## Scripts 索引
-
-scripts 是可直接執行的輔助工具，每個都會列印它要做什麼、等你確認：
-
-| Script | 用途 |
-|---|---|
-| **`bootstrap-check.sh`** | **環境體檢（不安裝，只回報）。agent 進 skill 第一個跑這個** |
-| `install-rescue-tools.sh` | 在剛開機的 Ubuntu Live 上一次裝完所有工具 + Node.js + Claude Code / Codex（支援 `--core` / `--with-node` / `--full` / `--auto`） |
-| `identify-windows-volumes.sh` | 自動偵測哪一個分割區是 Windows 系統、EFI、Recovery |
-| `mount-windows-safe.sh` | 安全掛載（先 ro，處理 hibernation） |
-| `backup-user-data.sh` | 使用者資料夾備份到外接碟，帶進度條 |
-| `disk-health-report.sh` | 一次性出健康度報告（SMART + badblocks dry-run） |
-| `boot-diagnostic.sh` | 收集 BCD/EFI/registry 開機相關資訊出摘要 |
-| `malware-quick-scan.sh` | clamav 更新病毒碼後針對常見路徑掃描 |
-
----
-
-## 跟使用者互動的原則
-
-1. **先問症狀，不要先動手**：使用者說「不能開機」要再問「卡在哪一個畫面、有沒有錯誤代碼、什麼時候開始的、最近有沒有更新或裝什麼東西」。同樣是不能開機，BCD 損壞、NTFS 損壞、硬碟壞掉的修法完全不同。
-2. **每個 `sudo` 指令都先解釋**：使用者可能不熟 Linux。「我要跑 `sudo ntfsfix /dev/sda3`，這會嘗試修 NTFS 上的小毛病，如果碟有實體損壞它會中止不會把事情弄更糟。要繼續嗎？」
-3. **destructive 動作要兩段式確認**：第一次說明會做什麼、影響什麼、是否可逆；使用者答 yes 後第二次覆述指令再執行。
-4. **修不完不要硬修**：有些東西（深層 WinSxS 損壞、特定 driver 黑屏）Linux 救不了，老實告訴使用者「這部分需要 Windows 安裝媒體進 WinRE 跑 sfc/DISM」，見 `13-when-linux-cannot-fix.md`。
-5. **記錄做過什麼**：每修一個地方就寫到 `/tmp/rescue-log-$(date +%Y%m%d).md`，使用者之後送修才有東西給技師看。
-
----
-
-## 預設語言
-
-繁體中文（台灣）。指令、檔名、技術名詞保留英文。錯誤訊息引用時保留原文再附中譯。
+- 先唯讀，壞碟先映像，無法解鎖的 BitLocker 不當一般 NTFS 修。
+- 從症狀判斷原因，檔名、時間、錯誤代碼與掃描命中都需要上下文。
+- 映像提取成功、檔案複製成功與恢復開機分別驗證，不互相代替。
+- `tmux` 能維持 SSH 斷線後的程序；不能防止斷電或 Live USB 當機。映像續作靠持續保存的 mapfile。
