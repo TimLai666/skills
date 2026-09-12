@@ -1,10 +1,10 @@
-﻿# Animation System and Fallbacks
+# Animation System and Fallbacks
 
-> 動效與效能底線依 design-studio 的 `shared/guardrails.md`（只動 transform/opacity、reduced-motion 強制、blur/grain 限制）。本檔管 LP 的動畫分層與降級矩陣。
+> 動效與效能底線依 design-studio 的 `shared/guardrails.md`（只動 transform/opacity、reduced-motion 強制、blur/grain 限制）。本檔管 LP 的動畫分層與失效處理。
 
 ## Required Animation Categories
 
-至少覆蓋 4 類：
+預設高動畫，至少覆蓋下列四類；使用者選擇減少動態時保留可讀的靜態內容：
 
 1. Hero 動畫
 2. 區塊進場動畫
@@ -18,7 +18,9 @@
 - Three.js: WebGL 粒子/幾何（可選）
 - CSS Native: fallback 與低功耗模式
 
-## Fallback Matrix
+## 動畫選擇參考
+
+下表是主動選擇效果強度時的參考，不是失效後自動切換的順序。高動畫維持預設；未達效能要求先優化實作，變更已約定效果須取得同意。
 
 | Scenario | WebGL Layer | Hero Motion | Scroll Motion | Interaction Motion |
 | --- | --- | --- | --- | --- |
@@ -29,8 +31,8 @@
 
 ## Detection Rules
 
-1. `prefers-reduced-motion: reduce` -> 強制最小動態
-2. 無 WebGL context -> 停用 Three.js
+1. `prefers-reduced-motion: reduce` -> 停止循環、進場與指標動效，保留靜態內容；載入時與偏好切換時都要生效
+2. 無 WebGL context、初始化失敗或 context 遺失 -> 停止失效效果，顯示可見錯誤並記錄受影響功能，不自動換成 SVG／CSS
 3. `animation_level=low` -> 停用高刺激動畫
 4. 行動裝置 -> 預設降低粒子密度與陰影層數
 
@@ -40,19 +42,22 @@
 {
   "animation_manifest": [
     {
-      "id": "hero_webgl_particles",
+      "id": "hero_webgl_layer",
       "category": "hero",
       "library": "three",
       "target": "#hero-canvas",
       "trigger": "on-load",
-      "fallback": "svg-gradient-drift"
+      "fallback": "report-error"
     }
   ]
 }
 ```
 
+腳本輸出是 `status: planned` 的 starter 計畫，包含效果強度及待核對說明。交付前按實際 DOM／元件核對 target、trigger 與 fallback；效果改了，清單也要更新。reduced motion 時所有效果強度為 0、trigger 為 none，不把計畫當成實測結果。
+
 ## Guardrails
 
 - 不可讓動畫壓過主訊息可讀性
 - 不可因動畫導致 CTA 可點擊區域不穩定
-- 不可使用無 fallback 的關鍵視覺特效
+- 動畫依賴或 CDN 載入失敗時顯示錯誤、保留可讀內容與 CTA；修復後重新驗證，不能把失效頁面視為完成。
+- `fallback: report-error` 表示明確報錯而非替代效果；reduced motion 的靜態呈現是使用者偏好，不是工具故障。

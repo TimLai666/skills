@@ -1,6 +1,6 @@
-﻿# Copy and Conversion Structure
+# Copy and Conversion Structure
 
-## Required Page Structure
+## 預設頁面結構
 
 1. Navbar
 - 品牌名
@@ -14,11 +14,12 @@
 - 視覺焦點（圖像/SVG/WebGL）
 
 3. Value Props
-- 3 張卡片
+- 預設三個真實價值主張，以適合內容的版型呈現
 - 每張包含：標題、一句價值、對應 icon
 
 4. Social Proof
-- 指標數字、客戶引用、合作品牌（擇二以上）
+- 預設從指標數字、客戶引用、合作品牌中選至少兩類真實證據
+- 來源不足先補查或詢問，不能編造數字、引言或合作關係；依可用內容調整並說明待補項目
 
 5. Final CTA
 - 強化行動動機

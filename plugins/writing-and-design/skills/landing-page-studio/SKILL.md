@@ -1,178 +1,63 @@
 ---
 name: landing-page-studio
 description: >-
-  This skill MUST be used when creating high-conversion landing pages with
-  modern visual effects, including SVG/WebGL animation, autonomous
-  multi-iteration optimization, and dual output modes (single-file HTML or
-  React project). MUST trigger on requests like landing page, LP, hero section
-  build, animated marketing page, or conversion page redesign. Visual style
-  comes from the design-studio style library; this skill owns conversion
-  structure, autonomous iteration, and delivery contracts.
+  This skill MUST be used when creating or improving conversion-oriented
+  landing pages, LPs, hero sections, animated marketing pages, or 活動頁、
+  產品落地頁、轉換頁面. It SHOULD also be used when a page needs clearer
+  value propositions and a primary action without naming a landing page.
+  Visual direction follows design-studio; this skill handles conversion
+  structure, animation, implementation, and delivery.
 metadata:
-  version: "2.0.5"
+  version: "2.1.1"
 ---
 
 # Landing Page Studio
 
 ## Overview
 
-此技能用於快速產出「可直接交付」的 Landing Page，重點是轉換導向、視覺辨識度、動畫品質與實務性能平衡。
-
-能力範圍：
-
-1. 自主多輪產生與優化（最多 3 輪）
-2. 現代前端特效（SVG procedural、GSAP、Anime.js、可選 Three.js/WebGL）
-3. 雙輸出模式：`single-file-html`、`react-project`
-4. Progressive Enhancement：低效能或 reduced motion 自動降級
-5. 品質門檻驗收（視覺與性能雙門檻）
-
-## 前置（開工前必讀）
-
-本 skill 是疊在 `design-studio` 上的**轉換層**：視覺與品質底線由 design-studio 供給，本 skill 只管轉換結構、輸入契約、自主迭代與交付格式。
-
-1. 讀 design-studio 的 `shared/anti-slop.md`、`shared/hard-rules.md`、`shared/guardrails.md`——它們對本 skill 的所有產出生效。
-2. 遵守 DESIGN.md 公約：專案有 `DESIGN.md` 就先讀並沿用 token；沒有就從 design-studio 的 `shared/DESIGN-template.md` 複製到專案根目錄建立；交付後把本次的色彩／字體／間距 token 寫回去。
-3. 風格方向（`style_direction`）優先從 design-studio 的風格庫取得：`practical/references/design-styles.md`（三軸校準 → 40 風格 → 深度風格包）。使用者沒給方向時，先用該庫提出三個方向；若品牌訊號或現有風格不足，可提出與內容和目標一致的自訂色板，並說明色彩角色與使用原則。
+產出可使用的 Landing Page，兼顧轉換訊息、視覺辨識度、動畫與效能。支援單檔 HTML、React 專案及既有頁面修改；視覺方法沿用 design-studio。
 
 ## Input Contract
 
-輸入物件型別：`LandingPageInput`
+先從對話、原稿與專案確認品牌／主題、價值主張、主要行動及目的地。預設三個價值主張、至少兩類真實信任證據；可用內容不足時補查或詢問，不能為湊數捏造。
 
-必要欄位：
+既有專案沿用技術、樣式與輸出方式。新頁面未指定輸出時，依使用需求選擇，單純靜態交付可用單檔 HTML；只有會改變需求或相容性的未決事項才詢問。輸入欄位、模式與預設見 [01 輸入與模式](references/01-intake-and-mode-selection.md)，整理輸入或使用驗證腳本時讀。
 
-- `brand_theme`: `string`
-- `value_props`: `string[3]`
-- `primary_cta`: `string`
-- `style_direction`: `string`（視覺方向，依前置第 3 點從 design-studio 風格庫選定）
-- `output_mode`: `single-file-html|react-project`
+## Workflow
 
-選填欄位：
+### 1. 接續設計方向
 
-- `variant_mode`: `single|batch`，預設 `single`
-- `autonomy_mode`: `single-pass|multi-iteration`，預設 `multi-iteration`
-- `animation_level`: `low|medium|high`，預設 `high`
-- `motion_preference`: `respect-reduced-motion`（建議預設採用）
-- `target_audience`: `string`
-- `industry`: `string`
-- `react_stack`: `vite-react-tailwind-framer|nextjs-app-router|react-css-modules`
+讀 design-studio 的 `shared/anti-slop.md`、`shared/hard-rules.md`、`shared/guardrails.md`，遵守其適用規則。沿用既有 `DESIGN.md` 與設計資訊；新設計依 design-studio 的公約建立並維護，局部修改依其流程判斷需要更新的範圍。
 
-## Data Sufficiency Gate
+沿用品牌與已確認的方向。方向未定時，依 design-studio 的 `practical/references/design-styles.md` 提出三個方向，完成既有風格選型與確認流程；選中風格後讀對應深度風格包與色彩推導協議。本 skill 不另維護風格庫。
 
-若下列欄位任一缺失，先回 `MissingDataOutput`，不可生成頁面：
+### 2. 安排內容與行動
 
-- `brand_theme`
-- `value_props`
-- `primary_cta`
-- `style_direction`（例外：缺席時不硬擋，先走前置第 3 點的 design-studio 風格選型取得方向）
-- `output_mode`
+寫頁面內容時讀 [06 文案與轉換結構](references/06-copy-and-conversion-structure.md)。保留預設三個價值主張與至少兩類信任證據，依真實資料、使用者指定與頁面範圍調整。局部修改只處理受影響區塊，不要求重建整頁。
 
-`MissingDataOutput` 必須包含：
+真實品牌素材依 design-studio 的 `shared/brand-asset.md` 取得；其餘圖片沿用 Unsplash／Pexels 的來源規則。核對來源並保留所需 attribution，成品不能殘留模板佔位、無依據數字、技能名稱或內部設定。圖像後方的文字須可讀，需要時加遮罩。
 
-- `missing_fields`
-- `why_needed`
-- `questions_to_user`
-- `next_step_rule`
+### 3. 實作與動畫
+
+新建時選對應 starter，既有專案直接在原結構修改，不重新搭骨架。React 未指定組合時沿用專案；無既有組合才依需求選用，普通獨立頁可採 Vite React。
+
+動畫預設 `high`，至少涵蓋 Hero、區塊進場、互動與背景四類。設計或實作動畫前讀 [03 動畫與失效處理](references/03-animation-system-and-fallbacks.md)，保留 SVG、GSAP、Anime.js 與可選 WebGL 的方法。依實際效果選工具，不為了四類效果載入四套函式庫。
+
+保留高動畫預設，尊重使用者的 reduced motion 偏好。WebGL、動畫依賴或 CDN 失效時明確報錯，說明受影響效果並修復原因，不自動改用低階效果或當作完成。內容與 CTA 保持可用；改變已約定效果須先取得同意。
+
+### 4. 檢查並修正
+
+預設在同一個實作上自主檢查並修正，依轉換清晰度、視覺一致性、可讀性與效能的實際問題迭代，不另強制生成多份完整候選稿。`variant_mode=batch` 或使用者要求比較時才交付多版；這不改變 design-studio 的風格提案流程。
+
+交付前讀 [05 品質驗收](references/05-quality-gates.md)，實測畫面、主要行動、動畫偏好、失效處理與效能。`single-pass` 只省去探索性迭代，仍須修正驗收發現的問題。未達門檻時處理原因，不能只把自評分數調高。
 
 ## Output Contract
 
-生成成功時回 `GenerationOutput`：
+交付頁面／專案、素材來源、實際動畫清單與驗證結果。單檔模式交付 `index.html`；React 模式交付可啟動的專案或既有專案修改。只回報實際產生與測得的內容，未驗證項目明列限制。需要結構化輸出、批次比較或清單欄位時讀 [04 交付契約](references/04-output-contracts.md)。
 
-- `artifact_type`: `single-html|react-tree`
-- `artifact_payload`: HTML 字串或檔案樹
-- `asset_sources`: Unsplash/Pexels 來源與 attribution
-- `animation_manifest`: 每段動畫的 `library`, `target`, `trigger`, `fallback`
-- `autonomy_report`: 候選版本評分與最終採用理由
-- `qa_report`: 門檻結果與修正記錄
+## Scripts and Templates
 
-## Mode Rules
-
-### 1) `single-file-html`
-
-- 交付單一 `index.html`
-- 允許 CDN：Tailwind、GSAP、Iconify、Three.js、Anime.js、Google Fonts
-- 需包含：Navbar、Hero、Value Props、Social Proof、Final CTA、Footer
-
-### 2) `react-project`
-
-- 若未指定 `react_stack`，先提供三種技術棧優缺點，再請使用者選擇
-- 預設優先順序：`vite-react-tailwind-framer`
-- 交付至少包含可啟動專案骨架與核心頁面
-
-## Autonomous Generation Flow
-
-若 `autonomy_mode=multi-iteration`，使用以下流程：
-
-1. 依輸入產生 2-3 個候選稿（結構一致、視覺與動畫策略不同）
-2. 依四維度打分：
-   - conversion clarity
-   - visual coherence
-   - readability
-   - performance risk
-3. 選最低分項目做修正，最多 3 輪
-4. 產出最佳版，並附 `autonomy_report`
-
-若 `autonomy_mode=single-pass`：
-
-- 只產 1 稿，仍需附簡版 `qa_report`
-
-## Style System
-
-風格系統整個交給 design-studio：三軸校準定強度 → 40 風格庫選方向 → 深度風格包拿完整協議 → 色彩推導協議產生本專案專屬色值（不抄庫裡的示例 hex）。本 skill 不維護自己的風格 preset。
-
-## Animation System
-
-動畫能力與降級矩陣見：
-
-- [03-animation-system-and-fallbacks.md](./references/03-animation-system-and-fallbacks.md)
-
-硬性規則：
-
-1. 至少包含 4 類動畫
-2. 必須提供每段 fallback
-3. `prefers-reduced-motion` 時關閉高刺激動效
-4. 無 WebGL 能力時自動使用 SVG/CSS 替代
-
-## Asset Rules
-
-1. 任務涉及真實品牌時，依 design-studio 的 `shared/brand-asset.md` 優先使用品牌真實資產；其餘圖片只允許 Unsplash/Pexels
-2. 不可使用 placeholder
-3. Hero 必須加遮罩保證文字可讀
-4. 輸出 `asset_sources` 必須含 attribution
-
-## Quality Gates
-
-完整規則見：
-
-- [05-quality-gates.md](./references/05-quality-gates.md)
-
-最低通過門檻：
-
-1. Desktop: Performance >= 85, Accessibility >= 90
-2. Mobile: Performance >= 75, Accessibility >= 90
-3. 主要斷點需完整可讀（mobile/tablet/desktop）
-
-## Conversion and Copy Rules
-
-轉換導向內容結構與文案規範見：
-
-- [06-copy-and-conversion-structure.md](./references/06-copy-and-conversion-structure.md)
-
-## Scripts
-
-- `scripts/validate_intake.py`: 驗證並標準化輸入，必要時回 MissingDataOutput
-- `scripts/build_animation_manifest.py`: 根據 style/animation level 產生動畫清單與 fallback
-
-## Templates
-
-- `assets/templates/single-file-starter.html`: 單檔輸出骨架
-- `assets/templates/react-vite-starter/`: React 專案骨架
-
-## Execution Checklist
-
-0. 完成「前置」三件事（shared 規則、DESIGN.md、風格方向）
-1. 先跑 intake 驗證
-2. 再選擇輸出模式
-3. 產生候選稿與動畫策略
-4. 執行多輪優化（若開啟）
-5. 產出 `GenerationOutput`
-6. 附 `qa_report` 與 `asset_sources`
+- [validate_intake.py](scripts/validate_intake.py)：整理新頁面輸入，檢查型態與有效選項；局部修改不必填完整新頁面契約。
+- [build_animation_manifest.py](scripts/build_animation_manifest.py)：產生 starter 動畫計畫，成品須依實際元件、觸發方式與失效處理核對，不能當成已驗證的清單。
+- [single-file-starter.html](assets/templates/single-file-starter.html)：單檔骨架，替換內容、素材與真實 CTA 目的地後使用。
+- [react-vite-starter](assets/templates/react-vite-starter/)：新 Vite React 專案骨架；其他技術組合依專案實作。

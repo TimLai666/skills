@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """Validate and normalize LandingPageInput for landing-page-studio skill."""
 
 from __future__ import annotations
@@ -12,8 +12,6 @@ REQUIRED_FIELDS = [
     "brand_theme",
     "value_props",
     "primary_cta",
-    "style_direction",
-    "output_mode",
 ]
 
 ALLOWED_OUTPUT_MODES = {"single-file-html", "react-project"}
@@ -80,45 +78,50 @@ def _missing_output(missing: List[str], extra_reasons: Dict[str, str]) -> Dict[s
 
 
 def validate_intake(payload: Dict[str, Any]) -> Dict[str, Any]:
+    if not isinstance(payload, dict):
+        raise ValueError("Input must be a JSON object.")
     data = {**DEFAULTS, **payload}
+    project = data.get("existing_project", {})
+    if not isinstance(project, dict):
+        raise ValueError("existing_project must be an object with output_mode and optional react_stack.")
+    data.setdefault("output_mode", project.get("output_mode", "single-file-html"))
+    if data["output_mode"] == "react-project":
+        data.setdefault("react_stack", project.get("react_stack", "vite-react-tailwind-framer"))
 
-    missing = [f for f in REQUIRED_FIELDS if f not in data or data[f] in (None, "", [])]
     reasons: Dict[str, str] = {}
-
-    if "value_props" in data and not (isinstance(data["value_props"], list) and len(data["value_props"]) == 3):
-        if "value_props" not in missing:
-            missing.append("value_props")
-        reasons["value_props"] = "`value_props` 必須是長度 3 的字串陣列。"
-
-    if missing:
-        return _missing_output(missing, reasons)
-
-    output_mode = data["output_mode"]
-    if output_mode not in ALLOWED_OUTPUT_MODES:
-        return _missing_output(
-            ["output_mode"],
-            {"output_mode": "output_mode 必須是 single-file-html 或 react-project。"},
-        )
-
-    variant_mode = data.get("variant_mode", DEFAULTS["variant_mode"])
-    if variant_mode not in ALLOWED_VARIANT_MODES:
-        data["variant_mode"] = DEFAULTS["variant_mode"]
-
-    autonomy_mode = data.get("autonomy_mode", DEFAULTS["autonomy_mode"])
-    if autonomy_mode not in ALLOWED_AUTONOMY_MODES:
-        data["autonomy_mode"] = DEFAULTS["autonomy_mode"]
-
-    animation_level = data.get("animation_level", DEFAULTS["animation_level"])
-    if animation_level not in ALLOWED_ANIMATION_LEVELS:
-        data["animation_level"] = DEFAULTS["animation_level"]
-
-    framework_choice_required = output_mode == "react-project" and not data.get("react_stack")
-
+    for field in ("brand_theme", "primary_cta"):
+        if not isinstance(data.get(field), str) or not data[field].strip():
+            reasons[field] = "必須提供非空白字串。"
+    props = data.get("value_props")
+    if not isinstance(props, list) or not props or any(not isinstance(v, str) or not v.strip() for v in props):
+        reasons["value_props"] = "提供非空白字串陣列，預設整理三個真實價值主張，依內容可調整數量。"
+    enums = {
+        "output_mode": ALLOWED_OUTPUT_MODES,
+        "variant_mode": ALLOWED_VARIANT_MODES,
+        "autonomy_mode": ALLOWED_AUTONOMY_MODES,
+        "animation_level": ALLOWED_ANIMATION_LEVELS,
+        "motion_preference": {"respect-reduced-motion"},
+        "react_stack": {option["id"] for option in REACT_STACK_OPTIONS},
+    }
+    for field, choices in enums.items():
+        if field == "react_stack" and field not in payload and field in project:
+            if not isinstance(project[field], str) or not project[field].strip():
+                reasons[field] = "既有專案技術組合必須是非空白字串。"
+            continue
+        if field in data and (not isinstance(data[field], str) or data[field] not in choices):
+            reasons[field] = "有效值：" + ", ".join(sorted(choices))
+    for field in ("style_direction", "target_audience", "industry"):
+        if field in data and not isinstance(data[field], str):
+            reasons[field] = "必須是字串。"
+    if reasons:
+        return _missing_output(list(reasons), reasons)
+    style_selection_required = not data.get("style_direction", "").strip()
     return {
         "type": "LandingPageInputNormalized",
         "valid": True,
-        "framework_choice_required": framework_choice_required,
-        "react_stack_options": REACT_STACK_OPTIONS if framework_choice_required else [],
+        "framework_choice_required": False,
+        "style_selection_required": style_selection_required,
+        "next_step_rule": "先沿用既有視覺方向，或依 design-studio 完成風格選型再生成。" if style_selection_required else "依已確認內容生成並驗證頁面。",
         "normalized_input": data,
     }
 
@@ -133,7 +136,7 @@ def main() -> int:
         payload = _load_input(args)
         result = validate_intake(payload)
         print(json.dumps(result, ensure_ascii=False, indent=2))
-        return 0
+        return 0 if result.get("valid") else 2
     except Exception as exc:  # pragma: no cover - defensive CLI guard
         error = {"type": "error", "message": str(exc)}
         print(json.dumps(error, ensure_ascii=False, indent=2), file=sys.stderr)

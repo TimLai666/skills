@@ -1,89 +1,38 @@
-﻿# Output Contracts
+# Output Contracts
 
-## 1) LandingPageInput
+這些欄位供結構化交付或工具整合使用；一般對話直接交付成品、來源與驗證摘要，不必把頁面 HTML 再塞進 JSON。
+
+## LandingPageInput 範例
+
+以下為假設旅宿頁面的輸入示例，實際文字與主張須依本案資料確認：
 
 ```json
 {
-  "brand_theme": "沐石・湯宿：頂級溫泉飯店",
-  "value_props": ["尊榮至上", "極致品味", "絕對私密"],
-  "primary_cta": "立即預訂",
+  "brand_theme": "溫泉旅宿",
+  "value_props": ["客房獨立湯池", "在地食材早餐", "車站接駁"],
+  "primary_cta": "查詢空房",
   "style_direction": "暖單色編輯部極簡",
   "output_mode": "single-file-html",
   "variant_mode": "single",
   "autonomy_mode": "multi-iteration",
   "animation_level": "high",
-  "motion_preference": "respect-reduced-motion",
-  "target_audience": "高端旅宿客群",
-  "industry": "hospitality"
+  "motion_preference": "respect-reduced-motion"
 }
 ```
 
-## 2) MissingDataOutput
+## MissingDataOutput
 
-```json
-{
-  "missing_fields": ["value_props"],
-  "why_needed": {
-    "value_props": "價值主張決定 Hero 與卡片區內容架構"
-  },
-  "questions_to_user": [
-    "請提供 3 個核心價值主張"
-  ],
-  "next_step_rule": "補齊缺漏欄位後，重新執行生成"
-}
-```
+缺少必要資料時提供 `missing_fields`、`why_needed`、`questions_to_user` 與 `next_step_rule`。問題使用自然語言，說明缺項如何影響頁面；不要要求重填已知資訊。
 
-## 3) GenerationOutput
+## GenerationOutput
 
-```json
-{
-  "artifact_type": "single-html",
-  "artifact_payload": "<!doctype html>...",
-  "asset_sources": [
-    {
-      "provider": "unsplash",
-      "url": "https://images.unsplash.com/...",
-      "attribution": "Photo by ... on Unsplash"
-    }
-  ],
-  "animation_manifest": [
-    {
-      "id": "hero_svg_drift",
-      "category": "hero",
-      "library": "animejs",
-      "target": "#hero-svg",
-      "trigger": "on-load",
-      "fallback": "static-gradient"
-    }
-  ],
-  "autonomy_report": {
-    "mode": "multi-iteration",
-    "iterations": 3,
-    "candidates": [
-      {
-        "id": "v1",
-        "scores": {
-          "conversion_clarity": 8.6,
-          "visual_coherence": 8.9,
-          "readability": 8.4,
-          "performance_risk": 7.7
-        }
-      }
-    ],
-    "selected": "v2",
-    "selection_reason": "更高的 CTA 對比與較低動畫風險"
-  },
-  "qa_report": {
-    "desktop": {"performance": 88, "accessibility": 93},
-    "mobile": {"performance": 78, "accessibility": 91},
-    "responsive_checks": "pass"
-  }
-}
-```
+| 欄位 | 實際交付內容 |
+| --- | --- |
+| artifact_type | single-html / react-tree |
+| artifact_payload | 成品檔案／專案路徑；要求 inline 時才放原始碼 |
+| asset_sources | 各素材的來源 URL、提供者與必要 attribution |
+| animation_manifest | 實際效果的 id、category、library、target、trigger、fallback；規格見 03 |
+| autonomy_report | 有進行迭代時記錄問題、修正與原因，不虛構候選稿或分數 |
+| qa_report | 實際檢查方式、結果、效能數據與未驗證項目 |
 
-## 4) Batch Variant Extension
-
-當 `variant_mode=batch` 時，`GenerationOutput` 需額外包含：
-
-- `batch_results`: array of artifacts
-- `variant_diff_summary`: 每版差異（palette、typography、motion）
+`variant_mode=batch` 時加上 `batch_results` 與 `variant_diff_summary`，記錄各版實際的風格、節奏與微互動差異。版本比較保留相同主要行動與真實內容，避免用不同證據製造勝負。

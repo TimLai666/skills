@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**34 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**35 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -789,7 +789,7 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **原文位置：** [主檔:4](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/human-writing/SKILL.md:4)、[主檔:24](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/human-writing/SKILL.md:24)、[references/final-checklist.md:3](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/human-writing/references/final-checklist.md:3)。
 
-- [ ] **61. landing-page-studio**（高優先）
+- [x] **61. landing-page-studio**（高優先）
 
   **可以改哪裡：** 固定三個價值主張、預設高動畫、多稿比較、至少四類動畫；缺輸出模式停止，React 還先問技術組合。要求同時寫在主檔及腳本。
 
@@ -798,6 +798,10 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
   **應保留：** 主要行動按鈕、真實內容、窄螢幕可讀、減少動態偏好、效能與可用性驗證。
 
   **原文位置：** [主檔:41](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/landing-page-studio/SKILL.md:41)、[主檔:59](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/landing-page-studio/SKILL.md:59)、[主檔:97](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/landing-page-studio/SKILL.md:97)、[主檔:101](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/landing-page-studio/SKILL.md:101)、[主檔:128](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/landing-page-studio/SKILL.md:128)、[scripts/validate_intake.py:24](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/landing-page-studio/scripts/validate_intake.py:24)、[scripts/validate_intake.py:88](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/landing-page-studio/scripts/validate_intake.py:88)。
+
+  **完成修改：** 保留使用者指定的三個價值主張、至少兩類真實信任證據，以及高動畫、至少四類動畫的預設。沿用既有技術與設計流程，單版依問題迭代，不額外強制產生多份完整稿。保留各參考教學並合併重複流程與交付欄位；修正輸入型態、減少動態與模板降級問題。依後續確認保留高動畫預設，WebGL／CDN 失效明確報錯，不自動替代；減少動態偏好另行尊重。skill 2.1.1、writing-and-design 1.21.1。使用者已確認接受並要求提交、推送。 後續失效處理驗證涵蓋兩模板的正常、WebGL 初始化失敗、動畫依賴載入失敗、context 遺失及減少動態，共十個情境；失敗顯示可見錯誤，不啟動替代動畫，並已查看錯誤畫面。
+
+  **驗證：** 輸入與動畫腳本測試、YAML／JSON、引用、skill／README 數量及 git diff --check 通過。React 測試副本 production build 通過；兩套模板的正常／CDN 與 WebGL 失敗、動態偏好切換、三斷點與 CTA 檢查通過。失效報錯調整前，填入測試文案後 Lighthouse：React 手機／桌面效能皆 100，HTML 手機 94、桌面 100，無障礙皆 100。Three 獨立區塊仍有大小提醒；未測真實客戶內容、後端與部署。測試依賴只在暫存副本，測試 server 已停止。
 
 - [ ] **62. open-slide-studio**（中優先）
 

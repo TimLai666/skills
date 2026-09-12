@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """Build animation manifest for landing-page-studio outputs."""
 
 from __future__ import annotations
@@ -29,6 +29,17 @@ def _load_payload(args: argparse.Namespace) -> Dict[str, Any]:
 
 
 def build_manifest(payload: Dict[str, Any]) -> Dict[str, Any]:
+    if not isinstance(payload, dict):
+        raise ValueError("Input must be a JSON object.")
+    for field in ("webgl_supported", "prefers_reduced_motion"):
+        if field in payload and type(payload[field]) is not bool:
+            raise ValueError(field + " must be a JSON boolean.")
+    if payload.get("animation_level", "high") not in ANIMATION_LEVEL_FACTORS:
+        raise ValueError("animation_level must be low, medium, or high.")
+    if payload.get("motion_preference", "respect-reduced-motion") != "respect-reduced-motion":
+        raise ValueError("motion_preference must be respect-reduced-motion.")
+    if payload.get("output_mode", "single-file-html") not in {"single-file-html", "react-project"}:
+        raise ValueError("output_mode must be single-file-html or react-project.")
     style_direction = payload.get("style_direction", "")
     animation_level = payload.get("animation_level", "high")
     motion_preference = payload.get("motion_preference", "respect-reduced-motion")
@@ -37,6 +48,9 @@ def build_manifest(payload: Dict[str, Any]) -> Dict[str, Any]:
 
     factor = ANIMATION_LEVEL_FACTORS.get(animation_level, ANIMATION_LEVEL_FACTORS["high"])
     reduce = motion_preference == "respect-reduced-motion" and prefers_reduced_motion
+
+    if not webgl_supported and not reduce and animation_level != "low":
+        raise ValueError("WebGL unavailable: requested animation cannot run; repair the environment or obtain approval to change the effect.")
 
     manifest: List[Dict[str, Any]] = []
 
@@ -48,7 +62,7 @@ def build_manifest(payload: Dict[str, Any]) -> Dict[str, Any]:
                 "library": "three",
                 "target": "#hero-canvas",
                 "trigger": "on-load",
-                "fallback": "svg-gradient-drift",
+                "fallback": "report-error",
                 "intensity": round(0.8 * factor, 2),
             }
         )
@@ -60,7 +74,7 @@ def build_manifest(payload: Dict[str, Any]) -> Dict[str, Any]:
                 "library": "animejs",
                 "target": "#hero-svg",
                 "trigger": "on-load",
-                "fallback": "static-gradient",
+                "fallback": "report-error",
                 "intensity": round(0.45 * factor, 2),
             }
         )
@@ -73,7 +87,7 @@ def build_manifest(payload: Dict[str, Any]) -> Dict[str, Any]:
                 "library": "gsap",
                 "target": "[data-reveal]",
                 "trigger": "on-scroll",
-                "fallback": "css-fade-in",
+                "fallback": "report-error",
                 "intensity": 0.0 if reduce else round(0.65 * factor, 2),
             },
             {
@@ -82,7 +96,7 @@ def build_manifest(payload: Dict[str, Any]) -> Dict[str, Any]:
                 "library": "gsap",
                 "target": "[data-magnetic]",
                 "trigger": "on-pointer-move",
-                "fallback": "hover-scale",
+                "fallback": "report-error",
                 "intensity": 0.0 if reduce else round(0.7 * factor, 2),
             },
             {
@@ -91,7 +105,7 @@ def build_manifest(payload: Dict[str, Any]) -> Dict[str, Any]:
                 "library": "css",
                 "target": "body::before",
                 "trigger": "always",
-                "fallback": "static-noise-texture",
+                "fallback": "report-error",
                 "intensity": round(0.4 * factor, 2),
             },
         ]
@@ -104,23 +118,27 @@ def build_manifest(payload: Dict[str, Any]) -> Dict[str, Any]:
                 "category": "interaction",
                 "library": "css",
                 "target": ".beam-border",
-                "trigger": "on-hover",
-                "fallback": "accent-outline",
+                "trigger": "always",
+                "fallback": "report-error",
                 "intensity": round(0.55 * factor, 2),
             }
         )
 
     if reduce:
+        for effect in manifest:
+            effect.update(library="none", trigger="none", intensity=0.0)
+            effect["fallback"] = "static-gradient" if effect["category"] == "hero" else "static-visible-content"
+    if reduce:
         notes = [
-            "reduced motion detected: disabling high-stimulus effects",
+            "reduced motion detected: all effects static",
             "webgl effects replaced with static/svg alternatives",
         ]
-    elif not webgl_supported:
-        notes = ["webgl unsupported: switched hero layer to SVG/CSS"]
     else:
         notes = ["full animation profile enabled"]
 
     return {
+        "status": "planned",
+        "verification_required": "Compare targets, triggers, fallbacks and runtime behavior with the delivered page; this is not observed QA.",
         "style_direction": style_direction,
         "animation_level": animation_level,
         "manifest_count": len(manifest),
