@@ -3,10 +3,11 @@ name: decision-bias-quality-control
 description: >-
   This skill MUST be used when evaluating high-stakes decisions with
   bias-aware quality control, including proposal review, decision meeting
-  facilitation, and personal coaching. MUST trigger on requests such as
-  重大決策、偏誤檢查、提案審查、決策會議引導、決策教練、go/no-go 決策。
+  facilitation, personal coaching, and autonomous agent review. MUST trigger
+  on requests such as 重大決策、偏誤檢查、提案審查、決策會議引導、決策教練、
+  go/no-go 決策、AI 自行審查決策。
 metadata:
-  version: "1.1.1"
+  version: "1.2.0"
 ---
 
 # Decision Bias Quality Control
@@ -22,7 +23,7 @@ metadata:
 先閱讀下列參考檔：
 - 核心原則與來源：[references/01-source-principles.md](./references/01-source-principles.md)
 - 12 問題庫：[references/02-12-question-bank.md](./references/02-12-question-bank.md)
-- 三種模式流程：[references/03-mode-workflows.md](./references/03-mode-workflows.md)
+- 模式流程：[references/03-mode-workflows.md](./references/03-mode-workflows.md)
 - 評分與門檻：[references/04-scoring-thresholds.md](./references/04-scoring-thresholds.md)
 - 統一輸出模板：[references/05-output-templates.md](./references/05-output-templates.md)
 
@@ -30,7 +31,7 @@ metadata:
 
 接收下列結構化輸入；欄位不足時走 Data Sufficiency Gate。
 
-- `mode`: `proposal-review | meeting-facilitation | personal-coaching | auto`
+- `mode`: `self-agent | proposal-review | meeting-facilitation | personal-coaching | auto`
 - `decision_statement`: `string`（必要）
 - `decision_context`: `string`（必要）
 - `proposal_snapshot`: `string`（提案審查時建議提供）
@@ -43,13 +44,16 @@ metadata:
 
 若 `mode=auto`，依需求語意路由：
 
+- 使用者要求 AI 自行查核、討論或審查目前決策，或由 ultrathink 自動轉接時，預設 `self-agent`；使用者明確要求下列工作時，依該需求選擇模式。
 - 出現「審查提案、投資案、核准、go/no-go」等語意時，路由 `proposal-review`。
 - 出現「主持、引導討論、會議流程、追問順序」等語意時，路由 `meeting-facilitation`。
 - 出現「我該怎麼選、個人抉擇、職涯選擇」等語意時，路由 `personal-coaching`。
 
-若語意混合，先以 `proposal-review` 執行主流程，並在附錄提供會議引導問題。
+若語意混合，依使用者主要目的選擇模式。
 
 ## Data Sufficiency Gate
+
+先從目前任務與已有資料取得輸入。`self-agent` 先查核可自行取得的資料，再提出仍影響結論的缺口。
 
 先檢查必要欄位：
 
@@ -115,6 +119,7 @@ metadata:
 
 ## Mode-Specific Decision Output
 
+- `self-agent`: 輸出決策建議、完整十二問評分、關鍵問題與方案修正，依模式流程完成查核與複核。
 - `proposal-review`: 輸出 `go | conditional-go | no-go`。
 - `meeting-facilitation`: 輸出會議腳本、追問順序、決策收斂規則。
 - `personal-coaching`: 輸出選項比較、偏誤提醒、48 小時驗證行動。

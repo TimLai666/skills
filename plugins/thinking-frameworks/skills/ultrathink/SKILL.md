@@ -7,7 +7,7 @@ description: >-
   Unless explicitly requested, it MUST NOT be used for routine work with
   no substantive uncertainty or trade-offs.
 metadata:
-  version: "2.2.0"
+  version: "2.3.0"
 ---
 
 # Ultrathink
@@ -44,7 +44,7 @@ metadata:
 | 檢查提案或論證是否成立 | [辯論思考](references/07-debate-thinking.md)：論點三要素、需根解損、判定立駁 |
 | 質疑前提、推演失敗與後果、辨識知識限制 | [思維模型](references/08-mental-models.md)：第一性原理、反向思考、二階思考、能力圈、奧坎剃刀 |
 | 懷疑特定論證有錯 | [謬誤檢核](references/fallacy-checklist.md)：只查相關條目 |
-| 檢查重大決策形成過程中的利益關係、異議處理、替代方案評估或估算偏誤 | `decision-bias-quality-control` 可用時，自動讀取其主檔並依本次決策資料執行 |
+| 檢查重大決策形成過程中的利益關係、異議處理、替代方案評估或估算偏誤 | `decision-bias-quality-control` 可用時，自動讀取主檔，以 `self-agent` 模式執行；使用者指定審查、會議引導或教練需求時依對應模式 |
 
 ## 選用的深入複核
 

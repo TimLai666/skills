@@ -83,6 +83,8 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
 - [ ] **03. decision-bias-quality-control**（中優先）
 
+  **已驗收的部分：** 保留獨立 skill，ultrathink 增加自動轉接入口。新增 self-agent 模式，自行查核、十二問評分與方案修正，需要時使用 subagents 交叉審查。使用者已確認並要求推送。skill 1.2.0、business-strategy plugin 1.4.0，ultrathink 2.3.0、thinking-frameworks plugin 0.43.0。格式、引用與數量檢查通過，未做模型行為實測。其餘簡化及評分規則修正尚待確認，本項維持未勾選。
+
   **可以改哪裡：** 泛提案審查與個人選擇容易觸發；每次先讀五份檔且所有模式都強制十二題逐題量化與固定三至五項，會把會議引導變成評分報告；評分摘要與 references/04 重複。
 
   **建議改法：** 縮到明確偏誤品管/重大決策方法需求；主檔保留模式入口和十二問證據檢查，題庫與評分只讀一次權威來源；會議/教練可先交關鍵追問，正式評分模式再展開雙軌和完整計算。

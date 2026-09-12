@@ -2,6 +2,8 @@
 
 ## Template A: Standard Decision Report
 
+`self-agent` 亦使用此模板，以實際查核結果填寫證據欄，將方案修正放入 recommended_actions，未解分歧放入 Assumptions and Data Gaps。
+
 ```markdown
 ## Executive Summary
 - 決策題目：{decision_statement}
