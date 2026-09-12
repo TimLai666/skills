@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**28 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**29 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -623,15 +623,17 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **目前位置：** [主檔](../../plugins/service-innovation/skills/service-design-workshop/SKILL.md)、[模板](../../plugins/service-innovation/skills/service-design-workshop/references/service-design-output-templates.md)。
 
-- [ ] **50. service-innovation-case-study**（高優先）
+- [x] **50. service-innovation-case-study**（高優先）
 
-  **可以改哪裡：** description 塞參考檔與讀檔指令；一般品牌研究也走全套。Doji 條件泛化為固定投資／電商層、三項 SWOT、八策略、48 分門檻和資源導向順序；reference 以 ST 組合預設定位。主檔與分析鏈重複。
+  **已完成並經使用者確認：** 保留自然語意觸發，區分完整研究、課堂格式與局部分析。完整研究保留全條分析鏈及 25 個報告章節，局部研究核對相關上下游。主檔集中範圍、閱讀時機與交付，方法留在既有參考文件。
 
-  **建議改法：** 區分完整課堂格式與一般案例研究，原課堂模式完整保留。主檔只留模式、證據、分析承接和交付，細節用既有 references。數量／門檻／ST 示例／Doji 分類限定模板，一般研究按問題選框架和策略。輸出位置依工作區，不綁 /mnt。
+  **方法與模板：** 課堂模式保留 SWOT 各三項、八策略及 PESTEL 門檻，一般研究依問題與證據判斷。取消預設 ST、AX 客群與資源導向，保留四類策略、BMC 九格及延伸分析。研究面向逐項判斷適用來源，區分未找到、無法存取及確認未公開。修正藍圖五層三線、圖例與情緒評分，保留完整品質清單。輸出依工作區，不再綁定 /mnt。
 
-  **應保留：** 可追溯來源、分析一致、真實摩擦、公司宣稱與證實效果；指定課堂作業不可縮成摘要。
+  **版本與範圍：** skill 1.2.0、service-innovation plugin 2.4.0，README 同步完整、課堂與局部研究定位。未發現 Suggested Prompt 同類殘留。
 
-  **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-innovation-case-study/SKILL.md:3)、[主檔:24](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-innovation-case-study/SKILL.md:24)、[主檔:134](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-innovation-case-study/SKILL.md:134)、[主檔:286](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-innovation-case-study/SKILL.md:286)、[主檔:320](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-innovation-case-study/SKILL.md:320)、[references/02-analysis-chain.md:61](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-innovation-case-study/references/02-analysis-chain.md:61)、[references/02-analysis-chain.md:179](/Users/timlai/Developer/skills/plugins/service-innovation/skills/service-innovation-case-study/references/02-analysis-chain.md:179)。
+  **驗證：** quick_validate、YAML／JSON、13 個相對連結、Markdown 圍欄與 git diff --check 通過。比對原模板確認 25 個章節與順序保留，Persona 副標改為複合人物。skill 數與 README 表格／總數均為 61。獨立走查圖書館局部定位、資料不足的課堂報告、顧客導向且採 SO 的完整研究三案，修正模板強制創辦人引言與風險等同情緒低點的殘留。此次為文件及規則驗證，未執行真實案例研究或圖表渲染。使用者已驗收並要求提交、推送，未同步安裝版本。
+
+  **目前位置：** [主檔](../../plugins/service-innovation/skills/service-innovation-case-study/SKILL.md)、[研究流程](../../plugins/service-innovation/skills/service-innovation-case-study/references/01-research-protocol.md)、[分析鏈](../../plugins/service-innovation/skills/service-innovation-case-study/references/02-analysis-chain.md)、[區段規格](../../plugins/service-innovation/skills/service-innovation-case-study/references/03-section-specs.md)、[品質清單](../../plugins/service-innovation/skills/service-innovation-case-study/references/04-quality-checklist.md)、[模板](../../plugins/service-innovation/skills/service-innovation-case-study/assets/report-template.md)。
 
 - [ ] **51. service-innovation-workshop**（中優先）
 
