@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**35 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**36 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -803,7 +803,7 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **驗證：** 輸入與動畫腳本測試、YAML／JSON、引用、skill／README 數量及 git diff --check 通過。React 測試副本 production build 通過；兩套模板的正常／CDN 與 WebGL 失敗、動態偏好切換、三斷點與 CTA 檢查通過。失效報錯調整前，填入測試文案後 Lighthouse：React 手機／桌面效能皆 100，HTML 手機 94、桌面 100，無障礙皆 100。Three 獨立區塊仍有大小提醒；未測真實客戶內容、後端與部署。測試依賴只在暫存副本，測試 server 已停止。
 
-- [ ] **62. open-slide-studio**（中優先）
+- [x] **62. open-slide-studio**（中優先）
 
   **可以改哪裡：** description 塞框架功能、內建技能和流程，格式限制與指令在多節重複。已有不複製上游規範的好設計。
 
@@ -812,6 +812,10 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
   **應保留：** 圖片版 PPTX 不可編輯的告知、Node 前提、theme 交接、不覆寫上游管理檔。
 
   **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/open-slide-studio/SKILL.md:3)、[主檔:49](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/open-slide-studio/SKILL.md:49)、[主檔:80](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/open-slide-studio/SKILL.md:80)、[主檔:88](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/open-slide-studio/SKILL.md:88)、[主檔:96](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/open-slide-studio/SKILL.md:96)。
+
+  **完成修改：** 精簡 description 與重複流程，保留自然語意觸發、格式分流與 design-studio 視覺交接。區分新建與局部修改，沿用既有主題；建立或調整主題時依工作區 create-theme 產出主題文件及預覽檔。skill 1.0.4、writing-and-design 1.21.2。使用者已確認接受並要求提交、推送。
+
+  **驗證：** quick_validate、YAML／JSON、description、引用、Markdown 圍欄、skill／README 數量及 git diff --check 通過。本次為指引修改，未建立或部署實際簡報。
 
 ## 一起留意的相依問題
 
