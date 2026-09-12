@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**32 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**33 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -723,15 +723,13 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **驗證與交付：** quick_validate、YAML／JSON、description 與 git diff --check 通過，skill 數與 README 列數／總數均為 61。使用者已確認並要求提交、推送。
 
-- [ ] **56. folder-organizer**（中優先）
+- [x] **56. folder-organizer**（中優先）
 
-  **可以改哪裡：** description 將一般 file audit/analyze 全捕捉；同一確認門檻在 description/Core/Phase4/Phase5 重述；固定每檔都提新名、分類、刪除與 zip，即使只問資料夾建議；上傳路徑與 bash_tool 寫死環境。
+  **已依使用者要求刪除並經驗收：** 內容主要重述模型既有整理能力及通用檔案操作規則，未提供足以獨立保留的工具或方法。原文可從 Git 歷史取得。
 
-  **建議改法：** 觸發限定整理、分類、重新命名或搬移規劃；合併成盤點→按需求提改動表→已授權範圍執行。單一確認門檻保留，已有完整授權不重問。工具與上傳路徑依環境取得；沒有改名/刪除需求不硬產方案。
+  **同步調整：** README 移除項目，README 與 AGENTS.md 的現有 skill 數量改為 60。utilities plugin 與 marketplace 描述移除檔案整理，plugin 升至 1.3.0。審查仍以原始 62 項追蹤，其他已略過項目維持原決定。
 
-  **應保留：** 碰檔案前盤點、明確來源/目的映射、重名處理、不可讀檔標未知與使用者確認實際整理計畫。
-
-  **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/utilities/skills/folder-organizer/SKILL.md:3)、[主檔:15](/Users/timlai/Developer/skills/plugins/utilities/skills/folder-organizer/SKILL.md:15)、[主檔:93](/Users/timlai/Developer/skills/plugins/utilities/skills/folder-organizer/SKILL.md:93)。
+  **驗證：** JSON 解析、skill 數／README 列數／總數一致、引用檢查及 git diff --check 通過。除了本項歷史紀錄，沒有剩餘 folder-organizer 引用。使用者已要求提交、推送。本機已安裝版本未移除。
 
 - [ ] **57. windows-rescue-from-linux**（中優先）
 

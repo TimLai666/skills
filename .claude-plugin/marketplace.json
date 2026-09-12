@@ -56,7 +56,7 @@
     {
       "name": "utilities",
       "source": "./plugins/utilities",
-      "description": "通用工具：網頁內容提取、檔案整理、Windows 系統救援。"
+      "description": "通用工具：網頁內容提取、Windows 系統救援。"
     }
   ]
 }
