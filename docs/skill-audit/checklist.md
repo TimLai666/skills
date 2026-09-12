@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**21 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**22 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -529,7 +529,9 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/experiential-guerrilla-marketing/SKILL.md:3)、[主檔:16](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/experiential-guerrilla-marketing/SKILL.md:16)、[主檔:29](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/experiential-guerrilla-marketing/SKILL.md:29)、[主檔:59](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/experiential-guerrilla-marketing/SKILL.md:59)、[主檔:118](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/experiential-guerrilla-marketing/SKILL.md:118)、[主檔:134](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/experiential-guerrilla-marketing/SKILL.md:134)、[主檔:182](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/experiential-guerrilla-marketing/SKILL.md:182)、[主檔:200](/Users/timlai/Developer/skills/plugins/marketing-strategy/skills/experiential-guerrilla-marketing/SKILL.md:200)。
 
-- [ ] **43. maslow-five-needs-marketing**（高優先）
+- [x] **43. maslow-five-needs-marketing**（高優先）
+
+  **已完成：** 五層都須分析需求、產品回應、依據或缺口與目標關聯，完成後才決定投入優先序，不能以低關聯或不投入略過。移除 IQ 人格、固定逐層投放與 70%／30% 配比；資料、排程、標題與 CTA 數量依需求，理論及五層判讀先完整讀，其他文件依工作目的載入。解除 copywriting 固定依賴，改用具體品質檢核與事實／承諾檢查，完整方法與模板保留。
 
   **可以改哪裡：** IQ300 角色重複兩次無可檢查行動價值；CTA/文案方向泛觸發；每次固定五層全產出、多 KPI/30天動作/每層三標題三CTA，且六份 reference 全串讀；硬綁 copywriting。
 

@@ -5,187 +5,109 @@ description: >-
   marketing and copy messaging frameworks based on Maslow needs, including
   五情疊加行銷、想打動消費者、訂定文案方向、主訴求設計、CTA 設計、跨通路訊息框架、品牌故事訴求、品牌忠誠提升與會員策略。
 metadata:
-  version: "1.1.1"
+  version: "1.2.0"
 ---
 
 # 馬斯洛五需求行銷策略
 
 ## Overview
 
-你是 IQ 300 的超強行銷大師，精通消費心理與策略設計。  
-使用本技能時，必須把需求分層為生理、安全、社交、尊重、自我實現五層，並輸出可驗證、可執行、可衡量的整合策略。
-本 skill 含完整理論章節，可在策略設計前先校準理論概念、五層定義與應用邏輯。
-
-## Trigger Map (When to Use)
-
-Use：
-
-- 使用者明確說「想打動消費者」、「要定文案方向」、「主訴求怎麼寫」、「CTA 怎麼設計」。
-- 需要把行銷策略拆成五層需求路徑，做跨通路訊息規劃。
-- 需要先產出訊息骨架與策略優先序，再交由文案技能成稿。
-
-Do not use：
-
-- 使用者只要完整長文案成稿，且不需要五層策略與需求拆解。
-- 任務純屬排版、潤稿或文句拋光。
-
-Handoff：
-
-- 若使用者要求完整成稿（例如 1200 字銷售頁），先輸出 `copy_message_briefs`，再轉交 `$copywriting` 進入成稿流程。
+從生理、安全、社交、尊重、自我實現五層，完整分析受眾需求與產品的關係，
+再提出訊息方向、投入優先序與可執行策略。使用者不必記得技能名稱，
+描述想打動消費者、釐清主訴求或規劃需求導向訊息時，就依情境使用。
+純排版、潤稿或不需要需求分析的長文案成稿，不啟用本流程。
 
 ## Input Contract
 
-必要欄位：
+先從現有資料確認產品／服務、受眾、提供的價值與本次目標。
+有投放或執行計畫時，再確認通路、預算、期間與衡量方式。
+有文案需求時，確認用途、語氣、證據素材與限制。
 
-- `product_or_service`: `string`
-- `target_audience`: `string`
-- `offer`: `string`
-- `goal_kpi`: `string[]`
-- `time_horizon`: `string`
-
-可選欄位：
-
-- `budget`: `string`
-- `channels`: `string[]`
-- `copy_goal`: `awareness|consideration|conversion|retention`
-- `copy_channel`: `ad|landing-page|email|social|line`
-- `desired_emotion`: `trust|belonging|status|aspiration`
-- `copy_constraints`: `string[]`
-- `brand_tone`: `string`
-- `constraints`: `string[]`
-- `proof_assets`: `string[]`
-- `market_context`: `string`
-- `competition_context`: `string`
+詳細欄位與受眾盤點見[輸入與分群](./references/01-intake-and-segmentation.md)，
+在需要補資料或細分受眾時讀取，不要求使用者先填完整表單。
 
 ## Data Sufficiency Gate
 
-缺少必要欄位時，不得直接產出策略，必須先回傳 `MissingDataOutput`：
+資訊足以分析就直接進行。缺少會改變方向的關鍵資訊時，提出具體問題；
+其他可合理推進的部分繼續處理，假設與待驗證之處清楚標明。
+只需要訊息方向時，不以缺少數值 KPI、預算或執行期間阻擋分析。
 
-```json
-{
-  "missing_fields": [],
-  "why_needed": {},
-  "questions_to_user": [],
-  "next_step_rule": "補齊必要欄位後再產出完整策略"
-}
-```
-
-## Persona & Output Tone Rules
-
-固定人格：
-
-- 你是 IQ 300 的超強行銷大師與心理學策略專家。
-
-輸出必須具備：
-
-- 高密度洞察：每項建議都要對應具體商業問題。
-- 清楚優先序：先底層後高層，並說明投放先後。
-- 可落地 KPI：每層都有可追蹤指標與觀察週期。
-- 可執行行動：明確到通路、訊息、節奏與責任角色。
-
-禁止事項：
-
-- 自我吹捧或浮誇語氣。
-- 空泛形容詞堆砌但無策略內容。
-- 無證據支持的斷言與結果保證。
-
-## Five-Layer Strategy Engine
-
-### 1) 生理需求層（底層）
-
-- 目標：強化感官刺激與可感知體驗。
-- 核心問題：使用者是否能快速感覺到產品價值。
-- 產出：五感體驗設計、首屏價值訊息、試用觸點。
-- KPI：首訪停留時間、首屏互動率、試用啟動率。
-
-### 2) 安全需求層
-
-- 目標：降低決策焦慮與交易風險。
-- 核心問題：使用者是否相信「買了不會後悔」。
-- 產出：保固、售後、風險逆轉、透明條款。
-- KPI：結帳放棄率、退款率、客服風險提問占比。
-
-### 3) 社交需求層
-
-- 目標：建立歸屬感、群體認同與持續互動。
-- 核心問題：使用者是否感覺自己是品牌社群的一員。
-- 產出：會員機制、社群任務、UGC 設計、推薦循環。
-- KPI：社群互動率、會員留存率、推薦轉介率。
-
-### 4) 尊重需求層
-
-- 目標：提供身份感、成就感與可展示價值。
-- 核心問題：使用者是否願意公開展示其選擇。
-- 產出：限量版、等級制度、VIP 權益、里程碑獎章。
-- KPI：高階方案滲透率、升級率、身份內容分享率。
-
-### 5) 自我實現需求層（頂層）
-
-- 目標：讓品牌與個人價值目標一致。
-- 核心問題：使用者是否把品牌視為實現理想的夥伴。
-- 產出：品牌使命、共創計畫、長期成長路徑。
-- KPI：品牌倡議率、長週期留存率、NPS 推薦意願。
-
-## Cross-Layer Prioritization Rules
-
-- 先修底層，再放大高層。
-- 若生理層與安全層任一薄弱，高層投資只能做小規模實驗。
-- 優先順序建議：`生理 -> 安全 -> 社交 -> 尊重 -> 自我實現`。
-- 任一高層策略都要回扣到前一層的穩定性證據。
-- 每層需標註「本期投入占比」與「下期升級條件」。
-
-## Output Contract
-
-完整策略必須符合 `StrategyOutput`：
-
-```json
-{
-  "executive_summary": "",
-  "five_layer_plan": [],
-  "campaign_architecture": [],
-  "kpi_ladder": [],
-  "risk_and_mitigation": [],
-  "first_30_day_actions": [],
-  "strategic_iq_check": [],
-  "copy_message_briefs": []
-}
-```
-
-欄位要求：
-
-- `executive_summary`：2-5 點關鍵判斷與策略方向。
-- `five_layer_plan`：五層各自的目標、訊息、通路、行動、KPI。
-- `campaign_architecture`：分階段投放與跨通路協同邏輯。
-- `kpi_ladder`：從先行指標到結果指標的梯度關係。
-- `risk_and_mitigation`：主要風險與對應緩解動作。
-- `first_30_day_actions`：30 天可執行排程。
-- `strategic_iq_check`：至少包含以下四項：
-  - `核心假設`
-  - `反證風險`
-  - `最小可行實驗`
-  - `30/60/90 天 KPI`
-- `copy_message_briefs`：文案方向與訊息骨架（非完整長文案），每層至少包含：
-  - `layer`
-  - `message_core`
-  - `headline_angles` (3)
-  - `cta_options` (3)
-  - `proof_points`
-
-## Quality & Ethics Rules
-
-- 每一層的建議都要可追溯到輸入條件，不能憑空臆測。
-- 不可使用操縱性、誤導性或不實承諾話術。
-- 若資料不足，優先輸出提問與補數據清單，而非硬推結論。
-- 對無法驗證的內容，明確標示 `Assumption` 與 `Validation Needed`。
+資料不足的層級也要分析目前能判斷的部分，標明缺什麼證據與如何補足，
+不能因資料少就從五層分析中刪除。
 
 ## Workflow
 
-1. 先讀 [00-theory-foundation.md](./references/00-theory-foundation.md) 校準理論概念、五層定義與判讀原則。
-2. 讀取 [01-intake-and-segmentation.md](./references/01-intake-and-segmentation.md) 做資料盤點。
-3. 依 [02-five-needs-playbook.md](./references/02-five-needs-playbook.md) 產出五層策略草案。
-4. 套用 [03-psychology-model-map.md](./references/03-psychology-model-map.md) 補強心理學依據。
-5. 依 [04-channel-message-matrix.md](./references/04-channel-message-matrix.md) 配置通路與訊息。
-6. 先輸出 `copy_message_briefs`（文案主軸、主標角度、CTA 選項）。
-7. 若需求是完整成稿，將骨架轉交 `$copywriting` 生成長文案。
-8. 依 [05-output-template-and-scorecard.md](./references/05-output-template-and-scorecard.md) 完成最終輸出與評分。
-9. 需要快速填表時，使用 [five-needs-strategy-template.md](./assets/templates/five-needs-strategy-template.md)。
+### 1. 校準理論與五層判讀
+
+分析前完整讀取[理論基礎](./references/00-theory-foundation.md)與
+[五需求實務判讀](./references/02-five-needs-playbook.md)。保留五層不同的問題，
+不要把同一個籠統利益換五種名稱，或把所有需求都歸到最熟悉的一層。
+
+### 2. 逐層完成分析
+
+**生理、安全、社交、尊重、自我實現五層都必須分析並呈現，之後才決定投入優先序。**
+每層交代：
+
+- 受眾在此層的需求、動機或阻力，以及出現的情境。
+- 產品／服務能如何回應，已有支持條件與不足之處。
+- 判斷依據，區分已知資料、合理推論與待驗證假設。
+- 與本次目標的關聯及可能的訊息方向。關聯較弱要說明理由，資料不足要列出缺口。
+
+使用者只關心某一層的投放時，也先交代其他四層與該決策的關係，不能用
+「本次不投入」代替需求分析。細節可依需求調整，但五層不能只剩空白標籤。
+
+### 3. 決定投入優先序
+
+完成五層分析後，根據受眾證據、目標、實際阻力、產品能力與資源選擇本期重點，
+說明先做什麼及原因。可以集中投入部分層級，但不省略其他層的分析。
+
+檢查基本體驗與信任問題是否會阻礙其他訴求；有具體阻礙時處理其影響。
+不預設必須按生理到自我實現逐層投放，也不固定使用 70%／30% 資源分配。
+未投入的層級交代決策理由，必要時列出重新評估條件。
+
+### 4. 展開訊息與行動
+
+需要解釋或設計具體心理機制時，讀[心理模型對照](./references/03-psychology-model-map.md)。
+需要主標、CTA 或通路配置時，讀[通路與訊息矩陣](./references/04-channel-message-matrix.md)，
+讓措辭、證據與行動呼籲配合投放情境。
+
+訊息骨架包含主訴求、標題角度、行動呼籲及支持證據，數量依需要決定。
+執行方案則補充通路、行動、角色、時程與衡量方式，不能只停在需求名稱或口號。
+
+使用者要求成稿時，以五層分析與選定訊息為依據，配合可用且適用的寫作 skill
+完成成品。不固定依賴 `$copywriting`，也不因缺少該名稱就停在訊息骨架。
+
+### 5. 檢查與交付
+
+確認五層分析完整、投入理由能追溯到資料、事實與承諾有依據，並完成使用者
+要求的交付深度。完整策略讀[輸出模板與檢核](./references/05-output-template-and-scorecard.md)；
+需要表格時使用[策略模板](./assets/templates/five-needs-strategy-template.md)。
+
+## Output Contract
+
+- **訊息方向**：五層需求分析、主次訴求與理由、所需的標題或 CTA 方向。
+- **完整策略**：五層分析與投入決策，加上通路安排、執行行動、成效衡量及重要限制。
+  排程依實際期間，未要求時不強制加入 30 天計畫或 30／60／90 天指標。
+- **成稿**：呈現五層分析與主訴求選擇的必要依據，交付完整文案。
+
+完整模板支援上述工作，不強制每次填滿所有欄位。五層分析是共同要求，
+不能以精簡輸出或只做單一通路為由省略。
+
+## Quality Rules
+
+- 每個需求判斷與建議都要連回受眾情境、產品條件與本次目標。
+- 不捏造數據、評價、限量條件或產品承諾；區分預期成效與實際成果。
+- 分析依據不足時說明缺口，不把未知當成需求不存在。
+- 行銷手法以相關性、可行性及事實依據評估，不另做道德評分。
+
+## Quick Reference
+
+| 文件 | 用途與讀取時機 |
+| --- | --- |
+| [理論基礎](./references/00-theory-foundation.md) | 每次分析前完整讀，校準五層定義與理論應用 |
+| [輸入與分群](./references/01-intake-and-segmentation.md) | 補資料或細分受眾時讀，含欄位、受眾盤點與缺口處理 |
+| [五需求實務判讀](./references/02-five-needs-playbook.md) | 每次分析前完整讀，含每層問題、訊息、行動與指標示例 |
+| [心理模型](./references/03-psychology-model-map.md) | 需深入心理機制時讀對應項目 |
+| [通路與訊息](./references/04-channel-message-matrix.md) | 配置通路、主標或 CTA 時讀 |
+| [輸出與檢核](./references/05-output-template-and-scorecard.md) | 交付完整策略時讀，含結構化模板與品質檢核 |
+| [表格模板](./assets/templates/five-needs-strategy-template.md) | 需要表格交付時使用，五層分析全數保留 |

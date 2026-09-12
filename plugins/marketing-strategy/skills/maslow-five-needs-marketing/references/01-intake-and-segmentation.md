@@ -1,16 +1,14 @@
 # Intake and Segmentation
 
-以 IQ 228 顧問標準輸出：策略必須可驗證、可執行、可衡量。
-
-## 1) Required Inputs
+## 1) 核心資料與執行條件
 
 | field | type | required | note |
 | --- | --- | --- | --- |
 | product_or_service | string | yes | 產品/服務描述與核心價值 |
 | target_audience | string | yes | 受眾輪廓、購買場景與痛點 |
 | offer | string | yes | 價值主張與成交主體 |
-| goal_kpi | string[] | yes | 成功判準與數值目標 |
-| time_horizon | string | yes | 執行期間與檢核節點 |
+| goal_kpi | string[] | 執行／評估時 | 成功判準；數值目標依資料與需求設定 |
+| time_horizon | string | 執行計畫時 | 執行期間與檢核節點 |
 
 ## 2) Optional Inputs
 
@@ -37,18 +35,18 @@
 
 ## 4) Copy Brief Minimum (Optional but Recommended)
 
-- 若任務含文案方向，至少補齊：`copy_goal`、`copy_channel`、`desired_emotion`。
-- 若缺少這三項，可先回傳提問，不要直接生成文案成稿。
+- 文案方向需理解用途與通路；`desired_emotion` 可以是五層分析後的結論，不要求使用者先指定。
+- 先從現有資料確認，只有缺口會改變方向或妨礙交付時才提問。
 ## 5) Data Sufficiency Gate
 
-缺必要欄位時，回傳 `MissingDataOutput`，不得直接輸出完整策略。
+依[主檔的資料充分性規則](../SKILL.md#data-sufficiency-gate)判斷是否需要提問。只做訊息方向時，不要求數值 KPI 與期間；完整執行方案需確認影響可行性的條件。需要結構化回覆時，可用以下 `MissingDataOutput`，一般對話直接問關鍵問題。
 
 ```json
 {
   "missing_fields": [],
   "why_needed": {},
   "questions_to_user": [],
-  "next_step_rule": "補齊必要欄位後再輸出策略"
+  "next_step_rule": "補齊影響決策的關鍵資訊，其他可獨立分析的部分繼續"
 }
 ```
 
