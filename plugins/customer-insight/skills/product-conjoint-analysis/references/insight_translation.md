@@ -1,214 +1,71 @@
-# Insight Translation Reference
+# 指標計算與解讀
 
-How to convert raw part-worth utilities into business-grade insights. The four canonical transforms — importance, WTP, choice probability, ROI — answer four distinct questions. Always produce all four for a complete conjoint report.
+## 使用前提
 
-## Table of contents
-- [1. Attribute importance](#1-attribute-importance)
-- [2. Willingness to pay (WTP)](#2-willingness-to-pay-wtp)
-- [3. Choice probability](#3-choice-probability)
-- [4. Cost-benefit ROI](#4-cost-benefit-roi)
-- [Reliability flags](#reliability-flags)
+使用同一個可識別、已完成估計與診斷的模型。係數要有一致尺度與來源，不能
+從多個探索模型挑係數拼接。計算函式的輸入檢查不能取代研究設計與外部驗證。
 
----
+## 屬性重要性
 
-## 1. Attribute importance
+分類屬性以各水準效用的最大值減最小值，包含參考水準的 0。
+獨立二元功能各自成組，分組由資料定義，不從欄名猜測。
+連續屬性以指定研究範圍內的效用差計算，線性項為
+`abs(beta) * (maximum - minimum)`。
+各屬性的差除以總差得到相對重要性。結果依水準範圍與模型而定，沒有通用的
+「低於 5% 就是雜訊」判準；總差為零時無法形成有意義的比例排名。
 
-**Question answered**: "Which attribute drives the most variation in consumer choice?"
+`compute_attribute_importance` 接受模型結果或同尺度係數，`attribute_groups`
+須涵蓋全部非截距欄。各連續欄以 `continuous_ranges={"size": (100, 110)}`
+明示範圍，價格也可用 `price_range`。獨立二元功能各自分組，舊的
+`binary_separately=True` 名稱猜測方式已停用。
 
-### Formula
+## 願付價格（WTP）
 
-```
-For each attribute i:
-    range_i = max(part-worths in attribute i) − min(part-worths in attribute i)
+線性價格模型中的局部取捨為 `-beta_attribute / beta_price`，對應相對參考
+水準的價格差。價格係數必須為負，且同一模型的估計與不確定性足以支持解讀。
+價格為正、為零或無法可靠區分於零時，先處理估計問題，不把絕對值分母當成修復。
 
-For PRICE specifically:
-    range_price = |β_price| × (max_price − min_price)
+需要區間估計時，同時考慮屬性與價格係數的變異及共變異。
+價格靠近零時，比值可能非常不穩定；簡單近似區間不保證適用，應報告限制或
+使用更適合的推論。不能將結果截斷到市場最高價來假裝穩定。
 
-importance_i = range_i / Σ(all ranges) × 100%
-```
+WTP 是模型與研究條件下的取捨估計，不能直接等同最適售價或實際可收取的溢價。
 
-### Why price needs rescaling
+`compute_wtp` 需接收完整模型結果及具名共變異數，目前僅支援獨立選擇事件的
+模型推論，拒絕重複顧客尚未調整的標準誤。工具以價格係數的近似 95% 區間
+完全低於零作為計算門檻，再用 delta method 計算比值的近似區間。這是工具的
+保守使用條件，不是通用研究品質判準。
+輸出為 `wtp_price_units`、`ci_lower`、`ci_upper`，單位依價格變數而定。
 
-Categorical part-worths are already on a "relative-to-reference" scale — the range directly reflects influence on choice.
+## 選擇機率
 
-Price's coefficient β is a **marginal-per-unit** effect (e.g., per dollar). Treating it identically would understate price by a factor equal to the price spread. Multiplying by the actual price range puts it back on a comparable scale.
+對明確可選集合中的每個商品計算 `U_j = X_j beta`，再以
+`exp(U_j) / sum(exp(U_k))` 計算集合內機率。數值計算先減去集合內最大效用，
+避免指數溢位。每組機率合計為 1，只有一種獨立二元事件時才另用二元模型。
 
-**Concrete example from case study**:
-- β_price = 0.052
-- Price range = $15.99 − $13.98 = $2.01
-- Effective range = 0.052 × 2.01 = 0.105
+所有預測欄、水準及單位須與估計時一致。商品共同截距不改變集合內機率。
+未觀察的組合、不同市場與價格範圍之外的預測屬外推，須另外驗證。
+這是指定集合與假設下的模型機率，不是實際市占率或市場最佳商品的保證。
 
-Without rescaling, "price range" would have been treated as 0.052 — making price look ~20× less important than reality.
+`compute_choice_probability` 每次接收一個可選集合及完整模型結果，回傳
+`prob_pct`；`compute_share_of_preference` 同樣使用集合內公式，回傳 `share_pct`。
+若傳原始係數字典，須明示 `same_model=True`，自行確認係數來自同一有效模型。
+獨立二元反應另用 `compute_binary_response_probability`，不接收條件式選擇模型。
 
-### Worked example
+## 效用與成本
 
-| Attribute | Max β | Min β | Range | Importance |
-|---|---|---|---|---|
-| Brand | 0.463 | 0 | 0.463 | 27.4% |
-| Size | 0.463 | 0 | 0.463 | 27.4% |
-| UV protection | 0 | −0.382 | 0.382 | 22.6% |
-| Color | 0.153 | 0 | 0.153 | 9.1% |
-| Anti-scratch | 0.121 | 0 | 0.121 | 7.2% |
-| Price | (rescaled) | | 0.105 | 6.2% |
-| **Total** | | | **1.687** | **100%** |
+`delta_utility / delta_cost` 的單位是效用／貨幣，不是財務 ROI。
+只有成本有來源、單位一致時才比較；沒有成本就不產生成本排名。
+成本為零或降低時須另外描述，不把它誤標為缺資料或套除法。
 
-### Interpretation rules
+不得用固定門檻 1 宣稱「值得投資」，也不能僅因某功能估計為負就建議移除。
+實際財務決策還需要銷量、毛利、固定成本及其他必要資料。
 
-- Top-3 attributes typically account for 60–80% of importance — focus product/marketing decisions there.
-- An attribute with importance < 5% is essentially noise. Consider whether to drop it from future studies.
-- If two attributes are tied (case study: brand & size both 27.4%), say so explicitly. Don't artificially break the tie.
+`compute_cost_benefit_roi` 保留舊函式名稱，輸出改為 `utility_per_cost_unit`，
+不再回傳 `roi` 或固定投資建議。只傳要比較的功能係數與成本，不含價格或
+截距。缺成本保留未知，零或負增量成本會要求另行比較，不套用比值排名。
 
----
+## 方法依據
 
-## 2. Willingness to pay (WTP)
-
-**Question answered**: "How many extra dollars would consumers pay for this attribute level?"
-
-### Formula
-
-```
-WTP(level) = part-worth(level) / |β_price|
-```
-
-### Interpretation
-
-- **Positive WTP**: Consumer would pay extra for this level versus the reference. WTP = $5 means "up to $5 premium is justified."
-- **Negative WTP**: Consumer needs a discount to accept this level. WTP = −$3 means "this level destroys value; would need a $3 price cut to be neutral."
-
-### Worked example
-
-Using β_price = 0.052 (note: positive, which is itself a flag — see below):
-
-| Level | β | WTP |
-|---|---|---|
-| MORKSUKY (vs HTS) | 0.463 | +$8.90 |
-| 145mm (vs 140mm) | 0.463 | +$8.90 |
-| Pink (vs black) | 0.153 | +$2.94 |
-| Anti-scratch (vs none) | 0.121 | +$2.33 |
-| UV protection (vs none) | −0.382 | −$7.35 |
-
-### When WTP is unreliable
-
-WTP is only meaningful if the price coefficient itself is reliable. **Flag and downgrade WTP to "directional only" if any of these hold**:
-
-| Flag | Cause | Action |
-|---|---|---|
-| β_price > 0 | Price range too narrow, or sample unusual | Mark all WTP as directional |
-| β_price has p > 0.5 | Insufficient data | Mark all WTP as directional |
-| Some WTP > max(price) | Extreme effect or unstable price coef | Cap at max price; flag as outlier |
-| Some WTP < −max(price) | Same as above for negative | Cap; flag |
-
-The case study had β_price = +0.052 (theoretically wrong sign because the $13.98–$15.99 range was too narrow). All WTP values in that report should be read as directional.
-
-### Pricing strategy applications
-
-When WTP is reliable, the typical uses are:
-
-- **Feature pricing**: charge up to WTP for an add-on feature.
-- **Tier ladder**: design product tiers where each upgrade's price increment ≤ its WTP.
-- **Competitive positioning**: if Brand A's WTP is +$8 over Brand B, A can sustain an $8 price premium.
-
----
-
-## 3. Choice probability
-
-**Question answered**: "Among candidate product configurations, which has highest market appeal?"
-
-### Single-product probability (logistic transform)
-
-For a card with attributes Xᵢ and intercept β₀:
-
-```
-U = β₀ + Σ βᵢ × Xᵢ                  (total utility)
-P = exp(U) / (1 + exp(U))            (logistic transform)
-```
-
-This gives a 0–1 probability. The card with the highest P is the **predicted optimal product**.
-
-### Worked example (case study)
-
-| Card | Brand | Size | Color | Features | U | P |
-|---|---|---|---|---|---|---|
-| 7 | MORKSUKY | 145mm | pink | scratch, no UV | −0.735 | **32.4%** |
-| 8 | MORKSUKY | 145mm | purple | scratch, no UV | −0.814 | 30.7% |
-| 6 | MORKSUKY | 145mm | black | scratch, no UV | −0.888 | 29.2% |
-| 2 | HTS | 140mm | pink | scratch, UV | −1.989 | 12.0% |
-| 1 | HTS | 140mm | black | scratch, UV | −2.142 | 10.5% |
-
-Card 7 has the highest predicted choice probability → predicted optimal configuration.
-
-### Multi-product share-of-preference (multinomial)
-
-When you want to know the **share** each candidate captures within a competitive set, use the multinomial form:
-
-```
-share(k) = exp(U_k) / Σⱼ exp(U_j)
-```
-
-Sums to 100% across the consideration set. This is what you'd use for market simulation: "If we launched product A alongside competitors B and C, A would capture X%."
-
-### Interpreting the gap
-
-If the optimal card is far ahead (e.g., 32% vs second place 17%), preferences are concentrated and the optimal configuration is robust. If top-3 cards are bunched (32% / 31% / 29%), preferences are diffuse and the "optimal" is barely better than alternatives — recommend a portfolio strategy rather than betting on one configuration.
-
----
-
-## 4. Cost-benefit ROI
-
-**Question answered**: "Where should we invest R&D / production budget for maximum customer value?"
-
-### Formula
-
-```
-For each attribute upgrade (level X vs reference):
-    ROI = part-worth gain / unit cost increase
-```
-
-### Worked example
-
-| Upgrade | Δ Cost (USD) | Δ Utility | ROI |
-|---|---|---|---|
-| 145mm size (from 140mm) | 0.30 | 0.463 | **1.54** |
-| Pink color (from black) | 0.25 | 0.153 | 0.61 |
-| Purple color (from black) | 0.25 | 0.074 | 0.30 |
-| 162mm size (from 140mm) | 0.50 | 0.137 | 0.27 |
-| Anti-scratch | 0.60 | 0.121 | 0.20 |
-| UV protection | 0.40 | −0.382 | −0.96 |
-
-### How to interpret
-
-- **ROI ≥ 1.0**: high-value upgrade. Each dollar invested produces ≥1 utility unit. Pursue.
-- **0 < ROI < 1.0**: positive but inefficient. Consider only if low-cost or strategic.
-- **ROI ≤ 0**: destroying value. Drop the feature or make it optional.
-
-### Where the cost numbers come from
-
-Almost always estimates supplied by the user. Ask them for:
-
-1. **Product spec data**: BOM (bill of materials) costs from manufacturing.
-2. **Market intelligence**: competitor pricing analysis revealing typical premium.
-3. **Internal estimates**: even a back-of-envelope number is enough for prioritization.
-
-If the user has no cost data at all, set Δcost = 1 for all attributes and compute ROI as pure utility ranking. This still produces a useful priority order.
-
-### Strategic interpretation
-
-The case study's findings:
-- **Invest first**: Size 145mm (ROI 1.54) — this is the highest-leverage product change.
-- **Add second**: Pink color (ROI 0.61) — moderate cost, moderate utility, broadens appeal.
-- **Reconsider**: UV protection (ROI −0.96) — strip from standard, offer as optional, or invest in marketing the value.
-
----
-
-## Reliability flags
-
-Before presenting any of the four insights, run through this final checklist:
-
-| Insight | Reliable when… | Flag when… |
-|---|---|---|
-| Importance | Always computable; meaningful even with insignificant p-values | Total range across attributes < 0.5 (model has very weak signal) |
-| WTP | β_price < 0 with p < 0.3 | β_price has wrong sign OR p > 0.5 OR WTP exceeds max price |
-| Choice probability | All sub-models converged | Probabilities all below 20% (intercept dominates) → small-sample artifact |
-| ROI | Cost data is consistent | Cost source is "guess" — note this |
-
-Always report flagged insights with a caveat sentence in plain English. The user's strategic decisions depend on their understanding what's solid versus directional.
+- [Train，Logit，第 3 章](https://eml.berkeley.edu/choice2/ch3.pdf)：效用尺度與集合內機率。
+- [Train，Welfare calculations](https://eml.berkeley.edu/~train/papers/welfare.pdf)：貨幣取捨與效用設定的關係。

@@ -1,125 +1,34 @@
-# Attribute Design Worksheet
+# 屬性設計工作表
 
-Use this fillable worksheet during Phase II to document attribute decisions. Save a copy per study and include the completed version as an appendix to the final report.
+依研究需要填寫，未知資料標示待確認，不以空白推論屬性不存在。
 
----
+## 研究範圍
 
-## Study metadata
+- 商品類別與問題：
+- 資料來源、期間與對象：
+- 反應型態與分析單位：
 
-- **Product category**: ___________________________________________
-- **Sample**: __________________________________________________
-- **Date**: ____________________________________________________
-- **Analyst**: _________________________________________________
+## 屬性決策
 
----
+| 屬性 | 實際值／水準與單位 | 各水準頻數與缺失 | 需求或研究依據 | 保留／排除理由 |
+| --- | --- | --- | --- | --- |
 
-## Step 1: Attribute candidate pool (from product pages)
+## 編碼與可識別性
 
-List every attribute that appears on at least one product in the sample.
+| 屬性 | 類型 | 參考水準 | 預測欄 | 連續範圍 | 共變或缺值問題 |
+| --- | --- | --- | --- | --- | --- |
 
-| # | Attribute | Sample products that list it | Universality % |
-|---|-----------|------------------------------|----------------|
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
-| 5 | | | |
-| 6 | | | |
-| 7 | | | |
-| 8 | | | |
+記錄哪些特徵總是一起出現，以及因此不能分別估計的影響。
 
-**Universality threshold for inclusion**: 5% < universality < 95%
-Attributes outside this range cannot be modeled (no variation).
+## 選擇事件設計（適用時）
 
----
+- 事件 ID 與顧客 ID：
+- 可選商品集合的來源：
+- 不購買選項與曝光限制：
+- 已選商品是否都在集合內：
+- 每事件是否恰有一項被選中、商品 ID 是否唯一：
 
-## Step 2: Demand-side themes (from review mining)
+## 決策檢查
 
-| # | Theme | Mention frequency | Sentiment skew | Maps to attribute? |
-|---|-------|-------------------|----------------|---------------------|
-| 1 | | | | |
-| 2 | | | | |
-| 3 | | | | |
-| 4 | | | | |
-| 5 | | | | |
-
----
-
-## Step 3: Triangulation matrix
-
-Cross-check supply-side universality against demand-side mentions. Keep attributes that score on both.
-
-| Attribute | Supply-side universality | Demand-side frequency | Decision | Reason |
-|-----------|--------------------------|------------------------|----------|--------|
-| | | | ☐ Include ☐ Exclude | |
-| | | | ☐ Include ☐ Exclude | |
-| | | | ☐ Include ☐ Exclude | |
-| | | | ☐ Include ☐ Exclude | |
-| | | | ☐ Include ☐ Exclude | |
-| | | | ☐ Include ☐ Exclude | |
-
----
-
-## Step 4: Final attribute and level definition
-
-For each retained attribute, define its levels and pick the reference.
-
-### Attribute 1: ____________________
-- Type: ☐ Categorical ☐ Continuous ☐ Binary
-- Levels: ____________________________________________
-- Reference level: ____________________________________
-- Encoding: ___________________________________________
-
-### Attribute 2: ____________________
-- Type: ☐ Categorical ☐ Continuous ☐ Binary
-- Levels: ____________________________________________
-- Reference level: ____________________________________
-- Encoding: ___________________________________________
-
-### Attribute 3: ____________________
-- Type: ☐ Categorical ☐ Continuous ☐ Binary
-- Levels: ____________________________________________
-- Reference level: ____________________________________
-- Encoding: ___________________________________________
-
-### Attribute 4: ____________________
-- Type: ☐ Categorical ☐ Continuous ☐ Binary
-- Levels: ____________________________________________
-- Reference level: ____________________________________
-- Encoding: ___________________________________________
-
-### Attribute 5: ____________________
-- Type: ☐ Categorical ☐ Continuous ☐ Binary
-- Levels: ____________________________________________
-- Reference level: ____________________________________
-- Encoding: ___________________________________________
-
-### Attribute 6: ____________________
-- Type: ☐ Categorical ☐ Continuous ☐ Binary
-- Levels: ____________________________________________
-- Reference level: ____________________________________
-- Encoding: ___________________________________________
-
----
-
-## Decision log
-
-Document non-obvious choices made during attribute design.
-
-- Excluded attribute "________" because: ___________________________________
-- Chose "________" as reference for attribute "________" because: ____________
-- Used binary instead of 3-level for "________" because: ____________________
-- Capped continuous "________" at "________" because: _____________________
-
----
-
-## Pre-modeling checklist
-
-Before proceeding to Phase III:
-
-- ☐ Every retained attribute has at least 2 levels with sufficient sample
-- ☐ Reference levels chosen with clear rationale
-- ☐ No two attributes are perfectly correlated in the sample
-- ☐ Encoding scheme uses (k−1) dummies per categorical attribute
-- ☐ Continuous attributes are on a meaningful scale (not standardized away)
-- ☐ Decision log is complete enough to reproduce the design
+確認每個預測欄的定義、缺值處理及參考水準有依據，實際矩陣能支持所需比較。
+連續屬性保留單位與範圍，獨立顧客數與選擇事件數分開記錄。

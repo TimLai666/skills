@@ -1,190 +1,41 @@
-# [Product Category] Conjoint Analysis Report
+# 商品屬性偏好分析報告
 
-**Author**: ___________
-**Date**: _____________
-**Sample**: N=___ customers, M=___ cards, ___ stacked observations
+依任務保留適用章節。缺資料的指標交代缺口，不代填數值。
 
----
+## 研究問題與資料
 
-## Executive summary
+交代商品範圍、來源、期間、反應型態與抽樣限制。
+分別列獨立顧客數、選擇事件數與展開列數；若只有設計，標示尚未蒐集。
 
-Three sentences max. State the optimal product configuration, the most important attribute, and the headline strategic recommendation.
+## 屬性與比較設計
 
----
+| 屬性 | 水準／範圍與單位 | 參考水準與編碼 | 保留依據 | 限制 |
+| --- | --- | --- | --- | --- |
 
-## 1. Research scope and data sources
+選擇資料說明各事件可選集合及其來源，評分資料說明量尺與重複作答方式。
 
-### Category and sample
+## 模型與檢查
 
-[Describe the product category, the platform / data source, and the sample selection criteria.]
+交代模型選擇、可識別性、收斂、警告及不確定性。不能估計的影響要明確指出。
 
-### Two-track data collection
+| 預測欄 | 係數 | 標準誤／區間 | 單位與解讀 | 來源模型 |
+| --- | --- | --- | --- | --- |
 
-| Track | Source | Volume | Purpose |
-|-------|--------|--------|---------|
-| Supply-side | [e.g., Amazon product pages] | [N products] | Identify encodable attributes |
-| Demand-side | [e.g., reviews via X tool] | [N reviews] | Identify salient attributes |
+## 可支持的結果
 
----
+依資料與研究目的選用屬性重要性、願付價格、集合內機率或效用／成本比較。
+標明估計設定、適用範圍與未完成檢查。探索模型保持分開，不拼接係數。
 
-## 2. Attribute design
+## 研究解讀或應用建議
 
-### Final attribute set
+讓建議對應結果，候選方案附待驗證假設。效用／成本比不稱為財務 ROI，
+模型情境排名不直接稱為市場最佳商品。沒有成本或價格依據時，不填相關結論。
 
-| Attribute | Levels | Reference | Type |
-|-----------|--------|-----------|------|
-| [Attribute 1] | [Level A, B, C] | [Reference level] | [Categorical / Continuous / Binary] |
-| [Attribute 2] | | | |
-| [Attribute 3] | | | |
-| [Attribute 4] | | | |
-| [Attribute 5] | | | |
-| [Attribute 6] | | | |
+## 限制與後續
 
-### Excluded attributes
+說明來源偏誤、集合假設、重複觀測、樣本與推論限制。下一步研究要指出能
+補足哪個尚未回答的問題。
 
-| Attribute considered | Reason for exclusion |
-|----------------------|----------------------|
-| [Attribute X] | [e.g., universality > 95%] |
+## 重現資料（需要時）
 
-### Encoding
-
-[Describe the dummy coding scheme. List the binary indicator columns generated.]
-
----
-
-## 3. Experimental design
-
-### Card set
-
-[Either: realistic cards from observed market, or orthogonal design]
-
-| Card | Attribute 1 | Attribute 2 | ... |
-|------|-------------|-------------|-----|
-| 1 | | | |
-| 2 | | | |
-| ... | | | |
-
-### Response variable
-
-[Define what y=1 means: chose the card, purchased it, gave it a high rating, etc.]
-
-### Stacked data structure
-
-```
-N customers × M cards = ___ stacked observations
-```
-
-[Note any consideration set assumptions.]
-
----
-
-## 4. Model results
-
-### Approach
-
-[Single full model OR split sub-models. Justify the choice.]
-
-### Coefficient table
-
-| Variable | β | Std. Err | p-value | Interpretation |
-|----------|------|----------|---------|----------------|
-| (Intercept) | | | | |
-| Variable A | | | | |
-| Variable B | | | | |
-
-### Diagnostics
-
-- Pseudo-R²: ___
-- Sample size adequacy: [comment]
-- Sign checks: [confirm price has expected sign, etc.]
-- Significance: [most coefficients are statistically significant / directional only]
-
----
-
-## 5. Insights
-
-### 5.1 Attribute importance
-
-| Rank | Attribute | Importance % | Interpretation |
-|------|-----------|--------------|----------------|
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
-
-**Headline finding**: [Top 2 attributes drive __% of choice; focus product/marketing decisions there.]
-
-### 5.2 Willingness to pay
-
-⚠ Reliability flag: [If β_price has wrong sign or weak significance, mark WTP as directional only.]
-
-| Attribute level | WTP (USD) | Note |
-|-----------------|-----------|------|
-| | | |
-| | | |
-| | | |
-
-### 5.3 Choice probability and optimal product
-
-| Rank | Card | Configuration summary | Choice probability % |
-|------|------|----------------------|----------------------|
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-
-**Predicted optimal product**: [Card description]
-
-### 5.4 Cost-benefit ROI
-
-| Upgrade | Δ Cost | Δ Utility | ROI | Recommendation |
-|---------|--------|-----------|-----|----------------|
-| | | | | |
-| | | | | |
-
----
-
-## 6. Strategic recommendations
-
-### Product configuration
-- **Lead SKU**: [recommended optimal product]
-- **Tier alternatives**: [if portfolio strategy makes sense]
-
-### Pricing
-- [Pricing logic based on WTP and competitive positioning]
-
-### R&D priorities
-1. [Highest-ROI upgrade]
-2. [Second priority]
-3. [Features to deprioritize or remove]
-
-### Marketing
-- [Communication priorities based on attribute importance]
-
----
-
-## 7. Limitations and future research
-
-### Limitations
-1. **Sample size**: [N customers, statistical power implications]
-2. **Price range**: [If narrow, WTP estimates are unreliable]
-3. **Consideration set**: [Assumptions about what customers compared]
-4. **Self-selection**: [If using reviews, who writes reviews vs who buys]
-5. **No interactions**: [If split models were used, can't see e.g. brand × price]
-
-### Future research
-1. [Suggested data expansion]
-2. [Suggested methodological improvements]
-3. [Suggested follow-up studies]
-
----
-
-## Appendices
-
-### Appendix A: Attribute design worksheet
-[See `attribute_design_worksheet.md`]
-
-### Appendix B: Raw coefficient output
-[Full statsmodels summary text]
-
-### Appendix C: Robustness checks
-[Optional: alternative reference levels, alternative groupings, etc.]
+附 [屬性工作表](attribute_design_worksheet.md)、編碼、模型設定與驗證輸出。

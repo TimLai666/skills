@@ -1,31 +1,15 @@
+"""Build and validate one chosen alternative per explicitly identified choice event.
+
+With no consideration-set column, callers must explicitly confirm that all
+defined cards were available using assume_all_available=True.
 """
-build_stacked_data.py
-
-Convert raw purchase / choice records into the stacked observation table required
-for logistic conjoint analysis.
-
-Input:
-    - card_definitions: a DataFrame where each row is a product card with its
-      attribute encoding. Must have a column 'card_id'.
-    - purchase_records: a DataFrame where each row is one customer-purchase event,
-      with columns 'customer_id' and 'card_id' (the card they actually purchased).
-
-Output:
-    - stacked: long-format DataFrame with columns from card_definitions plus
-      'customer_id' and 'y' (1 if this card was the one purchased, 0 otherwise).
-
-Each customer contributes M rows, where M = number of cards. Total rows = N × M.
-
-Assumption: every customer's consideration set covers all M cards. This is the
-default in revealed-preference conjoint when actual consideration data is
-unavailable. If consideration sets vary per customer, supply them as an extra
-'considered_cards' list per customer and filter accordingly — see the
-ConsiderationSetExpander class below.
-"""
-
 from __future__ import annotations
+
+from collections.abc import Iterable
+from numbers import Number
+
+import numpy as np
 import pandas as pd
-from typing import Iterable
 
 
 def build_stacked_data(
@@ -34,90 +18,114 @@ def build_stacked_data(
     card_id_col: str = "card_id",
     customer_id_col: str = "customer_id",
     consideration_set_col: str | None = None,
+    *,
+    choice_set_id_col: str = "choice_set_id",
+    assume_all_available: bool = False,
 ) -> pd.DataFrame:
+    """Expand each purchase row, preserving explicit event IDs or generating them.
+
+    Explicit event IDs must be globally unique in purchase_records. Repeated
+    customers are permitted; they do not identify choice events.
+    Without observed consideration sets, assume_all_available=True explicitly
+    asserts that every defined card was available for every purchase event.
     """
-    Build the stacked observation table for logistic conjoint.
-
-    Parameters
-    ----------
-    card_definitions : pd.DataFrame
-        One row per product card. Must include a card_id column and the encoded
-        attribute columns.
-    purchase_records : pd.DataFrame
-        One row per customer purchase. Must include customer_id and card_id.
-    card_id_col : str
-        Name of the card identifier column.
-    customer_id_col : str
-        Name of the customer identifier column.
-    consideration_set_col : str, optional
-        If provided, the column in purchase_records containing each customer's
-        considered card list. If None (default), every customer is assumed to
-        have considered all cards.
-
-    Returns
-    -------
-    pd.DataFrame
-        Long-format stacked table with columns:
-            customer_id, card_id, <all attribute columns>, y
-    """
-    if card_id_col not in card_definitions.columns:
-        raise ValueError(f"card_definitions must have column '{card_id_col}'")
-    if customer_id_col not in purchase_records.columns:
-        raise ValueError(f"purchase_records must have column '{customer_id_col}'")
-    if card_id_col not in purchase_records.columns:
-        raise ValueError(f"purchase_records must have column '{card_id_col}'")
-
+    if consideration_set_col is None and assume_all_available is not True:
+        raise ValueError("Supply consideration sets or explicitly set assume_all_available=True")
+    for frame, required in [(card_definitions, [card_id_col]),
+                            (purchase_records, [customer_id_col, card_id_col])]:
+        if frame.empty or not frame.columns.is_unique or not set(required) <= set(frame.columns):
+            raise ValueError("Nonempty data with unique, required columns is required")
+        if frame[required].isna().any().any():
+            raise ValueError("Identifiers cannot be missing")
+        _validate_finite_identifiers(frame[required].to_numpy().ravel())
+    if len({card_id_col, customer_id_col, choice_set_id_col, "y"}) != 4:
+        raise ValueError("Identifier and response column names must be distinct")
+    if set(card_definitions.columns) & {customer_id_col, choice_set_id_col, "y"}:
+        raise ValueError("Card attributes collide with reserved output columns")
+    if card_definitions[card_id_col].duplicated().any():
+        raise ValueError("Duplicate card definitions")
+    if consideration_set_col is not None and consideration_set_col not in purchase_records:
+        raise ValueError("Missing consideration-set column")
+    events = (purchase_records[choice_set_id_col].tolist() if choice_set_id_col in purchase_records
+              else list(range(len(purchase_records))))
+    if pd.Series(events).isna().any() or pd.Series(events).duplicated().any():
+        raise ValueError("Choice event IDs must be nonmissing and unique")
+    _validate_finite_identifiers(events)
+    cards = card_definitions.set_index(card_id_col, drop=False)
     rows = []
-    for _, prow in purchase_records.iterrows():
-        customer = prow[customer_id_col]
-        chosen_card = prow[card_id_col]
-
-        if consideration_set_col is not None:
-            considered = prow[consideration_set_col]
-        else:
-            considered = card_definitions[card_id_col].tolist()
-
+    for event, (_, purchase) in zip(events, purchase_records.iterrows()):
+        chosen = purchase[card_id_col]
+        if chosen not in cards.index:
+            raise ValueError("Unknown chosen card")
+        considered = purchase[consideration_set_col] if consideration_set_col else cards.index.tolist()
+        if isinstance(considered, (str, bytes)) or not isinstance(considered, Iterable):
+            raise ValueError("Consideration set must be a collection of card IDs")
+        considered = list(considered)
+        ids = pd.Series(considered, dtype=object)
+        if len(ids) < 2 or ids.isna().any() or ids.duplicated().any():
+            raise ValueError("Each event requires at least two distinct nonmissing cards")
+        if not ids.isin(cards.index).all() or chosen not in considered:
+            raise ValueError("Unknown considered card or chosen card missing from set")
         for cid in considered:
-            card_row = card_definitions.loc[
-                card_definitions[card_id_col] == cid
-            ].iloc[0].to_dict()
-            card_row[customer_id_col] = customer
-            card_row["y"] = 1 if cid == chosen_card else 0
-            rows.append(card_row)
-
-    stacked = pd.DataFrame(rows)
-    # Reorder columns: customer_id, card_id, attributes..., y
-    attr_cols = [c for c in card_definitions.columns if c != card_id_col]
-    cols = [customer_id_col, card_id_col] + attr_cols + ["y"]
-    stacked = stacked[cols]
+            row = cards.loc[cid].to_dict()
+            row.update({customer_id_col: purchase[customer_id_col], choice_set_id_col: event,
+                        "y": int(cid == chosen)})
+            rows.append(row)
+    columns = [choice_set_id_col, customer_id_col, card_id_col]
+    columns += [c for c in card_definitions if c != card_id_col] + ["y"]
+    stacked = pd.DataFrame(rows)[columns]
+    validate_stacked(stacked, customer_id_col, choice_set_id_col=choice_set_id_col,
+                     card_id_col=card_id_col)
     return stacked
 
 
-def validate_stacked(stacked: pd.DataFrame, customer_id_col: str = "customer_id") -> dict:
-    """
-    Sanity-check a stacked dataset.
+def _validate_finite_identifiers(values: Iterable) -> None:
+    """Keep string IDs valid while rejecting nonfinite numeric identifiers."""
+    if any(isinstance(value, Number) and not np.isfinite(value) for value in values):
+        raise ValueError("Numeric identifiers must be finite")
 
-    Returns a dict with diagnostics. Issues a warning if anything looks off.
-    """
-    diagnostics = {}
-    diagnostics["total_rows"] = len(stacked)
-    diagnostics["unique_customers"] = stacked[customer_id_col].nunique()
-    diagnostics["mean_choices_per_customer"] = (
-        stacked.groupby(customer_id_col)["y"].sum().mean()
-    )
-    diagnostics["positive_rate"] = stacked["y"].mean()
 
-    if diagnostics["mean_choices_per_customer"] != 1.0:
-        print(
-            f"⚠ Each customer should have exactly 1 chosen card. "
-            f"Got mean={diagnostics['mean_choices_per_customer']:.2f}"
-        )
-
-    if diagnostics["total_rows"] < 50:
-        print("⚠ Sample size is very small (< 50 stacked observations). "
-              "Treat results as directional only.")
-
-    return diagnostics
+def validate_stacked(
+    stacked: pd.DataFrame,
+    customer_id_col: str = "customer_id",
+    *,
+    choice_set_id_col: str = "choice_set_id",
+    card_id_col: str = "card_id",
+    response: str = "y",
+    predictors: list[str] | None = None,
+) -> dict:
+    """Raise ValueError for invalid events; return event-based diagnostics."""
+    required = [customer_id_col, choice_set_id_col, card_id_col, response]
+    if len(set(required)) != len(required):
+        raise ValueError("Identifier and response column names must be distinct")
+    if stacked.empty or not stacked.columns.is_unique or not set(required) <= set(stacked.columns):
+        raise ValueError("Nonempty stacked data with required unique columns is required")
+    if stacked[required].isna().any().any():
+        raise ValueError("Missing identifiers or response")
+    _validate_finite_identifiers(stacked[required[:-1]].to_numpy().ravel())
+    if not stacked[response].isin([0, 1]).all():
+        raise ValueError("Response must be binary 0 or 1")
+    if stacked.duplicated([choice_set_id_col, card_id_col]).any():
+        raise ValueError("Duplicate alternative within choice event")
+    groups = stacked.groupby(choice_set_id_col, sort=False)
+    if (groups.size() < 2).any() or (groups[response].sum() != 1).any():
+        raise ValueError("Every choice event requires at least two alternatives and exactly one chosen")
+    if (groups[customer_id_col].nunique() != 1).any():
+        raise ValueError("Each choice event must belong to one customer")
+    if predictors is not None:
+        if not predictors or len(set(predictors)) != len(predictors) or not set(predictors) <= set(stacked.columns):
+            raise ValueError("Predictors must be nonempty, unique, existing columns")
+        if set(predictors) & set(required):
+            raise ValueError("Identifiers and response cannot be predictors")
+        try:
+            values = stacked[predictors].to_numpy(dtype=float)
+        except (ValueError, TypeError) as exc:
+            raise ValueError("Predictors must be finite numeric values") from exc
+        if not np.isfinite(values).all():
+            raise ValueError("Predictors must be finite numeric values")
+    return {"total_rows": len(stacked), "unique_customers": stacked[customer_id_col].nunique(),
+            "n_choice_sets": groups.ngroups, "positive_rate": float(stacked[response].mean()),
+            "min_alternatives": int(groups.size().min()), "max_alternatives": int(groups.size().max())}
 
 
 # ----------------------------------------------------------------------------
@@ -142,7 +150,8 @@ if __name__ == "__main__":
         {"customer_id": i+1, "card_id": (i % 8) + 1} for i in range(20)
     ])
 
-    stacked = build_stacked_data(cards, purchases)
+    print("Synthetic demo assumption: all eight cards were available for every event.")
+    stacked = build_stacked_data(cards, purchases, assume_all_available=True)
     print(stacked.head(10))
     print()
     print("Diagnostics:", validate_stacked(stacked))

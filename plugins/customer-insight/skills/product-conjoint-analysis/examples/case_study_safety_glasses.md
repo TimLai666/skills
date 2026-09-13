@@ -1,52 +1,12 @@
-# Case Study: Safety Glasses (Fit Over) on Amazon
+# 安全眼鏡案例：先確認資料能回答什麼
 
-A fully worked example showing how the skill is applied end-to-end. Read this when you want to see what a real conjoint study looks like or to verify your work matches the expected pattern.
+## 原有案例記錄
 
----
+舊文件記錄 Amazon 安全眼鏡的 3 個品牌、8 張商品卡，以及 20 位評論者，展開
+為 160 列。資料夾沒有這 20 位評論者的原始選擇紀錄，因此不能據此重現舊係數，
+也不能把下方商品表視為目前市場資料。此案例用來檢查資料結構與推論限制。
 
-## Background
-
-- **Category**: safety-glasses (fit over) on Amazon
-- **Sample**: top-3 brands by sales rank — HTS, UKNOW, MORKSUKY
-- **Time**: original study completed Dec 2024
-- **Sample size**: 20 customers (review writers) → 8 cards × 20 customers = 160 stacked observations
-
----
-
-## Phase I: Data acquisition
-
-### Supply-side
-Scraped Amazon product pages for each of the 3 brands. Catalogued: brand, color, price, frame size (mm), anti-fog, anti-scratch, UV protection.
-
-### Demand-side
-Pulled customer reviews via "賣家精靈" (Sellerly), then ran AI-based theme extraction with Maslow's needs hierarchy as the interpretive frame.
-
-**Top demand themes**: frame-size compatibility, anti-fog, anti-scratch.
-
----
-
-## Phase II: Attribute engineering
-
-### Universality filter
-Anti-fog appeared on ~100% of products → **dropped** (no variance).
-Anti-scratch and UV protection at 90%+ → **kept** (cross-brand variation exists).
-
-### Final attributes (6)
-
-| Attribute | Levels | Reference |
-|-----------|--------|-----------|
-| Brand | HTS, UKNOW, MORKSUKY | HTS |
-| Color | Black, Pink, Purple | Black |
-| Price | $13.98 / $14.95 / $15.99 | (continuous) |
-| Frame size | 140 / 145 / 162 mm | 140 mm |
-| Anti-scratch | Yes / No | No |
-| UV protection | Yes / No | No |
-
----
-
-## Phase III: Experimental design
-
-8 product cards based on actual market combinations (not orthogonal):
+## 商品卡
 
 | Card | Brand | Color | Price | Size | Anti-scratch | UV |
 |------|-------|-------|-------|------|--------------|-----|
@@ -59,117 +19,34 @@ Anti-scratch and UV protection at 90%+ → **kept** (cross-brand variation exist
 | 7 | MORKSUKY | Pink | $14.95 | 145 | Yes | No |
 | 8 | MORKSUKY | Purple | $14.95 | 145 | Yes | No |
 
-Response variable: y = 1 if the customer's purchased product matches this card, else 0.
-Consideration set assumption: each customer compared all 8 cards.
-Stacked structure: 20 × 8 = 160 observations.
 
-**Note the correlation**: every MORKSUKY card is 145mm + anti-scratch + no UV, every UKNOW is 162mm + no anti-scratch + UV. This collinearity *forces* the use of split models in Phase IV.
+## 可以直接確認的限制
 
----
+- MORKSUKY 與 145mm 總是同時出現，UKNOW 與 162mm 也一樣。品牌與尺寸
+  的對應欄完全相同，無法分辨品牌和尺寸各自的效果。
+- 各品牌的價格與功能組合也固定。20 位評論者重複看到同一組商品，增加列數
+  不會產生原本不存在的屬性交叉比較。
+- 評論對應商品不會告訴我們評論者當時看過哪些商品。全體比較 8 張卡只能
+  是待驗證的集合假設，不能當成已觀察事實。
+- 160 是商品列數，原記錄的顧客數是 20。評估推論時不能將兩者互換。
 
-## Phase IV: Model estimation
+## 原先數字為什麼不能作商業結論
 
-### Approach: split sub-models
+舊文件分開估計品牌、尺寸、功能與價格，再合併係數計算重要性、WTP 與商品
+機率。分開估計沒有補足缺少的比較，同一個商品組合差異可能被重複計入。
 
-Five sub-models, one per attribute group:
+原記錄的價格係數為 +0.052，並記載所有 p 值大於 0.4。這些記錄不足以支持
+願付價格或投資排序。不能靠取價格係數絕對值，再加「僅供參考」就當成可用估計。
+原文件也沒有提供能追溯的成本來源，因此不沿用其成本排名。
 
-| Sub-model | Predictors | Why grouped |
-|-----------|------------|-------------|
-| Brand | UKNOW, MORKSUKY | Same attribute |
-| Color | pink, purple | Same attribute |
-| Size | size_145, size_162 | Same attribute |
-| Features | anti_scratch, uv_protection | Both binary product flags |
-| Price | price | Continuous, isolated for sensitivity reference |
+因此，不採用舊文件的「最佳商品」、價格溢價或移除 UV 功能建議。
 
-### Coefficients (key ones)
+## 下一步怎麼做
 
-| Variable | β | Interpretation |
-|----------|--------|----------------|
-| MORKSUKY | +0.463 | Strongly preferred over HTS |
-| UKNOW | +0.137 | Mildly preferred over HTS |
-| pink | +0.153 | Mildly preferred over black |
-| purple | +0.074 | Slightly preferred over black |
-| size_145 | +0.463 | Strongly preferred over 140mm |
-| size_162 | +0.137 | Mildly preferred over 140mm |
-| anti_scratch | +0.121 | Mild positive |
-| uv_protection | −0.382 | **Negative** — economically counter-intuitive |
-| price | +0.052 | **Wrong sign** — price range too narrow |
+若只要整理現有評論，交付有來源的需求與情境。若要估計商品組合的選擇，先
+取得真實選擇紀錄及可選集合，再設計可識別的組合比較模型。
 
-All p-values > 0.4. Findings reported as **directional only**.
+若要區分品牌、尺寸與價格的各自效果，需要能解除綁定的資料或問卷設計。
+明確記錄新增比較能回答什麼，不要求為了形式而固定拆成幾個模型。
 
----
-
-## Phase V: Insight translation
-
-### Importance
-
-| Attribute | Importance |
-|-----------|-----------|
-| Brand | 27.4% |
-| Frame size | 27.4% |
-| UV protection | 22.6% |
-| Color | 9.1% |
-| Anti-scratch | 7.2% |
-| Price | 6.2% |
-
-Two-thirds of choice variation comes from brand and size combined.
-
-### WTP (flagged as directional only)
-
-- MORKSUKY vs HTS: +$8.90
-- 145mm vs 140mm: +$8.90
-- Pink vs Black: +$2.94
-- Anti-scratch: +$2.33
-- **UV protection: −$7.35** (consumers want a discount to accept it)
-
-### Optimal product
-
-Card 7 — MORKSUKY / Pink / $14.95 / 145mm / anti-scratch / no UV
-Predicted choice probability: **32.4%** (highest among all cards).
-
-### ROI
-
-| Upgrade | Δ Cost | Δ Utility | ROI |
-|---------|--------|-----------|------|
-| 145mm size | $0.30 | 0.463 | **1.54** ← invest first |
-| Pink color | $0.25 | 0.153 | 0.61 |
-| Anti-scratch | $0.60 | 0.121 | 0.20 |
-| UV protection | $0.40 | −0.382 | **−0.96** ← drop or make optional |
-
----
-
-## Strategic recommendations
-
-1. **Lead SKU**: MORKSUKY-style fit-over with 145mm frame, pink option, anti-scratch coating, no UV protection by default, priced ~$14.95.
-2. **R&D priority**: Frame size optimization (highest ROI per dollar).
-3. **Reposition UV**: Move from standard inclusion to optional add-on, or revise marketing communication to elevate perceived value.
-
----
-
-## Limitations explicitly stated
-
-1. N=20 is small. All findings are directional.
-2. Price range $13.98–$15.99 ($2.01 spread) is too narrow → price coefficient is unreliable, WTP is directional only.
-3. Cannot estimate interaction effects (split-model trade-off).
-4. Review writers may not be representative of all buyers (self-selection).
-
----
-
-## What this case study illustrates
-
-**About methodology**:
-- How to do conjoint when you can't run a survey.
-- When to use split models instead of one full model.
-- How to handle a price coefficient that comes out wrong.
-- Why universality filtering matters (anti-fog dropped despite high mention count).
-
-**About interpretation**:
-- High mention frequency in reviews ≠ inclusion in model.
-- Wrong-sign coefficients are usually a data problem, not a customer-behavior insight.
-- Negative WTP can be real (consumer rejects a feature) but is more often a sign of confounding.
-- Small samples support directional conclusions, not inferential ones — say so.
-
-**About reporting**:
-- Lead with the optimal product, not the methodology.
-- State limitations clearly enough that the next analyst can improve on them.
-- Include the worksheet appendix for reproducibility.
+測試中的合成選擇資料只驗證程式行為，不能當成原案例市場結果。

@@ -1,198 +1,144 @@
-"""
-fit_logistic_conjoint.py
-
-Fit logistic conjoint models, with built-in support for split-model estimation
-when realistic cards introduce attribute correlation.
-
-Two main entry points:
-    - fit_single_model(stacked_df, predictors): one full model
-    - fit_split_models(stacked_df, attribute_groups): one model per attribute group
-
-Both return a structured result dict with coefficients, p-values, and diagnostics.
-"""
-
+"""Conditional choice models. Split models describe exploratory associations only."""
 from __future__ import annotations
-import pandas as pd
-import numpy as np
+
 import warnings
 
+import numpy as np
+import pandas as pd
 
-def fit_single_model(stacked: pd.DataFrame, predictors: list[str], response: str = "y") -> dict:
+from build_stacked_data import validate_stacked
+
+
+def fit_single_model(
+    stacked: pd.DataFrame,
+    predictors: list[str],
+    response: str = "y",
+    *,
+    choice_set_id_col: str = "choice_set_id",
+    card_id_col: str = "card_id",
+    customer_id_col: str = "customer_id",
+    maxiter: int = 1000,
+) -> dict:
+    """Fit ConditionalLogit without intercept, conditional on each choice event.
+
+    Covariance assumes independent choice events. Repeated customer events are
+    accepted but do not receive cluster-robust inference. Association estimates
+    require a credible observed consideration set and identifiable design.
+
+    Estimation centers predictors within each event and divides each column by
+    its within-event root mean square. Reported coefficients, standard errors,
+    and covariance are converted back to the original input units. model_object
+    retains the centered, normalized predictors and normalized parameters; use
+    the returned coefficients with original-unit cards for choice predictions.
     """
-    Fit one logistic regression with all predictors.
+    from statsmodels.discrete.conditional_models import ConditionalLogit
+    from statsmodels.tools.sm_exceptions import ConvergenceWarning, HessianInversionWarning
+    from scipy.optimize import linprog
 
-    Use when cards came from an orthogonal design and N >= 10 * len(predictors).
-    """
-    import statsmodels.api as sm
-
-    X = stacked[predictors].copy()
-    X = sm.add_constant(X)
-    y = stacked[response]
-
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        model = sm.Logit(y, X).fit(disp=False)
-
-    return _summarize_model(model, model_name="full")
+    info = validate_stacked(stacked, customer_id_col, choice_set_id_col=choice_set_id_col,
+                            card_id_col=card_id_col, response=response, predictors=predictors)
+    X = stacked[predictors].astype(float)
+    groups = stacked[choice_set_id_col]
+    centered = X - X.groupby(groups, sort=False).transform("mean")
+    scale = np.linalg.norm(centered.to_numpy(), axis=0) / np.sqrt(len(stacked))
+    if np.any(scale == 0) or np.linalg.matrix_rank(centered.to_numpy() / scale) < len(predictors):
+        raise ValueError("Within-choice-set design is rank deficient; effects cannot be separated")
+    # Complete or quasi separation: a direction improves some chosen-versus-other
+    # contrasts without worsening any. Such a likelihood has no finite maximum.
+    contrasts = []
+    for _, group in stacked.groupby(choice_set_id_col, sort=False):
+        chosen = group.loc[group[response] == 1, predictors].to_numpy(dtype=float)[0]
+        contrasts.extend(chosen - group.loc[group[response] == 0, predictors].to_numpy(dtype=float))
+    contrasts = np.asarray(contrasts) / scale
+    separation = linprog(np.zeros(len(predictors)),
+                        A_ub=np.vstack([-contrasts, -contrasts.sum(axis=0)]),
+                        b_ub=np.r_[np.zeros(len(contrasts)), -1.],
+                        bounds=[(None, None)] * len(predictors), method="highs")
+    if separation.success:
+        raise ValueError("Complete or quasi separation: finite coefficient estimates do not exist")
+    if separation.status != 2:
+        raise RuntimeError("Could not verify absence of separation")
+    normalized = centered / scale
+    model = ConditionalLogit(stacked[response].astype(int), normalized,
+                             groups=groups, missing="raise")
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", ConvergenceWarning)
+            warnings.simplefilter("error", HessianInversionWarning)
+            warnings.simplefilter("error", RuntimeWarning)
+            fitted = model.fit(method="bfgs", maxiter=maxiter, disp=False)
+        normalized_covariance = np.asarray(fitted.cov_params())
+        normalized_params = np.asarray(fitted.params)
+        # ConditionalResults drops optimizer status in statsmodels 0.15.0. Check
+        # the score as well as treating its convergence warnings as failures.
+        # This score uses dimensionless predictors, so the acceptance threshold
+        # does not depend on the user's price/attribute measurement units.
+        score = np.asarray(model.score(normalized_params)) / len(stacked)
+        if (not np.isfinite(normalized_params).all() or not np.isfinite(normalized_covariance).all()
+                or not np.isfinite(fitted.pvalues).all() or not np.isfinite(score).all()
+                or np.max(np.abs(score)) > 1e-4
+                or np.any(np.linalg.eigvalsh(normalized_covariance) <= 0)):
+            raise RuntimeError("Nonfinite, unconverged, or singular model result")
+    except (Warning, np.linalg.LinAlgError, ValueError) as exc:
+        raise RuntimeError(f"Conditional model fitting failed: {exc}") from exc
+    params = normalized_params / scale
+    std_errors = np.asarray(fitted.bse) / scale
+    covariance = pd.DataFrame(normalized_covariance / np.outer(scale, scale),
+                              index=predictors, columns=predictors)
+    if (not np.isfinite(params).all() or not np.isfinite(std_errors).all()
+            or not np.isfinite(covariance).all().all()):
+        raise RuntimeError("Could not represent model estimates in original input units")
+    ll = float(model.loglike(normalized_params))
+    null_ll = float(model.loglike(np.zeros(len(predictors))))
+    if not np.isfinite(ll) or not np.isfinite(null_ll):
+        raise RuntimeError("Nonfinite model likelihood")
+    return {"name": "full", "approach": "conditional_logit", "converged": True,
+            "coefficients": dict(zip(predictors, params)),
+            "p_values": dict(zip(predictors, np.asarray(fitted.pvalues))),
+            "std_errors": dict(zip(predictors, std_errors)),
+            "covariance": covariance, "log_likelihood": ll,
+            "null_log_likelihood": null_ll, "pseudo_r2": 1 - ll / null_ll,
+            "n_obs": len(stacked), "n_choice_sets": info["n_choice_sets"],
+            "choice_set_id_col": choice_set_id_col, "predictors": list(predictors),
+            "inference": "model_based_independent_choice_events",
+            "repeated_customers": info["unique_customers"] < info["n_choice_sets"],
+            "model_object": fitted,
+            "model_object_exog": "within_event_centered_divided_by_predictor_scale",
+            "predictor_scale": dict(zip(predictors, scale)),
+            "coefficient_units": "original_input_units"}
 
 
 def fit_split_models(
     stacked: pd.DataFrame,
     attribute_groups: dict[str, list[str]],
     response: str = "y",
+    **kwargs,
 ) -> dict:
-    """
-    Fit one logistic regression per attribute group. Recommended default for
-    realistic-card conjoint where attributes are partially correlated.
-
-    Parameters
-    ----------
-    attribute_groups : dict
-        e.g. {
-            "brand":    ["UKNOW", "MORKSUKY"],
-            "color":    ["pink", "purple"],
-            "size":     ["size_145", "size_162"],
-            "features": ["anti_scratch", "uv_protection"],
-            "price":    ["price"],
-        }
-    """
-    import statsmodels.api as sm
-
+    """Fit separate exploratory associations; never combine their coefficients."""
+    if not attribute_groups:
+        raise ValueError("At least one attribute group is required")
     results = {}
-    combined_part_worths = {}
-    combined_pvalues = {}
-
-    for group_name, predictors in attribute_groups.items():
-        X = stacked[predictors].copy()
-        X = sm.add_constant(X)
-        y = stacked[response]
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            model = sm.Logit(y, X).fit(disp=False)
-
-        results[group_name] = _summarize_model(model, model_name=group_name)
-
-        for var in predictors:
-            combined_part_worths[var] = model.params[var]
-            combined_pvalues[var] = model.pvalues[var]
-
-    return {
-        "submodels": results,
-        "part_worths": combined_part_worths,
-        "pvalues": combined_pvalues,
-        "approach": "split",
-    }
-
-
-def _summarize_model(model, model_name: str) -> dict:
-    """Extract the bits we care about from a fitted statsmodels Logit result."""
-    return {
-        "name": model_name,
-        "coefficients": model.params.to_dict(),
-        "p_values": model.pvalues.to_dict(),
-        "std_errors": model.bse.to_dict(),
-        "log_likelihood": model.llf,
-        "null_log_likelihood": model.llnull,
-        "pseudo_r2": model.prsquared,
-        "n_obs": int(model.nobs),
-        "model_object": model,
-    }
+    for name, predictors in attribute_groups.items():
+        result = fit_single_model(stacked, predictors, response, **kwargs)
+        result.update(name=name, exploratory_only=True)
+        results[name] = result
+    return {"submodels": results, "approach": "split_exploratory",
+            "exploratory_only": True,
+            "limitation": "Omitted attributes may confound associations; coefficients cannot be combined into utilities, importance, WTP, or shares."}
 
 
 def diagnostic_report(result: dict) -> str:
-    """
-    Produce a human-readable diagnostic summary. Flags common red flags:
-    - wrong sign on price
-    - very high p-values
-    - extreme coefficient magnitudes
-    """
-    lines = []
-    lines.append("=" * 60)
-    lines.append("CONJOINT MODEL DIAGNOSTICS")
-    lines.append("=" * 60)
-
-    if result.get("approach") == "split":
-        lines.append(f"\nApproach: split sub-models ({len(result['submodels'])} groups)")
-        for name, sm_result in result["submodels"].items():
-            lines.append(f"\n  [{name}]")
-            lines.append(f"    Pseudo-R²: {sm_result['pseudo_r2']:.3f}")
-            lines.append(f"    N obs:     {sm_result['n_obs']}")
-            for var, coef in sm_result["coefficients"].items():
-                if var == "const":
-                    continue
-                p = sm_result["p_values"][var]
-                marker = ""
-                if p < 0.05:
-                    marker = " ***"
-                elif p < 0.20:
-                    marker = " (directional)"
-                lines.append(f"    {var:25s}  β={coef:+.3f}  p={p:.3f}{marker}")
-    else:
-        lines.append("\nApproach: single full model")
-        lines.append(f"Pseudo-R²: {result['pseudo_r2']:.3f}")
-        for var, coef in result["coefficients"].items():
-            if var == "const":
-                continue
-            p = result["p_values"][var]
-            marker = ""
-            if p < 0.05:
-                marker = " ***"
-            elif p < 0.20:
-                marker = " (directional)"
-            lines.append(f"  {var:25s}  β={coef:+.3f}  p={p:.3f}{marker}")
-
-    # Red-flag checks
-    lines.append("\n" + "-" * 60)
-    lines.append("RED FLAG CHECKS")
-    lines.append("-" * 60)
-
-    pw = result.get("part_worths", result.get("coefficients", {}))
-    if "price" in pw:
-        if pw["price"] > 0:
-            lines.append("⚠ Price coefficient is POSITIVE — economically wrong sign.")
-            lines.append("  Likely cause: price range too narrow. WTP estimates unreliable.")
-        else:
-            lines.append("✓ Price coefficient sign is correct (negative).")
-
-    extreme = [v for v, c in pw.items() if abs(c) > 5]
-    if extreme:
-        lines.append(f"⚠ Extreme coefficients (|β| > 5): {extreme}")
-        lines.append("  Check for coding errors or outlier observations.")
-
+    """Describe model scope without interpreting signs as proof of validity."""
+    models = result.get("submodels", {"full": result})
+    lines = ["CONDITIONAL CHOICE MODEL DIAGNOSTICS", f"Approach: {result['approach']}"]
+    if result.get("exploratory_only"):
+        lines.append("Exploratory associations only; do not combine submodel coefficients.")
+    for name, model in models.items():
+        lines.append(f"[{name}] Choice events: {model['n_choice_sets']}; pseudo-R²: {model['pseudo_r2']:.3f}")
+        for variable, coefficient in model['coefficients'].items():
+            lines.append(f"  {variable}: coefficient={coefficient:+.3f}, p={model['p_values'][variable]:.3f}")
+        if model.get('repeated_customers'):
+            lines.append("Repeated customers: reported uncertainty assumes independent events and is not cluster-adjusted.")
+        if model['coefficients'].get('price', -1) >= 0:
+            lines.append("Nonnegative price coefficient: investigate design, omitted attributes and coding; WTP is unavailable.")
     return "\n".join(lines)
-
-
-# ----------------------------------------------------------------------------
-# Demo
-# ----------------------------------------------------------------------------
-if __name__ == "__main__":
-    # Reproduce the case-study split-model result
-    from build_stacked_data import build_stacked_data
-
-    cards = pd.DataFrame([
-        {"card_id": 1, "UKNOW": 0, "MORKSUKY": 0, "price": 15.99, "pink": 0, "purple": 0, "size_145": 0, "size_162": 0, "anti_scratch": 1, "uv_protection": 1},
-        {"card_id": 2, "UKNOW": 0, "MORKSUKY": 0, "price": 15.99, "pink": 1, "purple": 0, "size_145": 0, "size_162": 0, "anti_scratch": 1, "uv_protection": 1},
-        {"card_id": 3, "UKNOW": 1, "MORKSUKY": 0, "price": 13.98, "pink": 0, "purple": 0, "size_145": 0, "size_162": 1, "anti_scratch": 0, "uv_protection": 1},
-        {"card_id": 4, "UKNOW": 1, "MORKSUKY": 0, "price": 13.98, "pink": 1, "purple": 0, "size_145": 0, "size_162": 1, "anti_scratch": 0, "uv_protection": 1},
-        {"card_id": 5, "UKNOW": 1, "MORKSUKY": 0, "price": 13.98, "pink": 0, "purple": 1, "size_145": 0, "size_162": 1, "anti_scratch": 0, "uv_protection": 1},
-        {"card_id": 6, "UKNOW": 0, "MORKSUKY": 1, "price": 14.95, "pink": 0, "purple": 0, "size_145": 1, "size_162": 0, "anti_scratch": 1, "uv_protection": 0},
-        {"card_id": 7, "UKNOW": 0, "MORKSUKY": 1, "price": 14.95, "pink": 1, "purple": 0, "size_145": 1, "size_162": 0, "anti_scratch": 1, "uv_protection": 0},
-        {"card_id": 8, "UKNOW": 0, "MORKSUKY": 1, "price": 14.95, "pink": 0, "purple": 1, "size_145": 1, "size_162": 0, "anti_scratch": 1, "uv_protection": 0},
-    ])
-    np.random.seed(42)
-    purchases = pd.DataFrame([
-        {"customer_id": i+1, "card_id": np.random.choice([6, 7, 8, 6, 7, 8, 1, 3])}
-        for i in range(20)
-    ])
-    stacked = build_stacked_data(cards, purchases)
-
-    groups = {
-        "brand":    ["UKNOW", "MORKSUKY"],
-        "color":    ["pink", "purple"],
-        "size":     ["size_145", "size_162"],
-        "features": ["anti_scratch", "uv_protection"],
-        "price":    ["price"],
-    }
-    result = fit_split_models(stacked, groups)
-    print(diagnostic_report(result))

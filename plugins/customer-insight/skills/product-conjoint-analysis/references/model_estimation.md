@@ -1,219 +1,88 @@
-# Model Estimation Reference
+# 模型估計與限制
 
-How to fit conjoint models, choose between single vs. split models, and read the diagnostics. Read this when designing Phase IV.
+## 先確認反應與分析單位
 
-## Table of contents
-- [Choosing the model family](#choosing-the-model-family)
-- [Single full model](#single-full-model)
-- [Split sub-models](#split-sub-models)
-- [Rating-based variant (OLS)](#rating-based-variant-ols)
-- [Diagnostics and red flags](#diagnostics-and-red-flags)
-- [Sample size guidelines](#sample-size-guidelines)
+| 資料 | 模型安排 |
+| --- | --- |
+| 商品卡評分 | 依評分量尺選線性或序位等模型，處理同一受訪者重複評分 |
+| 已知集合內單選 | 條件式選擇模型，集合內比較商品屬性 |
+| 真正獨立的二元事件 | 依事件定義考慮二元模型，不能拿展開後的商品列冒充獨立事件 |
+| 排序、多選或未知可選集合 | 先安排適合設計，不能套本工具的單選估計 |
 
----
+附帶工具只實作單選資料，不宣稱支援所有 conjoint 方法。評分模型的預測仍是
+評分尺度，不能直接套 logistic 函數解讀為購買機率。
 
-## Choosing the model family
+## 選擇資料契約
 
-| Response variable | Model | Library |
-|---|---|---|
-| Continuous rating (1–7, 0–100) | OLS linear regression | `statsmodels.OLS` or `sklearn.LinearRegression` |
-| Binary choice (chose / didn't choose) | Logistic regression | `statsmodels.Logit` |
-| Multinomial choice (picked one of several) | Multinomial logit (MNL) | `statsmodels.MNLogit` or `pylogit` |
-| Ranked choices | Rank-ordered logit | `pylogit` or custom |
+每筆購買或問卷作答是一個選擇事件，用 `choice_set_id` 識別，顧客識別另存。
+同一人可能回答多次。商品 ID 在同一集合內唯一，每組至少兩項可選、恰一項
+被選中。可選集合必須包括已選商品，缺值或未知商品 ID 先處理。
 
-This skill defaults to **logistic** because revealed-preference data (purchases, reviews, clicks) is binary. Use the table above to switch when needed.
+`build_stacked_data.py` 展開每個事件，`validate_stacked` 逐組檢查。
+提供 `consideration_set_col` 指定每筆紀錄的可選商品清單；沒有該欄時，只有在
+研究已採用全商品可選的假設後，才傳 `assume_all_available=True`。
+全商品皆可選不能由評論資料自動推論。若需要「不購買」，
+在資料與研究設計中明確納入該選項，未觀察到它就不能估計市場不購買率。
 
----
+## 估計與診斷
 
-## Single full model
+`fit_single_model` 使用 statsmodels `ConditionalLogit`，以選擇事件分組，
+不加入共同截距。共同截距會在集合內比較時抵消。組內中心化後的設計矩陣
+須能區分所選預測欄；原始矩陣滿秩不保證組內可識別。
 
-All attributes go into one regression. Use this when:
+工具估計時依事件中心化並調整各欄尺度，避免改變單位造成假收斂。
+回傳的 `coefficients`、`covariance` 與 `std_errors` 已轉回原始輸入單位，
+可與原單位商品表一起計算指標。`model_object` 保留標準化後的資料與參數，
+不能把其中的參數直接套回原商品表。
 
-- Cards came from an **orthogonal design** (attributes are uncorrelated by construction), AND
-- N ≥ 10 × number of predictors
+估計前檢查缺值、有限數值、編碼與屬性共變。估計後檢查收斂、警告、
+係數與不確定性。未收斂、分離或數值異常時不將結果送往商業指標計算。
+收斂只是數值條件，還需依研究目的檢查模型設計、價格混淆、樣本與預測表現。
 
-### Code template
+同一顧客重複選擇需要處理顧客內依賴，不能只靠事件分組就宣稱標準誤適當。
+工具的實際推論支援與限制以回傳結果及函式說明為準，未支援的設計需另用
+適合的方法。報告分別列顧客數、事件數、商品列數，不以固定列數宣稱樣本足夠。
 
-```python
-import pandas as pd
-import statsmodels.api as sm
+目前回傳的 `inference` 為 `model_based_independent_choice_events`，
+`repeated_customers` 標示是否有同一人多次作答。後者為真時，回傳的標準誤
+尚未調整顧客內相關性，WTP 工具會拒絕使用這份不確定性估計。
 
-# Assume df already has: encoded dummy columns + 'price' + response 'y'
-predictor_cols = ['UKNOW', 'MORKSUKY', 'pink', 'purple',
-                  'size_145', 'size_162', 'anti_scratch', 'uv_protection', 'price']
-X = df[predictor_cols]
-X = sm.add_constant(X)            # intercept
-y = df['y']                        # 0/1 purchase indicator
+## 執行工具
 
-model = sm.Logit(y, X).fit(disp=False)
-print(model.summary())
-```
-
-### What to extract
-
-- `model.params` → part-worth utilities
-- `model.pvalues` → significance per coefficient
-- `model.llf`, `model.llnull` → for likelihood ratio test
-- `model.prsquared` → McFadden's pseudo-R² (treat 0.2–0.4 as good fit)
-
-### When the single model fails
-
-You'll see one or more of these:
-
-- Standard errors > coefficient magnitudes → unstable estimates
-- Sign reversals (e.g., negative price coefficient flips positive)
-- Convergence warnings during MLE
-- VIF > 10 for any predictor → severe multicollinearity
-
-When this happens: **switch to split sub-models**.
-
----
-
-## Split sub-models
-
-The case-study approach. Each attribute (or group of related attributes) gets its own regression, sharing only the response variable.
-
-### Why this works
-
-With realistic cards, attributes are correlated. A single model attributes shared variance arbitrarily, producing unstable coefficients. Splitting estimates each attribute's effect averaged over the empirical joint distribution of the others — less precise but stable.
-
-### How to group
-
-Default grouping (case study):
-
-| Sub-model | Predictors |
-|---|---|
-| Brand | brand dummies |
-| Color | color dummies |
-| Size | size dummies |
-| Features | binary feature flags (anti-scratch, UV, etc.) |
-| Price | price (continuous) |
-
-Combine binary features into one model only if there's no strong reason to separate them (they share a common "premium product" cluster, etc.). Brand and size each get their own model because they're typically the two highest-importance attributes.
-
-### Code template
+Python 環境需有 pandas、numpy、scipy 與 statsmodels。從 skill 的 `scripts/`
+目錄匯入下列函式，傳入已載入的商品表 `cards` 與選擇紀錄 `purchases`。
+此例假設資料欄位已定義 `quality`（二元）、`price`，以及 `considered_cards`：
 
 ```python
-def fit_submodel(df, predictor_cols, response='y'):
-    X = sm.add_constant(df[predictor_cols])
-    y = df[response]
-    return sm.Logit(y, X).fit(disp=False)
+from build_stacked_data import build_stacked_data
+from fit_logistic_conjoint import fit_single_model, diagnostic_report
 
-submodels = {
-    'brand':    fit_submodel(df, ['UKNOW', 'MORKSUKY']),
-    'color':    fit_submodel(df, ['pink', 'purple']),
-    'size':     fit_submodel(df, ['size_145', 'size_162']),
-    'features': fit_submodel(df, ['anti_scratch', 'uv_protection']),
-    'price':    fit_submodel(df, ['price']),
-}
-
-# Collect part-worth utilities into a single dict
-part_worths = {}
-for name, m in submodels.items():
-    for var, coef in m.params.items():
-        if var != 'const':
-            part_worths[var] = coef
-
-print(part_worths)
+stacked = build_stacked_data(cards, purchases, consideration_set_col="considered_cards")
+result = fit_single_model(stacked, ["quality", "price"])
+print(diagnostic_report(result))
 ```
 
-### Limitations to declare
+`result` 包含具名係數、共變異數、模型與事件數，可交給指標工具。
+若需要重現腳本檢查，從 skill 目錄執行
+`python -m unittest discover -s scripts/tests -v`。測試使用合成資料，不能替代
+使用者資料的研究有效性檢查。
 
-When using split models, **explicitly state in the report**:
+## 無法分辨屬性時
 
-- Cannot estimate interaction effects (e.g., "Does brand X command a premium specifically among 145mm buyers?")
-- Each sub-model's intercept is different — don't try to combine them
-- Use the **price sub-model's coefficient** as the single price-sensitivity reference for WTP calculations
+若品牌 A 總是大尺寸、品牌 B 總是小尺寸，資料只支持組合差異。可以改為
+有意義的組合比較、補足交叉組合資料，或縮小問題，並交代因此放棄的判斷。
+不能將品牌模型與尺寸模型的係數相加，或用另一模型的價格係數計算願付價格。
 
----
+`fit_split_models` 僅保留分開的探索結果，不回傳合併效用。探索模型不是
+「控制其他屬性後的獨立效果」，也不能拿來拼裝完整商品的機率。
 
-## Rating-based variant (OLS)
+## 不確定性與後續使用
 
-If respondents rated each card on a continuous scale (e.g., "How appealing is this on a 1–7 scale?"), switch from logistic to OLS:
+保留同一模型的係數、共變異數與估計設定。價格係數不符合預期時，檢查
+遺漏屬性、樣本、測量及設計等可能原因，不能斷言只因價格範圍太窄。
+不要以固定 p 值區間把不確定結果重新命名為可靠方向。
 
-```python
-model = sm.OLS(y, X).fit()
-```
+## 方法依據
 
-The math for downstream insights (importance, WTP, optimal product) is identical — only the model family changes. The output coefficients are still part-worth utilities.
-
-For OLS, `R²` replaces pseudo-R²; expect 0.4–0.7 for well-designed conjoint surveys.
-
-For ranked-preference data (respondent orders cards 1st, 2nd, 3rd…), use rank-ordered logit (exploded logit). See the `pylogit` documentation. Most beginners just convert ranks to ratings and use OLS, which loses some efficiency but is acceptable.
-
----
-
-## Diagnostics and red flags
-
-After fitting, always run through this checklist before moving to Phase V.
-
-### Sign check
-
-For **economic-theory-bound** attributes, signs should match expectation:
-
-| Attribute | Expected sign | Action if wrong |
-|---|---|---|
-| Price (raw) | Negative | Check price range; if narrow, switch to binned price or expand sample |
-| Quality / premium feature | Positive | Re-examine reference level; check sample composition |
-| Defect / negative feature | Negative | Same as above |
-
-For **purely preferential** attributes (color, brand, style), any sign is acceptable — these reflect consumer taste.
-
-### Magnitude check
-
-If one attribute's coefficient is >5× larger than all others, suspect:
-- A coding error (e.g., did you accidentally include the response variable as a predictor?)
-- An outlier customer skewing the result
-- A misidentified attribute (e.g., a category indicator that actually proxies for the brand)
-
-### Significance — don't over-interpret
-
-P-values in conjoint with realistic cards and small samples are notoriously high. The case study had every p > 0.4, but the directional patterns were still actionable.
-
-**Reporting rule**:
-- p < 0.05 → "statistically significant"
-- 0.05 ≤ p < 0.20 → "directionally suggestive"
-- p ≥ 0.20 → "no reliable signal; magnitude reported for descriptive purposes only"
-
-### Pseudo-R² benchmarks (for logistic)
-
-| McFadden's R² | Interpretation |
-|---|---|
-| < 0.10 | Weak fit; attributes don't explain choice well |
-| 0.10–0.20 | Acceptable for choice models |
-| 0.20–0.40 | Good fit |
-| > 0.40 | Excellent — but check for data leakage |
-
-These are lower than OLS R² benchmarks. **A pseudo-R² of 0.15 in a logistic conjoint is not a bad model.**
-
----
-
-## Sample size guidelines
-
-### Minimum useful sample
-
-For **single-model** estimation:
-
-```
-N ≥ 10 × (number of predictors including intercept)
-```
-
-For an 8-predictor model, that's 80 observations minimum, ideally 200+.
-
-For **split-model** estimation, each sub-model needs:
-
-```
-N ≥ 10 × (predictors in that sub-model + 1)
-```
-
-Brand sub-model with 2 dummies = 30 observations minimum.
-
-### When data is below minimum
-
-Don't refuse to run — produce results with appropriate caveats:
-
-- Lead the report with a sample-size warning.
-- Report all results as "directional, requires validation."
-- Recommend specific data collection to expand the sample.
-
-The case study's N=20 customers (160 stacked) is below most thresholds. The report explicitly frames findings as directional and lists "expand sample" as the first future-research priority.
+- [statsmodels ConditionalLogit](https://www.statsmodels.org/stable/generated/statsmodels.discrete.conditional_models.ConditionalLogit.html)：分組條件概似與截距限制。
+- [Train，Logit，第 3 章](https://eml.berkeley.edu/choice2/ch3.pdf)：選擇集合內機率及模型假設。

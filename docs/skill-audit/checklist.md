@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**45 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**46 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -183,15 +183,41 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **狀態：** 使用者已確認接受並要求提交、推送。
 
-- [ ] **10. product-conjoint-analysis**（高優先）
+- [x] **10. product-conjoint-analysis**（高優先）
 
-  **可以改哪裡：** description 排除純問卷但內文要求評分問卷切 OLS；五階段、報告、口頭 checklist 重複；所有分析強制四種洞察，即缺成本也用以一元代填；實際商品一律拆模型的案例經驗被寫成普遍規則。
+  **確認方向：** 保留產品多屬性取捨分析，先修正資料檢查、模型與指標，再精簡重複流程。依評分、選擇或市場資料安排方法，解除案例綁定。
 
-  **建議改法：** 收斂至已宣告的觀察資料範圍，問卷只留轉向提示；公式/程式/案例移已有 references 和 scripts，主檔留決策點；WTP、ROI、機率只在資料與估計可支持時產出；拆模型改成診斷後選擇，不能把簡化當修復統計識別。
+  **本輪修改：** 主檔、參考文件、模板與案例同步修正；選擇資料按事件驗證，估計保留集合結構與可識別性。指標按同模型與資料條件產出，不代填成本、不拼接探索模型。
 
-  **應保留：** 參考層編碼、價格尺度換算、評論選擇偏誤、真實獨立樣本數、估計限制；模型方法修正需另做專業驗證，不能只刪文。
+  **版本：** skill 1.2.0、customer-insight plugin 1.8.0。
 
-  **原文位置：** [主檔:53](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/SKILL.md:53)、[主檔:116](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/SKILL.md:116)、[主檔:157](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/SKILL.md:157)、[主檔:197](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/SKILL.md:197)、[主檔:261](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/SKILL.md:261)、[主檔:309](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/SKILL.md:309)。
+  **驗證：** 修正前已實際重現平均漏檢、品牌誤拆、指數溢位、組內共線漏檢與單位縮放假收斂。修正後 28 項 unittest 通過，含合成係數恢復、與兩選項 logistic 比對、全流程計算及 1e-6／1e6 單位換算。quick_validate、YAML/JSON、description、16 個連結、圍欄、59 個 skill／README 數量及 git diff --check 通過。獨立審查已檢視全部文件與腳本，發現的假收斂已修正並回歸驗證。
+
+  **限制與介面：** 工具支援單選條件式模型；評分／排序／多選需另選適當方法。重複顧客可估計但未調整顧客內相關性的標準誤，WTP 工具會拒絕該推論。未重現原案例市場係數，也未實測真實商業成效。新版選擇機率改為集合內 softmax，WTP 與成本輸出欄位已調整，舊腳本呼叫需依 references 更新。測試環境為 `/private/tmp/conjoint-model-venv`，沒有修改共用 Python 環境。
+
+  | 檔案 | 變更摘要 |
+  | --- | --- |
+  | [README.md](/Users/timlai/Developer/skills/README.md) | 同步評分與選擇資料的適用需求。 |
+  | [plugins/customer-insight/.claude-plugin/plugin.json](/Users/timlai/Developer/skills/plugins/customer-insight/.claude-plugin/plugin.json) | 版本調升至 1.8.0。 |
+  | [docs/skill-audit/checklist.md](/Users/timlai/Developer/skills/docs/skill-audit/checklist.md) | 記錄修改、驗證與待驗收狀態。 |
+  | [plugins/customer-insight/skills/product-conjoint-analysis/SKILL.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/SKILL.md) | 主流程依資料與可支持結果安排，版本 1.2.0。 |
+  | [plugins/customer-insight/skills/product-conjoint-analysis/references/encoding.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/references/encoding.md) | 明確分組、尺度、缺值與共變限制。 |
+  | [plugins/customer-insight/skills/product-conjoint-analysis/references/model_estimation.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/references/model_estimation.md) | 選擇事件模型、推論限制與執行介面。 |
+  | [plugins/customer-insight/skills/product-conjoint-analysis/references/insight_translation.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/references/insight_translation.md) | 同模型指標、WTP 條件、集合內機率與效用成本比。 |
+  | [plugins/customer-insight/skills/product-conjoint-analysis/references/review_mining.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/references/review_mining.md) | 評論用於屬性探索，區分頻率與選擇。 |
+  | [plugins/customer-insight/skills/product-conjoint-analysis/references/orthogonal_design.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/references/orthogonal_design.md) | 依研究目的設計商品卡與可選集合。 |
+  | [plugins/customer-insight/skills/product-conjoint-analysis/assets/attribute_design_worksheet.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/assets/attribute_design_worksheet.md) | 記錄實際水準、缺值與可識別性。 |
+  | [plugins/customer-insight/skills/product-conjoint-analysis/assets/report_template.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/assets/report_template.md) | 依證據保留結果章節，移除固定商業結論。 |
+  | [plugins/customer-insight/skills/product-conjoint-analysis/examples/case_study_safety_glasses.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/examples/case_study_safety_glasses.md) | 保留商品表，改為資料限制案例，不沿用缺乏依據的策略。 |
+  | [plugins/customer-insight/skills/product-conjoint-analysis/scripts/build_stacked_data.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/scripts/build_stacked_data.py) | 逐事件檢查，要求明示全商品可選假設。 |
+  | [plugins/customer-insight/skills/product-conjoint-analysis/scripts/fit_logistic_conjoint.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/scripts/fit_logistic_conjoint.py) | 分組選擇估計、尺度處理與失敗檢查，探索模型不合併。 |
+  | [plugins/customer-insight/skills/product-conjoint-analysis/scripts/compute_insights.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/scripts/compute_insights.py) | 修正分組、數值穩定性與各指標前提。 |
+  | [plugins/customer-insight/skills/product-conjoint-analysis/scripts/tests/test_model.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/scripts/tests/test_model.py) | 新增事件、模型識別、估計恢復及單位轉換測試。 |
+  | [plugins/customer-insight/skills/product-conjoint-analysis/scripts/tests/test_insights.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/scripts/tests/test_insights.py) | 新增分組、缺值、WTP 與穩定機率測試。 |
+  | [plugins/customer-insight/skills/product-conjoint-analysis/scripts/tests/test_workflow.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/product-conjoint-analysis/scripts/tests/test_workflow.py) | 新增合成資料端到端流程測試。 |
+
+
+  **狀態：** 使用者已確認接受並要求提交、推送。
 
 - [ ] **11. review-mining-stp**（高優先）
 

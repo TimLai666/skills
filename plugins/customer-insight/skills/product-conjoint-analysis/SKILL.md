@@ -1,342 +1,114 @@
 ---
 name: product-conjoint-analysis
 description: >-
-  Run a product-analysis focused revealed-preference logistic conjoint
-  workflow (product specs + reviews/transactions, stacked binary choice,
-  logistic estimation) — from attribute design through business insights
-  (importance, willingness-to-pay, optimal product configuration, pricing and
-  cost-benefit). This skill MUST be used when the goal is to analyze products
-  and infer multi-attribute preferences from observed market behavior, and
-  MUST NOT be used for a generic survey-only conjoint setup.
+  This skill MUST be used for product conjoint analysis (商品聯合分析、屬性偏好分析)
+  to study trade-offs among product attributes using ratings, stated choices,
+  or observed choices. It SHOULD be used for attribute importance,
+  willingness-to-pay (願付價格), or product configuration questions when
+  multi-attribute preference data is available. It MUST NOT treat review
+  mentions as observed choices or produce pricing and probability claims
+  unsupported by the data and fitted model.
 metadata:
-  version: "1.1.1"
+  version: "1.2.0"
 ---
 
 # Product Conjoint Analysis
 
-A reusable end-to-end workflow for conjoint analysis, distilled from a working case study (safety glasses on Amazon, N=160). It covers data acquisition, attribute engineering, experimental design, logistic regression estimation, and the four canonical insight transforms (importance, WTP, choice probability, cost-benefit ROI).
+## Overview
 
-The skill is opinionated about **decisions that beginners commonly get wrong** — choice of reference levels, when to split models for collinearity, why price needs special handling for importance, when WTP is meaningful, etc. Read this file fully on first use, then consult the `references/` folder when you hit a specific decision point.
+分析消費者如何取捨商品的品牌、價格、尺寸與功能等屬性，支援研究解讀、商品
+配置與定價判斷。依評分、選擇問卷或實際市場資料安排分析，不套用單一案例的
+模型或固定要求所有商業指標。
 
----
+評論可協助發現需求與候選屬性。要估計選擇偏好，還需要知道選了什麼、有哪些
+可選商品，以及這些商品的屬性。資訊不足時交付可做的整理或資料蒐集設計。
 
-## Out of scope
+## Input Contract
 
-Do **not** use this skill for: simple A/B testing, pure descriptive statistics, recommendation systems based on collaborative filtering, or single-attribute pricing studies.
+先從現有資料確認，缺少會影響方法或結論的資訊才詢問：
 
----
+- **研究目的與範圍**：商品類別、要理解的取捨，以及本輪是設計、分析或應用。
+- **反應資料**：評分、每次選擇、交易或點擊的實際意義、對象、期間與來源。
+- **商品屬性**：各商品的屬性、水準、單位、價格與缺值定義。
+- **選擇條件**：每次可選集合、選擇事件 ID、顧客 ID，以及能否不選任何商品。
+- **應用資料**：只有要做成本比較時才需要增量成本及來源。
 
-## The 5-phase architecture
+同一顧客可能有多次選擇，保留事件與顧客兩種識別。展開後列數、選擇事件數
+及獨立顧客數分別報告，不把增加資料列當成增加受訪者。
 
-Every conjoint study — regardless of domain — follows this structure. Always show the user this map at the start so expectations are clear.
+## Workflow
 
-```
-I. Data Acquisition  →  II. Attribute Engineering  →  III. Experimental Design
-                                                                ↓
-   V. Insight Translation  ←  IV. Model Estimation  ←──────────┘
-```
+### 1. 依資料決定分析方式
 
-| Phase | Purpose                                    | Key output                           |
-| ----- | ------------------------------------------ | ------------------------------------ |
-| I     | Get supply-side specs + demand-side signal | Attribute candidate pool             |
-| II    | Filter, define levels, encode              | Coded design matrix                  |
-| III   | Build product cards + response variable    | Stacked observation table            |
-| IV    | Estimate part-worth utilities              | Coefficient table                    |
-| V     | Translate utilities to decisions           | Importance / WTP / Probability / ROI |
+| 現有資料 | 處理方式 |
+| --- | --- |
+| 商品卡評分 | 依量尺與重複評分結構選擇評分模型，不能套選擇機率公式 |
+| 每次從已知集合選一項 | 保留選擇組別，使用能描述集合內取捨的選擇模型 |
+| 購買、評論對應商品或點擊 | 先確認可選集合與反應含義，再判斷能否估計選擇偏好 |
+| 只有評論文字或商品規格 | 整理需求、屬性與缺口，不能把未被評論的商品當作未被選擇 |
 
-For each phase below, the SKILL.md gives the workflow and the **"why"**. When you need formulas, code, or edge-case handling, jump to the referenced file.
+只有來源支持時，才將評論對應商品作為該評論者選擇的代理資料，交代評論者
+自我選擇、曝光與集合假設。完整商品清單不自動等於每人的可選集合。
+蒐集與整理評論時，讀 [評論與屬性](references/review_mining.md)。
 
----
+### 2. 設計屬性與比較
 
-## Phase I — Data acquisition
+結合商品規格、研究問題與需求證據選擇屬性。檢查屬性值的實際差異、稀少
+水準及缺值，不能以規格「有沒有列出」代替功能「有沒有具備」。
+常數屬性不能估計獨立影響；稀少屬性則依資料支持判斷，不固定用 5%／95% 刪除。
 
-### Decide the data source first
+分類屬性明確記錄參考水準與編碼，連續屬性保留單位與研究範圍。參考水準依
+研究問題與可解讀性決定，不為了讓係數變正而更換。
+讀 [編碼規則](references/encoding.md)，需要記錄決策時使用
+[屬性工作表](assets/attribute_design_worksheet.md)。
 
-Conjoint can run on three kinds of data, each with different downstream consequences. Confirm which one you have **before** designing anything else:
+問卷可安排有意義的商品組合；使用市場資料時保留真實組合。兩者都須檢查
+能否區分各屬性的影響。需要設計問卷商品卡時，讀
+[商品卡與選擇集合設計](references/orthogonal_design.md)。
 
-1. **Survey data with rating scores** — classic conjoint. Respondent rates each card 1–7. Use OLS regression in Phase IV.
-2. **Survey data with stated choice** — choice-based conjoint (CBC). Respondent picks one card from each set. Use logistic / multinomial logit.
-3. **Observed market data (transactions, reviews, clicks)** — revealed preference. Use logistic regression with stacked data structure. **This is what the case study uses.**
+### 3. 驗證資料與估計模型
 
-The skill defaults to **revealed-preference logistic conjoint** because it's the most common real-world scenario when full surveys aren't available. If the user has rating data instead, switch to OLS — see `references/model_estimation.md` § "Rating-based variant".
+選擇資料使用 [資料展開工具](scripts/build_stacked_data.py)，明確提供可選集合，
+或明示並記錄「所有商品皆可選」的研究假設。每個事件至少有兩項可選，恰有
+一項被選中。資料有重複、缺失或非法選擇時先修正，不用平均值掩蓋個別錯誤。
 
-### Two-track collection (when using market data)
+讀 [模型估計](references/model_estimation.md) 後，選擇資料可使用
+[條件式選擇模型工具](scripts/fit_logistic_conjoint.py)。檢查組內變化、無法
+分辨的屬性、收斂與估計不確定性。若品牌與尺寸總是一起出現，不能靠分開
+估計就宣稱得到各自的影響，也不能將分開模型的係數相加。
 
-If the user is scraping from an e-commerce platform or similar, always collect from both tracks. Don't let them rely on one.
+無法估計時，交付可識別的比較、資料缺口或重新蒐集的安排。評分、多選、
+排序及其他不符合工具假設的資料，選擇適合的方法，不能硬塞入單選工具。
 
-| Track       | Source                                         | Purpose                                    |
-| ----------- | ---------------------------------------------- | ------------------------------------------ |
-| Supply-side | Product pages, spec sheets, catalogs           | What attributes exist; what levels appear  |
-| Demand-side | Reviews, ratings, forum posts, support tickets | What attributes consumers actually mention |
+### 4. 只轉換有依據的指標
 
-The supply track tells you what's _encodable_; the demand track tells you what's _salient_. An attribute must score on **both** to enter the model. This is triangulation — it materially improves attribute validity over either source alone.
+讀 [指標解讀](references/insight_translation.md)，依任務與估計條件決定：
 
-For text mining of reviews, see `references/review_mining.md` for the topic extraction recipe (the case study used a Maslow-needs framework, but topic modeling, BERTopic, or LLM-based theme extraction all work).
+| 指標 | 必要條件與解讀 |
+| --- | --- |
+| 屬性重要性 | 同一模型、明確屬性分組與水準範圍；價格等連續屬性須按範圍換算 |
+| 願付價格 | 同一模型的價格與屬性係數，價格方向與估計不確定性足以支持解讀 |
+| 選擇機率 | 有效模型、明確可選集合與完整屬性，集合內機率合計為 1 |
+| 效用／成本比較 | 真實增量成本與同尺度效用，不等同財務投資報酬率 |
 
----
+[計算工具](scripts/compute_insights.py) 會拒絕不完整或不符合條件的輸入。
+缺少必要資料就說明哪項目前不能估算，不代填成本、不編造價格建議。
+沒有實際市場驗證時，模型情境下的排序不能宣稱是市場最佳商品或真實市占率。
 
-## Phase II — Attribute engineering
+## Output Contract
 
-This phase makes or breaks the study. Three sub-steps, in order.
+依使用者指定格式交付，通常包含研究範圍與來源、屬性設計、資料與模型限制、
+可支持的結果及對應建議。方法已指定或只做局部分析時，完成該部分即可。
 
-### Step 1: Universality filter (supply side)
+需要完整報告時使用 [報告模板](assets/report_template.md)，刪掉不適用章節。
+[安全眼鏡案例](examples/case_study_safety_glasses.md) 示範如何辨認既有資料
+不能分辨的屬性，不作為預設係數或策略來源。
 
-For each candidate attribute, compute the share of products in the sample that explicitly list it. **Drop attributes with universality > 95% or < 5%** — they have no variation across cards and the model cannot estimate their effect (the coefficient gets absorbed by the intercept).
+## Quality Rules
 
-Concrete example from the case study: anti-fog feature appeared on ~100% of products. Even though customers mentioned it heavily in reviews, it was dropped because it had no level variation. **High salience does not save an attribute that has no variance.**
-
-### Step 2: Triangulate against demand signal
-
-Cross-check the attributes that survived Step 1 against the high-frequency themes from review mining. Keep attributes that show up on **both** sides. This typically yields 4–8 final attributes.
-
-### Step 3: Define levels and encode
-
-For each surviving attribute, define its levels:
-
-- **Categorical (e.g., brand, color)** — list the actual market levels (typically 2–4 per attribute).
-- **Continuous (e.g., price, size in mm)** — either keep as continuous, or bin into 3 levels covering low/mid/high market range.
-- **Binary (e.g., feature on/off)** — just 0/1.
-
-Then encode using **dummy coding**, not one-hot:
-
-| Attribute type            | Encoding                     | Why                                                                  |
-| ------------------------- | ---------------------------- | -------------------------------------------------------------------- |
-| Categorical with k levels | (k−1) dummies, one reference | Avoids the dummy variable trap (perfect collinearity with intercept) |
-| Binary                    | Single 0/1 column            | Simplest case                                                        |
-| Continuous                | Keep raw value               | Coefficient = marginal effect per unit                               |
-
-**Choose the reference level deliberately.** Pick the most "baseline" or "default" version (e.g., black for color, the smallest size, the lowest-tier brand). All other coefficients will be interpreted _relative to this reference_, so a sensible reference makes the output readable.
-
-Full encoding rules and edge cases: `references/encoding.md`.
-
----
-
-## Phase III — Experimental design
-
-### Two design philosophies
-
-| Approach              | When to use                                                              | Trade-off                                                               |
-| --------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
-| **Orthogonal design** | You can run a real survey and want maximum statistical efficiency        | Generates synthetic combinations that may not exist in the market       |
-| **Realistic cards**   | You're using observed market data; combinations must match real products | Attributes will be partially correlated → must split models in Phase IV |
-
-The case study used realistic cards because reviews can only be tied to actual SKUs. If you go this route, **you commit yourself to split-model estimation in Phase IV** — flag this clearly to the user.
-
-For orthogonal design generation, see `references/orthogonal_design.md`.
-
-### Define the response variable
-
-| Data type                     | Response variable             | Model          |
-| ----------------------------- | ----------------------------- | -------------- |
-| Rating survey                 | Score 1–7                     | OLS            |
-| Stated choice                 | Chosen card = 1, others = 0   | Logistic / MNL |
-| Reviews as proxy for purchase | Reviewed card = 1, others = 0 | Logistic       |
-| Clickstream                   | Clicked = 1, not = 0          | Logistic       |
-
-**The reviews-as-purchase proxy** is a useful shortcut but carries two biases — declare them up front:
-
-- _Self-selection_: review writers are not representative buyers (extreme satisfaction tends to be over-represented).
-- _Consideration set assumption_: you must assume each customer compared all cards, even though you only observe their final choice.
-
-### Stack the data
-
-For revealed-preference logistic conjoint, expand each customer's single observation into one row per card in the consideration set:
-
-```
-N customers × M cards = N×M stacked observations
-```
-
-The chosen card gets `y=1`; the others `y=0`. Each row carries the full attribute encoding of _that card_, not the customer's choice. The case study: 20 customers × 8 cards = 160 rows.
-
-Stacking template and code: `scripts/build_stacked_data.py`.
-
----
-
-## Phase IV — Model estimation
-
-### Decide: single model or split models?
-
-This is the most common decision point. Default rule:
-
-```
-IF (cards generated by orthogonal design) AND (N > 10 × num_predictors):
-    → single full model
-ELSE IF (realistic cards) OR (small N):
-    → split into sub-models per attribute group
-```
-
-**Why splitting works.** When attributes are correlated (e.g., MORKSUKY brand always ships with 145mm frames in the case study), throwing them all into one logistic regression produces unstable coefficients, inflated standard errors, and sometimes sign reversals. Splitting estimates each attribute's effect _averaged over the joint distribution of the others_, which is less precise but more stable.
-
-**The cost of splitting.** You lose the ability to detect interaction effects. Note this limitation in the report.
-
-The case study used 5 sub-models: brand / color / size / features (anti-scratch + UV) / price. Use the price sub-model's coefficient as the "price sensitivity" reference for WTP calculations later.
-
-### Fit the model(s)
-
-For binary outcomes (choice, purchase, click): logistic regression via MLE.
-
-```python
-import statsmodels.api as sm
-
-X = df[['UKNOW', 'MORKSUKY']]      # one sub-model at a time
-X = sm.add_constant(X)
-y = df['purchased']
-model = sm.Logit(y, X).fit()
-```
-
-The β coefficients become **part-worth utilities** for each attribute level. Reference levels have utility = 0 by construction.
-
-Full fitting code with diagnostics, p-value handling, and robustness checks: `scripts/fit_logistic_conjoint.py`.
-
-### Statistical significance — set expectations
-
-With small samples (case study had N=160 stacked = 20 unique customers), p-values often fail to reach 0.05 even when effect sizes are large. **State this up front.** Conjoint with revealed-preference data is usually directional, not inferential. If the user needs proper hypothesis testing, they need a larger sample or a designed survey.
-
----
-
-## Phase V — Insight translation
-
-Coefficients are abstract. This phase converts them into four decision-grade outputs. Always produce all four — they answer different questions.
-
-### 1. Attribute importance
-
-Measures relative influence of each attribute on the choice.
-
-```
-For each attribute:
-    range_i = max(part-worth) - min(part-worth)
-    # For PRICE specifically: range = |β_price| × (max_price - min_price)
-importance_i = range_i / sum(all ranges) × 100%
-```
-
-**Why price is special.** Categorical coefficients are already on a "relative-to-reference" scale; price is a marginal-per-dollar coefficient. Without multiplying by the actual price range, you'll dramatically under-state price importance. Always do this rescaling.
-
-### 2. Willingness to pay (WTP)
-
-Translates abstract utility back into dollars:
-
-```
-WTP(level) = part-worth(level) / |β_price|
-```
-
-A WTP of $8.90 means "the consumer would pay up to $8.90 extra for this level versus the reference."
-
-**When WTP is unreliable** — flag any of these:
-
-- Price coefficient is positive (violates economic theory; usually means the price range is too narrow).
-- Price coefficient has very high p-value (>0.5).
-- Some attribute's WTP exceeds the max market price.
-
-In any of these cases, report WTP as "directional only" with a caveat. The case study had β_price = +0.052, which made WTP estimates technically computable but economically unstable.
-
-### 3. Choice probability via logistic transform
-
-For each candidate product configuration, compute total utility and convert to a 0–1 probability:
-
-```
-U = β₀ + Σ β_i × X_i
-P = exp(U) / (1 + exp(U))
-```
-
-The card with the highest P is the **predicted optimal product** under current market preferences. Rank all cards by P and present a top-3.
-
-For multi-product scenarios (share-of-preference rather than single-card P), use the multinomial form — see `references/insight_translation.md`.
-
-### 4. Cost-benefit (ROI) per attribute level
-
-For product development resource allocation, combine demand-side utility with supply-side cost:
-
-```
-ROI(upgrade) = part-worth gain / unit cost increase
-```
-
-An ROI of 1.54 means each $1 of additional cost produces 1.54 utility units. Rank upgrades by ROI to prioritize R&D investment.
-
-The cost figures are usually estimates from the user — ask them. If they don't have data, use a Δcost = 1 placeholder and let the user fill in real numbers later.
-
-Full insight calculation code: `scripts/compute_insights.py`.
-
----
-
-## Output: the standard report structure
-
-When you produce the final deliverable for the user, follow this structure. The case study's report is included as `examples/case_study_safety_glasses.md` — read it before writing your first conjoint report.
-
-```
-1. Research scope & data sources
-   - Category, sample size, time window
-   - Supply track + demand track summary
-2. Attribute design
-   - Final attributes table (attribute / levels / reference)
-   - Encoding scheme
-   - Justification for what was excluded and why
-3. Experimental design
-   - Card list (all combinations tested)
-   - Response variable definition
-   - Stacked data structure (N × M)
-4. Model results
-   - Coefficient table with p-values
-   - Note on splitting strategy
-5. Insights
-   - Attribute importance ranking
-   - WTP table (with caveats if unreliable)
-   - Choice probability ranking → optimal product
-   - Cost-benefit ROI
-6. Strategic recommendations
-   - Product configuration
-   - Pricing
-   - R&D priorities
-7. Limitations & future research
-```
-
-Default output format is **a Word document** for academic/business reports, or **a one-page HTML flow + markdown report pair** for executive summaries. Always offer both.
-
----
-
-## Common pitfalls
-
-These come up almost every time. Watch for them:
-
-1. **User skips the universality filter** and includes a feature that's on every product. Coefficient ends up unidentifiable. → Always run the filter.
-2. **User picks the wrong reference level** (e.g., the most premium brand as reference). All other brands then have negative coefficients, which reads strangely. → Pick the baseline / lowest-tier as reference.
-3. **User reports raw price coefficient as "importance"** without rescaling by price range. → Underestimates price by 5–10×.
-4. **User tries to interpret WTP when β_price is positive.** → Flag as unreliable; recommend wider price range.
-5. **User runs one big regression on correlated realistic cards** and gets sign flips. → Switch to split models.
-6. **User claims statistical significance with N<200 stacked observations.** → Report as directional, not inferential.
-
----
-
-## Workflow at a glance
-
-When a user brings a conjoint task, work through this checklist out loud:
-
-1. ☐ What kind of data? (rating / choice / observed) → determines model type
-2. ☐ How was the data collected? → drives Phase I two-track check
-3. ☐ Pull out attribute candidates, run universality filter
-4. ☐ Triangulate against demand signal, finalize attributes
-5. ☐ Choose reference levels deliberately, encode with dummies
-6. ☐ Decide: orthogonal design or realistic cards?
-7. ☐ Build stacked data structure, define response variable
-8. ☐ Decide: single model or split models? (default: split when realistic cards)
-9. ☐ Fit logistic regression(s), pull part-worth utilities
-10. ☐ Compute the 4 insights: importance, WTP, choice probability, ROI
-11. ☐ Write structured report with limitations section
-
-If at any step you're unsure, the relevant `references/*.md` file has the deeper reasoning. The `scripts/` folder has working Python code for the heavy lifting.
-
----
-
-## Files in this skill
-
-- `SKILL.md` (this file) — main workflow + decision logic
-- `references/encoding.md` — dummy coding rules, edge cases, multi-level handling
-- `references/model_estimation.md` — single vs split models, OLS variant for ratings, diagnostics
-- `references/insight_translation.md` — formulas for importance / WTP / probability / ROI with full derivations
-- `references/review_mining.md` — text mining recipe for the demand-side track
-- `references/orthogonal_design.md` — generating fractional factorial designs when survey is possible
-- `scripts/build_stacked_data.py` — turn raw purchase records into N×M stacked format
-- `scripts/fit_logistic_conjoint.py` — split-model logistic regression with diagnostics
-- `scripts/compute_insights.py` — the 4 standard insight transforms
-- `assets/report_template.md` — markdown skeleton for the final report
-- `assets/attribute_design_worksheet.md` — fillable worksheet for Phase II
-- `examples/case_study_safety_glasses.md` — the original case study, fully worked
+- 估計結果保留來源、模型、單位、參考水準與適用範圍，假設示例明確標示。
+- 不把評論頻率當成選擇機率，也不把相關係數或統計顯著直接當成因果。
+- 缺係數、未收斂或無法識別時，不以零補值或加註「僅供參考」繼續商業計算。
+- 重複選擇的依賴關係須納入推論；軟體支援範圍與尚未完成的檢查要說明。
+- 分組模型只供限定範圍的探索，各模型結果保持分開。
+- 不為了表格完整而產出缺乏依據的 WTP、機率、成本排名或固定前三名。

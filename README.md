@@ -66,7 +66,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | `theory-analysis` | 想用產品定位、購買動機、口碑動機三套理論分析跨來源證據（訪談摘要、工單、貼文、研究筆記、觀察紀錄），逐句標註構面並保留可追溯引文。可同時套用多個理論。 |
 | `review-scoring-docx` | 想把評論資料抽取屬性並做產品評分，輸出為 Word（.docx）報告。 |
 | `review-salience-xlsx` | 想把評論做顯著度評分、PCA、K-means 分群並輸出 Excel（.xlsx）。 |
-| `product-conjoint-analysis` | 想做商品屬性偏好分析、估算屬性重要性與願付價格（WTP），找出最佳商品組合與定價/成本效益方向。 |
+| `product-conjoint-analysis` | 分析商品多屬性取捨，依評分或選擇資料估計偏好，並在證據支持時比較商品配置、願付價格與成本。 |
 
 ### `marketing-strategy` — 行銷策略與訊息設計
 

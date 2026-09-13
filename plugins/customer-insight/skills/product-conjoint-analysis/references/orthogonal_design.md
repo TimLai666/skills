@@ -1,143 +1,29 @@
-# Orthogonal Design Reference
+# 商品卡與選擇集合設計
 
-How to generate fractional factorial product card sets when you can run a real survey (rather than relying on observed market data). Read this when the user is doing classical conjoint with willing respondents.
+## 依研究問題設計
 
-## When to use orthogonal design
+問卷可安排屬性組合以區分其影響，但要保留商品合理性、限制組合與不購買選項
+的設計理由。市場資料則保留實際商品，先檢查哪些屬性能由現有差異估計。
 
-Use orthogonal design (over realistic cards) when:
+評分問卷要確認量尺與作答負擔。選擇問卷除了商品卡，還要設計每一題的可選
+集合。商品清單不是完整的選擇問卷設計。
 
-- You can ask respondents to evaluate hypothetical products (survey, interview, online panel).
-- You need maximum statistical efficiency — orthogonal designs let you fit a single full model with all attributes simultaneously.
-- You want to test attribute interactions.
+## 檢查設計
 
-Stick with **realistic cards** when:
+- 各水準是否出現，是否有足夠的比較，而非只看每個水準出現次數相等。
+- 所需主效果與交互作用能否區分，哪些效果被設計混在一起。
+- 編碼後是否滿足所用模型的可識別條件，單選模型須檢查組內差異。
+- 價格是否與品牌或其他特徵完全綁定，能否回答預定的價格問題。
+- 問卷是否可理解，題數與每題商品數是否經試填檢查。
 
-- Data comes from observed market behavior (purchases, reviews, clicks).
-- Hypothetical combinations would be implausible to respondents (e.g., a Rolex at $50).
-- The user explicitly wants to mirror the existing market.
+正交或部分因子設計只是可選工具，不是所有研究必須採用的形式。
+需要用設計工具時，依目前可用工具的文件產生方案，再對實際模型矩陣驗證。
+不把函式成功回傳、固定卡片數或固定相關係數門檻當成設計合格的證明。
 
-## The full factorial baseline
+## 資料不能支持時
 
-A full factorial design tests every possible combination:
+先縮小到可回答的比較，或補充能解除混淆的組合。若要比較品牌與尺寸的獨立
+影響，資料需要提供能區分兩者的資訊；把它們拆成兩個迴歸不會補出缺少的比較。
 
-```
-N_full = level₁ × level₂ × ... × levelₖ
-```
-
-Example: 3 brands × 3 colors × 3 sizes × 2 anti-scratch × 2 UV = 108 combinations. Most respondents can't rate that many cards reliably (cognitive overload sets in around 15–25 cards). So we use a fraction.
-
-## Fractional factorial design
-
-A **fractional factorial** is a carefully chosen subset of the full factorial that preserves orthogonality — meaning each attribute level appears equally often across the design, and pairs of levels appear in balanced proportions.
-
-### Core property: orthogonality
-
-For any two attributes, the joint distribution of their levels in the design is uniform. This means the regression coefficients can be estimated independently — no multicollinearity by construction.
-
-### Generating designs in Python
-
-Use the `pyDOE2` library:
-
-```python
-from pyDOE2 import fracfact_by_res
-import numpy as np
-
-# Example: 5 attributes, each at 2 levels, resolution III design
-design = fracfact_by_res(5, 3)  # ±1 coded matrix
-print(design)
-# 8 rows instead of 32 (full factorial)
-```
-
-For mixed-level designs (some attributes have 2 levels, others 3+), use `pyDOE2.create_design` or move to R's `AlgDesign` package which has better support.
-
-### Resolution levels
-
-Designs are classified by their **resolution**, which determines what effects are confounded:
-
-| Resolution | Confounding | Use when |
-|---|---|---|
-| III | Main effects with 2-way interactions | Smallest design; only main effects matter |
-| IV | Main effects clean, 2-way interactions confounded with each other | Need main effects but suspect some interactions |
-| V | Main effects + 2-way interactions clean | Want to detect interactions; needs more cards |
-
-**Default for conjoint**: Resolution III or IV. Most consumer studies focus on main effects.
-
-### Example: 6-attribute design
-
-Suppose we want to test:
-- Brand (3 levels)
-- Color (3 levels)
-- Price (3 levels)
-- Size (3 levels)
-- Anti-scratch (2 levels)
-- UV protection (2 levels)
-
-Full factorial = 3⁴ × 2² = 324 cards. We need a fraction.
-
-A common choice is an **orthogonal main-effects plan (OMEP)** with 18 cards. Generate using:
-
-```python
-# Approximate; for production use specialized tools
-import pyDOE2
-
-# For complex mixed designs, fall back to standard published OMEPs
-# Reference: NIST/SEMATECH e-Handbook, Table of Standard L18 design
-```
-
-For mixed-level OMEPs the simplest path is to look up a published table (Taguchi L9, L18, L27 designs are well-tabulated) rather than generate from scratch.
-
-## Card count guidelines
-
-| Number of attributes | Suggested cards | Notes |
-|---|---|---|
-| 3–4 | 8–16 | Full factorial may be feasible |
-| 5–6 | 16–24 | Fractional factorial standard |
-| 7–8 | 24–32 | Push respondents toward limit |
-| 9+ | Use MaxDiff or adaptive conjoint | Standard rating becomes unreliable |
-
-Per respondent, 12–20 cards is the reliable rating ceiling. Beyond that, fatigue and inattention dominate.
-
-## Choice-based vs. rating-based with orthogonal design
-
-Even with an orthogonal card set, you can ask respondents in two ways:
-
-### Rating-based
-
-Show each card individually, ask for a 1–7 score. Use OLS regression. Older, simpler, but less realistic.
-
-### Choice-based (CBC)
-
-Show **sets of 2–4 cards**, ask the respondent to pick their favorite. Closer to actual purchase behavior. Use multinomial logit.
-
-For CBC, you need to generate **choice sets** in addition to the orthogonal card design. Tools like Sawtooth Software handle this; for DIY, balance the design so each card appears in choice sets equally often.
-
-## Validating an orthogonal design
-
-After generating, verify:
-
-```python
-# Check correlation matrix of the encoded design
-import pandas as pd
-import numpy as np
-
-design_df = pd.DataFrame(design_matrix, columns=attribute_names)
-corr = design_df.corr()
-print(corr)
-
-# All off-diagonal values should be 0 (or very close).
-# If not, the design is not properly orthogonal.
-np.fill_diagonal(corr.values, 0)
-print(f"Max off-diagonal correlation: {corr.values.max()}")
-# Should be < 0.1 for a clean design
-```
-
-If correlations are non-trivial, regenerate with different parameters or pick a published design table.
-
-## When orthogonal design is overkill
-
-For exploratory studies with very small sample sizes (N < 30 respondents), orthogonality matters less than realism. The case study deliberately chose realistic cards because:
-
-- The "respondents" were anonymous review-writers — no opportunity to ask them to rate hypothetical cards.
-- Combinations had to map to actual product SKUs to be linkable to reviews.
-
-Orthogonal design is the ideal; realistic cards are the pragmatic fallback when the data-collection method dictates it.
+樣本安排依效果、精度、設計與受訪者負擔決定，不用展開後列數宣稱樣本足夠。
+只有研究設計的任務，交付可執行設計與驗證計畫，不填入尚未觀察的研究結果。
