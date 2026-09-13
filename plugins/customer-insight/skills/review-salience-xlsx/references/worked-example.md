@@ -1,14 +1,12 @@
 # Worked Example — Safety Eyewear (923 reviews, 30 attributes, 4 clusters)
 
-Use this file to calibrate scoring intuition and verify PCA / K-means outputs.
-All results are from a full semantic reading pass + downstream analysis on
-Amazon safety-eyewear reviews spanning English, French, Spanish, Italian, German.
+This file retains a previously reported safety-eyewear analysis for illustration. The underlying review matrix and fitted models are not included here, so its numerical results are not a reproducible test fixture or expected results for a new run. Use the quoted text to discuss scoring, and the executable tests to verify the analysis helpers.
 
 ---
 
 ## Corpus
 
-8 products, 923 valid reviews (body length > 15 chars), no language filtering.
+The historical analysis reported 8 products and 923 reviews after a length filter (>15 characters), with no language filtering. New runs retain all non-blank reviews, including shorter ones; their sample and results may differ.
 
 | Product | Count | Key use context |
 |---------|-------|----------------|
@@ -33,7 +31,7 @@ Amazon safety-eyewear reviews spanning English, French, Spanish, Italian, German
 - `s12` (ear-muff compatibility) = 0 — no hearing protection context
 - `s13` (community identity) = 0 — no professional/military language
 
-### Score = 3–4 (indirect or ambiguous)
+### Brief mentions and explicit discussion
 
 > "Fogs up playing airsoft"
 
@@ -43,8 +41,8 @@ Amazon safety-eyewear reviews spanning English, French, Spanish, Italian, German
 > "Die Brille passt, sitz bequem, der Preis ist ok."  
 > (DE: The glasses fit, sit comfortably, the price is ok.)
 
-- `s23` (all-day comfort) = 5 — "bequem" (comfortable) is clear
-- `s28` (price-value) = 4 — "Preis ist ok" is neutral, not praising or criticising
+- Comfort is explicitly mentioned. Apply `s23` only if its frozen definition includes general comfort; this sentence alone does not establish all-day use.
+- `s28` (price-value) = 4 — price is explicitly mentioned but receives little elaboration; neutrality is not the scoring criterion
 
 ### Score = 5–6 (clearly mentioned)
 
@@ -63,7 +61,7 @@ Amazon safety-eyewear reviews spanning English, French, Spanish, Italian, German
 
 > "LITERALLY SCRATCHED WHEN I RECEIVED THEM!! This was probably my worst purchase ever."
 
-- `s08` (scratch resistance) = 7 — capitalised emphasis, strongest possible negative signal
+- `s08` (scratch resistance) = 7 — scratching is the central and strongly emphasized topic
 
 ---
 
@@ -80,10 +78,7 @@ Amazon safety-eyewear reviews spanning English, French, Spanish, Italian, German
 | 6 | 264 | 1.0% |
 | 7 | 61 | 0.2% |
 
-**Key observation:** 91 % of cells are 0. Most reviews mention only 2–5
-attributes. Scores of 1 are nearly absent because reviews rarely make partial
-references — they either say something clearly (5+) or don't say it (0).
-Score 4 appears for ambiguous statements like "price is ok" or implied context.
+This historical table reports mostly zero scores. Do not use its distribution as a scoring target. Determine each score from the actual prominence of the attribute, including brief mentions such as "price is ok".
 
 ---
 
@@ -106,13 +101,12 @@ than detailed sport-use reviews (Impactable pickleball corpus).
 
 ## Cross-language scoring notes
 
-- **Italian** "poco resistenti ai graffi" → `s08` = 6 (scratch resistance, clearly negative)
-- **Spanish** "no se empañan" → `s02` = 5 (no fogging, clearly positive)
-- **French** "ne bue pas au début (une semaine) et après rien à faire, on y voit plus rien" → `s02` = 7 (fog resistance collapses after one week — vivid, emphasis-worthy)
-- **German** "beschlägt kaum" → `s02` = 4 (barely fogs — mild positive, not strong enough for 5)
+- **Italian** "poco resistenti ai graffi": scratch resistance is explicitly discussed. Score its prominence in the full review.
+- **Spanish** "no se empañan": fogging is explicitly discussed. Positive wording does not lower or raise salience.
+- **French** "ne bue pas au début (une semaine) et après rien à faire, on y voit plus rien": fogging is developed over time and its effect is described, supporting strong emphasis.
+- **German** "beschlägt kaum": fogging is explicitly mentioned. "Barely" describes fogging frequency, not how prominently the reviewer discusses it; use the surrounding review to score salience.
 
-Treat all languages identically. Do not assign lower confidence to non-English
-reviews when scoring.
+Use the same salience rules across languages. If a phrase cannot be interpreted reliably, flag it for review rather than substituting a low score.
 
 ---
 
@@ -179,11 +173,15 @@ The 45 pruned reviews are re-assigned to nearest centroid:
 | C2 | 沉默大眾 | 624 | 67.6% | PC01=−0.46 (near zero on all PCs) |
 | C3 | 耐刮耐用派 | 112 | 12.1% | PC05=+2.04, PC07=−0.85 |
 
-Final silhouette (all 923): **0.1923** (slightly lower than 0.2199 due to re-assigned borderline reviews — expected)
+Reported final silhouette (all 923): **0.1923**, lower than 0.2199 on the fitted subset. New runs must inspect their actual reassignment results; a decrease alone does not establish why those reviews differed.
 
 ### Cluster interpretation notes
 
-- **C0 體驗達人:** Extremely high PC1 = overall satisfaction. Strong negative PC2 = not brand-driven. Top attrs: 活動場景適應廣度(3.29), 全天佩戴舒適度(2.95). Products: evenly spread; B08GKPC599 and B0B15BXZ94 slightly over-represented.
-- **C1 場景創新派:** PC3 dominant (+3.80). Top attrs: 創新解決痛點(4.25), 防霧性能(3.60). B00080FKIO and B016KZ2APQ each ≈31% of this cluster (military/pickleball scenario language).
-- **C2 沉默大眾:** All PCs near zero. Short, content-sparse reviews. Top attr by mean is 防霧性能(1.29) — even in the silent majority, fog is the #1 topic. B016KZ2APQ alone = 31% of this cluster.
-- **C3 耐刮耐用派:** PC5=+2.04 dominant. Top attrs: 鏡片耐刮性(4.63), 鏡片透明度持久性(1.63). Negative PC7 = disappointed by anti-fog claims. This is the primary negative-signal cluster for product quality. B07GB8Y11G (36 reviews) and B016KZ2APQ (27) most frequent.
+These descriptions concern topics mentioned in the reviews. PC signs reflect relative combinations of attributes, not positive or negative sentiment.
+
+- **C0:** High PC1 accompanies discussion of wearing comfort and protection. Reported leading attribute means are 活動場景適應廣度 (3.29) and 全天佩戴舒適度 (2.95). These numbers do not measure satisfaction.
+- **C1:** PC3 is prominent (+3.80), with discussion of 創新解決痛點 (4.25) and 防霧性能 (3.60). Describe the review topics rather than assuming reviewers are innovators.
+- **C2:** This is the largest reported group. Its PC coordinates are near the corpus center, which alone does not mean its reviewers are silent or discuss few attributes. The reported top attribute is 防霧性能 (1.29).
+- **C3:** PC5 is prominent (+2.04), with discussion of 鏡片耐刮性 (4.63) and 鏡片透明度持久性 (1.63). A negative PC7 score does not establish disappointment or poor product quality.
+
+For a new analysis, name groups from their actual attribute profiles and check representative original reviews before adding evaluative or motivational claims. Group labels in the historical tables are retained as historical labels only.

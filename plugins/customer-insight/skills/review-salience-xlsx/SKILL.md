@@ -1,182 +1,101 @@
 ---
 name: review-salience-xlsx
-description: |
-  This skill MUST be used when the user has product review files and wants to: (1) score each review on a set of attributes using a salience scale (0–7) and export a review × attribute matrix as .xlsx; (2) run PCA to reduce attributes into latent dimensions; (3) cluster reviews into customer segments with K-means. Trigger on requests like 「逐則評論評分」、「顯著度矩陣」、「salience scoring」、「主成分分析」、 「PCA」、「顧客分群」、「K-means」、「評論×屬性 Excel」, or any combination thereof. Also trigger when this step follows an attribute-discovery workflow and the user wants scored data, dimensionality reduction, or segmentation. MUST be used even if the user only mentions part of the pipeline.
+description: >-
+  This skill MUST be used for product-review salience scoring (0–7), review ×
+  attribute Excel matrices, or PCA and K-means analysis of those review scores
+  (逐則評論評分、提及程度、顯著度矩陣、評論×屬性 Excel、評論 PCA、評論分群).
+  It MUST support requests for individual stages and MUST NOT be used for
+  unrelated PCA or clustering tasks.
 metadata:
-  version: "1.1.1"
+  version: "1.2.0"
 ---
 
-# Review Salience → PCA → K-means Customer Segmentation
+# Review Salience → PCA → K-means
 
-Full pipeline from a review corpus to customer segments:
+## Overview
 
-1. **Score** every review on every attribute (salience 0–7) → `review × attribute` matrix
-2. **Reduce** attributes to latent dimensions via PCA
-3. **Segment** reviews into customer groups via iterative K-means
+把每篇評論對各項屬性的提及程度評為 0–7 分，依需求交付 Excel 矩陣、PCA 主成分分析或 K-means 分群。PCA 用來整理常一起被提及的屬性，分群則依這些提及模式整理評論。
 
-Each stage is independently useful. Run only the stages the user needs.
+三個階段可分別執行。只要評分就完成評分，只要分析既有矩陣就先檢查矩陣，不重做已完成的階段。
 
-For the Excel output format, read `references/xlsx-format.md`.  
-For PCA and K-means implementation details, read `references/pca-kmeans.md`.  
-For a worked example (safety-eyewear, 923 reviews, 30 attributes, 4 clusters), read `references/worked-example.md`.
+## Input Contract
 
-Salience measures *how prominently* a reviewer mentions an attribute — not
-sentiment. Each cell is an integer 0–7:
+確認本次需要評分、Excel、PCA、分群中的哪些成果，並取得對應資料：
 
-| Score | Meaning |
-|-------|---------|
-| 0 | Attribute not mentioned at all |
-| 1–3 | Slight or indirect mention |
-| 4 | Neutral or ambiguous mention |
-| 5–6 | Clearly and explicitly mentioned |
-| 7 | Strongly and fully emphasised |
+- 評分：各產品的完整評論，以及有順序的屬性目錄。
+- PCA：已檢查的評論 × 屬性分數矩陣。
+- 分群：PCA 產生的每篇評論座標，及可對照的評論識別資料。解讀群體時另需原始評分矩陣。
 
-For the Excel output format, read `references/xlsx-format.md`.  
-For PCA and K-means implementation details, read `references/pca-kmeans.md`.  
-For a worked example (safety-eyewear corpus, 923 reviews, 30 attributes, 4 clusters), read `references/worked-example.md`.
+屬性目錄使用固定的 `id` 與 `label`，例如 `01`、`耐用度`。沒有目錄時先閱讀評論整理項目，評分開始後不增刪或重排。
 
----
+每列保留 `review_id`、`product`、完整 `review_text`，評分欄依目錄排列為 `s01`、`s02` 等。沒有既有識別碼時，可按產品及原始順序建立穩定編號。每篇評論是一筆分析單位，不預設每篇都來自不同顧客。
 
-## Concepts
+## Data Sufficiency Gate
 
-### Attribute catalog
-A frozen, ordered list of attributes produced upstream (e.g. by the
-`review-scoring-docx` skill). Each attribute has an `id` (zero-padded, e.g.
-`01`) and a `label`. The catalog **must not change** after scoring begins.
-
-### Scorer
-The component that reads one review and returns N integers. This skill is
-**scorer-agnostic**: Claude reads and scores by default, but the architecture
-supports swapping in any external scorer without changing the rest of the pipeline.
-See [Scorer contract](#scorer-contract) below.
-
-### Salience matrix
-A table with one row per review and one column per attribute, plus metadata
-columns (`review_id`, `product`, `review_text`). Column names follow the pattern
-`s01`, `s02` … `sN`. This is the input to both PCA and K-means.
-
-### PC scores matrix
-Produced by PCA on the standardised salience matrix. Shape: `(n_reviews, n_components)`.
-Each column is a latent dimension (e.g. "整體使用價值感", "場景創新適應力").
-This matrix is the direct input to K-means clustering.
-
-### Customer segments
-K-means groups applied to the PC scores matrix. Each review (= each customer
-voice) is assigned to exactly one segment. The iterative pruning rule ensures
-no segment is smaller than 5% of the total corpus.
-
----
+- 保留所有非空白評論，不因字數少或語言不同而排除。空白列另計數，無法解讀的內容應標示待確認，不用 0 分代替評分失敗。
+- 分數必須是 0–7 的整數，每篇的分數數量及順序都要與目錄一致。小數、布林值、缺值或缺列必須處理完才能進入統計。
+- PCA 沒有足夠樣本或可變動的屬性時，保留評分成果並說明不能分析的原因。
+- 無法形成符合條件的多個群體時，回報未形成有效分群。保留每篇的結果，不把強制停止寫成成功分群。
 
 ## Workflow
 
-### Step 0 — Locate required skills
-Check your available skills for an **xlsx skill** (covers `.xlsx` or spreadsheet
-creation) and a **docx skill** if Word output is needed. Read their SKILL.md
-files before writing any output code.
+### 1. 匯入完整評論
 
-### Step 1 — Ingest reviews
+列出各產品的原始、空白及保留篇數，保留評論原文和來源順序。CSV 可使用 [scoring_io.py](scripts/scoring_io.py) 的 `load_reviews`。檔案格式或文字欄不明確時，先確認實際欄位，避免讀錯內容。
 
-Load all reviews for each product. Never truncate. Accept all languages.
+### 2. 固定目錄，逐篇評分
 
-```python
-import csv
+依完整語意判讀每個屬性，不以關鍵字出現次數代替閱讀。正面、負面或中立的內容都可能被明確提及。
 
-def load_reviews(filepath):
-    candidates = ['body', 'Body', 'review', 'text', 'content']
-    with open(filepath, encoding='utf-8', errors='replace') as f:
-        reader = csv.DictReader(f)
-        col = next((c for c in candidates if c in reader.fieldnames), None)
-        if col is None:
-            raise ValueError(f"No text column found. Headers: {reader.fieldnames}")
-        return [r[col].strip() for r in reader
-                if r[col].strip() and len(r[col].strip()) > 15]
-```
+| 分數 | 提及程度 |
+| --- | --- |
+| 0 | 完全沒有提到 |
+| 1–3 | 略微或間接提到 |
+| 4 | 清楚提到，但著墨有限 |
+| 5–6 | 明確討論 |
+| 7 | 是評論的主要關注點，或有充分強調 |
 
-Print a per-product count summary before proceeding.
+假設評論寫「拉鍊非常好拉」或「拉鍊完全拉不動」，兩者都可能高度提及拉鍊。分數衡量的是提及程度，不能據此判定滿意或不滿意。
 
-### Step 2 — Confirm the attribute catalog
+評分器的輸入是評論原文與固定屬性目錄，輸出是依目錄順序排列的整數串列。可由目前的 agent 閱讀評分，或使用外部評分器，兩者遵守相同檢查。批次工作分段保存進度，重跑時依識別碼確認已完成哪些評論。
 
-Either receive the catalog from upstream or rediscover it by reading the corpus.
-Freeze as an ordered list before scoring starts:
+外部 API 或 CSV 交接時，讀[外部評分器](references/external-scorer.md)。需要校準判讀時，讀[評分與分析案例](references/worked-example.md)，只參考有原文支持的判讀，不把案例群數當成本次答案。
 
-```python
-ATTRS = [
-    ("01", "attribute label 1"),
-    ("02", "attribute label 2"),
-    # ...
-]
-```
+### 3. 交付需要的矩陣
 
-### Step 3 — Score reviews  ← scorer swap point
+需要 `.xlsx` 時才載入當前可用的試算表技能，並依 [Excel 格式](references/xlsx-format.md)建立「評論 × 屬性」及「產品平均提及程度」兩張工作表。
 
-This is the **scorer contract boundary**. Anything that satisfies the contract
-below can replace Claude's built-in scoring.
+產品平均包含該產品所有已評分評論，沒有提到的 0 分也計入。平均值描述整批評論的提及程度，不是品質分數。
 
-#### Scorer contract
+### 4. PCA（需要時）
 
-**Input:** a single review string (any language)  
-**Output:** a list of integers, one per attribute, in catalog order, each 0–7
+依 [PCA 與 K-means](references/pca-kmeans.md)使用 [salience_analysis.py](scripts/salience_analysis.py)。先標準化可分析的屬性，再以特徵值大於 1 作為主成分保留依據。記錄排除的固定值屬性、保留數、解釋變異及限制。
 
-**Built-in scorer (Claude reads semantically):**  
-Read each review, understand its meaning, assign scores. No keyword matching.
-See `references/worked-example.md` for calibration examples.
+主成分依正負負荷量所對應的屬性命名。其正負號不能當成好壞評價。保存每篇評論的主成分座標，供需要的分群階段使用。
 
-**External scorer (n8n / API / other):**  
-See `references/external-scorer.md` for integration patterns.
+### 5. K-means（需要時）
 
-```python
-scores = {}
-for pid, reviews in all_reviews.items():
-    scores[pid] = []
-    for review_text in reviews:
-        scores[pid].append(score_one_review(review_text, ATTRS))
-```
+以主成分座標分群，在樣本數與不同座標數允許的範圍內比較群數。依統計指標及可解釋性選擇起始群數，記錄理由。
 
-Save progress incrementally if corpus > 200 reviews.
+沿用小群低於全樣本 5% 時的逐次排除與重訓流程。完成後用最終模型重新指派全部評論，檢查最終群體大小，每篇都要有對應結果。只剩一群時，明確回報無法形成多群。
 
-### Step 4 — Build salience Excel
+以主成分位置、原始屬性平均及產品分布描述各群「談論什麼」。要談滿意度、購買動機或人物特徵，必須另有原文或資料支持。
 
-See `references/xlsx-format.md` for exact sheet layout, colour scheme, and
-openpyxl patterns. Two sheets: full matrix + product summary.
+## Output Contract
 
-### Step 5 — PCA (if requested)
+只交付本次要求的階段成果：
 
-Read `references/pca-kmeans.md` → Section A before writing any PCA code.
+- 評分：完整原文、識別碼、固定目錄、逐篇分數及產品篇數。
+- Excel：完整矩陣與產品平均，欄位順序與評分資料一致。
+- PCA：主成分數、負荷量、解釋變異、每篇座標及未能分析的原因。
+- 分群：每篇歸屬、群體大小、各群提及模式、重訓紀錄及完成狀態。
 
-Key steps:
-1. Standardise: `X_std = StandardScaler().fit_transform(X)`
-2. Fit PCA: use Kaiser criterion (eigenvalue > 1) to choose `n_components`
-3. Compute factor loadings: `loadings = components_.T × sqrt(eigenvalues_)`
-4. Name each PC by its dominant loadings (|≥ 0.30|)
-5. Save PC scores matrix for clustering: `PC = pca.fit_transform(X_std)`
+使用當前環境的檔案連結或交付工具提供成果。只有檔案含公式時才需要重算與檢查公式結果。需要 Word 時再載入文件技能，不為單純評分或統計額外產生 Word。
 
-### Step 6 — K-means segmentation (if requested)
+## Quality Rules
 
-Read `references/pca-kmeans.md` → Section B before writing any clustering code.
-
-Key steps:
-1. Scan K=2–9 for Elbow + Silhouette
-2. Pick starting K (favour interpretability over peak silhouette if gap is small)
-3. Run iterative pruning: remove clusters < 5% of corpus, decrement K, refit
-4. **After convergence: call `km.predict(ALL_reviews)` — never discard pruned reviews**
-5. Name clusters by PC centroid pattern and top attribute means
-
-### Step 7 — Output
-
-- Build the `.xlsx` in the working directory, then copy it to the outputs directory. The build path is where `scripts/recalc.py` runs — recalculate first, copy second, or the delivered file carries uncalculated formulas.
-- Build the `.docx` the same way, if Word output was requested.
-- Call `present_files` for every output file
-- Write a prose summary: total reviewed, cluster sizes + names, top finding per cluster
-
----
-
-## Hard rules
-
-1. **Never truncate reviews.** Every valid review (> 15 chars) must be scored and clustered.
-2. **All languages count.** Do not filter by language.
-3. **Catalog is frozen before scoring.** No mid-run additions or reordering.
-4. **Integer scores only.** Each salience cell is a whole number 0–7.
-5. **Scorer is swappable.** The pipeline must not assume Claude is the scorer.
-6. **Never discard pruned reviews.** After iterative pruning converges, use `km.predict()` on the full corpus to assign every review — including those removed during pruning — to the nearest final centroid.
-7. **Use absolute column widths.** Percentage widths break in Google Sheets.
-8. **Present with `present_files`.** Never ask the user to navigate to the file.
+- 原文與評分分開保存，不能為了版面截斷唯一的原始資料。
+- 所有語言使用相同評分定義。短評論可以有高分，長評論也可能沒提到某個屬性。
+- 全部評論的順序與識別碼在評分、PCA、分群間保持一致，沒有遺失、重複或錯配。
+- 統計結果只能支持提及模式的描述，不能把高分、高主成分座標或特定群體當成高滿意度。
+- 確認完成狀態、實際分析篇數與最終群體大小，不以程式正常結束代替驗收。

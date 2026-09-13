@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**47 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**48 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -258,15 +258,33 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **狀態：** 使用者已確認接受並要求提交、推送。
 
-- [ ] **12. review-salience-xlsx**（中優先）
+- [x] **12. review-salience-xlsx**（中優先）
 
-  **可以改哪裡：** 相同三個 references 導引逐字重複；內嵌 CSV 範例與步驟重複工具細節；PCA/K-means-only 也要求讀 xlsx；硬綁 present_files、recalc.py 和工作目錄複製。
+  **確認方向：** 保留提及程度 0–7、Excel、PCA 與 K-means，各階段依需求執行。修正案例把提及程度當滿意度的解讀，保留非空短評論，修正整數檢查、小樣本與小群停止問題，精簡重複文件及交付工具綁定。
 
-  **建議改法：** 刪去重複導引，主檔只留階段選擇/評分契約/全樣本覆蓋，載入格式技能只在輸出該格式時；I/O 程式移腳本或 reference；用當前環境的檔案交付能力，只有公式存在才要求重算。
+  **本輪修改：** 主檔精簡為 101 行。匯入／評分檢查及統計函式集中到兩個 Python 工具。小群排除後會重訓最終模型，重新指派所有評論。無法形成多群時明確標示，固定值屬性與無法估計 PCA 的原因也保留在輸出。
 
-  **應保留：** 使用者只要哪階段就跑哪階段、salience 不是情緒、整數與屬性順序、分群後每筆仍得到歸屬。
+  **版本：** skill 1.2.0、customer-insight plugin 1.10.0。
 
-  **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-salience-xlsx/SKILL.md:3)、[主檔:18](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-salience-xlsx/SKILL.md:18)、[主檔:34](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-salience-xlsx/SKILL.md:34)、[主檔:77](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-salience-xlsx/SKILL.md:77)、[主檔:142](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-salience-xlsx/SKILL.md:142)、[主檔:164](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-salience-xlsx/SKILL.md:164)、[主檔:173](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-salience-xlsx/SKILL.md:173)。
+  **驗證：** 19 項 unittest 通過，涵蓋短文與多語原文、錯誤 CSV、評分型別、匯入排序、小樣本 PCA、固定值欄位、全零／相同資料、小群、5% 門檻與全列對齊。另以六篇假設短評論及明示的合成分數實跑匯入→檢查→PCA→分群→JSON 交付，保留全部六篇並產生兩群各三篇。quick_validate、YAML／JSON、304 字元 description、8 個相對連結、文件 Python 語法、59 個 skill 與 README 數量、git diff --check 通過。
+
+  **限制：** 原 923 篇案例沒有附完整矩陣及模型，因此保留為歷史示例，不宣稱重現數值。沒有呼叫外部 API，也沒有製作或實際渲染 Excel。獨立複核代理因使用額度不足而未完成，其結果不列為驗證證據；上述本機測試與整合檢查已由主代理執行。測試環境沿用 `/private/tmp/conjoint-model-venv`，整合產物在 `/private/tmp/salience-final-mwq80g4z`。
+
+  | 檔案 | 變更摘要 |
+  | --- | --- |
+  | [docs/skill-audit/checklist.md](/Users/timlai/Developer/skills/docs/skill-audit/checklist.md) | 記錄修改、驗證及待驗收狀態。 |
+  | [plugins/customer-insight/.claude-plugin/plugin.json](/Users/timlai/Developer/skills/plugins/customer-insight/.claude-plugin/plugin.json) | 調升 plugin 版本。 |
+  | [plugins/customer-insight/skills/review-salience-xlsx/SKILL.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-salience-xlsx/SKILL.md) | 精簡流程，保留短評論與提及程度定義。 |
+  | [plugins/customer-insight/skills/review-salience-xlsx/references/external-scorer.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-salience-xlsx/references/external-scorer.md) | 統一整數檢查及外部回傳的順序規則。 |
+  | [plugins/customer-insight/skills/review-salience-xlsx/references/pca-kmeans.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-salience-xlsx/references/pca-kmeans.md) | 改用共用函式，說明小樣本及分群停止條件。 |
+  | [plugins/customer-insight/skills/review-salience-xlsx/references/worked-example.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-salience-xlsx/references/worked-example.md) | 修正提及程度與滿意度混淆，標示歷史案例限制。 |
+  | [plugins/customer-insight/skills/review-salience-xlsx/references/xlsx-format.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-salience-xlsx/references/xlsx-format.md) | 保留全文、欄位順序，依實際工具重算與交付。 |
+  | [plugins/customer-insight/skills/review-salience-xlsx/scripts/salience_analysis.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-salience-xlsx/scripts/salience_analysis.py) | 新增可分階段執行的 PCA 與分群函式。 |
+  | [plugins/customer-insight/skills/review-salience-xlsx/scripts/scoring_io.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-salience-xlsx/scripts/scoring_io.py) | 新增評論載入、整數檢查及按 ID 匯入功能。 |
+  | [plugins/customer-insight/skills/review-salience-xlsx/scripts/test_salience_analysis.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-salience-xlsx/scripts/test_salience_analysis.py) | 新增 12 項統計及全列對齊測試。 |
+  | [plugins/customer-insight/skills/review-salience-xlsx/scripts/test_scoring_io.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-salience-xlsx/scripts/test_scoring_io.py) | 新增 7 項匯入與評分測試。 |
+
+  **狀態：** 使用者已確認接受並要求提交、推送。
 
 - [ ] **13. review-scoring-docx**（高優先）
 

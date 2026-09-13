@@ -19,7 +19,7 @@ salience_matrix.xlsx
 | A | `review_id` | `{PRODUCT_ID}_{zero-padded-index}`, e.g. `B016KZ2APQ_0001` |
 | B | `product` | Product identifier string |
 | C | `salience_sum` | Excel formula: `=SUM(E{row}:{last_attr_col}{row})` |
-| D | `review_text` | First 120–300 chars of the review body |
+| D | `review_text` | Full original review text |
 | E … | `s01`, `s02` … `sN` | Integer salience scores 0–7 |
 
 ### Header rows
@@ -27,6 +27,8 @@ salience_matrix.xlsx
 **Row 1 — Maslow tier group headers** (merged across attribute columns)  
 Each tier's columns are merged and labelled (e.g. `生理需求`, `安全需求`).  
 Fixed metadata columns (A–D) each span rows 1–2 (merged).
+
+Use tier groups when they are supplied by the frozen catalog. Otherwise use the existing attribute order without assigning new theoretical categories for formatting. Merge only adjacent columns in the same group; never reorder the scored attributes to create a header.
 
 **Row 2 — Attribute headers**  
 Each cell contains `{id}\n{label}` (e.g. `01\n光學清晰度`), wrap_text=True, height ≈ 42pt.
@@ -100,6 +102,8 @@ ws.row_dimensions[2].height = 42  # attr header row, needs wrap
 
 Each cell is the **mean salience** across all reviews for that product-attribute pair, rounded to 2 decimal places.
 
+Include genuine zero scores for unmentioned attributes. A product with no scored reviews has no mean; report the missing data rather than dividing by zero.
+
 ```python
 mean_val = round(sum(scores_list) / len(scores_list), 2)
 ```
@@ -151,16 +155,12 @@ ws.row_dimensions[2].height = 42
 # Freeze panes
 ws.freeze_panes = "E3"
 
-# Save to the working directory — not the outputs directory.
-# Formulas must be recalculated before the file is delivered (see below),
-# and recalc runs against this build path.
-wb.save("/home/claude/salience_matrix.xlsx")
+# Use the selected output path for this task.
+wb.save(output_path)
 ```
 
-### Recalculate formulas after saving
+### Validate and deliver
 
-```bash
-python scripts/recalc.py /home/claude/salience_matrix.xlsx 60
-```
+When formulas are present, use the available spreadsheet workflow to recalculate them and verify the delivered file's values. Static computed values do not require a separate recalculation step. Check review counts, column order, score ranges and product means against the scored data, then provide a file link or the environment's file-delivery tool.
 
-Check that the returned JSON shows `"status": "success"` and `"total_errors": 0`. Only then copy the file to the outputs directory and call `present_files` on the copy.
+Keep full original text. If the spreadsheet writer cannot preserve a review in one cell, deliver the complete text in a linked companion data file keyed by `review_id`, label any displayed excerpt as a preview, and verify the original is recoverable. Review text must be stored as text, including text that begins with a formula-like character.
