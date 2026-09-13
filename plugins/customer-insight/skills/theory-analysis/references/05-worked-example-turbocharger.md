@@ -48,7 +48,7 @@
 }
 ```
 
-## Example JSON (theory_annotations 節錄)
+## Example JSON（需要結構化交付時，theory_annotations 節錄）
 
 ```json
 {
@@ -90,5 +90,6 @@
 - 摘要
 - 構面判讀（依理論分節）
 - 證據引文
-- STP 對接欄位
 - 限制與假設
+
+若另有 STP 串接需求，再加入「STP 對接欄位」。本例未要求串接，因此省略。

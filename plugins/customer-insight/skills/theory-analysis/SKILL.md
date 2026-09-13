@@ -14,7 +14,7 @@ description: >-
   which is attribute-level and needs the handoff steps in
   references/06-stp-handoff.md.
 metadata:
-  version: "1.0.1"
+  version: "1.0.2"
 ---
 
 # Theory Analysis
@@ -58,13 +58,13 @@ metadata:
 1. 讀 [00-input-and-gate.md](references/00-input-and-gate.md)，完成輸入檢核與理論選擇。
 2. 讀本次選用理論的參考檔（[02](references/02-theory-product-positioning.md) / [03](references/03-theory-purchase-motivation.md) / [04](references/04-theory-wom-motivation.md)），校準構面定義與判準。
 3. 依 [01-output-contract.md](references/01-output-contract.md) 的 Coding Procedure 逐句標註。多理論時每句在每個理論之下各判一次。
-4. 依 [01-output-contract.md](references/01-output-contract.md) 輸出 JSON 與 Markdown。
+4. 依交付需求輸出報告或 JSON，格式見 [01-output-contract.md](references/01-output-contract.md)。
 5. 需要對齊格式與深度時，看 [05-worked-example-turbocharger.md](references/05-worked-example-turbocharger.md)。
 6. 要串接 `review-mining-stp` 才讀 [06-stp-handoff.md](references/06-stp-handoff.md)。
 
 ## Output Contract
 
-一份 JSON 加一份 Markdown，多理論也只出一份，靠每筆標註自己的 `family` 區分。完整 schema 見 [01-output-contract.md](references/01-output-contract.md)。
+一般判讀提供易讀報告。使用者要求 JSON、需要程式處理或串接時，才提供一份 JSON，以 `family` 區分多理論標註。只有要串接 STP 時才加入對接欄位。完整格式見 [01-output-contract.md](references/01-output-contract.md)。
 
 ## Quality Rules
 
@@ -72,7 +72,7 @@ metadata:
 - `quote` 必須是原文連續片段，可逐字對回，不可改寫成看似直接引述。
 - `reason` 要說明為何對應該構面，不可只重述原句。
 - 不得輸出各理論 taxonomy 之外的 subtheory。
-- 每個選用理論分別計算覆蓋率，未達 80% 要在摘要說出資料限制。
+- 每個選用理論分別計算覆蓋率，依 [00-input-and-gate.md](references/00-input-and-gate.md) 的各理論門檻判定，未達門檻時在摘要說出資料限制。
 
 ## Common Mistakes
 

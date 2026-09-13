@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**49 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**50 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -306,15 +306,26 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **狀態：** 使用者已確認接受並要求提交、推送。
 
-- [ ] **14. theory-analysis**（低優先）
+- [x] **14. theory-analysis**（低優先）
 
-  **可以改哪裡：** 主檔已做到按所選理論與 STP 需求讀 reference，宜低優先保留；description 仍含逐句多理論與 STP 欄位操作細節；即使只做質性判讀也固定 JSON+Markdown，references/01 永遠含 STP 對接欄。
+  **已修改：** skill 1.0.2、plugin 1.11.1。覆蓋率依各理論既有門檻判定。一般判讀提供易讀報告，需要程式處理或使用者要求時才提供 JSON。STP 對接區塊依串接需求提供，同步範例與啟動提示，保留理論分類與引文規則。
 
-  **建議改法：** 先只縮 description 到觸發與排除條件；JSON 僅結構化交付或串接需要時提供；STP 區塊隨交接需求產出；維持現有短入口，不為省字刪 taxonomy 判讀。
+  **驗證：** skill validator、YAML、plugin JSON、5 個 JSON 範例解析、相對連結、59 個 skill 與 README 列數檢查通過。README 定位沒有改變，無須調整。
 
-  **應保留：** 多理論可同時標、引文可逐字核對、無證據 insufficient、item-level 與 attribute-level 邊界。
+  | 檔案 | 變更摘要 |
+  | --- | --- |
+  | [plugins/customer-insight/.claude-plugin/plugin.json](/Users/timlai/Developer/skills/plugins/customer-insight/.claude-plugin/plugin.json) | 調升 plugin 版本。 |
+  | [plugins/customer-insight/skills/theory-analysis/SKILL.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/theory-analysis/SKILL.md) | 修正覆蓋率引用及輸出格式，調升 skill 版本。 |
+  | [plugins/customer-insight/skills/theory-analysis/agents/openai.yaml](/Users/timlai/Developer/skills/plugins/customer-insight/skills/theory-analysis/agents/openai.yaml) | 移除強制雙格式輸出的啟動提示。 |
+  | [plugins/customer-insight/skills/theory-analysis/references/00-input-and-gate.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/theory-analysis/references/00-input-and-gate.md) | 缺資料時也依需求使用文字或 JSON。 |
+  | [plugins/customer-insight/skills/theory-analysis/references/01-output-contract.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/theory-analysis/references/01-output-contract.md) | 區分一般報告、JSON 與選用 STP 區塊。 |
+  | [plugins/customer-insight/skills/theory-analysis/references/02-theory-product-positioning.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/theory-analysis/references/02-theory-product-positioning.md) | 依需求提供 STP 欄位。 |
+  | [plugins/customer-insight/skills/theory-analysis/references/03-theory-purchase-motivation.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/theory-analysis/references/03-theory-purchase-motivation.md) | 依需求提供 STP 欄位。 |
+  | [plugins/customer-insight/skills/theory-analysis/references/04-theory-wom-motivation.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/theory-analysis/references/04-theory-wom-motivation.md) | 依需求提供 STP 欄位。 |
+  | [plugins/customer-insight/skills/theory-analysis/references/05-worked-example-turbocharger.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/theory-analysis/references/05-worked-example-turbocharger.md) | 同步範例的格式與 STP 選用條件。 |
+  | [docs/skill-audit/checklist.md](/Users/timlai/Developer/skills/docs/skill-audit/checklist.md) | 記錄修改與驗證。 |
 
-  **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/customer-insight/skills/theory-analysis/SKILL.md:3)、[主檔:56](/Users/timlai/Developer/skills/plugins/customer-insight/skills/theory-analysis/SKILL.md:56)、[主檔:65](/Users/timlai/Developer/skills/plugins/customer-insight/skills/theory-analysis/SKILL.md:65)、[主檔:85](/Users/timlai/Developer/skills/plugins/customer-insight/skills/theory-analysis/SKILL.md:85)。
+  **狀態：** 使用者已確認接受並要求提交、推送。
 
 ### data-and-research
 

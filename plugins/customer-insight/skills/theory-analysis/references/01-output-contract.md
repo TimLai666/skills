@@ -1,8 +1,8 @@
-# Output Contract (JSON + Markdown)
+# Output Contract
 
-三個理論共用同一份輸出契約。多理論時**輸出一份 JSON**，用每筆標註自己的 `family` 區分，不要每個理論各出一份。
+三個理論共用判讀與證據規則。一般判讀提供易讀報告，使用者要求 JSON、需要程式處理或串接時才輸出 JSON。多理論合併在同一份結果，以 `family` 區分。交付格式依使用者需求，不固定同時輸出兩種格式。
 
-## JSON Contract
+## JSON Contract（需要結構化交付時）
 
 ```json
 {
@@ -36,11 +36,6 @@
       "quote": ""
     }
   ],
-  "stp_mapping": {
-    "attribute_group_recommendation": "見各理論參考檔的「STP 對接建議值」",
-    "suggested_stat_roles": ["見各理論參考檔"],
-    "dimension_catalog_notes": []
-  },
   "quality_checks": {
     "input_valid": true,
     "missing_fields": [],
@@ -54,15 +49,28 @@
 }
 ```
 
-## Markdown Contract
+## 報告內容
 
-固定輸出以下章節：
+依閱讀需求安排以下內容，可用 Markdown 呈現：
 
 1. `摘要`
 2. `構面判讀` — 多理論時依理論分節
 3. `證據引文`
-4. `STP 對接欄位`
-5. `限制與假設`
+4. `限制與假設`
+
+## STP 對接（有串接需求時）
+
+只有要串接 `review-mining-stp` 時，才在報告加入「STP 對接欄位」，並在 JSON 加入以下 `stp_mapping` 物件。沒有串接需求就省略整個區塊。轉換程序見 [06-stp-handoff.md](06-stp-handoff.md)。
+
+```json
+{
+  "stp_mapping": {
+    "attribute_group_recommendation": "見各理論參考檔的「STP 對接建議值」",
+    "suggested_stat_roles": ["見各理論參考檔"],
+    "dimension_catalog_notes": []
+  }
+}
+```
 
 ## Coding Procedure
 
@@ -85,4 +93,4 @@
 - `evidence_count` 必須等於該構面被引用的 `evidence_quotes` 筆數。
 - 每個構面摘要至少要有一則證據，否則明確標示 `insufficient`。
 - `quality_checks.input_valid = false` 時，先輸出 gate 結果，不輸出具體結論或強結論，只給缺資料說明與下一步。
-- `stp_mapping` 的建議值依選用理論而定，見各理論參考檔的「STP 對接建議值」。多理論時取聯集，並在 `dimension_catalog_notes` 註明各值來自哪個理論。
+- 需要 STP 對接時，`stp_mapping` 的建議值依選用理論而定，見各理論參考檔的「STP 對接建議值」。多理論時取聯集，並在 `dimension_catalog_notes` 註明各值來自哪個理論。

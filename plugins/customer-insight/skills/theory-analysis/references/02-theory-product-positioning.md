@@ -31,7 +31,7 @@
 
 ## STP 對接建議值
 
-選用本理論時，`stp_mapping` 填：
+選用本理論且需要 STP 對接時，`stp_mapping` 填：
 
 - `attribute_group_recommendation`: `attribute_function|benefit_use|brand_personality|brand_image`
 - `suggested_stat_roles`: `["segmentation", "targeting", "positioning"]`
