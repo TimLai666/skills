@@ -1,10 +1,10 @@
 # Minimal canonical-input fixture
 
-Three brands, five attributes, twenty synthetic reviews. The smallest corpus that still satisfies every contract check: at least three dimensions, at least two positioning attributes, all four theory families covered, every brand scored on every attribute.
+Three brands, five attributes, twenty synthetic reviews. This fixture includes at least three dimensions, at least two positioning attributes, all four default theory families, and evaluations for every brand on every attribute. Other valid corpora may have documented theory gaps or mentions without evaluations.
 
 It exists for one job: **prove that a change to the scripts did what you meant and nothing else.**
 
-The repo has no test suite. Without a before/after run, a change to `positioning.py` or `io.py` can only be judged by reading it, and a statistics pipeline that produces plausible wrong numbers reads exactly like one that produces right numbers.
+Run the script tests as well as this before/after comparison. The fixture checks that the complete pipeline preserves its hand-checkable results.
 
 ## Before/after procedure
 
@@ -30,7 +30,7 @@ Everything except the difference you intended should be identical. A renamed key
 
 ## Hand-checkable values
 
-The fixture is small enough to verify the aggregation by hand. The product-level quality figure is the mean of per-review quality over the reviews that mentioned the attribute (`salience >= 1`):
+The fixture is small enough to verify the aggregation by hand. The brand-level quality figure is the mean of observed per-review quality where the attribute was mentioned (`salience >= 1`). A mention without an evaluation contributes to `mention_count`, but not `evaluation_count` or the quality mean. A genuine quality score of zero is included in the mean.
 
 | Check | Expected |
 |---|---|

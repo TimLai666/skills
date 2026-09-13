@@ -22,6 +22,12 @@ Required script inputs:
 
 The attribute set is dynamic. It comes from `dimension_catalog.stat_roles` containing `positioning`, not from a fixed template.
 
+For scorecards derived from canonical reviews, `axis = quality` scores average only valid per-review evaluations. `mention_count` counts reviews with `salience >= 1`; `evaluation_count` counts those with non-empty quality. If no evaluations exist, the quality score stays empty.
+
+Positioning uses only feature columns with complete values across the compared brands. Excluded columns are recorded in `excluded_missing_features`. At least two complete shared feature columns are required; salience and quality columns from the same base attribute count separately. Do not fill missing brand evaluations with zero or a midpoint.
+
+If fewer than two usable columns remain, the runner exits with a nonzero status before producing the final full report. Earlier stage artifacts remain in the output directory and must be reported as partial results, not a completed full run.
+
 ## Method Rules
 
 - default positioning method: `factor_analysis`

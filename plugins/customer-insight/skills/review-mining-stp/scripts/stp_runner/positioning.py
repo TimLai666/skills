@@ -97,10 +97,13 @@ def run_positioning(
 
     pivot = scorecard.pivot_table(index="brand", columns="feature", values="score", aggfunc="mean")
     ideal_feature_map = _build_ideal_feature_map(scorecard, ideal_point)
-    shared_columns = [column for column in pivot.columns if column in ideal_feature_map]
+    pivot = pivot.reindex(index=scorecard["brand"].drop_duplicates(), columns=sorted(scorecard["feature"].unique()))
+    excluded_missing_features = [column for column in pivot.columns if pivot[column].isna().any()]
+    shared_columns = [column for column in pivot.columns if column in ideal_feature_map and column not in excluded_missing_features]
     if len(shared_columns) < 2:
         raise SystemExit(
-            "Positioning requires at least two shared salience/quality features between positioning_scorecard.csv and ideal_point.json."
+            "Positioning requires at least two complete shared salience/quality features; missing evaluations are not imputed. "
+            + "Excluded incomplete features: " + ", ".join(excluded_missing_features)
         )
     pivot = pivot[shared_columns].sort_index()
     ideal_series = pd.Series({column: ideal_feature_map[column] for column in shared_columns}, name=ideal_point["label"])
@@ -451,7 +454,8 @@ def run_positioning(
             "attribute": str(record["attribute"]),
             "axis": str(record["axis"]),
             "feature": str(record["feature"]),
-            "score": float(record["score"]),
+            "score": float(record["score"]) if pd.notna(record["score"]) else None,
+            **{key: int(record[key]) for key in ("mention_count", "evaluation_count") if key in record},
             "point_type": "brand",
         }
         for record in scorecard.to_dict("records")
@@ -470,6 +474,8 @@ def run_positioning(
         )
 
     return {
+        "excluded_missing_features": excluded_missing_features,
+        "modeled_feature_columns": shared_columns,
         "positioning_scorecard": scorecard_rows,
         "dynamic_scorecard_summary": {
             "brand_count": int(len(brand_matrix)),

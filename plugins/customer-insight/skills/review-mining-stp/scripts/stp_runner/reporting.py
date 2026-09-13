@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 from typing import Any
 
-from .io import write_json
+from .io import theory_taxonomy, write_json
 
 
 THEORY_DETAILS = {
@@ -297,6 +298,7 @@ def build_attribute_extraction_summary_contract(
         "target_minimum": int(extraction_summary.get("target_minimum", 30)),
         "actual_count": actual_count,
         "shortfall_reason": str(extraction_summary.get("shortfall_reason", "")),
+        "theory_gap": list(extraction_summary.get("theory_gap", [])),
         "themes_discovered": sorted(theme_counter.keys()),
         "attribute_group_summary": [
             {"attribute_group": group, "attribute_count": count}
@@ -329,6 +331,13 @@ def _themes_for_columns(
     ]
 
 
+def _theory_details(foundation: dict[str, Any], family: str) -> dict[str, str]:
+    if family in THEORY_DETAILS:
+        return THEORY_DETAILS[family]
+    extension = foundation.get("theory_extensions", {}).get(family, {})
+    return {"name": _titleize(family), "description": str(extension.get("rationale", ""))}
+
+
 def _theory_coverage_summary(
     foundation: dict[str, Any],
     columns: list[str],
@@ -341,7 +350,7 @@ def _theory_coverage_summary(
         include_segmentation_overlays=include_segmentation_overlays,
     )
     summary: list[dict[str, Any]] = []
-    for family, subtheories in THEORY_TAXONOMY.items():
+    for family, subtheories in theory_taxonomy(foundation).items():
         family_entries = [entry for entry in entries if entry.get("family") == family]
         covered = list(
             dict.fromkeys(str(entry.get("subtheory", "")) for entry in family_entries if entry.get("subtheory"))
@@ -351,11 +360,11 @@ def _theory_coverage_summary(
         )
         summary.append(
             {
-                "theory_family": THEORY_DETAILS[family]["name"],
+                "theory_family": _theory_details(foundation, family)["name"],
                 "covered_subtheories": [_subtheory_label(family, subtheory) for subtheory in covered],
                 "not_evidenced_subtheories": [
                     _subtheory_label(family, subtheory)
-                    for subtheory in subtheories
+                    for subtheory in sorted(subtheories)
                     if subtheory not in covered
                 ],
                 "supporting_items": supporting_items,
@@ -398,13 +407,16 @@ def _columns_for_stage(
     stage: str,
     stage_summary: dict[str, Any],
 ) -> list[str]:
+    if stage in {"segmentation", "positioning"} and "modeled_feature_columns" in stage_summary:
+        return list(stage_summary["modeled_feature_columns"])
+    excluded = set(stage_summary.get("excluded_missing_features", []))
     role_map: dict[str, list[str]] = {}
     for item in foundation.get("dimension_catalog", []):
         if not isinstance(item, dict):
             continue
         salience_column = str(item.get("salience_column", ""))
         quality_column = str(item.get("quality_column", ""))
-        expanded_columns = [column for column in [salience_column, quality_column] if column]
+        expanded_columns = [column for column in [salience_column, quality_column] if column and column not in excluded]
         if not expanded_columns:
             column = str(item.get("column", ""))
             expanded_columns = [column] if column else []
@@ -414,18 +426,22 @@ def _columns_for_stage(
     if stage == "segmentation":
         return list(dict.fromkeys(role_map.get("segmentation", [])))
     if stage == "targeting":
-        return list(
-            dict.fromkeys(
-                role_map.get("current_target", [])
-                + role_map.get("potential_target", [])
-                + role_map.get("comparison_axis", [])
-            )
+        tested_columns = [
+            str(row["variable"])
+            for key in ["current_target_market", "potential_target_market"]
+            for row in stage_summary.get(key, [])
+            if isinstance(row, dict) and row.get("variable")
+        ]
+        comparison_columns = stage_summary.get("target_selection_decision", {}).get(
+            "comparison_axes_used", stage_summary.get("method_selection", {}).get("comparison_axes_used", [])
         )
+        return list(dict.fromkeys(tested_columns + list(comparison_columns)))
     if stage == "positioning":
         columns = [
             str(row.get("feature") or row.get("attribute"))
             for row in stage_summary.get("positioning_scorecard", [])
             if row.get("point_type") == "brand" and (row.get("feature") or row.get("attribute"))
+            and str(row.get("feature") or row.get("attribute")) not in excluded
         ]
         if columns:
             return list(dict.fromkeys(columns))
@@ -446,7 +462,7 @@ def _theories_for_columns(
     unique_keys = list(
         dict.fromkeys(str(entry.get("family", "")) for entry in entries if entry.get("family"))
     )
-    return [THEORY_DETAILS[key] for key in unique_keys if key in THEORY_DETAILS]
+    return [_theory_details(foundation, key) for key in unique_keys if key in theory_taxonomy(foundation)]
 
 
 def _fallback_theories(stage: str) -> list[dict[str, str]]:
@@ -497,7 +513,11 @@ def _quote_candidates(
             frame = filtered
 
     score_matrix = frame[relevant_columns].apply(pd.to_numeric, errors="coerce")
-    frame = frame.assign(_relevance=score_matrix.mean(axis=1))
+    for column in relevant_columns:
+        if _axis_for_column(foundation, column) == "salience":
+            score_matrix[column] = score_matrix[column].where(score_matrix[column] > 0)
+    frame = frame.loc[score_matrix.notna().any(axis=1)]
+    frame = frame.assign(_relevance=score_matrix.loc[frame.index].mean(axis=1))
     frame = frame.sort_values("_relevance", ascending=False)
 
     quotes: list[dict[str, Any]] = []
@@ -527,7 +547,7 @@ def _quote_candidates(
                     return 0.0
 
             top_columns = sorted(
-                relevant_columns,
+                [column for column in relevant_columns if pd.notna(score_matrix.at[row.name, column])],
                 key=_score_for_sort,
                 reverse=True,
             )
@@ -551,7 +571,7 @@ def _quote_candidates(
             {
                 "review_id": str(row["review_id"]),
                 "quote_text": review_text,
-                "why_this_quote_matters": "This review strongly reflects " + ", ".join(linked_items) + ".",
+                "why_this_quote_matters": "This review provides scored evidence for " + ", ".join(linked_items) + ".",
                 "linked_items": linked_items,
             }
         )
@@ -737,13 +757,14 @@ def _axis_modeling_summary(
 ) -> dict[str, Any]:
     salience_columns = [column for column in relevant_columns if _axis_for_column(foundation, column) == "salience"]
     quality_columns = [column for column in relevant_columns if _axis_for_column(foundation, column) == "quality"]
+    axis_label = "Salience and quality" if salience_columns and quality_columns else "Salience" if salience_columns else "Quality" if quality_columns else "Available"
     if stage == "segmentation":
-        modeling_rule = "Salience and quality columns are standardized separately, then modeled together through factor analysis before K-means clustering."
+        modeling_rule = f"{axis_label} columns are standardized by axis, then modeled through factor analysis before K-means clustering."
     elif stage == "targeting":
-        modeling_rule = "Salience and quality columns are both tested as candidate drivers; continuous variables flow into ANOVA/regression, and binary variables flow into chi-square/logistic models."
+        modeling_rule = f"{axis_label} columns with available results are reported as tested drivers or target-selection comparison axes; continuous variables use ANOVA/regression, and binary variables use chi-square/logistic models."
     else:
         map_method = "factor analysis" if positioning_method != "mds" else "MDS"
-        modeling_rule = f"Salience and quality columns are combined into one feature matrix for the {map_method} perceptual map and ideal-point distance analysis."
+        modeling_rule = f"{axis_label} columns are combined into one feature matrix for the {map_method} perceptual map and ideal-point distance analysis."
     return {
         "axes_mode": _axes_used_for_columns(foundation, relevant_columns),
         "salience_columns_used": salience_columns,
@@ -817,7 +838,8 @@ def _segmentation_findings(
     unit_cluster_map: dict[str, str] | None,
 ) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
-    relevant_columns = _segmentation_columns_from_summary(stage_summary, relevant_columns)
+    relevant_columns = [column for column in _segmentation_columns_from_summary(stage_summary, relevant_columns)
+                        if column in relevant_columns and _axis_for_column(foundation, column) in {"salience", "quality"}]
     cluster_share_table = [
         row for row in stage_summary.get("cluster_share_table", []) if isinstance(row, dict)
     ]
@@ -967,7 +989,7 @@ def _segmentation_findings(
             (
                 (str(column), float(value))
                 for column, value in lead_numeric_summary.items()
-                if str(column) in catalog
+                if str(column) in relevant_columns and value is not None and math.isfinite(float(value))
             ),
             key=lambda item: item[1],
             reverse=True,
@@ -1281,7 +1303,11 @@ def _positioning_score_lookup(stage_summary: dict[str, Any]) -> tuple[dict[str, 
         attribute = str(row.get("attribute", ""))
         feature = str(row.get("feature") or attribute)
         axis = str(row.get("axis", "mixed"))
-        score = float(row.get("score", 0.0))
+        if row.get("score") is None:
+            continue
+        score = float(row["score"])
+        if not math.isfinite(score):
+            continue
         if not brand or not feature:
             continue
         feature_meta[feature] = {"attribute": attribute, "axis": axis}
@@ -1657,8 +1683,25 @@ def build_stage_report_contract(
         positioning_method,
         unit_cluster_map,
     )
+    supported_findings = []
+    omitted_findings = []
+    for finding in findings:
+        reason = ""
+        if finding.get("finding_id") == "segmentation-psychology-overlay":
+            columns = finding.get("reproducibility", {}).get("input_columns", [])
+            families = {entry["family"] for entry in _theory_entries_for_columns(
+                foundation, columns, include_segmentation_overlays=True)}
+            if not {"dual_process", "maslow"}.issubset(families):
+                reason = "The selected items do not support both decision-process and need-layer interpretations."
+        if not reason and evidence_status == "available" and not finding.get("evidence_quotes"):
+            reason = "No review with an observed relevant score supports this finding."
+        if reason:
+            omitted_findings.append({"finding_id": finding.get("finding_id"), "reason": reason})
+        else:
+            supported_findings.append(finding)
+    enriched["omitted_findings"] = omitted_findings
     enriched["findings"] = _augment_findings_with_theme_and_theory_details(
-        findings,
+        supported_findings,
         foundation,
         catalog,
         relevant_columns,
@@ -1780,6 +1823,7 @@ def _render_attribute_extraction_summary(summary: dict[str, Any]) -> list[str]:
         f"- target_minimum: {summary.get('target_minimum', 'n/a')}",
         f"- actual_count: {summary.get('actual_count', 'n/a')}",
         f"- shortfall_reason: {summary.get('shortfall_reason') or 'none'}",
+        f"- theory_gap: {', '.join(summary.get('theory_gap', [])) or 'none'}",
         f"- themes_discovered: {', '.join(summary.get('themes_discovered', [])) or 'none'}",
         "- Attribute groups:",
     ]
@@ -1876,6 +1920,10 @@ def _render_report_section(title: str, section: dict[str, Any]) -> list[str]:
             indent="  ",
         )
     )
+    if section.get("omitted_findings"):
+        lines.append("- Omitted findings:")
+        for finding in section["omitted_findings"]:
+            lines.append(f"  - {finding.get('finding_id')}: {finding.get('reason')}")
     if section.get("findings"):
         lines.append("")
         lines.append("### Findings")

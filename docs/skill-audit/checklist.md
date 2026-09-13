@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**46 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**47 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -219,15 +219,44 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **狀態：** 使用者已確認接受並要求提交、推送。
 
-- [ ] **11. review-mining-stp**（高優先）
+- [x] **11. review-mining-stp**（高優先）
 
-  **可以改哪裡：** 理論定義、抽取、workflow、Hard Rules 多處重複；完整 schema 與報告契約占主檔且 references/05 已有；四理論只能用/可擴充互相矛盾，必須全覆蓋與資料不足標缺口不一致。
+  **確認方向：** 保留從評論評分到客群區隔、目標市場選擇與定位的用途。理論與項目數依證據決定，統一理論擴充規則。有提及但沒有評價時，品質留空。主檔保留流程，詳細欄位及理論定義集中到參考文件。
 
-  **建議改法：** 主檔保留上游評分/下游腳本界線、雙軸及入口，理論字典/欄位schema/各統計模式契約按需讀；四家族與數量以證據支持為限，統一擴充規則；讓給讀者的報告摘要與機器重現附件分層，重複規則只留單一權威來源。
+  **本輪修改：** 主檔精簡為 114 行。品質缺漏不再補成 0，彙總分開保留提及數與有效評價數，統計及報告同步處理缺漏。預設理論缺口與已登錄的擴充理論保留在輸出。
 
-  **應保留：** salience 0–7、quality 0–10、缺 salience 留空 quality、凍結屬性、原文 review_id、腳本契約和驗證器相容；移文不能擅改欄位。
+  **版本：** skill 1.5.0、customer-insight plugin 1.9.0。
 
-  **原文位置：** [主檔:40](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/SKILL.md:40)、[主檔:76](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/SKILL.md:76)、[主檔:111](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/SKILL.md:111)、[主檔:150](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/SKILL.md:150)、[主檔:245](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/SKILL.md:245)、[主檔:419](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/SKILL.md:419)、[主檔:501](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/SKILL.md:501)。
+  **驗證：** 22 項 unittest 與既有 3 項 targeting-axis 測試通過。原始 fixture、部分品質缺漏加擴充理論、全部品質缺漏三組完整 CLI 與輸出驗證均通過，另逐項核對品質平均及有效評價數。全部品質缺漏時，三個階段均正確回報僅採提及程度。定位不足情境確認非零結束、保留前階段檔案且不產生完整報告。quick_validate、YAML/JSON、284 字元 description、15 個相對連結、Markdown 圍欄、59 個 skill 與 README 數量、git diff --check 通過。
+
+  **行為檢查：** 獨立代理實際整理三篇假設評論，保留無評價的空值、只提出原文支持的五項屬性、標示缺少理論，不補造客群或定位。這項僅驗證評分與範圍判斷，沒有執行其檔案交付流程。腳本端的三組完整流程另有上述驗證。
+
+  **限制與介面：** 新增理論登錄、缺口、有效評價數及排除欄位資訊。排除缺漏欄位後，分群與目標客群可能不同於舊版補零結果。沿用既有統計方法，沒有另行驗證真實市場成效。已查看部分缺值與全部缺值的定位圖，部分箭頭文字可能擁擠，版面調整留待另行處理。驗證環境與產物位於 `/private/tmp/conjoint-model-venv`、`/private/tmp/stp-final-5abto7x7`，沒有修改共用 Python 環境。
+
+  | 檔案 | 變更摘要 |
+  | --- | --- |
+  | [docs/skill-audit/checklist.md](/Users/timlai/Developer/skills/docs/skill-audit/checklist.md) | 記錄修改與驗證，更新驗收狀態。 |
+  | [plugins/customer-insight/.claude-plugin/plugin.json](/Users/timlai/Developer/skills/plugins/customer-insight/.claude-plugin/plugin.json) | 版本調升至 1.9.0。 |
+  | [plugins/customer-insight/skills/review-mining-stp/SKILL.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/SKILL.md) | 精簡主流程與雙軸評分規則，版本 1.5.0。 |
+  | [plugins/customer-insight/skills/review-mining-stp/fixtures/minimal/README.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/fixtures/minimal/README.md) | 更新測試資料的缺漏評價與平均計算說明。 |
+  | [plugins/customer-insight/skills/review-mining-stp/references/01-router-and-gates.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/references/01-router-and-gates.md) | 集中輸入欄位、理論登錄與缺漏規則。 |
+  | [plugins/customer-insight/skills/review-mining-stp/references/02-segmentation.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/references/02-segmentation.md) | 說明不完整欄位的排除與揭露。 |
+  | [plugins/customer-insight/skills/review-mining-stp/references/03-targeting.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/references/03-targeting.md) | 說明有效樣本與客群共同比較欄位。 |
+  | [plugins/customer-insight/skills/review-mining-stp/references/04-positioning.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/references/04-positioning.md) | 說明品質平均、排除欄位及資料不足時的部分成果。 |
+  | [plugins/customer-insight/skills/review-mining-stp/references/05-output-contract-and-quality-rules.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/references/05-output-contract-and-quality-rules.md) | 保留理論缺口及無法支持的發現之省略原因。 |
+  | [plugins/customer-insight/skills/review-mining-stp/references/06-end-to-end-examples.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/references/06-end-to-end-examples.md) | 修正小樣本範例並加入沒有品質評價的情況。 |
+  | [plugins/customer-insight/skills/review-mining-stp/references/08-verification-scenarios.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/references/08-verification-scenarios.md) | 同步理論缺口、擴充理論及缺漏評分驗證情境。 |
+  | [plugins/customer-insight/skills/review-mining-stp/scripts/stp_runner/io.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/scripts/stp_runner/io.py) | 保留缺值及真實零分，計算有效評價數，驗證理論擴充及缺口。 |
+  | [plugins/customer-insight/skills/review-mining-stp/scripts/stp_runner/positioning.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/scripts/stp_runner/positioning.py) | 缺值不補分數，揭露排除欄位與不足原因。 |
+  | [plugins/customer-insight/skills/review-mining-stp/scripts/stp_runner/reporting.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/scripts/stp_runner/reporting.py) | 依實際使用欄位及評論證據產生報告，保留理論與缺口。 |
+  | [plugins/customer-insight/skills/review-mining-stp/scripts/stp_runner/segmentation.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/scripts/stp_runner/segmentation.py) | 排除不完整模型欄位並保留實際使用欄位。 |
+  | [plugins/customer-insight/skills/review-mining-stp/scripts/stp_runner/targeting.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/scripts/stp_runner/targeting.py) | 依有效樣本估計，客群排序採共同比較欄位。 |
+  | [plugins/customer-insight/skills/review-mining-stp/scripts/stp_runner/validation.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/scripts/stp_runner/validation.py) | 檢查輸出理論缺口欄位。 |
+  | [plugins/customer-insight/skills/review-mining-stp/references/09-attribute-discovery-and-theories.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/references/09-attribute-discovery-and-theories.md) | 新增集中維護的項目整理與理論定義。 |
+  | [plugins/customer-insight/skills/review-mining-stp/scripts/test_missing_quality.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/scripts/test_missing_quality.py) | 新增缺漏評價、彙總、理論與部分完成流程的測試。 |
+  | [plugins/customer-insight/skills/review-mining-stp/scripts/test_reporting_evidence.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-mining-stp/scripts/test_reporting_evidence.py) | 新增實際使用評分、缺漏證據及報告產生測試。 |
+
+  **狀態：** 使用者已確認接受並要求提交、推送。
 
 - [ ] **12. review-salience-xlsx**（中優先）
 

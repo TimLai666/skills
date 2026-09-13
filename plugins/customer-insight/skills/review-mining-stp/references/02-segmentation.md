@@ -21,7 +21,7 @@
 
 ## Maslow Keyword Requirement
 
-Segmentation 輸出必須列出五需求層級與對應評論關鍵字：
+Segmentation 輸出列出五需求層級，有評論依據才填入對應關鍵字，沒有依據的層級標示 `not_evidenced`：
 
 - 生理需求
 - 安全需求
@@ -77,6 +77,8 @@ Segmentation 輸出必須列出五需求層級與對應評論關鍵字：
 - `k` 可由 2 起試。
 - 任一群體占比 `< 5%` 時，不得保留該解；需降低群數並重新執行。
 - 最終結果所有群體占比均須 `> 5%`。
+
+分群所需的欄位若含空值，排除該欄並在 `excluded_missing_features` 記錄。不要把缺少的品質評價補成 0 或中間分數。資料不足以分群時，說明缺少哪些可用變數。
 
 ## Required Outputs
 

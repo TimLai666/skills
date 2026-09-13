@@ -37,7 +37,7 @@ The review scoring workflow:
 1. reads each review one by one
 2. extracts a corpus-level attribute catalog with definitions, mention counts, and example quotes
 3. freezes that attribute catalog for the scoring run
-4. scores each attribute with paired `salience + quality`
+4. records paired `salience + quality` columns, leaving quality empty when there is no evaluation
 5. assigns dynamic theme names plus theory annotations
 6. preserves verbatim `review_text`
 
@@ -50,7 +50,9 @@ The review scoring workflow:
 - `brands.json`
 - `ideal_point.json`
 
-### Expected Outcome
+These two invented reviews illustrate intake and scoring only. They do not by themselves establish enough data for clustering or a brand positioning map. Extract only supported attributes, explain a count below 30, and record absent theory families as gaps. The [minimal fixture](../fixtures/minimal/) supplies the runnable statistical example.
+
+### Expected Outcome With Sufficient Scored Data
 
 - scripts emit `segmentation_variables.csv`, `targeting_dataset.csv`, and `positioning_scorecard.csv`
 - the final report prints the attribute-extraction summary and representative attributes in the main body
@@ -166,7 +168,16 @@ The review scoring workflow:
 - public perceptual-map delivery is the coordinate table plus the Python-rendered figure
 - factor-analysis-only vectors may appear as optional diagnostics
 
-## Example F: Raw Reviews Sent Directly To Scripts
+## Example F: Mention Without Evaluation
+
+Hypothetical review: `有附收納袋`.
+
+- Record a positive salience score for the storage-bag attribute.
+- Leave its quality cell empty because the text does not evaluate performance.
+- Count the review in `mention_count`, but not `evaluation_count`.
+- If this is the brand's only mention of the attribute, keep the brand quality score empty. Do not infer average quality from the fact that a bag exists.
+
+## Example G: Raw Reviews Sent Directly To Scripts
 
 ### Runnable Artifacts
 

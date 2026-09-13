@@ -63,6 +63,8 @@ def run_segmentation(foundation: dict[str, Any], frame: Any) -> dict[str, Any]:
     identifier_column = _pick_identifier_column(frame)
     excluded_columns = {identifier_column} if identifier_column else set()
     feature_columns = [column for column in frame.columns if column not in excluded_columns]
+    excluded_missing_features = [column for column in feature_columns if frame[column].isna().any()]
+    feature_columns = [column for column in feature_columns if column not in excluded_missing_features]
     numeric_columns = frame[feature_columns].select_dtypes(include=["number"]).columns.tolist()
     categorical_columns = [column for column in feature_columns if column not in numeric_columns]
 
@@ -158,6 +160,8 @@ def run_segmentation(foundation: dict[str, Any], frame: Any) -> dict[str, Any]:
         ]
 
     return {
+        "excluded_missing_features": excluded_missing_features,
+        "modeled_feature_columns": feature_columns,
         "cluster_selection": {
             "initial_k": int(initial_k),
             "selected_k": int(selected_k),

@@ -61,11 +61,15 @@ All scored attributes must:
 - exist in `dimension_catalog`
 - exist as paired `*_salience` and `*_quality` columns
 - keep `*_salience` as numeric integers inside `0-7`
-- keep `*_quality` as numeric integers inside `0-10`
+- keep non-empty `*_quality` as numeric integers inside `0-10`
 - keep `*_quality` empty when `*_salience = 0`
-- keep `*_quality` present when `*_salience >= 1`
+- allow empty `*_quality` when `*_salience >= 1` if the review gives no evaluation
 
 The scored item count is dynamic. The contract never assumes a fixed item count.
+
+`unit_id` may default to `review_id` when no stable person-level identity exists. Optional metadata includes `profile_*`, `channel`, and `rating`. Keep the `product` field name.
+
+A blank quality cell means no evaluation, not a score of 0 or 5. Quality aggregation uses only non-empty evaluations. `positioning_scorecard.csv` retains `mention_count` and `evaluation_count` separately for each brand and attribute. Unit-level intermediates retain `<attribute_key>_mention_count` and `<attribute_key>_evaluation_count`. A group with no evaluations has an empty quality mean.
 
 ### `review_foundation.json`
 
@@ -90,6 +94,16 @@ Each `dimension_catalog` item must include:
 - `stat_roles`
 - `plain_language_definition`
 - `theory_annotations`
+
+`attribute_group` is one of `attribute_function`, `benefit_use`, `brand_personality`, or `brand_image`.
+
+Each item needs applicable family and subtheory pairs in `theory_annotations`. Four default families and the `theory_extensions` registration format are defined in [attribute discovery and theories](09-attribute-discovery-and-theories.md).
+
+`attribute_extraction_summary` records `target_minimum`, `actual_count`, `shortfall_reason`, and `theory_gap`. The target is 30 when the corpus supports that many distinct attributes. Record absent default families in `theory_gap`; absence is a finding, not a requirement to invent attributes.
+
+`theory_gap` is a list of the default family keys absent from `dimension_catalog.theory_annotations`. Canonical input validation derives this list when omitted and checks a supplied list against the annotations. The report always includes the list.
+
+Retain available `people_insights`, `product_triggers`, `context_scenarios`, `system1_system2_split`, and `maslow_keywords` for segmentation interpretation. Missing evidence must remain identified as missing.
 
 Legacy compatibility is allowed through:
 
@@ -119,11 +133,21 @@ Must include:
 - `example_review_id`
 - `example_quote`
 
+The scoring workflow also records `theory_families` and `theory_subtheories` as comma-separated lists, aligned with `dimension_catalog.theory_annotations`.
+
 Rules:
 
 - it must align one-to-one with `dimension_catalog`
 - `example_quote` must stay verbatim so downstream evidence is auditable
 - if fewer than `30` attributes are extracted, `attribute_extraction_summary.shortfall_reason` must explain why
+
+### Context Files
+
+- `analysis_context.json`: `analysis_goal`, `comparison_axes`, `scope_limits`.
+- `brands.json`: `brands` is a flat list of brand-name strings. `similarity_matrix` is used for `--positioning-method mds`.
+- `ideal_point.json`: `label` and `attributes`. Each attribute value is a scalar or an object such as `{"salience": 4, "quality": 8}`. Only attribute keys that overlap with the positioning scorecard are used. Positioning requires at least two complete feature columns, counting salience and quality separately.
+
+The full runner derives brand-level quality from per-review scores and emits it as `quality` rows in `positioning_scorecard.csv`. Do not prepare a separate manually judged product-quality matrix.
 
 ## Run Modes
 
@@ -190,26 +214,4 @@ Every completed run must record:
 
 ## Reporting Gate
 
-Each stage summary must keep:
-
-- top-level `attribute_extraction_summary` for full runs
-- section-level `axis_modeling_summary`, `methods_used`, `theories_used`, `plain_language_explanation`, and `evidence_quotes`
-- section-level `theme_coverage_summary` and `theory_coverage_summary`
-- a non-empty `findings` list
-
-Each finding must keep:
-
-- `finding_id`
-- `finding_statement`
-- `business_implication`
-- `axes_used`
-- `methods_used`
-- `theories_used`
-- `themes_used`
-- `subtheories_used`
-- `reproducibility`
-- `statistical_results`
-- `plain_language_explanation`
-- `evidence_quotes`
-
-The scripts are responsible for assembling this reporting structure from scored artifacts. The review scoring workflow is responsible for the upstream scoring work only.
+Scripts assemble the report structure from scored artifacts. Required stage and finding fields are defined once in [Output Contract And Quality Rules](05-output-contract-and-quality-rules.md). The scoring workflow supplies the scores, metadata, and unchanged review text that support those fields.

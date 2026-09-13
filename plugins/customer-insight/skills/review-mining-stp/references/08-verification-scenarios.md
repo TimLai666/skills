@@ -50,28 +50,38 @@ Use these scenarios to verify both the workflow boundary and the downstream stat
   - `salience` outside `0-7`
   - `quality` outside `0-10`
   - `salience = 0` but `quality` is present
-  - `salience >= 1` but `quality` is missing
   - missing `attribute_catalog.csv`
   - fewer than `30` attributes without `shortfall_reason`
 - Expected:
   - router fails early with a contract error
   - scripts do not silently continue
 
-## Scenario 5: Scoring Rubric Metadata Is Optional
+## Scenario 5: Mention Without Evaluation
+
+- Input: valid canonical scores where an attribute has positive salience but blank quality for some reviews.
+- Expected:
+  - input validation accepts those cells
+  - quality averages use only actual evaluations
+  - mention and evaluation counts differ when appropriate
+  - zero-evaluation groups retain empty quality scores
+  - downstream models do not fill quality gaps with zero or a midpoint
+  - excluded features and effective samples are reported
+
+## Scenario 6: Scoring Rubric Metadata Is Optional
 
 - Input: canonical scored artifacts with no `scoring_rubric`
 - Expected:
   - scripts still run
   - scoring workflow remains documented in MD, not enforced by Python
 
-## Scenario 6: Custom Scoring Rubric Metadata
+## Scenario 7: Custom Scoring Rubric Metadata
 
 - Input: canonical scored artifacts with a custom `scoring_rubric` note
 - Expected:
   - scripts still run
   - validator still focuses on output contracts, not rubric prose
 
-## Scenario 7: Segmentation Partial Rerun
+## Scenario 8: Segmentation Partial Rerun
 
 - Input:
   - `review_foundation.json`
@@ -80,7 +90,7 @@ Use these scenarios to verify both the workflow boundary and the downstream stat
   - segmentation reruns independently
   - cluster guardrail metadata is retained
 
-## Scenario 8: Targeting Partial Rerun
+## Scenario 9: Targeting Partial Rerun
 
 - Input:
   - `targeting_dataset.csv`
@@ -90,7 +100,7 @@ Use these scenarios to verify both the workflow boundary and the downstream stat
   - targeting reruns independently
   - `comparison_axes` override is preserved
 
-## Scenario 9: Positioning Paths
+## Scenario 10: Positioning Paths
 
 - Factor-analysis path:
   - `positioning_method_used = factor_analysis`
@@ -102,7 +112,7 @@ Use these scenarios to verify both the workflow boundary and the downstream stat
   - `perceptual_map_coordinates.csv` and `perceptual_map.png` are present
   - no fabricated attribute-vector file is emitted
 
-## Scenario 10: Evidence-Backed Report
+## Scenario 11: Evidence-Backed Report
 
 - Input: canonical full run with real `review_text`
 - Expected:
@@ -112,7 +122,7 @@ Use these scenarios to verify both the workflow boundary and the downstream stat
   - the main `report.md` body directly lists the inferred themes plus `not_evidenced` theory subtheories
   - quotes trace back exactly to the canonical score table
 
-## Scenario 11: Validator Guardrails
+## Scenario 12: Validator Guardrails
 
 - Input: tampered output, such as:
   - missing execution-scope fields

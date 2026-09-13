@@ -23,6 +23,7 @@ When the corresponding stage runs, also produce:
 - `target_minimum`
 - `actual_count`
 - `shortfall_reason`
+- `theory_gap`
 - `themes_discovered`
 - `attribute_group_summary`
 - `representative_attributes`
@@ -103,6 +104,8 @@ Must be a non-empty list of objects with:
 - `supporting_items`
 - `evidence_status`
 
+Coverage includes the four default families and documented extension families that apply to the analysis. Mark absent default families or subtheories as `not_evidenced`. A coverage row does not by itself support a finding.
+
 ### `evidence_quotes`
 
 Each quote object must include:
@@ -123,6 +126,8 @@ The report contract is a script-layer responsibility. The scoring process itself
 ### `findings`
 
 Must be a non-empty list of objects.
+
+Keep only findings supported by the modeled data and available review evidence. When an unsupported candidate is omitted, record its `finding_id` and `reason` in the stage's `omitted_findings` list. Do not attach an unrelated quote to satisfy the evidence requirement.
 
 Each finding must include:
 
@@ -281,7 +286,8 @@ Optional factor-analysis diagnostics may retain:
 - Full runs must include `attribute_catalog.csv` and `attribute_extraction_summary`.
 - Full runs must list all three emitted statistical intermediates in `execution_scope.emitted_intermediate_artifacts`.
 - Partial and custom runs must retain accurate prerequisite traces.
-- Full runs must preserve the dual-axis contract: `salience 0-7`, `quality 0-10`, `salience=0 -> quality empty`, `salience>=1 -> quality present`.
+- Full runs must preserve the dual-axis contract: `salience 0-7`, `quality 0-10`, `salience=0 -> quality empty`, `salience>=1 -> quality present only when the reviewer evaluates it`.
+- Quality means use valid evaluations only, with `mention_count` and `evaluation_count` reported separately. Preserve missing quality and report excluded features or effective model samples.
 - Segmentation must keep `System 1 / System 2`, Maslow, and the `>5%` cluster guardrail metadata.
 - Targeting must keep current-market and potential-market outputs plus pairwise comparisons where required.
 - Positioning must keep ideal-point logic, pairwise competition distance, and no fabricated vectors in `MDS`.

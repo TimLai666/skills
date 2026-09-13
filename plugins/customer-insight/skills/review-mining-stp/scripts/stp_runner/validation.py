@@ -521,12 +521,17 @@ def _validate_attribute_extraction_summary(
             "target_minimum",
             "actual_count",
             "shortfall_reason",
+            "theory_gap",
             "themes_discovered",
             "attribute_group_summary",
             "representative_attributes",
         ],
         "attribute_extraction_summary",
     )
+    from .io import DEFAULT_THEORY_FAMILIES
+    gaps = summary["theory_gap"]
+    if not isinstance(gaps, list) or any(not isinstance(value, str) or value not in DEFAULT_THEORY_FAMILIES for value in gaps) or len(gaps) != len(set(gaps)):
+        fail("attribute_extraction_summary.theory_gap must list distinct default theory families.")
     if not isinstance(summary["themes_discovered"], list):
         fail("attribute_extraction_summary.themes_discovered must be a list.")
     if not isinstance(summary["attribute_group_summary"], list):

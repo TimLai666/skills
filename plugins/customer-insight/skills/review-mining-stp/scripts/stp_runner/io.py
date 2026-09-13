@@ -35,6 +35,8 @@ ATTRIBUTE_GROUPS = {
 }
 EMPTY_SENTINELS = {"", "n/a", "na", "null", "none"}
 
+DEFAULT_THEORY_FAMILIES = {"product_positioning", "maslow", "purchase_motivation", "wom_motivation"}
+
 THEORY_TAXONOMY = {
     "product_positioning": {
         "attributes",
@@ -131,7 +133,24 @@ def _fail_contract(message: str) -> None:
     raise SystemExit(message)
 
 
-def _validate_theory_metadata(column: str, item: dict[str, Any]) -> None:
+def theory_taxonomy(foundation: dict[str, Any]) -> dict[str, set[str]]:
+    taxonomy = {family: set(values) for family, values in THEORY_TAXONOMY.items()}
+    extensions = foundation.get("theory_extensions", {})
+    if not isinstance(extensions, dict):
+        _fail_contract("theory_extensions must be an object.")
+    for family, details in extensions.items():
+        if not isinstance(family, str) or not family.strip() or family in taxonomy:
+            _fail_contract("theory_extensions must use new, non-empty family names.")
+        if not isinstance(details, dict) or not isinstance(details.get("rationale"), str) or not details["rationale"].strip():
+            _fail_contract(f"theory_extensions.{family} must document a rationale.")
+        values = details.get("subtheories")
+        if not isinstance(values, list) or not values or any(not isinstance(value, str) or not value.strip() for value in values):
+            _fail_contract(f"theory_extensions.{family} must list non-empty subtheories.")
+        taxonomy[family] = set(values)
+    return taxonomy
+
+
+def _validate_theory_metadata(column: str, item: dict[str, Any], taxonomy: dict[str, set[str]]) -> None:
     theory_annotations = item.get("theory_annotations")
     theory_tags = item.get("theory_tags")
     if theory_annotations is None and theory_tags is None:
@@ -146,7 +165,7 @@ def _validate_theory_metadata(column: str, item: dict[str, Any]) -> None:
             )
         for family, subtheories in theory_annotations.items():
             family_name = str(family)
-            if family_name not in THEORY_TAXONOMY:
+            if family_name not in taxonomy:
                 _fail_contract(
                     f"dimension_catalog column '{column}' uses unsupported theory family '{family_name}'."
                 )
@@ -157,7 +176,7 @@ def _validate_theory_metadata(column: str, item: dict[str, Any]) -> None:
             invalid_subtheories = sorted(
                 str(subtheory)
                 for subtheory in subtheories
-                if str(subtheory) not in THEORY_TAXONOMY[family_name]
+                if str(subtheory) not in taxonomy[family_name]
             )
             if invalid_subtheories:
                 _fail_contract(
@@ -307,6 +326,7 @@ def _validate_attribute_catalog(
         "target_minimum": target_minimum,
         "actual_count": actual_count,
         "shortfall_reason": shortfall_reason,
+        "theory_gap": extraction_summary["theory_gap"],
     }
 
 
@@ -355,6 +375,7 @@ def validate_canonical_inputs(
     pair_columns_by_base: dict[str, dict[str, str]] = {}
     axis_column_to_base: dict[str, str] = {}
 
+    taxonomy = theory_taxonomy(foundation)
     for item in dimension_catalog:
         if not isinstance(item, dict):
             _fail_contract("dimension_catalog entries must be objects.")
@@ -397,7 +418,7 @@ def validate_canonical_inputs(
         if not plain_language_definition:
             _fail_contract(f"dimension_catalog column '{column}' must define plain_language_definition.")
 
-        _validate_theory_metadata(column, item)
+        _validate_theory_metadata(column, item, taxonomy)
 
         catalog_by_column[column] = item
         dimension_columns.append(column)
@@ -456,11 +477,6 @@ def validate_canonical_inputs(
             _fail_contract(
                 f"review_scoring_table.csv column '{quality_column}' must be empty when '{salience_column}' is 0."
             )
-        invalid_missing = (score_table[salience_column] >= 1) & quality_values.isna()
-        if invalid_missing.any():
-            _fail_contract(
-                f"review_scoring_table.csv column '{quality_column}' must be present when '{salience_column}' is at least 1."
-            )
         score_table[quality_column] = quality_values
 
         salience_columns.append(salience_column)
@@ -514,6 +530,17 @@ def validate_canonical_inputs(
             + ", ".join(mismatched_columns)
         )
 
+    covered_families = {
+        family for item in dimension_catalog
+        for family in (item.get("theory_annotations") or {})
+    }
+    gaps = sorted(DEFAULT_THEORY_FAMILIES - covered_families)
+    declared_gaps = extraction_summary.get("theory_gap", gaps)
+    if not isinstance(declared_gaps, list) or any(not isinstance(value, str) for value in declared_gaps) or set(declared_gaps) != set(gaps):
+        _fail_contract("attribute_extraction_summary.theory_gap must list exactly the default families absent from theory_annotations: " + ", ".join(gaps))
+    extraction_summary["theory_gap"] = gaps
+    foundation["attribute_extraction_summary"] = extraction_summary
+
     validated_extraction_summary = _validate_attribute_catalog(
         attribute_catalog,
         score_table,
@@ -566,7 +593,9 @@ def aggregate_review_scoring_table(score_table: Any, contract: dict[str, Any]) -
             salience_mean = round(float(pd.to_numeric(group[salience_column]).mean()), 4)
             mentioned = group.loc[group[salience_column] >= 1, quality_column]
             mentioned_numeric = pd.to_numeric(mentioned, errors="coerce").dropna()
-            quality_mean = round(float(mentioned_numeric.mean()), 4) if not mentioned_numeric.empty else 0.0
+            quality_mean = round(float(mentioned_numeric.mean()), 4) if not mentioned_numeric.empty else float("nan")
+            row[base_column + "_mention_count"] = int((group[salience_column] >= 1).sum())
+            row[base_column + "_evaluation_count"] = int(len(mentioned_numeric))
             row[salience_column] = salience_mean
             row[quality_column] = quality_mean
         for column in metadata_columns:
@@ -660,7 +689,8 @@ def build_positioning_scorecard(score_table: Any, contract: dict[str, Any]) -> A
             salience_score = round(float(pd.to_numeric(group[salience_column]).mean()), 4)
             mentioned = group.loc[group[salience_column] >= 1, quality_column]
             quality_numeric = pd.to_numeric(mentioned, errors="coerce").dropna()
-            quality_score = round(float(quality_numeric.mean()), 4) if not quality_numeric.empty else 0.0
+            quality_score = round(float(quality_numeric.mean()), 4) if not quality_numeric.empty else float("nan")
+            counts = {"mention_count": int((group[salience_column] >= 1).sum()), "evaluation_count": int(len(quality_numeric))}
             rows.append(
                 {
                     "brand": str(brand),
@@ -668,6 +698,7 @@ def build_positioning_scorecard(score_table: Any, contract: dict[str, Any]) -> A
                     "axis": "salience",
                     "feature": salience_column,
                     "score": salience_score,
+                    **counts,
                 }
             )
             rows.append(
@@ -677,6 +708,7 @@ def build_positioning_scorecard(score_table: Any, contract: dict[str, Any]) -> A
                     "axis": "quality",
                     "feature": quality_column,
                     "score": quality_score,
+                    **counts,
                 }
             )
     return pd.DataFrame(rows)

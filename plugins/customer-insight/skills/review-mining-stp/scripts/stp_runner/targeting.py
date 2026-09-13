@@ -299,7 +299,7 @@ def run_targeting(
         except Exception:
             f_stat, p_value = 0.0, 1.0
         design = pd.get_dummies(dataset["cluster"], drop_first=True, dtype=float)
-        model = sm.OLS(dataset[column], sm.add_constant(design)).fit()
+        model = sm.OLS(dataset[column], sm.add_constant(design), missing="drop").fit()
         current_results.append(
             {
                 "variable": column,
@@ -315,11 +315,12 @@ def run_targeting(
         if table.shape[0] < 2 or table.shape[1] < 2:
             continue
         chi2, p_value, _, _ = chi2_contingency(table)
-        design = pd.get_dummies(dataset["cluster"], drop_first=True, dtype=float)
+        sample = dataset[["cluster", column]].dropna()
+        design = pd.get_dummies(sample["cluster"], drop_first=True, dtype=float)
         scaler = StandardScaler(with_mean=False)
         design_scaled = scaler.fit_transform(design)
         model = LogisticRegression(max_iter=1000)
-        model.fit(design_scaled, dataset[column])
+        model.fit(design_scaled, sample[column])
         potential_results.append(
             {
                 "variable": column,
@@ -352,6 +353,11 @@ def run_targeting(
     if not numeric_axes:
         numeric_axes = current_continuous[:]
     cluster_scores = dataset.groupby("cluster")[numeric_axes].mean(numeric_only=True)
+    excluded_comparison_axes = [column for column in numeric_axes if cluster_scores[column].isna().any()]
+    numeric_axes = [column for column in numeric_axes if column not in excluded_comparison_axes]
+    if not numeric_axes:
+        raise SystemExit("Target selection requires complete comparison axes for every cluster. Excluded axes: " + ", ".join(excluded_comparison_axes))
+    cluster_scores = cluster_scores[numeric_axes]
     normalized = (cluster_scores - cluster_scores.min()) / (
         (cluster_scores.max() - cluster_scores.min()).replace(0, 1)
     )
@@ -381,6 +387,7 @@ def run_targeting(
     persona = cluster_profiles.get(selected_cluster, {}).get("persona", "")
 
     return {
+        "excluded_comparison_axes": excluded_comparison_axes,
         "current_target_market": current_results,
         "potential_target_market": potential_results,
         "method_selection": {
