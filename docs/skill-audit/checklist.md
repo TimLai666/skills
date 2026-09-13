@@ -1,6 +1,8 @@
 # Skills 簡化清單
 
-目前完成優化：**54 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**55 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+
+本輪審查已結束：62 項均已處理，其中 55 項完成優化並驗收，7 項依使用者決定保留原版，不計入優化數。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -923,15 +925,13 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
 ### writing-and-design
 
-- [ ] **58. commercial-proposal-writing**（高優先）
+- [x] **58. commercial-proposal-writing**（高優先）
 
-  **可以改哪裡：** 起草與審稿共用完整輸入門檻，局部審稿也會因缺 KPI／客群停下；九段正文、七項審稿成果、至少三風險及 A/B/C/D 補件皆固定。主檔與 reference 重複輸入和模式。
+  **已完成並經使用者確認：** 分完整提案、局部改稿與純審查，缺資料先查既有資料、外部來源或由原始數據推導，受阻或需要使用者決策才補問。必要內容不得因缺資料省略，假設草案須經使用者接受。九段結構改為參考模板，純審查不自動改寫，風險依實際影響選取。保留決策對象、資源需求、證據、數字推導及使用者指定結構。skill 1.2.1、plugin 1.25.1。
 
-  **建議改法：** 分完整提案、局部改稿、純審查，只問必需資料。九段、風險數量、無資料選項改完整提案模板。純審查不預設整篇重寫。核心保留受眾、決策請求與證據，細節按模式載入，合併重複規則。
+  **變更檔案：** [SKILL.md](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/commercial-proposal-writing/SKILL.md)、references/01–06 與 08、兩份 assets/templates 模板、agents/openai.yaml、README.md、writing-and-design/plugin.json 及本清單。參考文件與模板同步採用任務範圍，移除舊的固定輸出要求。
 
-  **應保留：** 決策對象、資源、財務假設推導、不捏造，以及使用者指定完整提案結構。
-
-  **原文位置：** [主檔:24](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/commercial-proposal-writing/SKILL.md:24)、[主檔:42](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/commercial-proposal-writing/SKILL.md:42)、[主檔:147](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/commercial-proposal-writing/SKILL.md:147)、[主檔:183](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/commercial-proposal-writing/SKILL.md:183)、[主檔:215](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/commercial-proposal-writing/SKILL.md:215)、[references/01-intake-and-audience-routing.md:5](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/commercial-proposal-writing/references/01-intake-and-audience-routing.md:5)。
+  **驗證：** skill validator、YAML／JSON 解析、相對連結及技能數量一致性檢查通過。已逐項檢查局部修改、純審查、缺資料草案與指定完整格式的文件規則。未執行研究分析腳本，本次沒有修改腳本。
 
 - [x] **59. design-studio**（高優先）
 
