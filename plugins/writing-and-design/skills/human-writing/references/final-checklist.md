@@ -10,6 +10,7 @@ The text:
 - [ ] remains understandable even when the reader has none of the Agent's prior context
 - [ ] does not rely on the reader to fill in missing context or read the writer's mind
 - [ ] does not leak internal planning language or unexplained analytical frames into the final prose
+- [ ] distinguishes instructions addressed to the AI from reader-facing information: writing constraints guide the prose, background serves the reader's needs, and a request to avoid a misunderstanding has not automatically become an explicit denial
 - [ ] does not answer an objection, accusation, or inner judgment that no one raised
 - [ ] states the current approach, retaining contrasts or prohibitions only when they serve the reader's task rather than echo an editing discussion or rejected draft
 - [ ] achieves concision by removing unnecessary wording while preserving necessary details: the reader knows what must be marked, checked, or explained, including the content or criterion when needed

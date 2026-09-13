@@ -166,6 +166,28 @@
 
 **較自然的寫法：** 講到不用花腦力。我兩秒內看不懂就是失敗的回答。
 
+以下兩個英文例子示範如何區分給 AI 的寫作指示與成稿內容。情境與技術資訊依使用者提供的素材設定，用來示範寫法，不作為套件現況的查證結果。
+
+**情境：** 使用者要寫 issue 給 go-milp 的作者，介紹 Insyra 的 `lp` 套件，並討論以 import 方式使用 go-milp 的計畫。
+
+**給 AI 的指示：** 不要讓作者以為我們在做求解器。`lp` 提供建立模型的介面，計畫交由 go-milp 求解。
+
+**多餘的寫法：** Insyra's `lp` package is a modeling layer, not a solver.
+
+**較自然的寫法：** Insyra's `lp` package provides an interface for building linear programming models. We plan to use go-milp to solve them.
+
+「不要讓作者以為」是在交代 AI 應達成的溝通效果。成稿說清楚 `lp` 與 go-milp 各自的用途，就能傳達這個意思。句尾的 "not a solver" 把寫作提醒變成了對讀者的否認。
+
+**給 AI 的指示：** 不要讓作者覺得我們要抄他的程式碼。我們會 import 他發布的模組作為依賴，再把模型轉成他的 API 所需的形式。
+
+**多餘的寫法：** With go-milp underneath, `lp` works right after `go get`. We'll import the published module as a normal dependency, without copying or modifying its code, and translate our models into go-milp's API.
+
+**較自然的寫法：** We plan to import go-milp as a dependency and translate our models into its API for solving.
+
+import 的使用方式已交代合作計畫，"without copying or modifying its code" 額外引入了讀者尚未提出的疑慮。這個情境也只提供整合計畫，因此改寫保留計畫語氣，沒有沿用 "works right after `go get`" 的現成功能宣稱。
+
+判斷重點是每段輸入的用途。寫作指示透過選材與表達落實，背景依讀者需要取捨，要傳達的資訊則保留在成稿。若作者已問是否會複製程式碼，回覆就應明確回答。這個原則適用於中英文，不能簡化成禁用 "not" 或 "without"。
+
 ### 16A. 改寫後，只交代讀者需要的現行做法
 
 **假設情境：** 文件原本要求資料不足時套用中等門檻，現在改為比較可能範圍。新版已移除舊做法，讀者只需要依新版操作。

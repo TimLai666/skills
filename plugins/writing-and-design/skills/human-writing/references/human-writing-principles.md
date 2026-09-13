@@ -54,6 +54,8 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 ### 7. Keep internal reasoning out of the final prose
 
+- Before drafting, distinguish instructions addressed to the AI, background supplied to guide the writing, and information intended for the reader. Apply writing instructions through content selection and expression. Include background only when the reader needs it to understand or act; being present in the prompt is not enough reason to put it in the prose.
+- When the user says "do not make the reader think X," convey the intended understanding through concrete facts, purposes, or actions. The instruction alone does not establish that the reader has raised X or needs an explicit denial. Keep a denial when the reader's actual question or task requires it. See the English examples under example 16 in [human-writing-examples.md](./human-writing-examples.md).
 - Do not assume the reader knows the categories, layers, sequence, or terminology created during planning.
 - Translate internal frameworks into concrete actions, observable facts, order, reasons, or consequences.
 - Introduce a concept before using it as a shared reference. If it cannot help the reader understand or act, remove it.
