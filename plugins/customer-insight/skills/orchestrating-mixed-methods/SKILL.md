@@ -9,7 +9,7 @@ description: >-
   numerical synthesis when evidence is unsuitable or override explicit
   single-method constraints.
 metadata:
-  version: "1.2.0"
+  version: "1.2.1"
 ---
 
 # Orchestrating Mixed Methods
@@ -113,11 +113,6 @@ metadata:
 - 沒有分析兩類證據時，不宣稱完成混合分析或交叉驗證。
 - 創新方案是待檢驗的提議，除非已有適當效果證據，不能宣稱成效已獲證實。
 - 不以平均、投票或模糊措辭掩蓋證據矛盾。
-
-## Suggested Prompt
-
-「針對這個研究問題，結合質性與量化證據。說明分析如何銜接、哪些發現互相
-支持或矛盾，依任務交付研究設計、文獻綜整、研究結論或應用建議。」
 
 ## References
 
