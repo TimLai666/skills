@@ -1,172 +1,38 @@
-# Routing Rules
+# 分析安排與資料缺口
 
-## Purpose
+## 選擇順序
 
-This reference defines the route-selection logic for:
+先確定要形成或檢驗的研究判斷，再看哪一階段需要另一階段的結果。
 
-- `qualitative-only`
-- `quantitative-only`
-- `mixed-qual-first`
-- `mixed-quant-first`
-- `mixed-parallel`
+- **質性先行**：尚不清楚概念、情境或研究假設，需要先探索，才能設計
+  有意義的測量。把質性發現轉成待檢驗假設、問卷題目或實驗方案。
+- **量化先行**：已有可分析的指標或比較資料，先找出問題集中在哪些情境或
+  群體，再針對這些發現安排訪談、觀察或案例分析。
+- **同步分析**：兩類分析能各自回答同一問題，互相沒有必要的先後依賴。
+  先對齊對象、時間與問題定義，再比較結果如何共同影響結論。
 
-The goal is to choose the smallest method path that answers the user's actual
-question without collapsing mixed-method needs into a false binary.
+兩類資料都存在，不必然適合同步分析。例如，仍需先從訪談釐清分類的意義，
+就應先完成這部分，再決定量化如何比較。已有指標但定義不明，也應先釐清。
 
-## Step 1: Respect Explicit Constraints
+若多種安排都可行，選能保留必要整合、且符合時程與資源的做法。
+整合可能需要回頭修正前一階段，無須為了固定次數而停止必要的檢查。
 
-Check explicit user constraints first.
+## 單一方法與執行範圍
 
-- If the user asks for `qualitative only`, `interview-based`, `thematic`, or
-  `non-statistical`, prefer `qualitative-only`.
-- If the user asks for `quantitative only`, `statistical`, `significance`,
-  `forecast`, or `metric-based`, prefer `quantitative-only`.
-- Override that preference only when the same request clearly asks for both:
-  - scale or magnitude
-  - explanation, mechanism, or context
+使用者指定「只做訪談整理」或「只比較這份數據」時，完成指定工作。
+需要標示方法時，可用 `qualitative-only` 或 `quantitative-only` 描述本輪執行。
+單純提到訪談或統計不等於禁止其他方法，應依完整要求判斷。
 
-Example:
+若使用者要求混合研究，只有一類資料可用不會改變整體目標。
+保留混合研究安排，先做可完成的階段，具體列出另一階段需要什麼資料。
 
-- `Run a significance test between cohorts` -> `quantitative-only`
-- `Explain why the cohorts differ and whether the difference is large` -> mixed route
+## 只有部分資料時
 
-## Step 2: Score the Five Dimensions
+- **只有訪談**：可整理需求、形成候選方案與待檢驗問題。設計問卷或實驗後，
+  將其標為後續計畫，不能據此聲稱方案已獲量化支持。
+- **只有指標**：可定位差異與值得研究的群體，提出有依據的暫定想法，再安排
+  針對性訪談或觀察。尚未取得的回覆不能當成已知原因。
+- **兩類資料都缺**：若任務是研究設計，交付蒐集與整合計畫。若要求實際結論，
+  說明所需資料，只提供標示為假設的探索方向。
 
-Read the task against these dimensions:
-
-1. `meaning-context-mechanism`
-   - high when the task asks why something happened, how users interpret it,
-     what a pattern means, or which mechanism explains the result
-2. `magnitude-comparison-significance`
-   - high when the task asks how much, how many, whether A differs from B,
-     whether a change is significant, or how large an effect is
-3. `construct-stability`
-   - stable when the variables, categories, codebook, or constructs already
-     exist
-   - exploratory when the categories still need to be discovered or defined
-4. `evidence-shape`
-   - text-heavy, numbers-heavy, or dual-evidence
-5. `decision-goal`
-   - exploration, explanation, measurement, estimation, validation,
-     triangulation, or design
-
-Do not route from a single keyword. Route from the combined profile.
-
-## Step 3: Route by the Smallest Valid Path
-
-### `qualitative-only`
-
-Choose this route when most of the following are true:
-
-- the task is exploratory or interpretive
-- constructs are unstable or undefined
-- evidence is mostly interviews, notes, observations, open-ended text, or cases
-- the main output is themes, mechanisms, frames, hypotheses, or explanations
-
-Common triggers:
-
-- interview synthesis
-- open coding
-- concept discovery
-- case comparison
-- mechanism building
-- interpreting a customer journey or decision process
-
-### `quantitative-only`
-
-Choose this route when most of the following are true:
-
-- the task is comparative, estimative, or inferential
-- constructs are already defined
-- evidence is structured numeric data
-- the main output is prevalence, rank, effect size, confidence, trend, or forecast
-
-Common triggers:
-
-- significance testing
-- cohort comparison
-- descriptive statistics
-- experiment analysis
-- forecasting
-- scoring and ranking
-
-### `mixed-qual-first`
-
-Choose this route when:
-
-- the end goal includes measurement or validation
-- but the constructs are still fuzzy, user-defined, or underspecified
-- the first pass must discover dimensions before the second pass can measure them
-
-Common triggers:
-
-- turn interviews into a survey instrument
-- discover themes, then test how common they are
-- build a codebook, then score a larger dataset
-- derive candidate segments, then validate them quantitatively
-
-### `mixed-quant-first`
-
-Choose this route when:
-
-- structured metrics already exist
-- the first pass can isolate anomalies, gaps, segments, or outliers
-- the second pass is needed to explain why those numeric patterns happened
-
-Common triggers:
-
-- explain a retention drop after seeing the metrics
-- explain unexpected segment behavior
-- interpret a KPI anomaly using follow-up interviews or cases
-- explain why two cohorts differ after the difference is established
-
-### `mixed-parallel`
-
-Choose this route when:
-
-- both narrative and numeric evidence already exist
-- both streams address the same research question
-- credibility depends on triangulation rather than simple sequencing
-
-Common triggers:
-
-- survey + interview synthesis
-- metrics + ticket or review synthesis
-- concurrent evaluation of observed behavior and reported perception
-
-## Tie-Breakers
-
-If two routes seem plausible, use these tie-breakers in order:
-
-1. pick the route that answers the user's core question with fewer method passes
-2. if measurement is impossible until constructs are defined, use `mixed-qual-first`
-3. if explanation is impossible until a pattern is established, use `mixed-quant-first`
-4. if both evidence streams already exist and neither is obviously primary, use `mixed-parallel`
-5. if the task can be fully answered with one method, do not upgrade it to mixed
-
-## Missing Evidence Rule
-
-If the research question is mixed but only one evidence stream is available:
-
-- route to the feasible primary method
-- keep the route honest about the missing complementary stream
-- recommend the follow-up method explicitly
-
-Do not claim a completed mixed-methods result when one side is still absent.
-
-## Recommended Primary Need Labels
-
-Use these `primary_need` values consistently:
-
-- `exploration`
-  - open discovery and framing
-- `explanation`
-  - interpretive and mechanism-seeking work
-- `measurement`
-  - counting, ranking, prevalence, and descriptive comparison
-- `estimation`
-  - effect size, projection, trend, or forecast
-- `validation`
-  - testing whether a pattern or construct holds more broadly
-- `triangulation`
-  - reconciling parallel evidence streams
+建議補充資料時，說明它要解決哪個尚未回答的問題，避免一律追加整套研究。

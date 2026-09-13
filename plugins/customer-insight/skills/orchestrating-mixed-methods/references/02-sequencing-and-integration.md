@@ -1,136 +1,70 @@
-# Sequencing and Integration
+# 階段銜接與證據整合
 
-## Purpose
+## 質性先行：從探索到檢驗
 
-This reference defines how the three mixed routes should be sequenced and how
-their outputs should be integrated.
+1. 從訪談、觀察或案例找出需求、限制、動機與現有替代做法，保留來源。
+2. 形成概念、研究假設或候選方案，將關鍵假設轉成可觀察的變項、比較問題或實驗。
+3. 用量化資料檢查適用群體、差異或方案效果，依結果修正概念、假設或方案。
 
-## `mixed-qual-first`
+**假設示例**：訪談指出使用者想先確認結果再投入設定。據此提出「先預覽、後
+設定」，再設計實驗比較任務完成率。問卷表達偏好只能支持偏好判斷，實際操作
+是否改善須以對應資料檢驗。沒有後續資料時，交付候選方案與驗證設計即可。
 
-Use this route when the first pass must define what will later be measured.
+## 量化先行：探究現象的可能解釋
 
-### First pass
+1. 找出與目標相關的差異、異常或趨勢，確認資料定義與比較條件。
+2. 根據發現挑選訪談或觀察對象，探究行為情境與可能的解釋。
+3. 用質性結果重新解讀指標，修正假設或形成應用建議，再決定如何檢驗。
 
-Qualitative outputs may include:
+**假設示例**：數據顯示某一步驟流失較多，後續觀察發現部分人是在等待同事
+提供資料。創新方向可能是暫存與共同填寫。應再檢查這個情境涵蓋哪些人，以及
+方案是否改善完成情況，不能把少數觀察套用到全部流失者。
 
-- theme map
-- candidate dimensions
-- codebook
-- hypotheses
-- segment logic
-- instrument wording
-- candidate variables
+## 同步分析：用互補與矛盾修正解讀
 
-### Second pass
+兩類分析先對齊研究問題，整合時區分：
 
-Quantitative outputs may include:
+- **一致**：兩類證據支持相同方向，說明它們各自支持哪個判斷。
+- **互補**：一類揭露另一類沒有呈現的需求、情境或影響，據此調整研究解讀。
+- **矛盾**：先檢查樣本、時間、定義、測量方式與群體差異。若無法釐清，
+  保留競爭解釋，提出能區分它們的補充研究。
 
-- prevalence
-- ranking
-- group differences
-- effect size
-- correlation
-- validation of segment strength
+**假設示例**：問卷偏好自助服務，訪談卻揭露複雜案件需要人工協助。先確認
+兩者是否談同一情境，再考慮「日常自助、複雜案件轉人工」的方案。若資料沒有
+交代案件差異，這只能是待檢驗的解釋，不能直接宣布矛盾已解決。
 
-### Integration rule
+## 文獻探討與跨研究整合
 
-The quantitative phase validates, scales, ranks, or stress-tests the constructs
-discovered in the qualitative phase.
+先依題目界定文獻範圍、選取依據與本輪可取得的內容。整理每篇研究的問題、
+對象、方法、情境、主要發現與限制，保留可核對的來源。只有摘要時標示限制，
+不能推稱已讀全文，或將有限資料的整理稱為完整文獻搜尋。
 
-Do not skip the qualitative discovery step when the variables are still fuzzy.
+先綜整質性主題及其情境，再比較量化研究的指標、方向與不確定性。兩類證據
+應對應同一研究問題，說明解釋如何互補、結論在哪些條件下不同。
+不同研究的樣本與結果不直接相加，也不以支持某結論的篇數代替證據品質判斷。
 
-## `mixed-quant-first`
+是否合併數值，須先檢查研究設計、對象、測量定義及必要統計資料是否適合。
+不適合時保留各研究結果，做有來源的比較與敘述綜整。文獻探討不必為了形式
+完整而補做量化統合；只做質性綜整時，如實交代執行方法。
 
-Use this route when the first pass can isolate the pattern and the second pass
-must explain it.
+研究缺口應由所檢視文獻的不足、矛盾或未涵蓋情境推導，交代檢視範圍，
+避免把「目前沒有找到」寫成「從未有人研究」。
 
-### First pass
+## 研究設計的整合計畫
 
-Quantitative outputs may include:
+說明兩類資料各自回答什麼、如何取樣與取得資料、在哪一步整合，以及整合
+結果會如何支持或修正研究假設。若只交付設計，成果是可執行計畫，不能預填
+研究結論。遇到重要方法取捨時，可依主檔條件搭配 ultrathink。
 
-- trend break
-- anomaly detection
-- drop-off point
-- unexpected cluster
-- segment contrast
-- conflicting metric pattern
+## 從整合到創新
 
-### Second pass
+交付時讓讀者能追溯「證據 → 整合解讀 → 創新機會 → 方案 → 驗證」。
+依本輪範圍展開，不必固定產生幾個方案或填滿所有欄位。
 
-Qualitative outputs may include:
+可用下表整理實際資料支持的機會：
 
-- mechanism explanation
-- motivation and interpretation
-- contextual explanation
-- process narrative
-- case comparison around the anomaly
+| 質性發現與來源 | 量化發現與來源 | 整合洞察 | 候選方案 | 關鍵假設與驗證方式 |
+| --- | --- | --- | --- | --- |
 
-### Integration rule
-
-The qualitative phase explains the most decision-relevant numeric pattern from
-the first pass. Do not run a broad qualitative detour unrelated to the measured
-anomaly.
-
-## `mixed-parallel`
-
-Use this route when both evidence streams already exist and both are necessary
-for a credible answer.
-
-### Parallel requirement
-
-Both tracks must address the same research question or decision frame.
-
-### Allowed integration labels
-
-- `convergence`
-  - both streams support the same conclusion
-- `divergence`
-  - the streams disagree and the contradiction matters
-- `expansion`
-  - one stream broadens or deepens the other without contradiction
-
-### Integration rule
-
-Do not merge the streams into vague synthesis language.
-State which of the three integration labels applies and why.
-
-## Conflict Handling
-
-When mixed evidence conflicts:
-
-- never average away disagreement
-- report contradictions directly
-- test likely causes:
-  - sample mismatch
-  - timeframe mismatch
-  - construct mismatch
-  - measurement artifact
-  - segment heterogeneity
-
-If the contradiction cannot be resolved, keep it visible in the conclusion and
-recommend the next evidence-collection step instead of pretending consensus.
-
-## Output Guidance
-
-For every mixed route, `MethodRoutingDecision` should name:
-
-- `first_pass_outputs`
-- `second_pass_outputs`
-- `integration_rule`
-
-Good examples:
-
-- `mixed-qual-first`
-  - `first_pass_outputs: [theme map, candidate variables, survey wording]`
-  - `second_pass_outputs: [prevalence table, segment comparison]`
-  - `integration_rule: Quantitative validation of qualitatively discovered constructs`
-
-- `mixed-quant-first`
-  - `first_pass_outputs: [retention drop by cohort, anomaly summary]`
-  - `second_pass_outputs: [mechanism explanation, interview-based root causes]`
-  - `integration_rule: Qualitative explanation of the most decision-relevant numeric anomaly`
-
-- `mixed-parallel`
-  - `first_pass_outputs: [survey pattern summary, interview theme summary]`
-  - `second_pass_outputs: [convergence or divergence memo]`
-  - `integration_rule: Triangulate using convergence, divergence, or expansion`
+驗證方式應對應方案希望改變的行為或結果。區分需求的重要性、使用者表達的
+偏好與方案實際效果，避免用其中一項取代其他項目的證據。

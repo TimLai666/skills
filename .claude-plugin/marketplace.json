@@ -21,7 +21,7 @@
     {
       "name": "customer-insight",
       "source": "./plugins/customer-insight",
-      "description": "顧客研究與洞察：研究方法選擇、persona、顧客旅程、評論探勘 STP、理論編碼分析、評論評分與聯合分析。"
+      "description": "顧客研究與洞察：質性與量化研究整合、persona、顧客旅程、評論探勘 STP、理論編碼分析、評論評分與聯合分析。"
     },
     {
       "name": "marketing-strategy",

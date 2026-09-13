@@ -1,198 +1,126 @@
 ---
 name: orchestrating-mixed-methods
 description: >-
-  This skill MUST be used when research, analysis, evaluation, diagnosis,
-  discovery, insight, or study-design tasks require deciding between
-  qualitative, quantitative, or mixed-methods approaches, and SHOULD be used
-  whenever the user does not specify a method or the work needs both
-  measurement and explanation.
+  This skill MUST be used to combine qualitative and quantitative research
+  (質性與量化整合、混合研究), including research design, literature review,
+  evidence synthesis, and innovation (研究設計、文獻探討、證據綜整、創新).
+  It SHOULD be used when a research question benefits from integrating
+  contextual understanding with measurement or testing. It MUST NOT force
+  numerical synthesis when evidence is unsuitable or override explicit
+  single-method constraints.
 metadata:
-  version: "1.1.1"
+  version: "1.2.0"
 ---
 
 # Orchestrating Mixed Methods
 
 ## Overview
 
-This skill is a routing and orchestration skill for research and analysis work.
-It prevents false `qualitative vs quantitative` either-or framing and chooses the
-smallest valid route:
+整合質性與量化研究，支援研究設計、資料分析、文獻探討、證據綜整與創新應用。
+質性分析協助理解需求、情境、動機與尚未定義的問題，量化分析協助檢查規模、
+差異、趨勢與效果。兩者的發現要互相影響，共同回答研究問題。
 
-- `qualitative-only`
-- `quantitative-only`
-- `mixed-qual-first`
-- `mixed-quant-first`
-- `mixed-parallel`
+依研究問題採用質性先行、量化先行或同步分析。順序是達成整合的安排，
+交付重點是整合如何支持研究結論、改善研究設計或形成應用方向。
 
-這個 skill 是研究方法的協調器，不是固定報告格式。
-它的工作是先判斷「該用哪種方法、先後順序怎麼排、兩軌怎麼整合」，
-而不是每次都硬做成對稱的雙軌輸出。
+## Input Contract
 
-## When to Use / 何時使用
+從使用者的要求與現有資料確認：
 
-Use this skill as the default entrypoint when the task involves:
+- **研究目的**：要理解、解釋或檢驗的問題，以及本輪交付範圍。
+- **質性證據**：訪談、觀察、案例或文獻中的質性發現，含來源與適用對象。
+- **量化證據**：問卷、行為數據、實驗或文獻中的量化結果，含定義、樣本與期間。
+- **限制**：指定方法、資料使用範圍、資源與時程。
 
-- research, analysis, evaluation, diagnosis, discovery, insight, or study design
-- user questions such as `what is happening`, `how much`, `why`, `how`, `what changed`, or `what should we test`
-- open-ended evidence like interviews, notes, observations, or case material
-- structured evidence like survey tables, KPIs, experiment results, cohort metrics, or scored datasets
-- mixed evidence such as `survey + interviews`, `metrics + support tickets`, `experiment + user quotes`
-- explicit mentions of `qualitative`, `quantitative`, `mixed methods`, `triangulation`, `interviews`, `survey`, or `statistical significance`
+可從上下文取得的資訊不重問。缺口會影響研究方向時才詢問，其餘先用可取得的
+證據推進，標示假設與待補部分。只有研究計畫的任務，交付設計即可。
 
-Do not use this skill when:
+## Workflow
 
-- the task is not actually research or analysis work
-- the user only wants direct arithmetic, file conversion, translation, or plain rewriting
-- the user already gave a narrow, fixed method and does not need any method choice or sequencing
+### 1. 確定兩種分析要共同回答的問題
 
-If this skill triggers on a clearly single-method task, route it to the proper
-single method. Do not force mixed methods just because this skill loaded.
+把研究目的轉成可研究的問題，說明質性與量化各自提供什麼，以及哪個判斷需要
+兩者整合。避免分別做完兩份分析後，才尋找表面相似的結論。
 
-## Core Rule / 核心規則
+使用者明確限制只用單一方法時，依限制完成本輪工作，說明因此尚未處理的問題。
+若補充另一方法有必要，可提出建議，但不自行擴大執行範圍。
 
-Respect explicit user constraints first.
+### 2. 安排分析順序
 
-- If the user clearly asks for only one method, route to that method.
-- Exception: if the same request clearly asks for both measurement and explanation,
-  do not treat the method choice as exclusive. Route to the smallest mixed path.
+| 安排 | 適用情況 | 兩種分析如何銜接 |
+| --- | --- | --- |
+| 質性先行 `mixed-qual-first` | 需求或概念尚未釐清 | 先釐清概念與假設，再轉成量化可檢驗的問題 |
+| 量化先行 `mixed-quant-first` | 已有可定位差異、趨勢或異常的數據 | 先找出值得探究的現象，再用質性資料探究情境與可能解釋 |
+| 同步分析 `mixed-parallel` | 兩類資料可各自分析同一問題，無須等待另一方定義問題 | 分析後對照一致、矛盾與互補處，再修正整合解讀 |
 
-Do not make the user pick between qual and quant when the actual question is
-asking for both `what/how much` and `why/how`.
+依問題與資料的依賴關係選擇，不因資料有數字就自動量化先行。
+難以判斷順序或只有一類資料時，讀 [分析安排](references/01-routing-rules.md)。
 
-## Required Routing Output / 必要路由輸出
+### 3. 執行並互相修正
 
-Before doing downstream analysis, emit a `MethodRoutingDecision`.
-If the method context is too incomplete to choose safely, emit
-`MissingMethodContextOutput` first.
+依需要使用訪談整理、編碼、主題分析、描述統計、比較或實驗分析等能力。
+從當前可用工具與 skills 選擇能完成工作的組合。文獻探討與跨研究整合時，讀
+[證據整合](references/02-sequencing-and-integration.md) 的文獻段落。
 
-```yaml
-MethodRoutingDecision:
-  route: qualitative-only | quantitative-only | mixed-qual-first | mixed-quant-first | mixed-parallel
-  primary_need: exploration | explanation | measurement | estimation | validation | triangulation
-  rationale: string
-  qualitative_capabilities_needed: []
-  quantitative_capabilities_needed: []
-  first_pass_outputs: []
-  second_pass_outputs: []
-  integration_rule: string
-  why_not_other_routes: []
-```
+前一階段的結果應實際改變下一階段的取樣、問題、變項或候選方案。
+後一階段若不支持原先解讀，回頭修正解讀或方案。需要具體銜接做法時，讀
+[階段銜接與整合](references/02-sequencing-and-integration.md)。
 
-```yaml
-MissingMethodContextOutput:
-  missing_context: []
-  why_it_matters: []
-  recommended_default_route: qualitative-only | quantitative-only | mixed-qual-first | mixed-quant-first | mixed-parallel
-  assumption_if_forced: string
-```
+只有一類證據時，先完成可執行部分，交代另一階段所需資料與補充方式。
+清楚區分混合研究計畫、目前完成的分析與尚待檢驗的想法。
 
-## Routing Dimensions / 判斷維度
+### 4. 整合成符合研究目的的成果
 
-Classify the task on five dimensions in this order:
+對照兩類發現，說明哪些一致、哪些互補、哪些矛盾，以及這如何改變問題理解。
+依任務形成研究結論、研究缺口、修訂後的研究設計，或創新洞察與候選方案。
+提出後續驗證時，交代它要解決哪個尚未確定的判斷。
 
-1. Is the core question about meaning, context, mechanism, or interpretation?
-2. Is it about magnitude, comparison, significance, prevalence, or forecasting?
-3. Are the constructs already defined, or still exploratory and unstable?
-4. Is the available evidence mostly text and observations, mostly structured numbers, or both?
-5. Is the goal decision support, design, validation, explanation, or triangulation?
+有矛盾時，檢查樣本、期間、定義、測量方式與群體差異。無法解決的矛盾保留在
+結論中，說明它限制了哪個判斷，以及哪項補充證據能協助釐清。
 
-Read the task through all five dimensions before picking a route.
-Do not shortcut from one keyword.
+### 按需要搭配 ultrathink
 
-Use [references/01-routing-rules.md](./references/01-routing-rules.md) for the
-full route-selection matrix and tie-breakers.
+使用者明確指定，或研究設計有重要取捨、證據衝突涉及不同解釋、關鍵假設待檢查時，若
+`ultrathink` 可用，載入其主檔，依它的規則選用相關方法與複核。
+本 skill 負責質性與量化的銜接和整合，ultrathink 協助檢查問題、假設、替代
+解釋與推論。把具體疑點及相關證據交給它，再將檢查結果用來修正研究工作。
 
-## Route Definitions / 路由定義
+使用者未指定且沒有實質疑點時不額外啟用。ultrathink 不可用時，依現有證據與工具完成可做的
+分析，交代尚未解決的問題。兩個 skill 維持獨立，不互相要求反覆載入。
 
-- `qualitative-only`
-  - Use for open exploration, framing, concept discovery, interview synthesis,
-    case interpretation, mechanism building, or theory generation.
-- `quantitative-only`
-  - Use for estimation, benchmarking, hypothesis testing, forecasting,
-    experiments, or structured metric comparison.
-- `mixed-qual-first`
-  - Use when constructs are fuzzy and the qualitative pass must define the
-    dimensions, hypotheses, codebook, segments, or candidate variables before
-    measurement.
-- `mixed-quant-first`
-  - Use when structured metrics already exist and the quantitative pass can
-    surface anomalies, segments, drops, or outliers that need qualitative
-    explanation.
-- `mixed-parallel`
-  - Use when both narrative and numeric evidence already exist and the result
-    must be reconciled through triangulation.
+## Output Contract
 
-## Downstream Capability Mapping / 下游能力對接
+交代分析安排與理由、證據來源、整合方式及目前完成的部分，再依任務交付：
 
-This skill must stay capability-based, not skill-name-based.
-Do not hard-code downstream skill names.
+| 任務 | 主要成果 |
+| --- | --- |
+| 研究設計 | 研究問題、取樣與資料蒐集、兩類分析及整合計畫 |
+| 資料分析與研究 | 主要發現、整合結論、成立條件與未解決問題 |
+| 文獻探討 | 可追溯來源的證據綜整、差異與研究缺口 |
+| 創新應用 | 證據支持的機會、候選方案與驗證方式 |
 
-Qualitative capability classes:
+只要求計畫時，不填入尚未取得的研究結果。
 
-- interview synthesis
-- coding
-- thematic analysis
-- case comparison
-- contextual explanation
+可用短文或表格，不要求兩種分析篇幅相等。只有使用者或實際下游工具需要時，
+才使用結構化格式，欄位依接收者需求決定。
 
-Quantitative capability classes:
+## Quality Rules
 
-- descriptive analysis
-- scoring
-- statistical testing
-- modeling
-- forecasting
-- experiment analysis
+- 分析結論須能追溯證據。清楚區分觀察、推論與新提出的方案。
+- 說明整合如何影響研究判斷，不能只並列兩份摘要。
+- 訪談提及次數只能描述該份資料，不能自行推論整體市場比例。
+- 數值差異與受訪者的解釋都不自動構成因果證明。
+- 沒有分析兩類證據時，不宣稱完成混合分析或交叉驗證。
+- 創新方案是待檢驗的提議，除非已有適當效果證據，不能宣稱成效已獲證實。
+- 不以平均、投票或模糊措辭掩蓋證據矛盾。
 
-Map available skills at runtime to these capability classes and choose the
-smallest set that can complete the route.
+## Suggested Prompt
 
-## Workflow / 執行流程
-
-1. Read the user's explicit method request, scope, and output constraints.
-2. Score the task across the five routing dimensions.
-3. Pick the smallest valid route.
-4. Emit `MethodRoutingDecision`.
-5. Map the route to capability classes, not named skills.
-6. If one evidence stream is missing, choose the feasible primary route and
-   explicitly name the complementary follow-up method.
-7. For mixed routes, use [references/02-sequencing-and-integration.md](./references/02-sequencing-and-integration.md)
-   to define the pass order and integration rule.
-8. Do not claim triangulation unless both evidence streams actually exist.
-
-## Evidence Availability Rule / 證據可得性規則
-
-If the task is broad but only one evidence type is available:
-
-- route to the feasible primary method
-- name the missing complementary method as a follow-up
-- do not fake a mixed-methods conclusion
-
-Example:
-
-- If the user asks `why did retention drop and how large is the drop` but only
-  gives metrics, route to `mixed-quant-first` with a quantitative first pass and
-  a qualitative follow-up recommendation.
-- If the user asks to design a survey from interviews but only gives interviews,
-  route to `mixed-qual-first` and keep the quantitative phase as a downstream
-  validation step.
-
-## Anti-Patterns / 禁止做法
-
-Never do the following:
-
-- frame qual and quant as mutually exclusive when the user is clearly asking for both
-- force mixed methods for obviously single-method tasks
-- treat `mixed methods` as `always output two equal sections`
-- claim triangulation when only one evidence stream exists
-- smooth over disagreement between evidence streams by averaging or vague wording
-
-When mixed evidence conflicts, report the contradiction directly and test likely
-causes such as sample mismatch, timeframe mismatch, construct mismatch,
-measurement artifact, or segment heterogeneity.
+「針對這個研究問題，結合質性與量化證據。說明分析如何銜接、哪些發現互相
+支持或矛盾，依任務交付研究設計、文獻綜整、研究結論或應用建議。」
 
 ## References
 
-- Routing rules and tie-breakers: [references/01-routing-rules.md](./references/01-routing-rules.md)
-- Mixed-route sequencing and conflict handling: [references/02-sequencing-and-integration.md](./references/02-sequencing-and-integration.md)
-- Pressure scenarios and validation prompts: [references/03-validation-scenarios.md](./references/03-validation-scenarios.md)
+- [分析安排與資料缺口](references/01-routing-rules.md)
+- [階段銜接與證據整合](references/02-sequencing-and-integration.md)
+- [驗證情境](references/03-validation-scenarios.md)

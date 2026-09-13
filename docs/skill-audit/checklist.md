@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**44 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**45 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -169,15 +169,19 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **原文位置：** [主檔:23](/Users/timlai/Developer/skills/plugins/customer-insight/skills/customer-persona-framer/SKILL.md:23)、[主檔:56](/Users/timlai/Developer/skills/plugins/customer-insight/skills/customer-persona-framer/SKILL.md:56)、[主檔:78](/Users/timlai/Developer/skills/plugins/customer-insight/skills/customer-persona-framer/SKILL.md:78)、[主檔:115](/Users/timlai/Developer/skills/plugins/customer-insight/skills/customer-persona-framer/SKILL.md:115)、[主檔:170](/Users/timlai/Developer/skills/plugins/customer-insight/skills/customer-persona-framer/SKILL.md:170)。
 
-- [ ] **09. orchestrating-mixed-methods**（高優先）
+- [x] **09. orchestrating-mixed-methods**（高優先）
 
-  **可以改哪裡：** 泛研究/分析/診斷甚至 what/why 問句都是入口，會套到大量單方法任務；強制輸出長 YAML 與未採用路線理由；五維判斷、路線定義、workflow、禁例及 references/01 重複。
+  **確認方向：** 整合質性與量化研究，涵蓋研究設計、文獻探討、資料分析與創新應用。依疑點按需搭配獨立的 ultrathink。
 
-  **建議改法：** 限縮至需要選方法、安排質性與量化研究順序或整合兩類證據；已指定方法則不載入；主檔用短決策表，複雜 tie-breaker 留 reference；一般只用一句方法及理由，結構化路由僅供真正下游工具需要。
+  **本輪修改：** 依任務交付研究設計、證據綜整、研究結論或創新方案。補上文獻可比較性、來源限制及 ultrathink 協作條件，精簡重複定義與固定 YAML。同步更新三份 references、介面提示與 marketplace/plugin/README 描述。
 
-  **應保留：** 最小可行方法、缺某軌不能宣稱混合證據完成、相互矛盾證據不平均掩蓋。
+  **應保留：** 證據來源、資料缺口與階段完成狀態、矛盾處理、待驗證假設，以及使用者指定範圍。
 
-  **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/customer-insight/skills/orchestrating-mixed-methods/SKILL.md:3)、[主檔:31](/Users/timlai/Developer/skills/plugins/customer-insight/skills/orchestrating-mixed-methods/SKILL.md:31)、[主檔:62](/Users/timlai/Developer/skills/plugins/customer-insight/skills/orchestrating-mixed-methods/SKILL.md:62)、[主檔:89](/Users/timlai/Developer/skills/plugins/customer-insight/skills/orchestrating-mixed-methods/SKILL.md:89)、[主檔:105](/Users/timlai/Developer/skills/plugins/customer-insight/skills/orchestrating-mixed-methods/SKILL.md:105)、[主檔:150](/Users/timlai/Developer/skills/plugins/customer-insight/skills/orchestrating-mixed-methods/SKILL.md:150)、[主檔:180](/Users/timlai/Developer/skills/plugins/customer-insight/skills/orchestrating-mixed-methods/SKILL.md:180)。
+  **驗證：** quick_validate、YAML/JSON、description、相對連結、59 個 skill 與 README 數量核對、git diff --check 通過。本版獨立實跑三份假設摘要的文獻綜整，回答保留測量與樣本限制、未合併數值或提出創新方案，研究缺口限於所給摘要。ultrathink 搭配條件已對照其主檔檢查，尚未實跑雙 skill 協作及不可用情境。上一輪兩題實跑僅作歷史紀錄，不視為本版驗證結果。
+
+  **關聯修改：** 經使用者確認，在 ultrathink 工具索引加入「問題需要結合質性理解與量化分析」時載入本 skill 的引導，已載入時沿用。ultrathink 版本 2.3.1、thinking-frameworks plugin 0.43.1，已經使用者驗收。
+
+  **狀態：** 使用者已確認接受並要求提交、推送。
 
 - [ ] **10. product-conjoint-analysis**（高優先）
 

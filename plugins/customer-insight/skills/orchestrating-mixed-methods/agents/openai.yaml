@@ -1,4 +1,4 @@
 interface:
   display_name: "Orchestrating Mixed Methods"
-  short_description: "Route research tasks across qual, quant, and mixed methods"
-  default_prompt: "Use $orchestrating-mixed-methods to choose the right qualitative, quantitative, or mixed-methods route for this research task and explain the sequencing."
+  short_description: "Integrate qualitative and quantitative research evidence"
+  default_prompt: "Use $orchestrating-mixed-methods to combine qualitative and quantitative analysis, support research design, literature review, or the requested application, and identify what needs further validation."

@@ -1,135 +1,79 @@
-# Validation Scenarios
+# 驗證情境
 
-## Purpose
+## 使用方式
 
-Use these prompts to validate that the skill stops false `qual vs quant`
-either-or behavior and emits a correct `MethodRoutingDecision`.
+將情境與 skill 交給獨立執行者，檢查實際回答如何使用兩類證據、交付符合研究目的的
+成果。不要把下方檢核重點當成答案提示。格式與方法代號不作為通過依據。
+以下資料均為假設的測試素材，不得當成真實研究成果。
 
-## Validation Procedure
+## 1. 質性先行，量化資料待補
 
-1. Run the prompt without this skill and record whether the agent defaults to a
-   single method too early.
-2. Run the same prompt with `$orchestrating-mixed-methods`.
-3. Verify that the response emits `MethodRoutingDecision`.
-4. Verify that the route matches the expected route below.
-5. Verify that the response does not claim triangulation unless both evidence
-   streams exist.
+**要求**：「訪談中有人想先看到結果才願意設定，有人怕設定錯了無法復原。
+用質性與量化結合的方式，幫我發展新的首次使用體驗。目前沒有問卷或實驗資料。」
 
-## Scenario 1: Interview Themes Only
+**檢核**：先整理需求與候選方案，再設計對應的量化檢驗。清楚標示量化階段
+尚未執行，不捏造普及率、偏好比例或改善效果。
 
-Prompt:
+## 2. 量化先行，質性資料待補
 
-`Find the major themes from these user interviews and explain what they suggest about purchase hesitation.`
+**要求**：「舊流程 100 人中 70 人完成，新流程 100 人中 50 人完成。兩批人
+的來源還沒確認，也沒有訪談。請結合質性與量化分析，提出改善方向。」
 
-Expected route:
+**檢核**：正確比較完成率與差距，標示比較限制。針對差異安排質性探究，
+可以提出暫定方案，但不能宣稱新流程已被證明造成下降或虛構受訪者解釋。
 
-- `qualitative-only`
+## 3. 同步整合與創新方案
 
-Expected primary need:
+**要求**：「假設問卷有 100 人，70 人偏好自助處理一般查詢，30 人偏好人工。
+另有 8 份訪談，5 人提到複雜案件仍需人工協助，3 人沒提到。訪談與問卷是否
+為同一批人尚不清楚。請結合兩類資料，提出服務創新方案與驗證方式。」
 
-- `exploration` or `explanation`
+**檢核**：辨認一般查詢與複雜案件的情境差異，形成可追溯兩類證據的方案。
+保留樣本限制，不能相加成 108 人或推論 5/8 是全體需求比例。驗證須對應方案。
 
-Common failure without the skill:
+## 4. 矛盾尚未解決
 
-- agent starts inventing metrics or a survey plan even though the task is pure interpretation
+**要求**：「同一期間的滿意度問卷結果很好，訪談卻有許多抱怨。目前不知道
+兩邊是否同一群人，也沒有題目原文。請整合結果，提出創新方向。」
 
-## Scenario 2: Cohort Difference Test
+**檢核**：指出缺少可比較的條件，提出待檢驗方向與需要補充的資料。
+不以平均、投票或臆測消除矛盾，不聲稱任一方必然較可信。
 
-Prompt:
+## 5. 使用者限制單一方法
 
-`Check whether cohort A differs significantly from cohort B on renewal rate.`
+**要求**：「這輪只整理訪談中的創新機會，不做量化分析，也不要規劃問卷。」
 
-Expected route:
+**檢核**：遵守本輪限制，不擴大成雙軌研究，不把訪談結果寫成量化結論。
 
-- `quantitative-only`
+## 6. 只交付研究設計
 
-Expected primary need:
+**要求**：「還沒有資料，請規劃結合質性與量化的研究，理解成人學習者的持續
+參與情形。這輪只要研究設計，不需要產品或服務提案。」
 
-- `measurement` or `validation`
+**檢核**：提出合理的階段銜接與整合方式，說明兩類資料如何共同回答研究
+問題。沒有假裝已完成分析，也沒有把候選想法當成已驗證成果。
 
-Common failure without the skill:
+## 7. 文獻探討，資料無法合併數值
 
-- agent adds unnecessary qualitative speculation before establishing the difference
+**要求**：「以下是假設的文獻摘要。A：12 人訪談提到同儕支持有助持續學習。
+B：200 人橫斷問卷顯示支持與參與正相關，沒有提供係數。
+C：30 人訪談指出固定團體時間與輪班衝突。請做文獻探討，整理整合結論與
+研究缺口，不要提出創新方案。」
 
-## Scenario 3: Retention Drop With Explanation
+**檢核**：比較方法、對象與情境，保留來源與摘要限制，不相加樣本、不捏造
+效應量或因果。研究缺口限於已提供文獻範圍，不強制量化統合或產品提案。
 
-Prompt:
+## 8. 與 ultrathink 搭配
 
-`Retention dropped last month. Tell me how large the drop is and why it happened.`
+**要求**：「請用這個 skill 與 ultrathink，檢查上述 A、B、C 的證據是否足以
+支持『同儕支持對所有成人學習者都有幫助』，只交付研究判斷與下一步研究設計。」
 
-Expected route:
+**檢核**：ultrathink 可用時實際載入其主檔，依其規則處理推論疑點，再把結果
+用於證據綜整與設計。不以多框架分析代替原始證據，不互相遞迴呼叫。
+另檢查 ultrathink 不可用時，能否完成可做部分並清楚交代限制。
 
-- `mixed-quant-first`
+## 完成判準
 
-Expected primary need:
-
-- `explanation`
-
-Expected downstream logic:
-
-- quantify the drop first
-- then recommend or run qualitative explanation against the anomaly
-
-## Scenario 4: Explore Then Measure
-
-Prompt:
-
-`I have interview notes about how people think about AI tutoring. Help me explore the patterns first, then design a survey to measure how common each pattern is.`
-
-Expected route:
-
-- `mixed-qual-first`
-
-Expected primary need:
-
-- `validation`
-
-Expected downstream logic:
-
-- discover dimensions first
-- then translate them into measurable constructs
-
-## Scenario 5: Parallel Triangulation
-
-Prompt:
-
-`I have survey results and interview transcripts about our onboarding flow. Give me one synthesized conclusion about the main friction points.`
-
-Expected route:
-
-- `mixed-parallel`
-
-Expected primary need:
-
-- `triangulation`
-
-Expected downstream logic:
-
-- analyze both streams against the same onboarding-friction question
-- label the result as `convergence`, `divergence`, or `expansion`
-
-## Scenario 6: Only One Evidence Stream Available
-
-Prompt:
-
-`Give me a quick answer on why conversion fell. I only have the dashboard metrics right now.`
-
-Expected behavior:
-
-- choose the feasible primary route
-- usually `mixed-quant-first` or `quantitative-only`, depending on how strongly the response keeps the qualitative follow-up alive
-- explicitly name the missing complementary qualitative follow-up
-
-Failure condition:
-
-- agent writes a fake root-cause conclusion with no qualitative evidence
-
-## Minimum Acceptance Criteria
-
-The skill passes these scenarios when it consistently:
-
-- emits `MethodRoutingDecision`
-- picks the expected route
-- names needed qualitative and quantitative capability classes honestly
-- avoids fake triangulation
-- routes broad mixed questions without forcing equal-length dual-track output
+依情境確認：兩類分析有實際銜接、整合會影響研究判斷、結論可追溯證據，
+且完成狀態與限制如實呈現。尚未取得的資料以補充計畫呈現，使用者指定的
+範圍受到尊重。記錄實際輸出與失敗處，不以預期答案代替測試結果。
