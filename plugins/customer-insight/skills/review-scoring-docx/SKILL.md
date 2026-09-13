@@ -1,169 +1,106 @@
 ---
 name: review-scoring-docx
-description: |
-  This skill MUST be used whenever the user has one or more product review files and wants to (1) extract product attributes from the reviews, (2) score each product on those attributes, and (3) export the results into a Word document (.docx). Trigger on requests like 「從評論歸納屬性」、「幫我評分每個產品」、「做成 Word」、「產品屬性分析」、 「評論轉評分表」, or any combination of "reviews → attributes → scores → Word/docx". MUST also be used when the user uploads review files (CSV, JSON, TXT, or similar) and asks for comparative analysis, attribute extraction, or scoring — even without mentioning Maslow or Word explicitly.
+description: >-
+  This skill MUST be used when the user wants to infer product attributes from
+  review files, score product quality, and deliver a Word (.docx) report, or
+  explicitly requests review-scoring-docx. Triggers include 「評論評分 Word」、
+  「產品屬性比較報告」 with Word output, and reviews-to-scores-to-docx.
+  It SHOULD be used for review-based product comparisons whose agreed deliverable
+  is Word. It MUST NOT force Word output for general review analysis or substitute
+  quality scores for attribute salience.
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Review Scoring → Word Document
 
-Converts raw product review files into a formatted Word document with two deliverables:
+## Overview
 
-1. **Attribute catalog** — a minimum of 30 product attributes inferred from the full review corpus, each anchored to a Maslow need tier and accompanied by an evaluation dimension statement.
-2. **Product × attribute score matrix** — every product scored 0–10 on every attribute, colour-coded by performance band, with per-attribute averages and per-product totals.
+從完整評論歸納產品屬性，以 0–10 分評估各產品在每項屬性的表現，製作 Word 屬性目錄及產品比較表。評分反映評論中的品質與使用經驗。
 
-For a worked example using real Amazon reviews, see `references/worked-example.md`.
+## Input Contract
 
----
+- 評論檔案（CSV、JSON、TXT 等）、產品對應方式，以及評論正文欄位。
+- 報告語言與 Word 交付需求。明確點名本 skill 時，依使用者指定的交付格式處理。
+- 欄位與產品可明確辨識就直接使用。有多個合理選項時才確認。
 
-## Concepts and definitions
+## Data Sufficiency Gate
 
-### Review corpus
-All text written by customers about a product, collected across one or more files. A **valid review** is any entry whose body text exceeds 15 characters after stripping whitespace. No language filter is applied; multilingual corpora are treated identically to monolingual ones.
+納入所有非空白評論，保留短評、各種語言、完整原文及可追溯的檔案與列號。空白判斷可去除首尾空白，保存的原文不截短。解析失敗須指出檔案與原因，不能默默跳過。
 
-### Attribute
-A distinct, evaluable dimension of product quality or experience that surfaces — positively or negatively — across multiple reviews. An attribute is not a feature; it is the *customer's lived experience* of that feature. For example, "anti-fog coating" is a feature; "fog resistance in practice" is an attribute.
-
-Each attribute has four required fields:
-
-| Field | Definition |
-|-------|-----------|
-| `id` | Zero-padded sequential number (01, 02 … 30+) |
-| `label` | Concise display name; language matches the user's preference |
-| `dimension` | One sentence stating exactly what reviewers say when this attribute is good or bad |
-| `maslow_tier` | Which Maslow tier this attribute primarily satisfies (see table below) |
-
-### Maslow tier mapping
-
-Attributes must collectively cover all five tiers. The tiers and their characteristic questions are:
-
-| Tier | Need type | Core question the attribute answers |
-|------|-----------|--------------------------------------|
-| 1 | Physiological | Does the product function as the body requires? (sensory, physical comfort) |
-| 2 | Safety | Does the product reliably protect and hold up over time? |
-| 3 | Belonging | Does the product connect the user to a group, relationship, or shared identity? |
-| 4 | Esteem | Does the product make the user feel valued, seen, and not deceived? |
-| 5 | Self-actualisation | Does the product help the user fully achieve their goal or potential? |
-
-Minimum per-tier attribute counts: **5 for tiers 1 and 2**, **4 for tiers 3 and 4**, **5 for tier 5**.
-Adjust upward if the corpus warrants richer coverage; never go below these floors.
-
-### Score
-An integer from 0 to 10 expressing the net sentiment signal for one product on one attribute, derived from the entire review set for that product.
-
-| Band | Range | Signal |
-|------|-------|--------|
-| Critical failure | 0–2 | Near-universal negative; serious liability |
-| Predominantly negative | 3–4 | Majority of mentions are complaints |
-| Neutral / insufficient | 5 | Mixed signals, or attribute rarely mentioned |
-| Mostly positive | 6–7 | Clear majority satisfied; occasional complaints |
-| Strong positive | 8–9 | Consistently praised; very few negatives |
-| Near-universal praise | 10 | Effectively no negative signal found |
-
-**Absence rule:** if an attribute is never mentioned in any review for a product, assign 5.
-
----
+先列出各產品原始筆數、非空白筆數及排除原因。沒有評論的產品保留在比較範圍，標示資料不足。全部沒有正文時停止評分，請使用者補資料。
 
 ## Workflow
 
-### Step 0 — Locate required skills
-Before writing any code, check the available skills listed in your context. You need a **docx skill** (any skill covering `.docx` or Word document creation). Read its SKILL.md fully before Step 4.
+### 1. 歸納並固定屬性目錄
 
-### Step 1 — Ingest reviews
+閱讀所有產品的完整評論，整理反覆出現的稱讚、抱怨與未滿足需求。少數但具體的重大問題也可列入，須標示證據有限。
 
-1. Identify all uploaded review files from the conversation.
-2. For each file, auto-detect the text-bearing column (common names: `body`, `Body`, `review`, `text`, `content`).
-3. Load **all** valid reviews — no sampling, no row limit.
-4. Print a per-product count summary before proceeding.
+屬性描述可評估的使用經驗，例如「實際防霧效果」。每項記錄：
 
-```python
-import csv
+| 欄位 | 內容 |
+| --- | --- |
+| `id` | 固定且不重複的編號，例如 01、02 |
+| `label` | 屬性名稱 |
+| `dimension` | 哪些評論內容表示表現好或差 |
+| `maslow_tier` | 有證據支持的需求層級，無法判定時填 null |
+| `evidence` | 原文引句及來源位置 |
 
-def load_reviews(filepath):
-    text_col_candidates = ['body', 'Body', 'review', 'Review', 'text', 'content']
-    with open(filepath, encoding='utf-8', errors='replace') as f:
-        reader = csv.DictReader(f)
-        col = next((c for c in text_col_candidates if c in reader.fieldnames), None)
-        if col is None:
-            raise ValueError(f"No text column found. Headers: {reader.fieldnames}")
-        return [r[col].strip() for r in reader
-                if r[col].strip() and len(r[col].strip()) > 15]
-```
+Maslow 可分為生理（身體與感官）、安全（保護與可靠性）、歸屬（關係與群體）、尊重（被重視與自我價值）、自我實現（能力與目標實現）。依評論中的需求判定，沒有證據的層級標示未觀察到。
 
-### Step 2 — Discover and freeze the attribute catalog
+屬性數量由語料決定，不設定總數或各層配額。評分前固定目錄與順序。若後續發現必須調整定義，更新目錄後重評所有受影響的產品。
 
-1. Read through all reviews across all products to build a holistic picture of the corpus.
-2. Identify recurring themes, complaint patterns, praise patterns, and unmet needs.
-3. Formulate attributes **bottom-up from the corpus** — do not start from a fixed template.
-4. Ensure all five Maslow tiers are covered at or above minimum floor counts.
-5. Write out the complete catalog with all four required fields before scoring begins.
-6. **Freeze it.** The catalog must not change after scoring starts.
+### 2. 依完整評論評分
 
-Attribute discovery heuristics:
-- Recurring noun phrases → candidate attributes
-- Adjective + noun complaints (e.g. "flimsy arms", "blurry vision") → negative-pole definitions
-- Absence evidence (e.g. "wish it came with a case") → packaging / completeness attribute
-- Cross-language mentions count equally — translate and tally together
-- After a first pass, check each Maslow tier for gaps; tier 3 (belonging) is most commonly under-represented
+逐產品、逐屬性整理正負評價的頻率、強度及使用情境，再給一個整數分數。每筆分數附上評價筆數、代表引文與來源，以及判分理由。遇到相反評價，保留兩方依據。
 
-### Step 3 — Score every product
+| 分數 | 評論中的表現 |
+| --- | --- |
+| 0–2 | 幾乎都是負評，存在嚴重失敗 |
+| 3–4 | 負評占多數 |
+| 5 | 有實際中性評價，或正負評價相當 |
+| 6–7 | 大多正面，但有部分抱怨 |
+| 8–9 | 持續獲得稱讚，負評很少 |
+| 10 | 有充分且一致的正面評價，幾乎沒有反例 |
+| null | 沒有提及、沒有可判讀的評價，或證據不足以判分 |
 
-For each product:
-1. Read through **all** its valid reviews.
-2. For each attribute in the frozen catalog, tally the direction and intensity of reviewer mentions.
-3. Weight by frequency (how many reviews mention it) and intensity (how strongly positive or negative).
-4. Assign a single integer 0–10 per the scale defined above.
+5 分須有中性或混合評價支持。沒有負評本身不足以給 10 分。短評能支持哪項就評哪項，例如「很耐用」可支持耐用性，「讚」無法單獨支持某項具體屬性。證據稀少時附上限制，無法判分就留空。
 
-Store as: `scores: dict[product_id, list[int]]` — list length equals catalog size, ordered identically to the catalog.
+保存為 `scores: dict[product_id, list[int | None]]`，各列與固定目錄一一對應。JSON 使用 `null`，不要使用字串「null」、0 或 5 代替空值。
 
-### Step 4 — Build the Word document
+### 3. 計算平均與比較
 
-Consult the docx skill you located in Step 0 for the full API reference. The document has two sections:
+使用 [scripts/score_summary.py](scripts/score_summary.py) 的 `summarize_scores(scores, attribute_ids)` 計算報告數值。它只彙總已判定的分數，不自動推論評論品質。
 
-#### Section 1 — Portrait orientation: Attribute catalog table
+- 平均＝有分數的項目加總 ÷ 有分數的項目數。空值不計入分子或分母，真正的 0 分照算。全部空白時平均也留空。
+- 每個平均都顯示有效項目數／總項目數。屬性平均的分母是有評分的產品數，產品平均的分母是有評分的屬性數。
+- 各產品「已評屬性平均」只描述自身資料。排名使用所有待比較產品都有分數的共同屬性，等權平均，並列出共同屬性及占完整目錄的比例。
+- 沒有共同屬性，或只有一個產品，就不排名。不得為了產生排名自行刪除缺資料的產品。相同分數並列，排序以未四捨五入數值為準。
+- 排名僅適用於共同屬性，不能宣稱產品整體最好。屬性間若有重疊、資料量很少或評價情境不同，需說明比較限制。
 
-Columns: `id` | `attribute label` | `evaluation dimension` | `Maslow tier`
+假設評分為 8、6、空白，平均是 7（2/3 項）。若為 8、6、0，平均是 4.67（3/3 項）。
 
-- Differentiate tiers visually with distinct cell fill colours (one colour per tier, applied consistently to label and tier cells).
-- Dark header row with white bold text.
-- Consistent font throughout; body text 16–18 pt.
+### 4. 製作與交付 Word
 
-#### Section 2 — Landscape orientation: Product × attribute matrix
+製作文件前，讀取環境中可用的 Word 文件技能與 [references/word-layout.md](references/word-layout.md)。依使用中的文件工具設定頁面與表格，檢查實際渲染結果。
 
-Columns: `id` | `attribute label` | one column per product | `row average`
+交付可點擊的檔案連結或環境提供的附件。摘要列出各產品評論數、語言、共同屬性比較結果及資料缺口。有至少兩個有效分數的屬性才可比較差異幅度，並標示參與比較的產品數。
 
-- Include a **review-count sub-header row** directly below the product-ID header.
-- Insert **tier separator rows** (full-width band in the tier's accent colour, bold tier label) before each tier group.
-- **Colour-code score cells** by band: low → warm red; neutral → warm yellow; good → light green; excellent → strong green. Use a matching text colour within each band.
-- Add a **legend row** above the matrix explaining the colour bands.
-- Add a **product total-average row** at the bottom in a distinct dark header colour.
+## Output Contract
 
-#### Docx layout rules (apply regardless of docx library)
-- Use absolute units for all table widths — never percentage widths (they break in Google Docs).
-- Set width on both the table-level column-widths array and on every individual cell.
-- Use clear/transparent shading type, not solid fill, to prevent black-background rendering bugs.
-- Landscape section: pass portrait dimensions plus an orientation flag.
-- Never encode newlines as `\n` in text runs; use separate paragraph elements.
+- 屬性目錄：名稱、評估定義、需求層級及證據來源。
+- 產品 × 屬性表：整數品質分數、缺值、有效筆數與平均。
+- 比較說明：共同屬性、排名或無法排名的原因，以及可追溯的判分依據。
+- 完成的 Word 文件。文件產生或渲染受阻時，明確說明完成到哪裡。
 
-### Step 5 — Output
+## Quality Rules
 
-Write the `.docx` to the working directory, copy to the outputs directory, then call `present_files`.
+完整讀取、多語同等、目錄固定及證據可追溯，都是評分前提。報告中的分數、平均、排名與色彩必須對應同一份資料。評分是對評論的判讀，不能當成產品認證或實測結果。
 
-Accompany the file with a prose summary stating:
-- Total reviews per product and grand total
-- Languages present in the corpus
-- Top and bottom performers overall
-- The two or three attributes with the widest score variance across products
+## Common Mistakes
 
----
+- 用提及頻率代替品質好壞。頻率只能協助判斷證據多寡。
+- 對不同屬性集合的產品平均排名，或把空值當成中性分數。
+- 把歷史案例的屬性和分數套到新資料。
 
-## Hard rules
-
-1. **Never truncate.** Every valid review (length > 15 chars) is read for scoring. No sampling.
-2. **All languages count.** Non-English reviews carry equal weight.
-3. **Freeze before scoring.** The catalog is finalised before any product is scored.
-4. **Minimum 30 attributes.** Exception: corpus < 50 total reviews → 20 is acceptable; state the reason.
-5. **Integer scores only.** Individual scores are whole numbers 0–10.
-6. **Absolute table widths.** Percentage widths corrupt layout.
-7. **Present with `present_files`.** Never ask the user to navigate to the file manually.
+需要看目錄與矩陣的舊版範例時，讀取 [references/worked-example.md](references/worked-example.md)。其中缺值處理與本版不同，不能用來校準本版分數。

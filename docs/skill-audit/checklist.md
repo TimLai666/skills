@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**48 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**49 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -286,15 +286,25 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **狀態：** 使用者已確認接受並要求提交、推送。
 
-- [ ] **13. review-scoring-docx**（高優先）
+- [x] **13. review-scoring-docx**（高優先）
 
-  **可以改哪裡：** description 連未要求 Word 的一般屬性比較也強制觸發；硬湊至少三十屬性及五層配額，和由語料歸納矛盾；未提及直接給五分讓無證據混成中性；內嵌 I/O 與 Word 排版指南重複下游能力。
+  **已修改：** skill 1.2.0。空值不計入分子或分母，0 分照算，全空值平均留空。排名只使用所有待比較產品共同有分數的屬性，沒有共同屬性就不排名。取消三十屬性與 Maslow 各層配額，保留完整多語短評與評分依據。
 
-  **建議改法：** 限定評論比較並需要 Word 的任務；取消屬性及各層硬配額，無證據保留未觀察狀態，連同平均分規則一起調整；保留屬性定義和評分規準在主檔，程式及版面移 scripts/reference；格式依現有文件技能。
+  **驗證：** 9 項 Python unittest 通過，涵蓋空值、0 分、全空值、不同覆蓋範圍、無共同屬性、單產品、同分排名及非法輸入。JSON 往返保留 null。skill validator、YAML、plugin JSON、相對連結及 git diff --check 通過。實際 skill 與 README 表格均為 59，README 既有定位符合 Word 交付，無須改寫。
 
-  **應保留：** 完整評論覆蓋、多語同等、凍結可追溯屬性、評分依據、數值與視覺一致；缺值變更須同步驗證所有平均分。
+  **限制：** 本次驗證評分彙總與文件規則，沒有產生或渲染實際 Word。歷史案例缺少原始評論，保留數字並標示不能用來校準新版評分。
 
-  **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-scoring-docx/SKILL.md:3)、[主檔:13](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-scoring-docx/SKILL.md:13)、[主檔:37](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-scoring-docx/SKILL.md:37)、[主檔:52](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-scoring-docx/SKILL.md:52)、[主檔:73](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-scoring-docx/SKILL.md:73)、[主檔:94](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-scoring-docx/SKILL.md:94)、[主檔:120](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-scoring-docx/SKILL.md:120)、[主檔:161](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-scoring-docx/SKILL.md:161)。
+  | 檔案 | 變更摘要 |
+  | --- | --- |
+  | [plugins/customer-insight/skills/review-scoring-docx/SKILL.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-scoring-docx/SKILL.md) | 保留 0–10 品質評分，取消屬性配額與短評排除，定義空值、有效分母與共同屬性排名。 |
+  | [plugins/customer-insight/skills/review-scoring-docx/references/word-layout.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-scoring-docx/references/word-layout.md) | 集中 Word 排版與缺值顯示規則。 |
+  | [plugins/customer-insight/skills/review-scoring-docx/references/worked-example.md](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-scoring-docx/references/worked-example.md) | 保留舊數字，標示舊版缺值規則與未重現的判讀。 |
+  | [plugins/customer-insight/skills/review-scoring-docx/scripts/score_summary.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-scoring-docx/scripts/score_summary.py) | 新增空值平均、共同屬性排名及輸入驗證。 |
+  | [plugins/customer-insight/skills/review-scoring-docx/scripts/test_score_summary.py](/Users/timlai/Developer/skills/plugins/customer-insight/skills/review-scoring-docx/scripts/test_score_summary.py) | 新增 9 項測試。 |
+  | [plugins/customer-insight/.claude-plugin/plugin.json](/Users/timlai/Developer/skills/plugins/customer-insight/.claude-plugin/plugin.json) | 版本調升至 1.11.0。 |
+  | [docs/skill-audit/checklist.md](/Users/timlai/Developer/skills/docs/skill-audit/checklist.md) | 記錄本次修改與驗證，待使用者驗收。 |
+
+  **狀態：** 使用者已確認接受並要求提交、推送。
 
 - [ ] **14. theory-analysis**（低優先）
 

@@ -1,13 +1,20 @@
 # Worked Example — Safety Eyewear (Amazon, 8 products, 923 reviews)
 
-This file illustrates what one complete run of the skill looks like. Nothing here
+This file preserves a historical run under the old scoring rules. The original
+review corpus and per-score evidence are not included, so the judgments have not
+been independently reproduced. The old rules allowed missing evidence to receive
+5. It is impossible to identify those cells from this table alone. Keep these
+numbers as a historical record, not as a dataset compliant with the current
+missing-value rules. Re-scoring requires the original reviews.
+
+This file illustrates the catalog and matrix structure. Nothing here
 is prescriptive for other product categories. The attribute labels, Maslow
 assignments, and scores are all specific to this corpus; a different category
 (e.g. headphones, skincare, kitchen appliances) will yield different attributes.
 
 Use this file to:
 - Calibrate what a well-formed attribute catalog looks like
-- Anchor your scoring intuition against real reference scores
+- Inspect the historical table structure without using it to calibrate new scores
 - See which attribute discovery heuristics surfaced the most signal
 
 ---
@@ -25,7 +32,7 @@ Use this file to:
 | B0B15BXZ94 | Impactable Pickleball | 42 | EN |
 | B0BQHBHNQF | Lab/Science glasses | 32 | EN, FR, ES |
 
-Key finding: products with the most reviews (249 / 208 / 194) showed the largest
+Historical report, not reproduced from source reviews: products with the most reviews (249 / 208 / 194) showed the largest
 divergence between early and full-corpus scores — sampling would have materially
 changed the rankings.
 
@@ -92,8 +99,8 @@ changed the rankings.
 
 ## Score reference table
 
-Full-corpus scores (all valid reviews, no truncation). Use these to calibrate your
-scoring intuition — not to copy scores into a new analysis.
+Historical scores and averages under the old rules. Do not infer which 5s should
+be null, reuse these scores, or treat these averages as current-rule rankings.
 
 | # | Attribute | B00080FKIO | B007W7X1UK | B00X69LVKK | B016KZ2APQ | B07GB8Y11G | B08GKPC599 | B0B15BXZ94 | B0BQHBHNQF |
 |---|-----------|-----------|-----------|-----------|-----------|-----------|-----------|-----------|-----------|
@@ -133,9 +140,10 @@ scoring intuition — not to copy scores into a new analysis.
 
 ## Key observations from this corpus
 
-These are observations about this specific dataset, not universal rules.
+These are claims recorded by the historical run. The underlying reviews and
+analysis are unavailable here, so they are not verified findings or scoring rules.
 
-**Attribute with widest variance:** 廣告／描述誠信度 (attribute 20) — scores ranged from 2 (3M, systematic anti-fog failure + missing items) to 7 (ESS, Impactable, Lab glasses). Ad-honesty gaps are consistently diagnostic in e-commerce reviews.
+**Attribute with widest variance:** 廣告／描述誠信度 (attribute 20) — scores ranged from 2 (3M, systematic anti-fog failure + missing items) to 7 (ESS, Impactable, Lab glasses).
 
 **Attribute most correlated with overall rank:** 鏡框耐用性 (09) and 鏡片耐刮性 (08) — the products that ranked lowest all shared severe structural fragility complaints.
 
