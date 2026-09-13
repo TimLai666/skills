@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**50 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**51 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -329,15 +329,28 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
 ### data-and-research
 
-- [ ] **15. arxiv**（中優先）
+- [x] **15. arxiv**（中優先）
 
-  **可以改哪裡：** description 把所有 paper/related-work 都強制用 arxiv；inline XML parser、curl examples 與既有 helper script 是多份操作路徑；Semantic Scholar 全套及七步完整研究流程常駐，即使只查指定 ID。
+  **已修改：** arxiv 1.2.0，作為一般文獻搜尋的其中一個來源。完整指令說明移至 CLI help，保留論文版本與完整摘要，補上參數、缺欄位及 API 錯誤處理。使用者另外核准將工具自帶說明的通用規則加入開發與 skill 編寫規範。
 
-  **建議改法：** 限定 arXiv 搜尋/擷取；以 helper 為主入口，curl/XML/BibTeX 移按需 reference，Semantic Scholar 只在 citation/related-work 需求讀；七步改任務路由，不必每次查作者與影響力。
+  **驗證：** 15 項離線 unittest 通過，涵蓋現代／舊式編號與版本連結、完整摘要、缺欄位、錯誤回應、help 與參數驗證。實際執行 --help。兩個 skill validator、YAML、plugin JSON、相對連結、59 個 skill 與 README 列數、git diff --check 通過。
 
-  **應保留：** 版本後綴、撤稿檢查、API 限流、Atom格式處理與原文閱讀/引用。
+  **限制：** 沒有呼叫 arXiv 搜尋 API，遠端服務狀態尚未驗證。連續請求間隔由呼叫者遵守，help 與主檔皆有說明。
 
-  **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/data-and-research/skills/arxiv/SKILL.md:3)、[主檔:35](/Users/timlai/Developer/skills/plugins/data-and-research/skills/arxiv/SKILL.md:35)、[主檔:174](/Users/timlai/Developer/skills/plugins/data-and-research/skills/arxiv/SKILL.md:174)、[主檔:243](/Users/timlai/Developer/skills/plugins/data-and-research/skills/arxiv/SKILL.md:243)。
+  | 檔案 | 變更摘要 |
+  | --- | --- |
+  | [AGENTS.md](/Users/timlai/Developer/skills/AGENTS.md) | 新增工具說明由介面提供的 skill 編寫規則。 |
+  | [README.md](/Users/timlai/Developer/skills/README.md) | 說明 arxiv 是一般文獻搜尋的其中一個來源。 |
+  | [plugins/data-and-research/.claude-plugin/plugin.json](/Users/timlai/Developer/skills/plugins/data-and-research/.claude-plugin/plugin.json) | 版本 1.2.0。 |
+  | [plugins/data-and-research/skills/arxiv/SKILL.md](/Users/timlai/Developer/skills/plugins/data-and-research/skills/arxiv/SKILL.md) | 精簡為使用時機、help 入口、研究判斷與品質規則。 |
+  | [plugins/data-and-research/skills/arxiv/references/related-work.md](/Users/timlai/Developer/skills/plugins/data-and-research/skills/arxiv/references/related-work.md) | 相關研究的選用流程，指向官方 API 說明。 |
+  | [plugins/data-and-research/skills/arxiv/scripts/search_arxiv.py](/Users/timlai/Developer/skills/plugins/data-and-research/skills/arxiv/scripts/search_arxiv.py) | 完整 help、BibTeX 輸出、參數驗證、版本與摘要保留及錯誤處理。 |
+  | [plugins/data-and-research/skills/arxiv/scripts/test_search_arxiv.py](/Users/timlai/Developer/skills/plugins/data-and-research/skills/arxiv/scripts/test_search_arxiv.py) | 15 項離線測試。 |
+  | [plugins/dev-workflow/.claude-plugin/plugin.json](/Users/timlai/Developer/skills/plugins/dev-workflow/.claude-plugin/plugin.json) | 版本 1.29.0。 |
+  | [plugins/dev-workflow/skills/software-engineering-guidelines/SKILL.md](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/software-engineering-guidelines/SKILL.md) | 版本 1.5.0，加入 CLI／API／MCP 自帶說明及同步更新規則。 |
+  | [docs/skill-audit/checklist.md](/Users/timlai/Developer/skills/docs/skill-audit/checklist.md) | 記錄核准範圍、修改與驗證，待使用者驗收。 |
+
+  **狀態：** 使用者已確認接受並要求提交、推送。
 
 - [ ] **16. data-analysis-workflow**（高優先）
 

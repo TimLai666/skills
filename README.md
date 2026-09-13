@@ -122,7 +122,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | --- | --- |
 | `data-analysis-workflow` | 想把資料分析從資料檢查、清理、EDA、建模、評估一路做成標準化流程並產出分析報告。 |
 | `investment-research-prompts` | 想快速套用股票篩選、投資組合風險、股息策略、財報前瞻、DCF、技術分析或趨勢識別等投資研究模板。 |
-| `arxiv` | 想搜尋 arXiv 論文、查 Semantic Scholar 引用數據、產生 BibTeX、做學術文獻回顧。 |
+| `arxiv` | 搜尋與閱讀 arXiv 論文，也可作為一般文獻搜尋的其中一個來源。 |
 
 ### `knowledge-tools` — 知識管理與圖表
 
