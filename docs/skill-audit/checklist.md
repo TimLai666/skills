@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**53 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**54 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -401,15 +401,19 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
 ### dev-workflow
 
-- [ ] **18. db-engineering**（高優先）
+- [x] **18. db-engineering**（高優先）
 
-  **可以改哪裡：** 任何 DB 工作都必載十一條鐵則及完整性清單；原則、流程、收尾重述同樣規則。微小查詢也帶入雙實例、全稽核、軟刪、BCNF 等架構選擇；日常流程自動要求 commit。
+  **已完成並經使用者確認：** 主檔改為依任務查閱參考文件，合併原則、流程與收尾的重複要求。十一條既有政策集中保留，migration 改為必須納入版本控制，移除範例中的 git add／git commit 指令。保留 migration 不可變及同一檔案的內容分組規則，修正不存在的 example_table.sql 引用。skill 1.3.0、plugin 1.31.0。
 
-  **建議改法：** description 聚焦 DB 設計、migration、資料安全與效能；主檔縮成任務分流及不可遺失的安全檢查，建表／查詢／稽核／上線各讀對應 reference。環境、軟刪、稽核、正規化寫成有前提的專案政策；commit 依授權。消除主文與收尾逐條複製。
+  **驗證：** skill validator、YAML／JSON 解析、相對連結及數量檢查通過。除 migration 條文外，其餘十條政策與原文一致。這次只調整文件，沒有執行資料庫操作。
 
-  **應保留：** migration 可追溯、正式環境授權與備份、FK 刪除影響、資料讀寫路徑與實測效能證據。
-
-  **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/db-engineering/SKILL.md:3)、[主檔:15](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/db-engineering/SKILL.md:15)、[主檔:55](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/db-engineering/SKILL.md:55)、[主檔:69](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/db-engineering/SKILL.md:69)、[主檔:94](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/db-engineering/SKILL.md:94)、[主檔:110](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/db-engineering/SKILL.md:110)。
+  | 檔案 | 變更摘要 |
+  | --- | --- |
+  | [db-engineering/SKILL.md](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/db-engineering/SKILL.md) | 精簡主檔，依任務連結參考文件並調升版本。 |
+  | [design-policies.md](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/db-engineering/references/design-policies.md) | 集中保留十一條設計政策。 |
+  | [migrations.md](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/db-engineering/references/migrations.md) | 改為納入版本控制，修正模板引用。 |
+  | [dev-workflow/plugin.json](/Users/timlai/Developer/skills/plugins/dev-workflow/.claude-plugin/plugin.json) | 調升 plugin 版本。 |
+  | [checklist.md](/Users/timlai/Developer/skills/docs/skill-audit/checklist.md) | 記錄修改與待驗收狀態。 |
 
 - [x] **19. dev-task-loop**
 

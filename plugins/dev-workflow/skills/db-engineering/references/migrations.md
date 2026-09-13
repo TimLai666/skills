@@ -30,9 +30,7 @@ supabase db reset
 #    或推到 link 著的 dev 專案
 supabase db push
 
-# 4. 進版控
-git add supabase/migrations/
-git commit -m "migration: add orders table with RLS"
+# 4. migration 檔必須納入版本控制。
 ```
 
 ## 不可變原則
@@ -60,14 +58,14 @@ Dashboard SQL Editor 可以用來**探索、查詢、試**；但只要試出了�
 supabase db diff -f capture_manual_changes
 ```
 
-它會把差異寫成一個新的 migration 檔。檢查內容、確認無誤後 commit，讓版控重新追上實際狀態。之後就不要再手改了。
+它會把差異寫成一個新的 migration 檔。檢查內容、確認無誤後將 migration 檔納入版本控制，讓版控重新追上實際狀態。之後就不要再手改了。
 
 ## 一個 migration 的內容建議
 
 - 一個 migration 聚焦一件邏輯改動，檔名描述清楚（`add_orders_table`、`add_rls_to_profiles`）。
 - 寫 DDL 時盡量用 `if not exists` / `or replace`，讓重複套用較安全。
 - 新建表的 migration 一定要在同一檔內把這些一次寫齊：欄位（含 `created_at/updated_at/deleted_at`）、`enable row level security`、policy、`updated_at` 的 `moddatetime` trigger、需要的索引。不要分次補，避免出現「表建好了但 RLS 還沒開」的空窗。
-- 參考 `assets/starter-migrations/example_table.sql` 的完整樣板。
+- 欄位與 trigger 寫法見 [data-conventions.md](data-conventions.md)。稽核表範例見 [0003_audit_log.sql](../assets/starter-migrations/0003_audit_log.sql) 與 [0004_request_log.sql](../assets/starter-migrations/0004_request_log.sql)。
 
 ## 環境順序
 
