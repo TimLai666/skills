@@ -3,14 +3,15 @@ name: human-writing
 description: >-
   This skill MUST be used by default for any user-facing writing, including
   answers to users, emails, documents, formal correspondence, reports,
-  proposals, landing-page copy, social posts, essays, commentary,
+  proposals, project introductions, README files, repository descriptions,
+  landing-page copy, social posts, essays, commentary,
   explanations, summaries, product copy, internal updates, and other prose
   intended to be read by people. Apply it whenever the output contains
   human-readable text. This skill MUST NOT be skipped unless another skill
   explicitly owns the writing style or the output is purely code, structured
   data, or a command. Supports Chinese and English.
 metadata:
-  version: "1.11.0"
+  version: "1.12.0"
 ---
 
 # Human Writing
@@ -20,6 +21,8 @@ metadata:
 Use this for prose that a person will read, whether you are writing from scratch or revising a draft. The goal is prose the reader can picture and act on, with no AI tells left in.
 
 Do not apply it to code, JSON, SQL, shell commands, or other structured output. When another skill owns the format or subject matter, use that skill to plan the content and use this one for the prose.
+
+Project introductions, README files, and repository descriptions also use this skill. In mixed technical documents, apply the writing rules to prose while preserving the correctness of commands, code examples, and API identifiers.
 
 This file gives the sequence. The rules are in the linked references. Read the reference named at each step instead of relying on a remembered summary.
 

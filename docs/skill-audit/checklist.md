@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**52 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**53 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -374,15 +374,30 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **狀態：** 使用者已確認接受並要求提交、推送。
 
-- [ ] **17. investment-research-prompts**（中優先）
+- [x] **17. investment-research-principles**（原 investment-research-prompts）
 
-  **可以改哪裡：** 定位是 prompt 模板，但 description 網羅全部投資研究；多場景必先問主軸、缺資料固定五欄 MissingDataOutput，連產出可填 prompt 也被同一門檻卡住；reference 八模板有冗長履歷式角色，固定10/15–20標的及全分析項。
+  **已修改：** 改為投資研究原則，移除 prompt 模板、角色履歷、固定標的數量及固定缺資料輸出。保留來源、時效、假設與風險檢查，納入新聞事件與可取得的籌碼資料，以及十類研究重點。skill 2.0.0、plugin 2.0.0。
 
-  **建議改法：** description 收斂研究prompt/框架；先分生成模板與執行研究，模板可保留槽位，分析才查必要資料。八場景做短索引＋按段讀；角色改簡短專業任務，不需20年/$60B履歷；清單與標的數改依需求，缺資料用簡短必要問題。
+  **驗證：** skill validator、YAML、JSON、相對連結、59 個 skill 與 README 列數檢查通過，十類研究段落均保留。git diff --check 通過。沒有執行實際投資研究。
 
-  **應保留：** 時效資料查證、來源、假設/未知區分，DCF敏感度與情境風險等專業內容。
+  **共通補充：** human-writing 1.12.0 明確適用專案簡介、README 與 repository 描述，writing-and-design plugin 1.24.0。
 
-  **原文位置：** [主檔:3](/Users/timlai/Developer/skills/plugins/data-and-research/skills/investment-research-prompts/SKILL.md:3)、[主檔:48](/Users/timlai/Developer/skills/plugins/data-and-research/skills/investment-research-prompts/SKILL.md:48)、[主檔:58](/Users/timlai/Developer/skills/plugins/data-and-research/skills/investment-research-prompts/SKILL.md:58)、[主檔:99](/Users/timlai/Developer/skills/plugins/data-and-research/skills/investment-research-prompts/SKILL.md:99)、[references/prompt-library.md:22](/Users/timlai/Developer/skills/plugins/data-and-research/skills/investment-research-prompts/references/prompt-library.md:22)。
+  **名稱變更：** 明確呼叫改用 investment-research-principles。README、plugin 與 marketplace 描述、啟動提示同步更新。
+
+  | 檔案 | 變更摘要 |
+  | --- | --- |
+  | plugins/data-and-research/skills/investment-research-prompts/SKILL.md → [plugins/data-and-research/skills/investment-research-principles/SKILL.md](/Users/timlai/Developer/skills/plugins/data-and-research/skills/investment-research-principles/SKILL.md) | 改為精簡研究原則。 |
+  | plugins/data-and-research/skills/investment-research-prompts/references/prompt-library.md → [plugins/data-and-research/skills/investment-research-principles/references/analysis-checkpoints.md](/Users/timlai/Developer/skills/plugins/data-and-research/skills/investment-research-principles/references/analysis-checkpoints.md) | 移除模板，保留十類分析檢查點。 |
+  | plugins/data-and-research/skills/investment-research-prompts/agents/openai.yaml → [plugins/data-and-research/skills/investment-research-principles/agents/openai.yaml](/Users/timlai/Developer/skills/plugins/data-and-research/skills/investment-research-principles/agents/openai.yaml) | 同步名稱與使用目的。 |
+  | [README.md](/Users/timlai/Developer/skills/README.md) | 同步名稱與定位。 |
+  | [.claude-plugin/marketplace.json](/Users/timlai/Developer/skills/.claude-plugin/marketplace.json) | 更新投資研究原則描述。 |
+  | [plugins/data-and-research/.claude-plugin/plugin.json](/Users/timlai/Developer/skills/plugins/data-and-research/.claude-plugin/plugin.json) | 更新描述與版本。 |
+  | [docs/skill-audit/checklist.md](/Users/timlai/Developer/skills/docs/skill-audit/checklist.md) | 記錄修改與待驗收狀態。 |
+
+  | [human-writing/SKILL.md](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/human-writing/SKILL.md) | 明確納入專案簡介、README 與程式庫描述。 |
+  | [writing-and-design/plugin.json](/Users/timlai/Developer/skills/plugins/writing-and-design/.claude-plugin/plugin.json) | 版本調升。 |
+
+  **狀態：** 使用者已確認接受並要求提交、推送。
 
 ### dev-workflow
 

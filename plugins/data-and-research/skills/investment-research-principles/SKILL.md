@@ -1,120 +1,42 @@
 ---
-name: investment-research-prompts
+name: investment-research-principles
 description: >-
-  This skill MUST be used when the user needs stock screening, portfolio risk
-  review, dividend portfolio design, pre-earnings analysis, industry
-  competition analysis, DCF valuation, technical analysis, or stock
-  trend/anomaly detection. MUST trigger on requests like 選股, 投資組合風險, 股息策略,
-  財報前瞻, DCF 估值, 技術面分析, 產業競爭研究, 趨勢識別, or investment research prompts.
+  This skill MUST be used for equity investment research involving stock screening,
+  portfolio risk, dividend strategies, earnings previews, industry comparison, DCF
+  valuation, technical analysis, news and events, ownership and trading flows,
+  or market anomalies. It SHOULD guide investment
+  research planning and review. It MUST NOT expand a single price lookup into a
+  research report. Triggers include 投資研究、選股、投資組合風險、股息策略、財報前瞻、
+  產業比較、DCF 估值、技術分析、新聞事件、籌碼面、異常研究。
 metadata:
-  version: "1.1.0"
+  version: "2.0.0"
 ---
 
-# Investment Research Prompts
+# Investment Research Principles
 
 ## Overview
 
-把投資研究需求先路由到正確場景，再檢查必要輸入，最後從提示詞庫取用對應模板。這個 skill 以 prompt 模板與分析框架為核心，不負責程式化抓取金融資料。
+依投資問題選擇分析方法，檢查資料、估值假設與風險是否支持結論。各類研究的檢查重點見 [analysis-checkpoints.md](references/analysis-checkpoints.md)，只讀本次相關段落。
 
-## Use This Skill
+## Input Contract
 
-Use when:
+先辨識研究標的、市場、時間範圍與要回答的問題。涉及個人配置時，才確認持倉、資金需求、投資期限與風險承受度。可從現有資訊判斷的內容不重問，多個分析目的可一起處理。
 
-- 使用者想要股票篩選、選股框架或研究報告模板
-- 使用者要拆解投資組合風險、再平衡或避險方向
-- 使用者要規劃股息投資組合與被動收入藍圖
-- 使用者要做財報前瞻、產業競爭、DCF 估值、技術分析或異常模式辨識
-- 使用者明確要「prompt」「模板」「分析框架」「研究 brief」
+關鍵資料不足時，簡短說明缺口並完成可獨立處理的部分。只討論方法或研究規劃時，不要求先取得全部市場資料。
 
-Do not use when:
+## Workflow
 
-- 使用者只要單一即時股價或單一財務指標，沒有研究框架需求
-- 任務是實作金融資料 API、回測程式或交易系統
-- 任務是一般理財建議，且不需要股票研究輸出格式
+- 先查證資料再分析。價格、估值倍數、財報日期、共識預測、配息與持股變化等資料須附來源及資料日期。歷史研究只使用當時可取得的資訊，避免把後來公布的結果帶入。
+- 比較前核對幣別、期間、會計口徑與價格調整方式。優先使用公司公告、財報與交易所資料，區分公司指引、外部預測與自己的假設。
+- 研究標的時也檢查相關新聞、公司與產業事件、政策及總體資訊，判斷是否改變原有假設。籌碼資料可取得且與問題相關時，納入持股結構與資金流向。各面向相互核對，有矛盾就說明，不能只靠基本面或技術面完成綜合判斷。
+- 依問題選擇指標與分析深度，標的數量由範圍與資料品質決定。沒有足夠證據時保留未知，不為了完成表格編造評分、機率或目標價。
+- 估值與預測交代假設、情境範圍，以及哪些條件會使結論失效。比較潛在收益與損失，避免單一數字製造過度確定感。
+- 投資建議須與研究目的、期限和限制相符。資料不足以支持買賣或排名時，提供可確認的結果與待驗證條件。
 
-## Routing Rule
+## Output Contract
 
-先判斷請求屬於哪一類：
+依需求提供分析結論或研究規劃，附上關鍵證據、方法、假設與限制。數值結果須可依來源與計算重現，交付格式及圖表依用途決定。
 
-1. `stock-screening`
-2. `portfolio-risk-review`
-3. `dividend-portfolio-blueprint`
-4. `pre-earnings-brief`
-5. `industry-competition-report`
-6. `dcf-valuation-memo`
-7. `technical-analysis-report`
-8. `trend-anomaly-memo`
+## Quality Rules
 
-若使用者描述同時包含多個類型，優先問清楚主要決策目的是：
-
-- 找標的
-- 估值
-- 交易時機
-- 組合風險
-- 產業比較
-
-細節模板與欄位規則見 [references/prompt-library.md](./references/prompt-library.md)。
-
-## Input Gate
-
-先檢查該場景的必要資訊是否齊全。若不足，先回 `MissingDataOutput`，不要直接輸出空模板。
-
-`MissingDataOutput` 必須包含：
-
-- `detected_scenario`
-- `missing_fields`
-- `why_needed`
-- `follow_up_questions`
-- `next_step`
-
-追問原則：
-
-- 只問最少必要欄位
-- 優先問能改變分析結論的資訊
-- 若日期不明但可合理推進，先標示假設再繼續
-
-## Freshness Rule
-
-以下資訊具有時效性，執行分析時必須查證最新來源，不可把模板當成離線事實：
-
-- 最新股價
-- 估值倍數
-- 財報日期
-- 分析師共識
-- 殖利率
-- 配息紀錄
-- 市值
-- 期權隱含波動或 implied move
-- 空頭比例、內部人交易、機構持股變化
-
-若使用者要求「最新」「今天」「目前」「即將公布」之類的內容，必須先取得最新資料與來源，再套用模板。
-
-## Output Rule
-
-若資訊足夠，可以有兩種輸出方式：
-
-- 直接產出適合該情境的完整研究 prompt
-- 依模板結構直接展開分析框架，並明確標示已知資訊、待補資訊、假設與資料來源需求
-
-輸出時應保留：
-
-- 專業角色設定
-- 分析項目清單
-- 輸出格式要求
-- 使用者需補的變數槽位
-
-不要：
-
-- 捏造即時市場數據
-- 在缺必要欄位時硬做結論
-- 把多個場景模板混在一起而不說明主軸
-
-## Suggested Workflow
-
-1. 辨識主要場景
-2. 檢查必要輸入
-3. 若缺資料，回 `MissingDataOutput`
-4. 讀取對應模板段落
-5. 視需求保留模板，或轉成當前任務的分析框架
-6. 若內容依賴即時市場資訊，先查證再回答
-
+查核資料時效與來源，區分事實、估計與推論。研究完成以約定問題是否獲得有依據的回答為準，不要求跑完所有分析場景。資料不足造成的未完成部分須明確說明。

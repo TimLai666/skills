@@ -121,7 +121,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | Skill | 適合什麼需求 |
 | --- | --- |
 | `data-analysis-workflow` | 規劃或執行資料分析，依問題選擇方法，檢查資料處理、評估與結論是否可信。 |
-| `investment-research-prompts` | 想快速套用股票篩選、投資組合風險、股息策略、財報前瞻、DCF、技術分析或趨勢識別等投資研究模板。 |
+| `investment-research-principles` | 依投資問題檢查資料來源、估值假設與風險，規劃或執行有依據的研究。 |
 | `arxiv` | 搜尋與閱讀 arXiv 論文，也可作為一般文獻搜尋的其中一個來源。 |
 
 ### `knowledge-tools` — 知識管理與圖表

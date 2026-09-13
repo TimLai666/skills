@@ -46,7 +46,7 @@
     {
       "name": "data-and-research",
       "source": "./plugins/data-and-research",
-      "description": "資料分析與研究：端到端資料分析流程、投資研究模板、arXiv 文獻搜尋。"
+      "description": "資料分析與研究：端到端資料分析流程、投資研究原則、arXiv 文獻搜尋。"
     },
     {
       "name": "knowledge-tools",
