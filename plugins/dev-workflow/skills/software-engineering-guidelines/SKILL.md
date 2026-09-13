@@ -2,7 +2,7 @@
 name: software-engineering-guidelines
 description: "Software engineering guidelines for any software change. This skill MUST be loaded before requirement clarification, architecture/design, implementation, refactoring, code review, testing, shipping, or creating Git commits (including standalone commit requests), and MUST NOT be skipped because the change is a one-liner. Covers simplicity, surgical changes, testing-first for high-impact changes with TDD (Test-Driven Development), and verifiable success criteria. Triggers on: 任何軟體規劃, 需求釐清, 架構設計, 寫 code, 改 code, 做功能, 修 bug, refactor, 開發, coding, development, 實作, 實現, 寫程式, 改程式, 加功能, 修問題, code review, 測試, 重構, init, 初始化專案, 建立 CLAUDE.md, 建立 AGENTS.md"
 metadata:
-  version: "1.5.0"
+  version: "1.6.0"
 ---
 
 ## Core Principles
@@ -86,6 +86,13 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
+### Progress at Every Turn End
+
+End every turn of any ongoing task with a progress bar tied to the original goal: completed/total agreed items, current work, and what remains before completion. Use the existing plan or checklist. Count only verified work that meets the agreed acceptance and delivery conditions; show pending acceptance separately.
+
+Keep the scope and denominator stable unless the user changes them. If the total is unknown, show milestones without inventing a percentage or finish date. Item completion is not a time estimate; 100% requires the original goal and all delivery conditions to be met.
+
+
 ---
 
 ### 6. Tool and API Discoverability
@@ -114,6 +121,7 @@ Implement using Principles 2–4.
 
 1. Complete and report verification (Principle 4).
 2. Review the Pre-Ship Checklist.
+3. Before ending the turn, report progress against the original goal using Principle 5.
 
 ---
 

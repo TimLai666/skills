@@ -1,6 +1,6 @@
 # Skills 簡化清單
 
-目前完成優化：**51 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
+目前完成優化：**52 / 62**。已勾選項目均經使用者確認。每次只處理一個 skill，實際修改、必要驗證並經使用者確認接受後，才勾選該項。
 
 初次審查範圍：repository 的 `plugins/*/skills/*`，共 62 個 skills、10 個 plugins。不是本機所有第三方已安裝 skills 的清單。已逐一閱讀全部 SKILL.md，涉及重複、相依或矛盾的建議另查相關 references、模板或腳本；這不是所有附屬檔案逐行審計，也未實測所有技能的執行效果。
 
@@ -352,15 +352,27 @@ commit 訊息規範放在 [software-engineering-guidelines](/Users/timlai/Develo
 
   **狀態：** 使用者已確認接受並要求提交、推送。
 
-- [ ] **16. data-analysis-workflow**（高優先）
+- [x] **16. data-analysis-workflow**（高優先）
 
-  **可以改哪裡：** 主檔固定 Step0–12 與 model_performance，reference 缺目標就一律 clustering（237–254）、缺失值固定median/mode、異常remove/winsorize（103–129）；所謂簡化版仍強制Model（423–434），不是按需求減步驟。
+  **已修改：** 保留短版分析原則，移除固定十二步與重複教學。先探索分布與描述統計，再依問題及資料條件選方法、清理需有依據、模型評估隔離測試資料，交付內容以研究問題為準。skill 1.2.0，plugin 1.3.0。
 
-  **建議改法：** 目標判定前移；主檔只保留問題→品質→必要分析→驗證→報告。描述性/推論/預測分支按需讀，非建模不生成 model artifacts；清理方式由資料機制與用途決定，不用固定閾值/填值/刪除；合併reference三套重複流程。
+  **共通規則：** human-writing 1.11.0 同步要求所有持續任務每輪回覆顯示進度，writing-and-design plugin 1.23.0。software-engineering-guidelines 1.6.0 以兩段短規則要求每輪結尾進度條，以最初目標及驗收條件計算。分母不能默默變更，待驗收與完成分開，總量未知時不編造百分比。dev-workflow plugin 1.30.0。
 
-  **應保留：** 資料結構與品質查核、來源/清理決策可追蹤、使用適合評估且報告實際限制。
+  **驗證：** 兩個 skill validator、YAML、plugin JSON、相對連結、59 個 skill 與 README 列數、git diff --check 通過。本次為文件原則調整，沒有執行實際資料分析。
 
-  **原文位置：** [主檔:30](/Users/timlai/Developer/skills/plugins/data-and-research/skills/data-analysis-workflow/SKILL.md:30)、[主檔:48](/Users/timlai/Developer/skills/plugins/data-and-research/skills/data-analysis-workflow/SKILL.md:48)、[references/data-analysis-flow.md:237](/Users/timlai/Developer/skills/plugins/data-and-research/skills/data-analysis-workflow/references/data-analysis-flow.md:237)。
+  | 檔案 | 變更摘要 |
+  | --- | --- |
+  | [plugins/data-and-research/skills/data-analysis-workflow/SKILL.md](/Users/timlai/Developer/skills/plugins/data-and-research/skills/data-analysis-workflow/SKILL.md) | 縮成分析判斷與品質原則。 |
+  | [plugins/data-and-research/skills/data-analysis-workflow/references/data-analysis-flow.md](/Users/timlai/Developer/skills/plugins/data-and-research/skills/data-analysis-workflow/references/data-analysis-flow.md) | 改為依目的選擇驗證重點。 |
+  | [plugins/dev-workflow/skills/software-engineering-guidelines/SKILL.md](/Users/timlai/Developer/skills/plugins/dev-workflow/skills/software-engineering-guidelines/SKILL.md) | 加入每輪以原始目標回報進度的規則與結尾檢查點。 |
+  | [plugins/data-and-research/.claude-plugin/plugin.json](/Users/timlai/Developer/skills/plugins/data-and-research/.claude-plugin/plugin.json) | 版本調升。 |
+  | [plugins/dev-workflow/.claude-plugin/plugin.json](/Users/timlai/Developer/skills/plugins/dev-workflow/.claude-plugin/plugin.json) | 版本調升。 |
+  | [README.md](/Users/timlai/Developer/skills/README.md) | 同步分析 skill 定位。 |
+  | [docs/skill-audit/checklist.md](/Users/timlai/Developer/skills/docs/skill-audit/checklist.md) | 記錄修改、驗證與待驗收狀態。 |
+  | [human-writing/SKILL.md](/Users/timlai/Developer/skills/plugins/writing-and-design/skills/human-writing/SKILL.md) | 通用回覆加入原始目標進度條，與正式交付物分開。 |
+  | [writing-and-design/plugin.json](/Users/timlai/Developer/skills/plugins/writing-and-design/.claude-plugin/plugin.json) | 版本調升至 1.23.0。 |
+
+  **狀態：** 使用者已確認接受並要求提交、推送。
 
 - [ ] **17. investment-research-prompts**（中優先）
 
