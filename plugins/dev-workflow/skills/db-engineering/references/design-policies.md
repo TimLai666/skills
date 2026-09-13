@@ -39,4 +39,3 @@
 10. **Log 顯示用欄位要 snapshot** — log 表的 FK 顯示用欄位（actor_email、sender_name…）要在寫入當下 snapshot 成欄位，**不要靠 join 父表抓**。父表改 email 或被刪，log 顯示就跟著變或遺失追溯。
 
 11. **Schema 先畫 ER model，再決定拆表與正規化** — 設計或優化 schema 時，先釐清 entity、attribute、relationship、cardinality、optional relationship、candidate key 與 functional dependency，畫出 ER model 後再決定表的拆分方式。沒有特殊業務需求時，先以無損連接且盡可能保留相依性的 BCNF 設計為基準。只有在實際量測到效能瓶頸，且業務需求確實需要時，才可為效能從 BCNF 放寬到 3NF，並記錄取捨與驗證結果。這裡的放寬不能低於 3NF，不得只因為預期會比較快、方便 join 或主觀感覺就反正規化。
-
