@@ -166,7 +166,7 @@
 
 **較自然的寫法：** 講到不用花腦力。我兩秒內看不懂就是失敗的回答。
 
-以下兩個英文例子示範如何區分給 AI 的寫作指示與成稿內容。情境與技術資訊依使用者提供的素材設定，用來示範寫法，不作為套件現況的查證結果。
+以下英文例子示範如何區分給 AI 的寫作指示與成稿內容。情境與技術資訊依使用者提供的素材設定，用來示範寫法，不作為套件現況的查證結果。
 
 **情境：** 使用者要寫 issue 給 go-milp 的作者，介紹 Insyra 的 `lp` 套件，並討論以 import 方式使用 go-milp 的計畫。
 
@@ -186,7 +186,33 @@
 
 import 的使用方式已交代合作計畫，"without copying or modifying its code" 額外引入了讀者尚未提出的疑慮。這個情境也只提供整合計畫，因此改寫保留計畫語氣，沒有沿用 "works right after `go get`" 的現成功能宣稱。
 
-判斷重點是每段輸入的用途。寫作指示透過選材與表達落實，背景依讀者需要取捨，要傳達的資訊則保留在成稿。若作者已問是否會複製程式碼，回覆就應明確回答。這個原則適用於中英文，不能簡化成禁用 "not" 或 "without"。
+**給 AI 的指示：** 希望這封 issue 能鼓勵作者繼續維護、繼續做下去。
+
+**原文相關段落：** 以下保留開頭與結尾，省略中間的套件功能及採用理由。`[B]` 是原稿中的標記。
+
+> I maintain [Insyra](https://github.com/HazelnutParadise/insyra), a Go data analysis library. I'm writing to let you know we plan to depend on go-milp as the default solver engine in our next release series, and to thank you for building it.
+>
+> […]
+>
+> Before writing, I built v0.2.0 and ran its test suite locally, and everything passed. We'll also run our own models through both go-milp and GLPK in Insyra's CI, and report anything that disagrees here with a reproducer.
+>
+> We'd be glad to see go-milp keep going. Regular tagged releases and a short note on how stable the API is would help downstream users like us pin with confidence. **[B]** We're writing a CPLEX LP file reader on our side to feed go-milp. If a reader like that would be useful upstream, we'd be happy to offer it.
+>
+> Thanks again for the careful work.
+>
+> The Insyra maintainers
+
+**放回整段後的診斷：** 單看 "We'd be glad to see go-milp keep going"，可以是普通的鼓勵。這封信開頭已告知採用並致謝，結尾前又承諾測試與回報問題，接著還提出貢獻讀取器，這些內容已在傳達支持。在這個安排裡，"keep going" 緊接著定期發版與 API 穩定性建議，會讓結尾的重心從感謝與合作轉向希望作者如何持續維護。
+
+**較自然的結尾：** 保留前文已交代的採用與測試計畫，結尾聚焦合作與感謝。
+
+> We're writing a CPLEX LP file reader on our side to feed go-milp. If a reader like that would be useful upstream, we'd be happy to offer it.
+>
+> Thanks again for the careful work.
+
+這個改寫以感謝、告知採用與鼓勵為目的，刪去額外的維護建議。若使用者也要詢問發版與 API 穩定性，應保留並獨立說明具體需求，不能為了語氣順暢而刪掉。使用者確實提出了鼓勵的目的，AI 應透過整封信落實，並依情境決定是否需要明說。這類例子須保留足以支持診斷的前後文，避免把篇章問題誤教成禁用單句。
+
+判斷重點是每段輸入的用途。寫作指示透過選材與表達落實，背景依讀者需要取捨，要傳達的資訊則保留在成稿。若作者已問是否會複製程式碼，回覆就應明確回答。這個原則適用於中英文，不能簡化成禁用 "not"、"without" 或鼓勵的句子。
 
 ### 16A. 改寫後，只交代讀者需要的現行做法
 
@@ -350,6 +376,16 @@ import 的使用方式已交代合作計畫，"without copying or modifying its 
 **原句：** 台灣已經是超高齡社會，但照護人力永遠無法二十四小時站在每一位長者身旁。
 
 **較自然的改寫：** 台灣已經是超高齡社會，但照護人力不可能二十四小時守在每位長者身邊。
+
+### 27A. 表達感謝時，說明對方的工作如何幫上忙
+
+**情境：** 沿用例 16 的 issue 素材，寫信者要感謝 go-milp 作者，並說明 CI 中與 GLPK 的比較是考慮採用的原因之一。
+
+**像在評定對方是否合格的寫法：** That is the evidence we look for before trusting a numerical library.
+
+**較自然的寫法：** Your GLPK comparisons in CI helped us evaluate go-milp for our models.
+
+原句把寫信者放在評審的位置，宣告什麼成果才值得自己信任。在告知採用與致謝的信裡，具體說明對方的工作如何幫上忙，更符合雙方的關係。若文章本來就是選型評估，則可以交代判準與證據。改寫時也須確認比較結果確實用於評估，不能為了讓感謝具體而捏造幫助。
 
 ### 28. 避免用頓號堆出標語節奏
 

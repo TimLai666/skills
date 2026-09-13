@@ -54,7 +54,7 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 ### 7. Keep internal reasoning out of the final prose
 
-- Before drafting, distinguish instructions addressed to the AI, background supplied to guide the writing, and information intended for the reader. Apply writing instructions through content selection and expression. Include background only when the reader needs it to understand or act; being present in the prompt is not enough reason to put it in the prose.
+- Before drafting, distinguish instructions addressed to the AI, background supplied to guide the writing, and information intended for the reader. Apply writing instructions through content selection and expression. Include background only when the reader needs it to understand or act; being present in the prompt is not enough reason to put it in the prose. Communication goals such as encouraging or reassuring someone should shape the whole message; they do not automatically need a sentence naming the desired response or disproportionate emphasis.
 - When the user says "do not make the reader think X," convey the intended understanding through concrete facts, purposes, or actions. The instruction alone does not establish that the reader has raised X or needs an explicit denial. Keep a denial when the reader's actual question or task requires it. See the English examples under example 16 in [human-writing-examples.md](./human-writing-examples.md).
 - Do not assume the reader knows the categories, layers, sequence, or terminology created during planning.
 - Translate internal frameworks into concrete actions, observable facts, order, reasons, or consequences.
@@ -202,6 +202,7 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 ### 25. Match social context
 
 - Business writing earns trust by stating facts and next steps plainly, without template phrases.
+- In appreciation or adoption messages, describe how the recipient's work helps you. Keep the relationship between writer and reader intact; a declaration that the work meets your standards can turn thanks into an unsolicited evaluation. Use evaluative language when assessment is the actual purpose. See example 27A in [human-writing-examples.md](./human-writing-examples.md).
 - Public-facing copy should read as if someone chose each word for this product and this reader.
 - In commentary, take a position and give its reason. A survey of safe opinions reads as filler.
 - When replying to a message, mirror the other side's paralinguistic level: if they write with「～」, exclamation marks, or emoji, do not answer in bare full-stop sentences, which read as cold or even displeased; if they write formally, do not sprinkle symbols. A friendly signal that gets no echo erodes trust.
