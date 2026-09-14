@@ -1,6 +1,6 @@
 # Agent Skills
 
-59 個 agent skills，分成 10 個 plugins，這個 repo 同時是 Claude Code plugin marketplace。
+60 個 agent skills，分成 10 個 plugins，這個 repo 同時是 Claude Code plugin marketplace。
 
 ## 安裝方式
 
@@ -103,6 +103,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 
 | Skill | 適合什麼需求 |
 | --- | --- |
+| `agent-delegation` | 主 agent 派工給 subagent 或外部 CLI（agy、opencode、codex、Agent 工具）時的固定規則：決策表、派工 prompt 六項、同檔單寫、親自審查、工具失敗照實回報。 |
 | `eng-architect` | 設計技術架構、釐清模組邊界、按可驗收行為拆任務，或審查 UI。沿用專案既有文件與任務系統，沒有安排且需要完整交接時建立預設協作文件。 |
 | `diff-inspector` | 想在合併前審查 diff：scope drift check、critical code review、specialist 並行掃描、adversarial review。 |
 | `test-and-fix` | 依指定範圍或 diff 測試網站、API、命令列工具與函式庫，追查失敗原因、修復並驗證回歸測試。 |
