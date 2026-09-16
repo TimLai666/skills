@@ -2,7 +2,7 @@
 name: software-engineering-guidelines
 description: "Software engineering guidelines for any software change. This skill MUST be loaded before requirement clarification, architecture/design, implementation, refactoring, code review, testing, shipping, or creating Git commits (including standalone commit requests), and MUST NOT be skipped because the change is a one-liner. Covers simplicity, surgical changes, testing-first for high-impact changes with TDD (Test-Driven Development), and verifiable success criteria. Triggers on: 任何軟體規劃, 需求釐清, 架構設計, 寫 code, 改 code, 做功能, 修 bug, refactor, 開發, coding, development, 實作, 實現, 寫程式, 改程式, 加功能, 修問題, code review, 測試, 重構, init, 初始化專案, 建立 CLAUDE.md, 建立 AGENTS.md"
 metadata:
-  version: "1.6.0"
+  version: "1.7.0"
 ---
 
 ## Core Principles
@@ -42,6 +42,10 @@ When editing existing code:
 **Recording rule:** Mention discovered out-of-scope issues to the user and record them using the project's existing follow-up location and conventions. If none are established, use `## Follow-ups` in the project's `AGENTS.md`, creating the section or file if needed. Preserve existing content and avoid duplicate records. When an issue is resolved, follow the project's completion convention; under the default `Follow-ups` arrangement, remove the resolved entry. See [references/follow-ups-example.md](references/follow-ups-example.md) for the default format and examples.
 
 **Agent context files:** Inspect and follow the project's existing arrangement for agent instructions. When initializing project docs (e.g. `/init`) or asked to create or update agent context files, use this default if no arrangement exists: put the operating instructions in `AGENTS.md` and make `CLAUDE.md` a one-line pointer: "Read `AGENTS.md` before doing any project work." Create missing files as needed. Existing substantive instructions in either file count as an arrangement to preserve; a missing counterpart alone is not a reason to reorganize them.
+
+**Content boundary at every level:** An `AGENTS.md` at any directory level contains only what an agent must follow or check on every turn of work in that scope: operating rules and agent-facing reminders such as `## Follow-ups`. Project or module introductions, background, structure overviews, and usage notes go in the `README.md` at the same level. Move misplaced content to the correct file when editing either one.
+
+**Writing rules, prompts, and skills:** State the rule itself. Do not explain the reason behind it, and do not write it as a change record (for example, a date and what it was changed from). Update the rule text in place.
 
 The test: Every changed line should trace directly to the user's request.
 

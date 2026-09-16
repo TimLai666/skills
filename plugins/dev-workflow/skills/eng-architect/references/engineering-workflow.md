@@ -255,7 +255,7 @@ Read `AGENTS.md` before doing any project work. Treat it as the project operatin
 | `delivery-status.md` | phase, blockers, next output, next ticket | roadmap copy or changelog dump |
 | Tickets | one user-visible slice each, with its blocking edges | one ticket per layer, or one per phase |
 | `ENG.md` | what holds across tickets: architecture, seams, assumptions, migration order | a second copy of anything that lives on a ticket |
-| `AGENTS.md` | shared operating rules any agent can follow | a personal note file |
+| `AGENTS.md` | shared operating rules any agent follows on every turn, stated without rationale or change history | a personal note file, a project introduction, or a changelog |
 | `CLAUDE.md` | pointer to `AGENTS.md` | a second full operating manual |
 
 #### Re-sync cadence
