@@ -8,6 +8,7 @@
 | --- | --- | --- | --- | --- |
 | 非互動執行 | `claude -p '<prompt>'` | `codex exec '<prompt>'` | `agy -p='<prompt>'`，`-p=` 放所有旗標之後 | `opencode run '<prompt>'` |
 | 指定模型 | `--model <name>` | `-m <name>` | `--model <name>` | `-m <provider>/<name>` |
+| 推理強度 | `--effort low|medium|high|xhigh|max` | `-c model_reasoning_effort=high`，無獨立旗標 | `--effort low|medium|high` | `--variant <level>`，依 provider |
 | 列模型 | 無指令，用 `opus`、`sonnet`、`haiku` 別名 | 無指令 | `agy models` | `opencode models` |
 | 可寫檔 | `--permission-mode acceptEdits` | `-s workspace-write` | `--mode accept-edits` | `--agent build` |
 | 唯讀 | `--allowedTools Read,Grep,Glob` | `-s read-only` | `--mode plan` | `--agent plan`（模型層約束，不是硬擋） |
