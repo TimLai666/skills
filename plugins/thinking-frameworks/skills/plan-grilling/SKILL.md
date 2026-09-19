@@ -19,7 +19,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "2.3.0"
+  version: "2.4.0"
 ---
 
 ## Overview
@@ -54,22 +54,40 @@ the intended outcome before proceeding.
 Review all ten areas in the interview guide. Reuse established answers and
 ask only about unresolved choices that affect direction, scope, resources or
 acceptance. Keep relevant findings even when they require no question.
+Tell the user at the start that saying 「先出草案」 ends the interview at any
+point.
 
-Ask one question at a time and wait for the answer. For a choice, give concrete
+Ask one question at a time and wait for the answer. Before asking, state to
+yourself how the plan changes with each possible answer; a question whose
+answers lead to the same plan is not asked. For a choice, give concrete
 options and mark a recommendation with a reason based on the evidence. Use a
 plain question when asking for an experience or missing context rather than
 inventing choices for it.
+
+A follow-up stays on the current thread and targets a contradiction, an
+unverified assumption or an ambiguity in the user's last answer. Switching
+thread is a separate move: close the current thread first and say which
+thread comes next. Decide reversible, low-cost choices yourself and hold them
+for the decided list in step 3.
+
+When the plan covers several features, list the feature threads before the
+first question. The opening question of each independent thread may go in
+one message; follow-ups go one at a time.
+
+Close a thread or area as soon as the next question in it would no longer
+change the plan, and say so in one line: 「這區確定了：…」. A closed one stays
+closed unless later evidence contradicts it. Attach a progress board to every
+question: which of the ten areas and which feature threads are closed, and
+which one is open now.
 
 For build plans, check the guide's rules for verifiable scope items even when
 the scope is already settled. Clarify wording within the agreed scope yourself.
 Ask before a rewrite changes capabilities, dependencies, scope or acceptance
 criteria. Do not infer a new capability from a technical label alone.
 
-End the interview when the available information supports an executable plan
-with clear acceptance criteria and no consequential choice still requires the
-user's decision. Record remaining uncertainties as assumptions to validate.
-If the user asks to stop or consolidate now, deliver the current conclusions
-and unresolved items.
+The interview ends when all ten areas and all feature threads are closed, or
+when the user says 「先出草案」. Record remaining uncertainties as assumptions to validate and
+deliver the current conclusions and unresolved items.
 
 ### 3. Consolidate the plan
 
@@ -80,6 +98,11 @@ reasons for a superseded decision when they help explain the change.
 
 Separate confirmed decisions from assumptions and unresolved choices. Check
 that the final scope, success criteria and next step agree with the discussion.
+
+In the chat reply that delivers the plan, list the choices you decided
+yourself under 「我先決定了這些」, one line each with the choice and reason,
+at most five lines. The user vetoes lines they disagree with; no reply means
+accepted. Everything else the user needs is in the chat reply, not the file.
 
 ## Output Contract
 

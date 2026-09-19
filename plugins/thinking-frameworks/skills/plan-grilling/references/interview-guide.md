@@ -11,6 +11,8 @@ Use these questions where the context leaves a gap, one at a time:
 Distinguish observed experience from a proposed scenario. Examine what the
 answers imply, which assumptions may fail, and whether another framing would
 change the solution. Confirm meaningful changes to the problem being solved.
+Each follow-up names the contradiction, assumption or ambiguity in the last
+answer that it targets.
 
 ## Scope direction
 
@@ -27,7 +29,11 @@ is not approval for every resulting addition.
 ## Ten review areas
 
 Review each area; use existing evidence and decisions wherever sufficient.
-Ask about a gap only when resolving it needs a user choice or unavailable context.
+Ask about a gap only when resolving it needs a user choice or unavailable
+context, and only when different answers lead to different plans. Close the
+area once the next question would not change the plan, and show the closed
+areas on the progress board with every question. All ten closed ends the
+interview.
 
 | Area | What to examine |
 | --- | --- |
