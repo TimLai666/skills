@@ -26,6 +26,6 @@
 
 | 錯誤片段 | 意思 | 處置 |
 | --- | --- | --- |
-| `requires a newer version of Codex` | 預設模型比 CLI 新 | 回報，請使用者升級或用 `-m` 指定舊模型 |
+| `requires a newer version of Codex` | 預設模型比 CLI 新 | 轉決策表的下一個備案，回報時附錯誤原文，建議使用者升級 |
 | `-p took "--mode" as its prompt` | agy 的 `-p` 沒用 `=` 接 prompt | 改成 `-p='...'` 並放最後 |
-| `Model metadata for ... not found` | Codex 找不到模型描述 | 回報，附 `-m` 實際值 |
+| `Model metadata for ... not found` | Codex 找不到模型描述 | 轉決策表的下一個備案，回報時附 `-m` 實際值 |

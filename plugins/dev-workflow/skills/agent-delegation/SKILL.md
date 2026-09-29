@@ -14,7 +14,7 @@ description: >-
   for it in the current task. An agent whose own prompt marks it as
   the dispatched worker MUST NOT apply this skill and MUST NOT delegate further.
 metadata:
-  version: "1.4.0"
+  version: "1.5.0"
 ---
 
 # Agent 派工規範
@@ -49,7 +49,7 @@ env | grep -E '^(CLAUDECODE|CODEX_THREAD_ID|ANTIGRAVITY_AGENT|OPENCODE)='
 
 | 任務類型 | 第一選擇 | 備案 | 模型種類 |
 | --- | --- | --- | --- |
-| 實作：寫程式、改程式、修 bug | `opencode run --agent build -m <free-model> '<prompt>'` | 同一張 ticket 連續兩次沒過驗證，改派 agy 的 Claude：`agy --model <opus-model> --mode accept-edits -p='<prompt>'` | 免費模型，推薦 `opencode/big-pickle` → Claude Opus 系列 |
+| 實作：寫程式、改程式、修 bug | `opencode run --agent build -m <free-model> '<prompt>'` | 同一張 ticket 在同一級連續兩次沒過驗證就往下一級。先派 Sonnet：宿主是 Claude Code 用 Agent 工具（`model: sonnet`），其他宿主用 `claude -p --model sonnet --permission-mode acceptEdits '<prompt>'`。再派 agy 的 Claude：`agy --model <opus-model> --mode accept-edits -p='<prompt>'` | 免費模型，推薦 `opencode/big-pickle` → Sonnet 5.5 以上 → Claude Opus 系列 |
 | 前端設計、版面、樣式 | agy 的 Gemini Flash：`agy --model <flash-model> --mode accept-edits -p='<prompt>'` | 使用者當次指定 Codex 時用 Codex，否則 agy 的 Claude Opus | Gemini Flash 系列最新版 → Codex 或 Claude Opus |
 | 快速唯讀探索、找檔案、問「X 在哪」 | agy 的 Gemini Flash：`agy --model <flash-model> --mode plan -p='<prompt>'` | 宿主是 Claude Code 用 Agent 工具 `Explore`；其他宿主用 `opencode run --agent plan -m <free-model> '<prompt>'` | Gemini Flash 系列最新版 |
 | 雜事：機械性文件段落、證據整理、大量套版改寫 | `opencode run --agent build -m <free-model> '<prompt>'` | agy 的 Gemini Flash | 免費模型 |
@@ -59,7 +59,7 @@ env | grep -E '^(CLAUDECODE|CODEX_THREAD_ID|ANTIGRAVITY_AGENT|OPENCODE)='
 - 表中只寫模型種類。派工前先跑 `agy models` 或 `opencode models`，挑該種類最新版填進佔位符。
 - opencode 只能用免費模型：`opencode models | grep opencode/` 查得到才算。
 - Codex 當工人要有使用者這一輪的指示，前一輪不延續，指定後 review 與實作都改由 Codex 做。只用名稱含 luna 的模型，effort 只能 `high` 或 `xhigh`，寫在 `-c model_reasoning_effort=`。Codex 當主 agent 不受指示限制。
-- 不用 Sonnet 級模型。需要中階算力時改用 Opus 系列加低 effort：agy 與 `claude -p` 都加 `--effort low`，Agent 工具沒有 effort 參數就直接 `model: opus`。
+- Sonnet 只用 5.5 以上版本，用在中等偏低算力的任務與中階的寫程式任務。其他中階算力任務改用 Opus 系列加低 effort：agy 與 `claude -p` 都加 `--effort low`，Agent 工具沒有 effort 參數就直接 `model: opus`。
 - 不派給自己所在的 CLI。同一個模型不同 CLI 可以。
 - 每輪都照表從第一選擇派起。上一輪額度耗盡、逾時或失敗，不代表這一輪還是，實際失敗了才走備案。
 
@@ -114,14 +114,14 @@ env | grep -E '^(CLAUDECODE|CODEX_THREAD_ID|ANTIGRAVITY_AGENT|OPENCODE)='
 
 ### 5. 工具失敗
 
-wrapper 或 CLI 失敗時照實回報錯誤原文，停下來讓使用者決定。不要默默換工具。
+wrapper 或 CLI 失敗時直接照決策表轉下一個備案，不停下來問使用者。錯誤原文在回報裡照實列出，不默默換工具。該列的選項全部失敗才停下來，讓使用者決定。下一輪仍從第一選擇派起。
 
 | 症狀 | 回報寫法 |
 | --- | --- |
 | 模型不存在或需升級 CLI | 貼錯誤原文與 `agy models`／`opencode models` 輸出 |
 | 權限被拒、未登入 | 貼錯誤原文，說明需要哪個權限或登入指令 |
-| 逾時 | 貼逾時設定與已完成部分，問要不要延長或拆小 |
-| 額度耗盡（rate limit、quota、usage limit） | 貼錯誤原文，這一輪走備案並在回報註明。下一輪仍從第一選擇派起 |
+| 逾時 | 貼逾時設定與已完成部分 |
+| 額度耗盡（rate limit、quota、usage limit） | 貼錯誤原文 |
 
 ### 6. 回報
 
@@ -142,10 +142,10 @@ wrapper 或 CLI 失敗時照實回報錯誤原文，停下來讓使用者決定�
 | 沒辨識宿主就派工，結果呼叫自己 | 回報第一行必須有「宿主：」，且工具清單裡沒有宿主自己的 CLI |
 | 被派工的 agent 也載入本 skill 再往下派 | 被派工者的回報裡不得出現任何派工動作。出現就退回，檢查 prompt 第一行有沒有執行者標記 |
 | 主 agent 覺得改動很小就自己寫 | 動到任何程式檔就算寫程式，查決策表 |
-| 上一輪額度耗盡，這一輪直接走備案 | 回報裡出現備案工具時，必須附上這一輪第一選擇的實際錯誤原文 |
+| 上一輪額度耗盡，這一輪直接走備案 | 回報裡出現備案工具時，必須附上這一輪前一級的實際錯誤原文或驗證失敗輸出 |
 | ticket 太大丟給免費模型 | 派出前對切 ticket 四項，不符合就拆 |
 | 兩個 agent 同時改同一個檔 | 派第二個前重跑 `git status --short`，路徑重疊就等第一個完成 |
 | 只看 subagent 摘要就採用 | 回報裡必須有主 agent 自己跑的驗證輸出 |
-| 模型不存在時自動換成別的種類 | 回報的模型必須屬於決策表指定的種類，且與派工前記下的一致 |
+| 模型不存在時換成決策表以外的種類 | 回報的模型必須屬於決策表該列第一選擇或備案的種類，且與派工前記下的一致 |
 | Codex 沒被點名卻當工人，或用了非 luna 模型、effort 低於 high | 回報的工具清單裡有 codex 時，要能指出使用者這一輪哪句話要求它，且旗標含 luna 與 `model_reasoning_effort=high` 或 `xhigh` |
-| 任務派給 Sonnet | 回報的模型名稱不得含 sonnet |
+| 任務派給 5.5 以下的 Sonnet | 回報的模型名稱含 sonnet 時，版本必須是 5.5 以上 |
