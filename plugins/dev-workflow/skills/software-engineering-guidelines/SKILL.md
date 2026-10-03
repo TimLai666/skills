@@ -1,8 +1,8 @@
 ---
 name: software-engineering-guidelines
-description: "Software engineering guidelines for any software change. This skill MUST be loaded before requirement clarification, architecture/design, implementation, refactoring, code review, testing, shipping, or creating Git commits (including standalone commit requests), and MUST NOT be skipped because the change is a one-liner. Covers simplicity, surgical changes, testing-first for high-impact changes with TDD (Test-Driven Development), and verifiable success criteria. Triggers on: 任何軟體規劃, 需求釐清, 架構設計, 寫 code, 改 code, 做功能, 修 bug, refactor, 開發, coding, development, 實作, 實現, 寫程式, 改程式, 加功能, 修問題, code review, 測試, 重構, init, 初始化專案, 建立 CLAUDE.md, 建立 AGENTS.md"
+description: "Software engineering guidelines for any software change. This skill MUST be loaded before requirement clarification, architecture/design, implementation, refactoring, code review, testing, shipping, or creating Git commits (including standalone commit requests), and MUST NOT be skipped because the change is a one-liner. Covers simplicity, complete-unit changes built skeleton first, testing-first for high-impact changes with TDD (Test-Driven Development), and verifiable success criteria. Triggers on: 任何軟體規劃, 需求釐清, 架構設計, 寫 code, 改 code, 做功能, 修 bug, refactor, 開發, coding, development, 實作, 實現, 寫程式, 改程式, 加功能, 修問題, code review, 測試, 重構, init, 初始化專案, 建立 CLAUDE.md, 建立 AGENTS.md"
 metadata:
-  version: "1.7.0"
+  version: "1.8.0"
 ---
 
 ## Core Principles
@@ -29,9 +29,14 @@ Before implementing:
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
-### 3. Surgical Changes
+### 3. Complete, Surgical Changes
 
-**Touch only what you must. Clean up only your own mess.**
+**Touch everything the task needs and nothing else. Clean up only your own mess.**
+
+The unit of work is one complete feature or one complete problem, done in one pass:
+
+- A feature covers every layer, entry point, and edge case it needs.
+- A fix covers the root cause, every occurrence of the same pattern, and the related edge cases. Do not stop at the reported spot.
 
 When editing existing code:
 
@@ -90,6 +95,16 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
+**Skeleton first.** Before filling in logic for a new project, feature, or fix, write a skeleton that fixes the scope:
+
+- New project or feature: code that runs end to end, with entry points, data shapes, and empty slots. Give each slot its signature (inputs, outputs, how errors are reported) and a list of expected results, including edge cases. Add two or three end-to-end acceptance flows that exercise the whole path.
+- Fix: the root cause, the full list of places to change, and the check that proves each one.
+- Include pseudocode only when it is already worked out.
+- Place independent slots in separate files.
+- Scale the skeleton to the task. A single-location change needs only its expected results and check.
+
+Then fill the slots until their checks and the acceptance flows pass. When work is handed to other agents, follow **agent-delegation** when it is installed. Otherwise give each agent its slot's signature, expected results, and checks. The agent that fills a slot does not edit its checks. Review the returned work yourself before accepting it.
+
 ### Progress at Every Turn End
 
 End every turn of any ongoing task with a progress bar tied to the original goal: completed/total agreed items, current work, and what remains before completion. Use the existing plan or checklist. Count only verified work that meets the agreed acceptance and delivery conditions; show pending acceptance separately.
@@ -116,10 +131,11 @@ When designing or changing our CLI tools, MCP tools, or APIs, put their supporte
 1. Establish the requirement and approach (Principle 1).
 2. Define success criteria (Principle 5).
 3. Select verification and establish required pre-change results (Principle 4).
+4. Write the skeleton (Principle 5).
 
 ### B. While Writing Code
 
-Implement using Principles 2–4.
+Fill the skeleton using Principles 2–4.
 
 ### C. After Completion
 
@@ -134,7 +150,7 @@ Implement using Principles 2–4.
 Follow the user's explicit instructions first, then the project's documented
 commit-message rules. Before drafting a commit, read the relevant project
 instructions (such as `AGENTS.md` and `CONTRIBUTING.md`) and any saved preference
-through **project-memory**. Commit history alone does not establish a documented
+through **project-memory** when it is installed. Commit history alone does not establish a documented
 rule. Reuse an already confirmed choice without asking again.
 
 If no documented rule or confirmed choice exists, inspect recent commit
@@ -151,7 +167,8 @@ If the style is already documented elsewhere, link to that source instead of
 duplicating it. If the user adopts this skill's default, use it and record that
 choice through **project-memory** as preference `commit-message-style`, with
 source `software-engineering-guidelines`, so later commits do not repeat the
-question. A one-commit exception applies only to that commit and must not be
+question. Without **project-memory**, record the adopted default in the project's
+`AGENTS.md` the same way as a custom style. A one-commit exception applies only to that commit and must not be
 saved as the project's ongoing style. Report any failure to save a decision.
 
 The default format is Conventional Commits:
@@ -180,5 +197,6 @@ docs: clarify installation steps
 ## Pre-Ship Checklist
 
 - [ ] Scope and simplicity reviewed against Principles 2–3.
-- [ ] Verification completed under Principle 4.
+- [ ] The feature or problem is handled completely: root cause, same-pattern occurrences, and edge cases.
+- [ ] Verification completed under Principle 4, including the end-to-end acceptance flows.
 - [ ] Results demonstrate the agreed success criteria; any remaining gaps are reported.

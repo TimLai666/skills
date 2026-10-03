@@ -7,21 +7,22 @@ description: >-
   or the Claude Code Agent tool, and MUST be loaded before the main agent
   dispatches any task to another agent, even when the task looks small. It
   SHOULD be loaded when the user asks who should write the code or which model
-  to use. The main agent MUST NOT write production code itself while a
-  delegation path in the decision table is available, MUST NOT dispatch to the
+  to use. Before dispatching implementation, the main agent MUST write the
+  skeleton and each slot's expected results itself, MUST NOT let the agent that
+  fills a slot edit its tests, MUST NOT dispatch to the
   CLI it is itself running in, MUST NOT skip the cheapest tool because it failed
   in an earlier turn, and MUST NOT use Codex as a worker unless the user asks
   for it in the current task. An agent whose own prompt marks it as
   the dispatched worker MUST NOT apply this skill and MUST NOT delegate further.
 metadata:
-  version: "1.5.0"
+  version: "2.0.0"
 ---
 
 # Agent 派工規範
 
 ## Overview
 
-主 agent 負責切任務、寫契約與 ticket、審查、驗證、提交，不自己寫程式。成本原則：Antigravity（agy）與 OpenCode 最便宜，是主力。實作交給 OpenCode 的免費模型，前端設計與探索交給 agy 的 Gemini，品質靠主 agent 把任務切細加親自審查來守，弱模型拿到的每張 ticket 都小到沒有跑歪的空間。Claude Opus 與 Codex 留給 review。任何 CLI 都能當主 agent，所以派工前先辨識自己是誰。各 CLI 的旗標見 [references/cli-cheatsheet.md](references/cli-cheatsheet.md)。
+主 agent 是強模型，負責寫骨架與每個格子的想要的結果、審查、驗證、提交。骨架鎖住範圍，弱模型照規格寫測試或填實作。成本原則：Antigravity（agy）與 OpenCode 最便宜，是主力。測試與實作交給 OpenCode 的免費模型，前端設計與探索交給 agy 的 Gemini。Claude Opus 與 Codex 留給 review。任何 CLI 都能當主 agent，所以派工前先辨識自己是誰。各 CLI 的旗標見 [references/cli-cheatsheet.md](references/cli-cheatsheet.md)。
 
 ## 0. 先辨識自己
 
@@ -49,12 +50,12 @@ env | grep -E '^(CLAUDECODE|CODEX_THREAD_ID|ANTIGRAVITY_AGENT|OPENCODE)='
 
 | 任務類型 | 第一選擇 | 備案 | 模型種類 |
 | --- | --- | --- | --- |
-| 實作：寫程式、改程式、修 bug | `opencode run --agent build -m <free-model> '<prompt>'` | 同一張 ticket 在同一級連續兩次沒過驗證就往下一級。先派 Sonnet：宿主是 Claude Code 用 Agent 工具（`model: sonnet`），其他宿主用 `claude -p --model sonnet --permission-mode acceptEdits '<prompt>'`。再派 agy 的 Claude：`agy --model <opus-model> --mode accept-edits -p='<prompt>'` | 免費模型，推薦 `opencode/big-pickle` → Sonnet 5.5 以上 → Claude Opus 系列 |
+| 寫測試、填格子實作、照清單修 bug | `opencode run --agent build -m <free-model> '<prompt>'` | 同一個格子在同一級連續兩次沒過驗證就往下一級。先派 Sonnet：宿主是 Claude Code 用 Agent 工具（`model: sonnet`），其他宿主用 `claude -p --model sonnet --permission-mode acceptEdits '<prompt>'`。再派 agy 的 Claude：`agy --model <opus-model> --mode accept-edits -p='<prompt>'` | 免費模型，推薦 `opencode/big-pickle` → Sonnet 5.5 以上 → Claude Opus 系列 |
 | 前端設計、版面、樣式 | agy 的 Gemini Flash：`agy --model <flash-model> --mode accept-edits -p='<prompt>'` | 使用者當次指定 Codex 時用 Codex，否則 agy 的 Claude Opus | Gemini Flash 系列最新版 → Codex 或 Claude Opus |
 | 快速唯讀探索、找檔案、問「X 在哪」 | agy 的 Gemini Flash：`agy --model <flash-model> --mode plan -p='<prompt>'` | 宿主是 Claude Code 用 Agent 工具 `Explore`；其他宿主用 `opencode run --agent plan -m <free-model> '<prompt>'` | Gemini Flash 系列最新版 |
 | 雜事：機械性文件段落、證據整理、大量套版改寫 | `opencode run --agent build -m <free-model> '<prompt>'` | agy 的 Gemini Flash | 免費模型 |
 | Review：審 diff、找漏洞、對契約 | 使用者當次指定 Codex 時 `codex exec -s read-only -m <luna-model> -c model_reasoning_effort=high '<prompt>'`，否則 agy 的 Claude：`agy --model <opus-model> --mode plan -p='<prompt>'` | 宿主是 Claude Code 用 Agent 工具（`model: opus`）；其他宿主用 `claude -p --model opus '<prompt>'` | Codex luna 系列 > Claude Opus 系列 |
-| 主 agent 自己做 | 切 ticket、寫契約、讀 diff、跑測試、commit | | |
+| 主 agent 自己做 | 寫骨架與想要的結果、審測試、派出去不划算的格子、讀 diff、跑測試、commit | | |
 
 - 表中只寫模型種類。派工前先跑 `agy models` 或 `opencode models`，挑該種類最新版填進佔位符。
 - opencode 只能用免費模型：`opencode models | grep opencode/` 查得到才算。
@@ -63,14 +64,24 @@ env | grep -E '^(CLAUDECODE|CODEX_THREAD_ID|ANTIGRAVITY_AGENT|OPENCODE)='
 - 不派給自己所在的 CLI。同一個模型不同 CLI 可以。
 - 每輪都照表從第一選擇派起。上一輪額度耗盡、逾時或失敗，不代表這一輪還是，實際失敗了才走備案。
 
-### 切 ticket 的標準
+### 骨架與格子
 
-派給免費模型的實作 ticket 每張都要符合，不符合就再切：
+派實作前，主 agent 先寫骨架：
 
-- [ ] 只改一組檔案，路徑都列在可改清單。
-- [ ] 只驗一個行為，只有一個驗證指令。
-- [ ] 預期 diff 不超過約 200 行。超過就拆成兩張，先派第一張。
-- [ ] 契約寫到 subagent 不必自己做設計決定：函式簽名、輸入輸出、錯誤處理方式都給定。
+- [ ] 骨架從頭到尾能跑，入口、資料形狀與空格子都在。
+- [ ] 每個格子有簽名（輸入、輸出、錯誤怎麼回報）與想要的結果清單，邊界情況各列一條。虛擬碼想到才附。
+- [ ] 有兩三條完整使用流程的驗收，全部格子填完後必跑。
+- [ ] 互不相依的格子落在不同檔案。
+- [ ] 修正的骨架是根因、所有要改的位置與每處的驗證。
+
+邏輯短到交代與審查比直接寫還費工，或說不清楚要改哪裡的格子，主 agent 自己寫。其餘格子照下列順序派：
+
+1. 派測試 agent，照想要的結果寫測試，不寫實作。
+2. 主 agent 審測試：逐條對照想要的結果，並在空格子上跑一次。有測試通過的退回重寫。
+3. 派另一個實作 agent 填格子，填到測試通過，不得修改測試檔。認為測試錯就停下回報，由主 agent 裁決。
+4. 主 agent 照第 4 節收件審查。
+
+沒有測試環境或畫面類的格子，測試換成可執行的驗證步驟，由測試 agent 寫成指令或檢查清單。
 
 ## 派工流程
 
@@ -89,12 +100,12 @@ env | grep -E '^(CLAUDECODE|CODEX_THREAD_ID|ANTIGRAVITY_AGENT|OPENCODE)='
 | 執行者標記 | 第一行原文寫「你是被派工的執行者，不得再派工給任何 agent 或 CLI，自己完成」 |
 | 角色設定 | 一句話說明它是誰、標準多高，例如「你是這個 repo 的資深工程師，只交能過測試的程式」 |
 | 可改與不可改的檔案 | 明確列路徑。沒列到的檔案一律不可改 |
-| 先寫失敗測試再實作 | 先提交會失敗的測試，再寫實作讓它過，回報兩個階段的測試輸出 |
+| 任務與驗收 | 測試 agent：簽名、想要的結果、測試檔路徑，只寫測試。實作 agent：簽名、想要的結果、測試檔路徑，原文寫「不得修改測試檔，認為測試錯就停下回報」 |
 | 要跑的驗證指令 | 寫出完整指令，例如 `go test ./...`、`npm test -- --run` |
 | 回報格式 | 改了哪些檔、每個結論的依據、不確定的地方、沒驗證的項目 |
 | 不要 commit | 原文寫「不要 commit，也不要 stash 或 reset」 |
 
-唯讀探索任務可省略「先寫失敗測試」與「不要 commit」，其餘五項照列。
+唯讀探索任務的「任務與驗收」寫要回答的問題，可省略「不要 commit」，其餘五項照列。
 
 ### 3. 派工中
 
@@ -109,7 +120,8 @@ env | grep -E '^(CLAUDECODE|CODEX_THREAD_ID|ANTIGRAVITY_AGENT|OPENCODE)='
 - [ ] 讀完整 diff：`git diff`，不是只看 subagent 摘要。
 - [ ] 回報裡的每個數字、測試通過數、檔案數，都對回實際輸出或檔案。
 - [ ] 自己跑一次驗證指令，貼實際輸出。subagent 說「測試通過」不算證據。
-- [ ] 比對可改檔案清單，多改的檔案一律退回。
+- [ ] 比對可改檔案清單，多改的檔案一律退回。實作 agent 的 diff 碰到測試檔也退回。
+- [ ] 全部格子完成後跑完整使用流程驗收。
 - [ ] 才決定採用、退修或丟棄。
 
 ### 5. 工具失敗
@@ -133,7 +145,7 @@ wrapper 或 CLI 失敗時直接照決策表轉下一個備案，不停下來問�
 工具與模型：opencode / <實際免費模型名> / --agent build
 ```
 
-沒派工就寫「工具與模型：無」。派工 prompt 骨架直接照第 2 節七項依序寫，每項一行。
+沒派工就寫「工具與模型：無」。派工 prompt 直接照第 2 節七項依序寫，每項一行。
 
 ## 陷阱
 
@@ -141,9 +153,10 @@ wrapper 或 CLI 失敗時直接照決策表轉下一個備案，不停下來問�
 | --- | --- |
 | 沒辨識宿主就派工，結果呼叫自己 | 回報第一行必須有「宿主：」，且工具清單裡沒有宿主自己的 CLI |
 | 被派工的 agent 也載入本 skill 再往下派 | 被派工者的回報裡不得出現任何派工動作。出現就退回，檢查 prompt 第一行有沒有執行者標記 |
-| 主 agent 覺得改動很小就自己寫 | 動到任何程式檔就算寫程式，查決策表 |
+| 沒寫骨架就派實作 | 派實作前，骨架、該格子的想要的結果與審過的測試都已存在 |
 | 上一輪額度耗盡，這一輪直接走備案 | 回報裡出現備案工具時，必須附上這一輪前一級的實際錯誤原文或驗證失敗輸出 |
-| ticket 太大丟給免費模型 | 派出前對切 ticket 四項，不符合就拆 |
+| 測試在空格子上就通過 | 審測試時在空格子跑一次，回報附上全部失敗的輸出 |
+| 實作 agent 改測試讓自己過關 | 收件時 `git diff` 列出的檔案不含測試檔 |
 | 兩個 agent 同時改同一個檔 | 派第二個前重跑 `git status --short`，路徑重疊就等第一個完成 |
 | 只看 subagent 摘要就採用 | 回報裡必須有主 agent 自己跑的驗證輸出 |
 | 模型不存在時換成決策表以外的種類 | 回報的模型必須屬於決策表該列第一選擇或備案的種類，且與派工前記下的一致 |
