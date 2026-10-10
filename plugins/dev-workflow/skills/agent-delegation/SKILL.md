@@ -15,7 +15,7 @@ description: >-
   for it in the current task. An agent whose own prompt marks it as
   the dispatched worker MUST NOT apply this skill and MUST NOT delegate further.
 metadata:
-  version: "2.6.0"
+  version: "2.7.0"
 ---
 
 # Agent 派工規範
@@ -54,14 +54,16 @@ env | grep -E '^(CLAUDECODE|CODEX_THREAD_ID|ANTIGRAVITY_AGENT|OPENCODE)='
 | 前端設計、版面、樣式 | agy 的 Gemini Flash：`agy --model <flash-model> --mode accept-edits -p='<prompt>'` | 使用者當次指定 Codex 時用 Codex，否則派 Sonnet：宿主是 Claude Code 用 Agent 工具（`model: sonnet`），其他宿主用 `claude -p --model sonnet --permission-mode acceptEdits '<prompt>'` | Gemini Flash 系列最新版 → Codex 或 Sonnet 5.5 以上 |
 | 快速唯讀探索、找檔案、問「X 在哪」 | agy 的 Gemini Flash：`agy --model <flash-model> --mode plan -p='<prompt>'` | 宿主是 Claude Code 用 Agent 工具 `Explore`（`model: haiku`）；其他宿主用 `opencode run --agent plan -m <free-model> '<prompt>'` | Gemini Flash 系列最新版 → Haiku 5.5 以上或免費模型 |
 | 雜事：機械性文件段落、證據整理、大量套版改寫 | `opencode run --agent build -m <free-model> '<prompt>'` | 先派 agy 的 Gemini Flash。再派 Haiku：宿主是 Claude Code 用 Agent 工具（`model: haiku`），其他宿主用 `claude -p --model haiku --permission-mode acceptEdits '<prompt>'` | 免費模型 → Gemini Flash 系列最新版 → Haiku 5.5 以上 |
+| 分類：把資料、評論、issue 或檔案歸進類別、打標籤或編碼 | 使用者當次指定 Codex 時 `codex exec -s workspace-write -m <luna-model> -c model_reasoning_effort=high '<prompt>'`，否則派 Haiku：宿主是 Claude Code 用 Agent 工具（`model: haiku`），其他宿主用 `claude -p --model haiku --permission-mode acceptEdits '<prompt>'` | 無，不往 Sonnet 或 Opus 升級 | Haiku 5.5 以上或 Codex luna 系列，禁止 Opus |
 | Review：審 diff、找漏洞、對契約 | 使用者當次指定 Codex 時 `codex exec -s read-only -m <luna-model> -c model_reasoning_effort=high '<prompt>'`，否則 agy 的 Claude：`agy --model <opus-model> --mode plan -p='<prompt>'` | 宿主是 Claude Code 用 Agent 工具（`model: opus`）；其他宿主用 `claude -p --model opus '<prompt>'` | Codex luna 系列 > Claude Opus 系列 |
 | 寫規則與架構：skill、prompt 與規則檔條文，模組邊界、資料模型等架構決策 | agy 的 Claude：`agy --model <opus-model> --mode accept-edits -p='<prompt>'` | 宿主是 Claude Code 用 Agent 工具（`model: opus`）；其他宿主用 `claude -p --model opus --permission-mode acceptEdits '<prompt>'` | Claude Opus 系列 |
 | 主 agent 自己做 | 寫骨架與想要的結果、審測試、派出去不划算的格子、讀 diff、跑測試、commit | | |
 
 - 表中只寫模型種類。派工前先跑 `agy models` 或 `opencode models`，挑該種類最新版填進佔位符。
 - opencode 只能用免費模型：`opencode models | grep opencode/` 查得到才算。
-- Codex 當工人要有使用者這一輪的指示，前一輪不延續，指定後 review 與實作都改由 Codex 做。只用名稱含 luna 的模型，effort 只能 `high` 或 `xhigh`，寫在 `-c model_reasoning_effort=`。Codex 當主 agent 不受指示限制。
-- Haiku 只用 5.5 以上版本，用在唯讀探索、雜事與簡單的寫程式任務。
+- Codex 當工人要有使用者這一輪的指示，前一輪不延續，指定後 review、實作與分類都改由 Codex 做。只用名稱含 luna 的模型，effort 只能 `high` 或 `xhigh`，寫在 `-c model_reasoning_effort=`。Codex 當主 agent 不受指示限制。
+- Haiku 只用 5.5 以上版本，用在唯讀探索、雜事、分類與簡單的寫程式任務。
+- 任務同時符合分類與雜事或探索時，照分類那一列派。
 - Sonnet 只用 5.5 以上版本，用在中等偏低算力的任務與 Haiku 寫不出來的寫程式任務。其他中階算力任務也用 Sonnet。
 - Opus 只用在寫規則、架構、review，以及 Sonnet 也沒過驗證的寫程式格子，其他任務一律不派 Opus。接手寫程式格子時 agy 與 `claude -p` 都加 `--effort low`，Agent 工具沒有 effort 參數就直接 `model: opus`。
 - 不派給自己所在的 CLI。同一個模型不同 CLI 可以。
@@ -167,4 +169,5 @@ wrapper 或 CLI 失敗時直接照決策表轉下一個備案，不停下來問�
 | 模型不存在時換成決策表以外的種類 | 回報的模型必須屬於決策表該列第一選擇或備案的種類，且與派工前記下的一致 |
 | Codex 沒被點名卻當工人，或用了非 luna 模型、effort 低於 high | 回報的工具清單裡有 codex 時，要能指出使用者這一輪哪句話要求它，且旗標含 luna 與 `model_reasoning_effort=high` 或 `xhigh` |
 | Opus 用在寫規則、架構與 review 以外的任務 | 回報的模型名稱含 opus 時，該次派工必須屬於決策表「Review」或「寫規則與架構」那一列，或是附上 Sonnet 在同一個格子連續兩次沒過驗證的輸出，且旗標含 `--effort low` |
+| 分類任務派給 Haiku 與 luna 以外的模型 | 分類任務的派工，回報的模型名稱必須含 haiku 或 luna，不得含 opus 或 sonnet |
 | 任務派給 5.5 以下的 Sonnet 或 Haiku | 回報的模型名稱含 sonnet 或 haiku 時，版本必須是 5.5 以上 |
