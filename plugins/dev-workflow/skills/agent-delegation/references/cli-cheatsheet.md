@@ -8,7 +8,7 @@
 | --- | --- | --- | --- | --- |
 | 非互動執行 | `claude -p '<prompt>'` | `codex exec '<prompt>'` | `agy -p='<prompt>'`，`-p=` 放所有旗標之後 | `opencode run '<prompt>'` |
 | 指定模型 | `--model <name>` | `-m <name>` | `--model <name>` | `-m <provider>/<name>` |
-| 推理強度 | `--effort low|medium|high|xhigh|max` | `-c model_reasoning_effort=high`，無獨立旗標 | `--effort low|medium|high` | `--variant <level>`，依 provider |
+| 推理強度 | `--effort low|medium|high|xhigh|max` | `-c model_reasoning_effort=high`，無獨立旗標 | `--effort low|medium|high`，Gemini 改選模型名結尾 `-low`／`-medium`／`-high` 的版本 | `--variant <level>`，依 provider |
 | 列模型 | 無指令，用 `opus`、`sonnet`、`haiku` 別名 | 無指令 | `agy models` | `opencode models` |
 | 可寫檔 | `--permission-mode acceptEdits` | `-s workspace-write` | `--mode accept-edits` | `--agent build` |
 | 唯讀 | `--allowedTools Read,Grep,Glob` | `-s read-only` | `--mode plan` | `--agent plan`（模型層約束，不是硬擋） |
@@ -26,6 +26,6 @@
 
 | 錯誤片段 | 意思 | 處置 |
 | --- | --- | --- |
-| `requires a newer version of Codex` | 預設模型比 CLI 新 | 轉決策表的下一個備案，回報時附錯誤原文，建議使用者升級 |
+| `requires a newer version of Codex` | 預設模型比 CLI 新 | 轉決策表該列右邊的下一個，回報時附錯誤原文，建議使用者升級 |
 | `-p took "--mode" as its prompt` | agy 的 `-p` 沒用 `=` 接 prompt | 改成 `-p='...'` 並放最後 |
-| `Model metadata for ... not found` | Codex 找不到模型描述 | 轉決策表的下一個備案，回報時附 `-m` 實際值 |
+| `Model metadata for ... not found` | Codex 找不到模型描述 | 轉決策表該列右邊的下一個，回報時附 `-m` 實際值 |
