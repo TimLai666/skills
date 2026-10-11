@@ -15,7 +15,7 @@ description: >-
   claude. An agent whose own prompt marks it as
   the dispatched worker MUST NOT apply this skill and MUST NOT delegate further.
 metadata:
-  version: "2.9.0"
+  version: "2.10.0"
 ---
 
 # Agent 派工規範
@@ -55,7 +55,7 @@ env | grep -E '^(CLAUDECODE|CODEX_THREAD_ID|ANTIGRAVITY_AGENT|OPENCODE)='
 | 快速唯讀探索、找檔案、問「X 在哪」 | 免費模型，`--agent plan` | Gemini Flash，`--mode plan` | | Haiku，宿主是 Claude Code 時用 `Explore` |
 | 雜事：機械性文件段落、證據整理、大量套版改寫 | 免費模型，`--agent build` | Gemini Flash，`--mode accept-edits` | | Haiku，可寫檔 |
 | 分類：把資料、評論、issue 或檔案歸進類別、打標籤或編碼 | | | luna，`-s workspace-write` | Haiku，可寫檔 |
-| Review：審 diff、找漏洞、對契約 | | Claude Opus，`--mode plan` | luna，`-s read-only` | Opus，唯讀 |
+| Review：審 diff、找漏洞、對契約 | | Claude Opus，`--mode plan` | GPT-6 以上的 sol，`-s read-only` | Opus，唯讀 |
 | 決策：方案取捨、技術選型、只影響單一模組的設計 | | | | Sonnet，唯讀 |
 | 寫規則與複雜架構：skill、prompt 與規則檔條文，以及跨多個模組、改資料模型或 API 契約的架構決策 | | Claude Opus，`--mode accept-edits` | | Opus，可寫檔 |
 
@@ -66,7 +66,7 @@ env | grep -E '^(CLAUDECODE|CODEX_THREAD_ID|ANTIGRAVITY_AGENT|OPENCODE)='
 ```
 opencode run --agent <build|plan> -m <free-model> '<prompt>'
 agy --model <model> --mode <accept-edits|plan> -p='<prompt>'
-codex exec -s <workspace-write|read-only> -m <luna-model> -c model_reasoning_effort=medium '<prompt>'
+codex exec -s <workspace-write|read-only> -m <luna-model|sol-model> -c model_reasoning_effort=medium '<prompt>'
 claude -p --model <haiku|sonnet|opus> --effort medium --permission-mode acceptEdits '<prompt>'
 ```
 
@@ -74,7 +74,7 @@ claude 那欄在宿主是 Claude Code 時改用 Agent 工具（`model: haiku`／
 
 - 表中只寫模型種類。派工前先跑 `agy models` 或 `opencode models`，挑該種類最新版填進佔位符。
 - opencode 只能用免費模型：`opencode models | grep opencode/` 查得到才算。
-- Codex 照表主動派，只用名稱含 luna 的模型。
+- Codex 照表主動派。Review 只用 GPT-6 以上、名稱含 sol 的模型，其他任務只用名稱含 luna 的模型。
 - 非免費模型的 effort 預設 `medium`，主 agent 判斷任務需要時才調高，最高 `xhigh`。agy 的 Gemini 選模型名結尾是 `-medium` 的版本，agy 的 Claude 加 `--effort medium`，agy 最高只到 `high`。Agent 工具沒有 effort 參數，不用設。
 - Haiku 與 Sonnet 只用 5.5 以上版本，所以 agy 的 Sonnet 4.6 不派。
 - Haiku 用在唯讀探索、雜事、分類與簡單的寫程式任務。
@@ -185,7 +185,7 @@ wrapper 或 CLI 失敗時直接照決策表往右轉下一個，不停下來問�
 | 兩個 agent 同時改同一個檔 | 派第二個前重跑 `git status --short`，路徑重疊就等第一個完成 |
 | 只看 subagent 摘要就採用 | 回報裡必須有主 agent 自己跑的驗證輸出 |
 | 模型不存在時換成決策表以外的種類 | 回報的模型必須屬於決策表該列的種類，且與派工前記下的一致 |
-| Codex 用了非 luna 模型 | 回報的工具清單裡有 codex 時，`-m` 的模型名稱含 luna |
+| Codex 用錯模型 | 回報的工具清單裡有 codex 時，review 的 `-m` 是 GPT-6 以上且名稱含 sol，其他任務的 `-m` 名稱含 luna |
 | effort 沒照預設或超過上限 | 非免費模型的派工旗標是 `medium`，調高時回報寫出理由，任何派工都沒有 `max`。Opus 接手寫程式格子是 `low` |
 | 同一個 CLI 同時跑超過三條 | 派工前列出該 CLI 正在跑的派工，加上這次不超過三條 |
 | Opus 用在寫規則、複雜架構與 review 以外的任務 | 回報的模型名稱含 opus 時，該次派工必須屬於決策表「Review」或「寫規則與複雜架構」那一列，或是附上 Sonnet 在同一個格子連續兩次沒過驗證的輸出，且旗標含 `--effort low` |
