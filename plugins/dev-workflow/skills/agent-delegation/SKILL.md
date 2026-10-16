@@ -15,7 +15,7 @@ description: >-
   claude. An agent whose own prompt marks it as
   the dispatched worker MUST NOT apply this skill and MUST NOT delegate further.
 metadata:
-  version: "2.11.0"
+  version: "2.12.0"
 ---
 
 # Agent 派工規範
@@ -46,7 +46,7 @@ env | grep -E '^(CLAUDECODE|CODEX_THREAD_ID|ANTIGRAVITY_AGENT|OPENCODE)='
 
 ## 決策表
 
-每列由左往右派，左邊的實際失敗或被禁才往右走。空格與宿主自己的 CLI 直接跳過。
+每列由左往右派，左邊的實際失敗或被禁才往右走。空格直接跳過，宿主自己的 CLI 改用內建 subagent 工具。
 
 | 任務類型 | opencode | agy | codex | claude |
 | --- | --- | --- | --- | --- |
@@ -71,7 +71,7 @@ codex exec -s <workspace-write|read-only> -m <luna-model|sol-model> -c model_rea
 claude -p --model <haiku|sonnet|opus> --effort medium --permission-mode acceptEdits '<prompt>'
 ```
 
-claude 那欄在宿主是 Claude Code 時改用 Agent 工具（`model: haiku`／`sonnet`／`opus`），唯讀任務的 `claude -p` 拿掉 `--permission-mode acceptEdits`。
+claude 那欄在宿主是 Claude Code 時改用 Agent 工具（`model: haiku`／`sonnet`／`opus`），唯讀任務的 `claude -p` 拿掉 `--permission-mode acceptEdits`。codex 那欄在宿主是 Codex 時改用 Codex 內建的 subagent 功能，模型種類與唯讀限制照該列填寫。
 
 - 表中只寫模型種類。派工前先跑 `agy models` 或 `opencode models`，挑該種類最新版填進佔位符。
 - opencode 只能用免費模型：`opencode models | grep opencode/` 查得到才算。
@@ -85,7 +85,7 @@ claude 那欄在宿主是 Claude Code 時改用 Agent 工具（`model: haiku`／
 - Opus 只用在寫規則、複雜架構、review，以及 Sonnet 也沒過驗證的寫程式格子，其他任務一律不派 Opus。接手寫程式格子時 `claude -p` 改用 `--effort low`。
 - 寫程式那一列，同一個格子在同一級連續兩次沒過驗證才往下一級，claude 那欄依 Haiku、Sonnet、Opus 的順序升級。
 - 同一個 CLI 同時最多跑三條，Claude Code 的 Agent 工具也算 claude。
-- 不派給自己所在的 CLI。同一個模型不同 CLI 可以。
+- 不用宿主自己的 CLI 指令派工（`claude -p`、`codex exec` 等），改用宿主內建的 subagent 工具。同一個模型不同 CLI 可以。
 - 每輪都照表從最左邊派起。上一輪額度耗盡、逾時或失敗，不代表這一輪還是，實際失敗了才往右走。
 - 唯一例外：主 agent 判斷很難的寫程式格子，若這次任務裡 opencode 已在同類型的格子交出不完整或沒過驗證的結果，可以跳過免費模型直接從 luna 派起，其餘往下升級的規則不變。
 
@@ -177,7 +177,7 @@ wrapper 或 CLI 失敗時直接照決策表往右轉下一個，不停下來問�
 
 | 陷阱 | 檢核方式 |
 | --- | --- |
-| 沒辨識宿主就派工，結果呼叫自己 | 回報第一行必須有「宿主：」，且工具清單裡沒有宿主自己的 CLI |
+| 沒辨識宿主就派工，結果呼叫自己 | 回報第一行必須有「宿主：」，且工具清單裡沒有宿主自己的 CLI 指令，宿主自己的那欄用的是內建 subagent 工具 |
 | 被派工的 agent 也載入本 skill 再往下派 | 被派工者的回報裡不得出現任何派工動作。出現就退回，檢查 prompt 第一行有沒有執行者標記 |
 | 沒寫骨架就派實作 | 派實作前，骨架、該格子的想要的結果與審過的測試都已存在 |
 | 很難的格子沒有 opencode 失敗紀錄就直接派 luna | 跳過免費模型時，回報要指出這次任務裡 opencode 在哪個同類型格子交出不完整或沒過驗證的結果，並附該次輸出 |
