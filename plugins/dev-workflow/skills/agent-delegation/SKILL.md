@@ -15,7 +15,7 @@ description: >-
   claude. An agent whose own prompt marks it as
   the dispatched worker MUST NOT apply this skill and MUST NOT delegate further.
 metadata:
-  version: "2.14.0"
+  version: "2.14.1"
 ---
 
 # Agent 派工規範
@@ -56,7 +56,7 @@ env | grep -E '^(CLAUDECODE|CODEX_THREAD_ID|ANTIGRAVITY_AGENT|OPENCODE)='
 | 雜事：機械性文件段落、證據整理、大量套版改寫 | 免費模型，`--agent build` | Gemini Flash，`--mode accept-edits` | | Haiku，可寫檔 |
 | 分類：把資料、評論、issue 或檔案歸進類別、打標籤或編碼 | | | luna，`-s workspace-write` | Haiku，可寫檔 |
 | Review：審 diff、找漏洞、對契約 | | Claude Opus，`--mode plan` | GPT-6 以上的 sol，`-s read-only` | Opus，唯讀 |
-| 深度研究：摸清陌生系統怎麼運作（程式碼庫、服務、協定、環境），或找非常規的做法（hack 式繞法）完成一件事 | | | GPT-6 以上的 sol，`-s workspace-write` | Opus，可寫檔 |
+| 深度研究（深度層，先由「快速唯讀探索」那列做廣度層，主 agent 統合）：摸清陌生系統怎麼運作（程式碼庫、服務、協定、環境），或找非常規的做法（hack 式繞法）完成一件事 | | | GPT-6 以上的 sol，`-s workspace-write` | Opus，可寫檔 |
 | 決策：方案取捨、技術選型、只影響單一模組的設計 | | | | Sonnet，唯讀 |
 | 寫規則與複雜架構：skill、prompt 與規則檔條文，以及跨多個模組、改資料模型或 API 契約的架構決策 | | Claude Opus，`--mode accept-edits` | | Opus，可寫檔 |
 
