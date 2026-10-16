@@ -15,7 +15,7 @@ description: >-
   claude. An agent whose own prompt marks it as
   the dispatched worker MUST NOT apply this skill and MUST NOT delegate further.
 metadata:
-  version: "2.13.0"
+  version: "2.14.0"
 ---
 
 # Agent 派工規範
@@ -60,7 +60,7 @@ env | grep -E '^(CLAUDECODE|CODEX_THREAD_ID|ANTIGRAVITY_AGENT|OPENCODE)='
 | 決策：方案取捨、技術選型、只影響單一模組的設計 | | | | Sonnet，唯讀 |
 | 寫規則與複雜架構：skill、prompt 與規則檔條文，以及跨多個模組、改資料模型或 API 契約的架構決策 | | Claude Opus，`--mode accept-edits` | | Opus，可寫檔 |
 
-主 agent 自己做：寫骨架與想要的結果、審測試、派出去不划算的格子、讀 diff、跑測試、commit，以及整合深度研究的結論。
+主 agent 自己做：寫骨架與想要的結果、審測試、派出去不划算的格子、讀 diff、跑測試、commit，以及統合深度研究的全部結果、做整體判斷。
 
 各 CLI 的指令：
 
@@ -76,7 +76,11 @@ claude 那欄在宿主是 Claude Code 時改用 Agent 工具（`model: haiku`／
 - 表中只寫模型種類。派工前先跑 `agy models` 或 `opencode models`，挑該種類最新版填進佔位符。
 - opencode 只能用免費模型：`opencode models | grep opencode/` 查得到才算。
 - Codex 照表主動派。Review 與深度研究只用 GPT-6 以上、名稱含 sol 的模型，其他任務只用名稱含 luna 的模型。
-- 深度研究分工：sol 負責挖深，回報系統結構、可行做法與每個結論的依據（檔案路徑、指令輸出、文件出處）。主 agent 負責整合：核對關鍵依據、與其他來源和任務目標對起來、決定採用哪個做法並親自執行。sol 的結論不直接當成定論。
+- 深度研究分三層：
+  1. 廣度層：照「快速唯讀探索」那列派（opencode、Gemini Flash、Haiku），每條負責一個範圍，掃描並回報發現與線索，附出處。回報當成線索，不當成事實。
+  2. 深度層：主 agent 從線索挑出值得深挖的項目，每個項目派一個 sol，一次只專研一件事，prompt 只放那一件。回報系統結構、可行做法與每個結論的依據（檔案路徑、指令輸出、文件出處）。
+  3. 統合層：主 agent 合併廣度與深度的全部結果，核對關鍵依據、前後對照、做出整體判斷，決定採用哪個做法並親自執行。sol 的結論不直接當成定論。
+  廣度層沒挑出值得深挖的項目時，不派 sol。
 - 深度研究的 agent 可實際試探系統，但可改檔案只列暫存目錄或沙盒，專案檔一律不可改。試探造成的副作用（建立的檔案、啟動的程序、改過的設定）一併寫進回報，由主 agent 決定保留或清掉。
 - 非免費模型的 effort 預設 `medium`，主 agent 判斷任務需要時才調高，最高 `xhigh`。agy 的 Gemini 選模型名結尾是 `-medium` 的版本，agy 的 Claude 加 `--effort medium`，agy 最高只到 `high`。Agent 工具沒有 effort 參數，不用設。
 - Haiku 與 Sonnet 只用 5.5 以上版本，所以 agy 的 Sonnet 4.6 不派。
