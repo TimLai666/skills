@@ -15,7 +15,7 @@ description: >-
   claude. An agent whose own prompt marks it as
   the dispatched worker MUST NOT apply this skill and MUST NOT delegate further.
 metadata:
-  version: "2.12.0"
+  version: "2.13.0"
 ---
 
 # Agent 派工規範
@@ -56,7 +56,7 @@ env | grep -E '^(CLAUDECODE|CODEX_THREAD_ID|ANTIGRAVITY_AGENT|OPENCODE)='
 | 雜事：機械性文件段落、證據整理、大量套版改寫 | 免費模型，`--agent build` | Gemini Flash，`--mode accept-edits` | | Haiku，可寫檔 |
 | 分類：把資料、評論、issue 或檔案歸進類別、打標籤或編碼 | | | luna，`-s workspace-write` | Haiku，可寫檔 |
 | Review：審 diff、找漏洞、對契約 | | Claude Opus，`--mode plan` | GPT-6 以上的 sol，`-s read-only` | Opus，唯讀 |
-| 深度研究：摸清陌生系統怎麼運作（程式碼庫、服務、協定、環境），或找非常規的做法（hack 式繞法）完成一件事 | | | GPT-6 以上的 sol，`-s read-only` | Opus，唯讀 |
+| 深度研究：摸清陌生系統怎麼運作（程式碼庫、服務、協定、環境），或找非常規的做法（hack 式繞法）完成一件事 | | | GPT-6 以上的 sol，`-s workspace-write` | Opus，可寫檔 |
 | 決策：方案取捨、技術選型、只影響單一模組的設計 | | | | Sonnet，唯讀 |
 | 寫規則與複雜架構：skill、prompt 與規則檔條文，以及跨多個模組、改資料模型或 API 契約的架構決策 | | Claude Opus，`--mode accept-edits` | | Opus，可寫檔 |
 
@@ -71,12 +71,13 @@ codex exec -s <workspace-write|read-only> -m <luna-model|sol-model> -c model_rea
 claude -p --model <haiku|sonnet|opus> --effort medium --permission-mode acceptEdits '<prompt>'
 ```
 
-claude 那欄在宿主是 Claude Code 時改用 Agent 工具（`model: haiku`／`sonnet`／`opus`），唯讀任務的 `claude -p` 拿掉 `--permission-mode acceptEdits`。codex 那欄在宿主是 Codex 時改用 Codex 內建的 subagent 功能，模型種類與唯讀限制照該列填寫。
+claude 那欄在宿主是 Claude Code 時改用 Agent 工具（`model: haiku`／`sonnet`／`opus`），唯讀任務的 `claude -p` 拿掉 `--permission-mode acceptEdits`。codex 那欄在宿主是 Codex 時改用 Codex 內建的 subagent 功能，模型種類與寫入權限照該列填寫。
 
 - 表中只寫模型種類。派工前先跑 `agy models` 或 `opencode models`，挑該種類最新版填進佔位符。
 - opencode 只能用免費模型：`opencode models | grep opencode/` 查得到才算。
 - Codex 照表主動派。Review 與深度研究只用 GPT-6 以上、名稱含 sol 的模型，其他任務只用名稱含 luna 的模型。
 - 深度研究分工：sol 負責挖深，回報系統結構、可行做法與每個結論的依據（檔案路徑、指令輸出、文件出處）。主 agent 負責整合：核對關鍵依據、與其他來源和任務目標對起來、決定採用哪個做法並親自執行。sol 的結論不直接當成定論。
+- 深度研究的 agent 可實際試探系統，但可改檔案只列暫存目錄或沙盒，專案檔一律不可改。試探造成的副作用（建立的檔案、啟動的程序、改過的設定）一併寫進回報，由主 agent 決定保留或清掉。
 - 非免費模型的 effort 預設 `medium`，主 agent 判斷任務需要時才調高，最高 `xhigh`。agy 的 Gemini 選模型名結尾是 `-medium` 的版本，agy 的 Claude 加 `--effort medium`，agy 最高只到 `high`。Agent 工具沒有 effort 參數，不用設。
 - Haiku 與 Sonnet 只用 5.5 以上版本，所以 agy 的 Sonnet 4.6 不派。
 - Haiku 用在唯讀探索、雜事、分類與簡單的寫程式任務。
