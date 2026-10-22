@@ -15,7 +15,7 @@ description: >-
   claude. An agent whose own prompt marks it as
   the dispatched worker MUST NOT apply this skill and MUST NOT delegate further.
 metadata:
-  version: "2.14.1"
+  version: "2.15.0"
 ---
 
 # Agent 派工規範
@@ -50,13 +50,13 @@ env | grep -E '^(CLAUDECODE|CODEX_THREAD_ID|ANTIGRAVITY_AGENT|OPENCODE)='
 
 | 任務類型 | opencode | agy | codex | claude |
 | --- | --- | --- | --- | --- |
-| 寫測試、填格子實作、照清單修 bug | 免費模型，推薦 `opencode/big-pickle`，`--agent build` | | luna，`-s workspace-write` | Haiku → Sonnet → Opus 加 `--effort low`，可寫檔 |
-| 前端設計、版面、樣式 | | Gemini Flash，`--mode accept-edits` | luna，`-s workspace-write` | Sonnet，可寫檔 |
-| 快速唯讀探索、找檔案、問「X 在哪」 | 免費模型，`--agent plan` | Gemini Flash，`--mode plan` | | Haiku，宿主是 Claude Code 時用 `Explore` |
-| 雜事：機械性文件段落、證據整理、大量套版改寫 | 免費模型，`--agent build` | Gemini Flash，`--mode accept-edits` | | Haiku，可寫檔 |
-| 分類：把資料、評論、issue 或檔案歸進類別、打標籤或編碼 | | | luna，`-s workspace-write` | Haiku，可寫檔 |
-| Review：審 diff、找漏洞、對契約 | | Claude Opus，`--mode plan` | GPT-6 以上的 sol，`-s read-only` | Opus，唯讀 |
-| 深度研究（深度層，先由「快速唯讀探索」那列做廣度層，主 agent 統合）：摸清陌生系統怎麼運作（程式碼庫、服務、協定、環境），或找非常規的做法（hack 式繞法）完成一件事 | | | GPT-6 以上的 sol，`-s workspace-write` | Opus，可寫檔 |
+| 寫測試、填格子實作、照清單修 bug | 免費模型，推薦 `opencode/big-pickle`，`--agent build --auto` | | luna，`--approve-for-me` | Haiku → Sonnet → Opus 加 `--effort low`，可寫檔 |
+| 前端設計、版面、樣式 | | Gemini Flash，`--mode accept-edits` | luna，`--approve-for-me` | Sonnet，可寫檔 |
+| 快速唯讀探索、找檔案、問「X 在哪」 | 免費模型，`--agent build --auto` | Gemini Flash，`--mode accept-edits` | | Haiku，宿主是 Claude Code 時用一般用途 Agent |
+| 雜事：機械性文件段落、證據整理、大量套版改寫 | 免費模型，`--agent build --auto` | Gemini Flash，`--mode accept-edits` | | Haiku，可寫檔 |
+| 分類：把資料、評論、issue 或檔案歸進類別、打標籤或編碼 | | | luna，`--approve-for-me` | Haiku，可寫檔 |
+| Review：審 diff、找漏洞、對契約 | | Claude Opus，`--mode accept-edits` | GPT-6 以上的 sol，`--approve-for-me`，任務唯讀 | Opus，唯讀 |
+| 深度研究（深度層，先由「快速唯讀探索」那列做廣度層，主 agent 統合）：摸清陌生系統怎麼運作（程式碼庫、服務、協定、環境），或找非常規的做法（hack 式繞法）完成一件事 | | | GPT-6 以上的 sol，`--approve-for-me` | Opus，可寫檔 |
 | 決策：方案取捨、技術選型、只影響單一模組的設計 | | | | Sonnet，唯讀 |
 | 寫規則與複雜架構：skill、prompt 與規則檔條文，以及跨多個模組、改資料模型或 API 契約的架構決策 | | Claude Opus，`--mode accept-edits` | | Opus，可寫檔 |
 
@@ -65,13 +65,16 @@ env | grep -E '^(CLAUDECODE|CODEX_THREAD_ID|ANTIGRAVITY_AGENT|OPENCODE)='
 各 CLI 的指令：
 
 ```
-opencode run --agent <build|plan> -m <free-model> '<prompt>'
-agy --model <model> --mode <accept-edits|plan> -p='<prompt>'
-codex exec -s <workspace-write|read-only> -m <luna-model|sol-model> -c model_reasoning_effort=medium '<prompt>'
-claude -p --model <haiku|sonnet|opus> --effort medium --permission-mode acceptEdits '<prompt>'
+opencode run --auto --dir <project-dir> --agent build -m <free-model> '<prompt>'
+agy --model <model> --mode accept-edits -p='<prompt>'
+codex exec --approve-for-me -C <project-dir> -m <luna-model|sol-model> -c model_reasoning_effort=medium '<prompt>'
+claude -p --model <haiku|sonnet|opus> --effort medium --permission-mode auto '<prompt>'
 ```
 
-claude 那欄在宿主是 Claude Code 時改用 Agent 工具（`model: haiku`／`sonnet`／`opus`），唯讀任務的 `claude -p` 拿掉 `--permission-mode acceptEdits`。codex 那欄在宿主是 Codex 時改用 Codex 內建的 subagent 功能，模型種類與寫入權限照該列填寫。
+claude 那欄在宿主是 Claude Code 時改用 Agent 工具（`model: haiku`／`sonnet`／`opus`）。codex 那欄在宿主是 Codex 時改用 Codex 內建的 subagent 功能，模型種類與任務可改範圍照該列填寫。
+
+- 外部 CLI 派工一律明確指定自動核准：OpenCode 加 `--auto`，Codex 加 `--approve-for-me`，Claude Code 加 `--permission-mode auto`，不改用 bypass。Claude Code 與 agy 從目標專案目錄啟動。
+- 自動核准不擴大任務可改檔案清單。表中的「唯讀」只表示 prompt 必須明寫「不得修改任何檔案」；探索、審查與實作沿用相同執行模式，不另設 plan、read-only 沙盒或唯讀工具清單，也不選唯讀專用 agent。宿主內建 subagent 不套用外部 CLI 旗標，可改範圍同樣寫在 prompt。
 
 - 表中只寫模型種類。派工前先跑 `agy models` 或 `opencode models`，挑該種類最新版填進佔位符。
 - opencode 只能用免費模型：`opencode models | grep opencode/` 查得到才算。
@@ -173,7 +176,7 @@ wrapper 或 CLI 失敗時直接照決策表往右轉下一個，不停下來問�
 ```
 宿主：Claude Code
 工具與模型：agy / <實際 flash 模型名> / --mode accept-edits
-工具與模型：opencode / <實際免費模型名> / --agent build
+工具與模型：opencode / <實際免費模型名> / --agent build --auto
 ```
 
 沒派工就寫「工具與模型：無」。派工 prompt 直接照第 2 節七項依序寫，每項一行。
