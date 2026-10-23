@@ -1,28 +1,28 @@
 ---
 name: agent-delegation
 description: >-
-  Fixed rules for handing work to subagents or external coding CLIs, usable from
-  any host (Claude Code, Codex, Antigravity, OpenCode). This skill MUST be loaded
-  when the user mentions subagent、分工、派工、antigravity、agy、opencode、codex,
-  or the Claude Code Agent tool, and MUST be loaded before the main agent
-  dispatches any task to another agent, even when the task looks small. It
-  SHOULD be loaded when the user asks who should write the code or which model
-  to use. Before dispatching implementation, the main agent MUST write the
-  skeleton and each slot's expected results itself, MUST NOT let the agent that
-  fills a slot edit its tests, MUST NOT dispatch to the
-  CLI it is itself running in, MUST NOT skip the cheapest tool because it failed
-  in an earlier turn, and MUST try CLIs in the order opencode, agy, codex,
-  claude. An agent whose own prompt marks it as
-  the dispatched worker MUST NOT apply this skill and MUST NOT delegate further.
+  This skill MUST be loaded when the user mentions subagent、分工、派工、
+  antigravity、agy、opencode、codex or Claude Code Agent, before dispatching
+  work even on small tasks, and when proposing
+  changes to existing API names, signatures, usage or behavior（介面變更）.
+  It SHOULD be loaded for questions about who should code or which model to use.
+  Existing API changes MUST follow the conditional consultation rule before
+  implementation. Ordinary delegation MUST try opencode, agy, codex, claude in
+  order and MUST NOT skip a tool due to failure in an earlier turn. The main
+  agent MUST write the skeleton and expected results before dispatching
+  implementation, MUST NOT let implementers edit their tests, and MUST NOT
+  dispatch to its own CLI. These rules apply across Claude Code, Codex,
+  Antigravity and OpenCode. Workers marked as dispatched MUST NOT apply this
+  skill or delegate further.
 metadata:
-  version: "2.15.0"
+  version: "2.16.0"
 ---
 
 # Agent 派工規範
 
 ## Overview
 
-主 agent 是強模型，負責寫骨架與每個格子的想要的結果、審查、驗證、提交。骨架鎖住範圍，弱模型照規格寫測試或填實作。成本原則：CLI 一律照 OpenCode → Antigravity（agy）→ Codex → Claude 的順序派。測試、實作與雜事先交給 OpenCode 的免費模型，前端設計交給 agy 的 Gemini。一般決策交給 Sonnet。Claude Opus 只用來寫規則、複雜架構、review 與接手 Sonnet 也寫不出來的格子。任何 CLI 都能當主 agent，所以派工前先辨識自己是誰。各 CLI 的旗標見 [references/cli-cheatsheet.md](references/cli-cheatsheet.md)。
+主 agent 是強模型，負責寫骨架與每個格子的想要的結果、審查、驗證、提交。骨架鎖住範圍，弱模型照規格寫測試或填實作。一般派工的成本原則：CLI 照 OpenCode → Antigravity（agy）→ Codex → Claude 的順序派。測試、實作與雜事先交給 OpenCode 的免費模型，前端設計交給 agy 的 Gemini。一般決策交給 Sonnet。Claude Opus 只用來寫規則、複雜架構、review 與接手 Sonnet 也寫不出來的格子。任何 CLI 都能當主 agent，所以派工前先辨識自己是誰。各 CLI 的旗標見 [references/cli-cheatsheet.md](references/cli-cheatsheet.md)。
 
 ## 0. 先辨識自己
 
@@ -46,7 +46,7 @@ env | grep -E '^(CLAUDECODE|CODEX_THREAD_ID|ANTIGRAVITY_AGENT|OPENCODE)='
 
 ## 決策表
 
-每列由左往右派，左邊的實際失敗或被禁才往右走。空格直接跳過，宿主自己的 CLI 改用內建 subagent 工具。
+每列由左往右派，左邊的實際失敗或被禁才往右走。空格直接跳過，宿主自己的 CLI 改用內建 subagent 工具。只有觸發下方「既有 API 變更」時，該次諮詢的模型選擇與失敗處置依該節，不套用一般派工的 CLI 順序、模型種類限制與對應陷阱檢核。其他工作照原流程。
 
 | 任務類型 | opencode | agy | codex | claude |
 | --- | --- | --- | --- | --- |
@@ -95,7 +95,26 @@ claude 那欄在宿主是 Claude Code 時改用 Agent 工具（`model: haiku`／
 - 同一個 CLI 同時最多跑三條，Claude Code 的 Agent 工具也算 claude。
 - 不用宿主自己的 CLI 指令派工（`claude -p`、`codex exec` 等），改用宿主內建的 subagent 工具。同一個模型不同 CLI 可以。
 - 每輪都照表從最左邊派起。上一輪額度耗盡、逾時或失敗，不代表這一輪還是，實際失敗了才往右走。
-- 唯一例外：主 agent 判斷很難的寫程式格子，若這次任務裡 opencode 已在同類型的格子交出不完整或沒過驗證的結果，可以跳過免費模型直接從 luna 派起，其餘往下升級的規則不變。
+- 一般派工的唯一例外：主 agent 判斷很難的寫程式格子，若這次任務裡 opencode 已在同類型的格子交出不完整或沒過驗證的結果，可以跳過免費模型直接從 luna 派起，其餘往下升級的規則不變。
+
+### 既有 API 變更
+
+只有準備變更既有 API，或函數、變數、結構體、Enum 等程式元素的命名、結構、用法或行為時，才啟動本節。不因任務涉及 API、一般設計、審查或派工就啟動。純內部實作調整若保持上述項目不變，或單純新增且不改變既有名稱、結構、用法或行為，照原流程。
+
+- 變更包括函數／方法的名稱、簽名、參數、回傳值、錯誤與副作用，以及變數、欄位、結構體、Enum 的名稱、結構或使用方式。不以私有、內部使用、改動小或由主 agent 親自實作為豁免理由。
+- 在修改受影響的骨架、測試或實作前，先查閱現有定義、呼叫處、測試與文件，整理初案、改動理由及相容性影響，再交給獨立模型諮詢。主 agent 自己的推理不算諮詢。
+
+| 主 agent 環境 | 諮詢模型 |
+| --- | --- |
+| Claude | Fable 5.1 以上，沒有可用的合格 Fable 時，改用 Opus 5.5 以上 |
+| GPT | Astra |
+
+依主 agent 實際使用的模型系列選擇，不由 CLI 名稱猜測。在其他模型環境中，先請使用者指定諮詢模型。用目前工具實際提供的模型識別與版本，別名不足以證明版本下限時先查證。沿用宿主內建 subagent 或外部 CLI 的執行規則。指定模型無法使用時，僅能採用表中明列的替代模型。仍無可用模型就回報證據，暫停該介面變更並請使用者決定，其他獨立工作可繼續。
+
+1. **諮詢**：提供現有程式與使用範例、初案、改動原因、限制及待決策事項。要求顧問檢查命名與用法、行為差異、相容性及替代方案，附依據並標明不確定處。諮詢任務不得修改任何檔案。
+2. **修正初案**：主 agent 核對意見與原始內容，採納有依據的建議並修正方案。未採納的重要建議簡述理由，不直接轉貼模型回覆，也不為了顯示有修改而硬改合理的初案。
+3. **交由使用者決定**：把修正後的方案與原本就需要使用者決定的事項合併提出。呈現現況與建議改法、最小使用範例、相容性與遷移影響、推薦選項及主要取捨。行為變更用相同輸入對照改前與改後的結果，不能只列函數簽名。範例格式見 [介面變更提案示例](references/api-change-examples.md)。
+4. **依決定實作**：取得使用者對具體方案的確認後，接回原本的實作與驗證流程。已確認且未變動的部分不重問。諮詢後新增或改變的待決策事項須先確認。派工涉及這些介面時，在 prompt 列出核准範圍。執行者若發現還需要其他介面變更，先回報主 agent，由主 agent 依本節處理。
 
 ### 骨架與格子
 
