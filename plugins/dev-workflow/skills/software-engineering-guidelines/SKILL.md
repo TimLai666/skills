@@ -1,8 +1,8 @@
 ---
 name: software-engineering-guidelines
-description: "Software engineering guidelines for any software change. This skill MUST be loaded before requirement clarification, architecture/design, implementation, refactoring, code review, testing, shipping, or creating Git commits (including standalone commit requests), and MUST NOT be skipped because the change is a one-liner. Covers simplicity, complete-unit changes built skeleton first, testing-first for high-impact changes with TDD (Test-Driven Development), and verifiable success criteria. Triggers on: 任何軟體規劃, 需求釐清, 架構設計, 寫 code, 改 code, 做功能, 修 bug, refactor, 開發, coding, development, 實作, 實現, 寫程式, 改程式, 加功能, 修問題, code review, 測試, 重構, init, 初始化專案, 建立 CLAUDE.md, 建立 AGENTS.md"
+description: "Software engineering guidelines for any software change. This skill MUST be loaded before requirement clarification, architecture/design, implementation, refactoring, code review, testing, shipping, or creating Git commits (including standalone commit requests), and MUST NOT be skipped because the change is a one-liner. Covers simplicity, complete delivery based on a coherent implementation design, testing-first for high-impact changes with TDD (Test-Driven Development), and verifiable success criteria. Triggers on: 任何軟體規劃, 需求釐清, 架構設計, 寫 code, 改 code, 做功能, 修 bug, refactor, 開發, coding, development, 實作, 實現, 寫程式, 改程式, 加功能, 修問題, code review, 測試, 重構, init, 初始化專案, 建立 CLAUDE.md, 建立 AGENTS.md"
 metadata:
-  version: "1.10.0"
+  version: "1.13.0"
 ---
 
 ## Core Principles
@@ -13,20 +13,22 @@ metadata:
 
 Before implementing:
 
-- Check available information first. Ask the user when an unresolved gap would materially affect the result, scope, authorization, or an important tradeoff. Continue independent work while that decision is pending.
-- Otherwise proceed with a reasonable assumption, explaining it when it helps the user assess the result. When interpretations differ materially, explain the relevant difference and recommend an approach for confirmation.
+- Own the implementation design. Resolve routine technical details from the code, documentation, existing conventions, and focused checks. Use reasonable assumptions within the authorized scope, explaining them when they help the user assess the result. Do not turn internal design work into an exhaustive questionnaire or require approval for each implementation detail.
+- Ask the user only when a gap remains after checking available information and would materially affect the result, scope, authorization, or an important tradeoff. Explain the relevant difference and recommend an approach. Continue independent work while that decision is pending.
 - If a simpler approach exists, say so. Push back when warranted.
+- Work out a coherent design for the full authorized outcome before filling individual components. Trace required flows through responsibilities, interfaces, data lifecycle, dependencies, failure and recovery behavior, and acceptance checks. Consider relevant boundary cases, duplicate or concurrent operations, interruption, compatibility, and downstream effects before coding. Scale the depth to the task and resolve foreseeable gaps before they become implementation rework.
+- Compare materially different approaches against correctness, compatibility, maintainability, and actual resource constraints. Choose the simplest approach that satisfies the full agreed requirements. Validate uncertain assumptions that could invalidate it with focused checks, then proceed once material decisions have sufficient support. Apply the design and required quality from the first implementation. Revisit settled decisions when new evidence or changed requirements warrants it.
 
 ### 2. Simplicity First
 
-**Minimum code that solves the problem. Nothing speculative.**
+**Simple, correct implementations for the full agreed requirements. Nothing speculative.**
 
 - No features beyond what was asked.
 - No abstractions for single-use code.
 - No "flexibility" or "configurability" that wasn't requested.
 - No error handling for impossible scenarios.
 - When the goal can be met either by removing code or by adding code, remove code. The removal stays within the task's scope and keeps every other behavior intact.
-- If you write 200 lines and it could be 50, rewrite it.
+- Use concise, maintainable implementations. Do not rewrite accepted code solely to reduce line count while required outcomes remain incomplete.
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
@@ -34,7 +36,9 @@ Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, sim
 
 **Touch everything the task needs and nothing else. Clean up only your own mess.**
 
-The unit of work is one complete feature or one complete problem, done in one pass:
+Plan each turn to finish the full authorized outcome, including implementation, integration, verification, and necessary repairs. Do not reserve required work for a later turn or wait for another prompt to finish it. Intermediate milestones organize the work within the turn; they are not delivery boundaries unless the user explicitly requested staged delivery. If a real blocker prevents completion, finish independent work and report the exact remaining gap and what is needed to resolve it.
+
+Judge completion over the whole agreed feature or problem. Order intermediate work by Principle 5's whole-goal priorities:
 
 - A feature covers every layer, entry point, and edge case it needs.
 - A fix covers the root cause, every occurrence of the same pattern, and the related edge cases. Do not stop at the reported spot.
@@ -81,10 +85,11 @@ Rules:
 - **Bug fixes need a test that reproduces the bug; use the test-first requirements above to determine timing.**
 - **Before refactoring, establish the result of relevant tests; rerun them after the change.**
 - **Don't weaken a test just to make it pass.** Unless the test itself is wrong.
+- **For behavior-changing edits to skills, prompts, or agent workflows, compare the current and candidate versions on the same tasks in fresh contexts with the same model, tools, data access, and resource limits.** Scale the comparison to the change. Inspect actual decisions, artifacts, acceptance results, unsupported retries, premature stops, and cost. Keep acceptance cases separate from cases used to revise the instructions. Retain the current version as an eligible outcome; inconclusive comparisons do not establish improvement.
 
 ### 5. Goal-Driven Execution
 
-**Define success criteria. Loop until verified.**
+**Define success criteria. Use observed progress to choose each next step.**
 
 Transform tasks into verifiable goals — e.g. "Add validation" → "Write tests for invalid inputs, then make them pass".
 
@@ -96,7 +101,7 @@ For multi-step tasks, state a brief plan:
 3. [Step] → verify: [check]
 ```
 
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+Derive concrete success criteria from the request and available project evidence. Resolve routine gaps yourself and apply Principle 1's clarification threshold to material unknowns.
 
 **Skeleton first.** Before filling in logic for a new project, feature, or fix, write a skeleton that fixes the scope:
 
@@ -106,11 +111,28 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Place independent slots in separate files.
 - Scale the skeleton to the task. A single-location change needs only its expected results and check.
 
-Then fill the slots until their checks and the acceptance flows pass. When work is handed to other agents, follow **agent-delegation** when it is installed. Otherwise give each agent its slot's signature, expected results, and checks. The agent that fills a slot does not edit its checks. Review the returned work yourself before accepting it.
+Fill the slots in the order below until their checks and the acceptance flows pass. When work is handed to other agents, follow **agent-delegation** when it is installed. Otherwise give each agent its slot's signature, expected results, and checks. The agent that fills a slot does not edit its checks. Review the returned work yourself before accepting it.
+
+#### Whole-Goal Priority
+
+- For multi-part work, identify the required outcomes, their dependencies, and which primary flows remain unimplemented or unverified. Choose the next work from these gaps before deepening an already working part.
+- Implement production-intended components according to the agreed design, with the correctness and interfaces their role requires. Integrate and verify a complete primary flow early, then cover the remaining primary flows before optional local refinement. Do not substitute a knowingly inadequate design or disposable implementation for required work. Scaffolding, disconnected components, and mock outputs do not establish working coverage. Keep intermediate gaps explicit; complete all required edge cases and checks before delivery.
+- Once a part meets the criteria needed for the current integrated flow, move to the next uncovered outcome or blocking dependency. Defer extra abstraction, optimization beyond the agreed target, cosmetic polish, and repeated passing checks unless new evidence justifies them. Complete necessary local work first when correctness, safety, data integrity, or a downstream dependency prevents valid integration.
+- Follow an explicit user priority or narrowly scoped request. Do not expand the task to create breadth. Before returning to a covered part, identify the unmet requirement or new evidence that makes that work more valuable than the remaining gaps.
+
+#### Evidence-Guided Iterations
+
+Apply these checks around a meaningful experiment, implementation attempt, or revision within the ongoing work. Use them to verify and repair the complete implementation during the current turn, not to defer foreseeable requirements or delivery to another turn. Scale the record to the task; routine actions within an attempt do not each need a separate plan or report.
+
+1. Before an attempt, identify the acceptance gap or decision-relevant uncertainty it addresses and the observable result expected. For uncertain claims, state what would support, weaken, or leave them unresolved, including relevant alternative explanations. Prefer a feasible check that distinguishes alternatives at low cost; reuse applicable evidence.
+2. After the check, compare the result with the attempt's starting state and the best supported result under the same criteria. Identify verified improvement, a necessary repair or prerequisite, an informative negative result, repetition, regression, or insufficient evidence. Tie each claimed gain to evidence and the original goal. A prerequisite counts only toward the acceptance condition it enables; execution or compilation alone does not establish correctness or validate a research claim.
+3. Apply whole-goal priorities, then choose the next action by its expected contribution to the original goal, evidential value, and remaining cost. Preserve supported gains, repair an identified defect, or investigate alternatives that predict different outcomes. Revise or abandon a contradicted approach. For inconclusive results, improve the measurement or obtain missing evidence before drawing a conclusion. A negative result counts as progress only when a valid check rules out a relevant possibility or changes a justified decision.
+4. Before retrying, identify new evidence, a changed condition, or a distinct diagnostic check and what it can establish. When none is available, stop repeating that attempt and continue independent work that can advance the goal. Request help only for a material evidence, access, expertise, or authorization gap. Do not stop solely because an arbitrary number of attempts failed, or change acceptance criteria to make an attempt pass.
+5. Preserve the best supported candidate and enough evidence to compare later revisions. Before continuing, handing off, or resuming, update and read the existing task record for confirmed results, failed approaches and their conditions, evidence locations, unresolved questions, and the next discriminating check. Link revisions to the candidate they changed; do not count repeated versions as separate gains. Use the existing coordination file, or `docs/software-engineering-guidelines/` when a persistent record is needed, and preserve unrelated content.
 
 ### Progress at Every Turn End
 
-End every turn of any ongoing task with a progress bar tied to the original goal: completed/total agreed items, current work, and what remains before completion. Use the existing plan or checklist. Count only verified work that meets the agreed acceptance and delivery conditions; show pending acceptance separately.
+End every turn of any ongoing task with a progress bar tied to the original goal: completed/total agreed items, current work, and what remains before completion. Use the existing plan or checklist and identify primary flows that are still unimplemented or unverified. Count only verified work that meets the agreed acceptance and delivery conditions; show pending acceptance separately.
 
 Keep the scope and denominator stable unless the user changes them. If the total is unknown, show milestones without inventing a percentage or finish date. Item completion is not a time estimate; 100% requires the original goal and all delivery conditions to be met.
 
@@ -138,13 +160,13 @@ When designing or changing our CLI tools, MCP tools, or APIs, put their supporte
 
 ### B. While Writing Code
 
-Fill the skeleton using Principles 2–4.
+Fill the skeleton using Principles 2–4 and Principle 5's whole-goal priorities. Before and after each meaningful attempt, apply the iteration checks and use the result to choose the next action.
 
 ### C. After Completion
 
 1. Complete and report verification (Principle 4).
 2. Review the Pre-Ship Checklist.
-3. Before ending the turn, report progress against the original goal using Principle 5.
+3. Before ending the turn, compare the result with the full authorized outcome. Continue any required work that can still be completed, then report progress against the original goal using Principle 5.
 
 ---
 
