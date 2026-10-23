@@ -11,7 +11,7 @@
     {
       "name": "thinking-frameworks",
       "source": "./plugins/thinking-frameworks",
-      "description": "通用思考框架：ultrathink 依問題選用分析方法，六語分析與完整謬誤檢核可依需要自動啟用或明確指定。另含 plan-grilling 與 subtraction-thinking。"
+      "description": "通用思考框架：ultrathink 以任務脈絡與外部證據支持推導，保留第一性原理與現有框架，六語分析與完整謬誤檢核依條件啟用。另含 plan-grilling 與 subtraction-thinking。"
     },
     {
       "name": "business-strategy",
