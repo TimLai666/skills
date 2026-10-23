@@ -16,7 +16,7 @@ A merge is an ordinary `add` that names what it now covers:
 python3 "$_MEM" add \
   --type pitfall \
   --key skill-instructions-need-an-execution-point \
-  --insight '<one sentence, keeping the specifics from both>' \
+  --insight '<concise lesson, keeping the specifics from both>' \
   --confidence 8 \
   --absorbs 'skill-write-actions-need-a-moment,printed-suggestion-is-not-an-executed-step'
 ```

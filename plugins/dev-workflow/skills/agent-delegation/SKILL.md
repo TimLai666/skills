@@ -13,9 +13,10 @@ description: >-
   implementation, MUST NOT let implementers edit their tests, and MUST NOT
   dispatch to its own CLI. These rules apply across Claude Code, Codex,
   Antigravity and OpenCode. Workers marked as dispatched MUST NOT apply this
-  skill or delegate further.
+  skill or delegate further. Prompts MUST carry relevant project lessons; workers
+  MUST report new lessons for main-agent verification and recording.
 metadata:
-  version: "2.16.0"
+  version: "2.17.0"
 ---
 
 # Agent 派工規範
@@ -139,6 +140,8 @@ claude 那欄在宿主是 Claude Code 時改用 Agent 工具（`model: haiku`／
 
 ### 1. 派工前
 
+- [ ] 主 agent 依照 `project-memory` skill 載入目前專案的記憶，按這次 subagent 的任務搜尋可能相關的經驗。已載入的內容可沿用，但任務範圍改變時重新篩選。把適用條件、踩坑重點、已驗證做法與來源帶進 prompt，不只給 key 或要求 subagent 自己找，也不整份貼上無關記憶。舊經驗與現況不符時依 project-memory 的失效查證規則處理。
+
 - [ ] 跑 `git status --short`。有未提交變更時逐檔確認是自己這輪的、還是別的 agent 的半成品。是半成品就先處理完再派。
 - [ ] 確認這組檔案目前沒有別的會寫檔的 agent 在跑。同一組檔案同時只能有一個會寫檔的 agent。
 - [ ] 確認要用的 CLI 目前跑不到三條，滿了就等其中一條結束。
@@ -153,17 +156,18 @@ claude 那欄在宿主是 Claude Code 時改用 Agent 工具（`model: haiku`／
 | 執行者標記 | 第一行原文寫「你是被派工的執行者，不得再派工給任何 agent 或 CLI，自己完成」 |
 | 角色設定 | 一句話說明它是誰、標準多高，例如「你是這個 repo 的資深工程師，只交能過測試的程式」 |
 | 可改與不可改的檔案 | 明確列路徑。沒列到的檔案一律不可改 |
-| 任務與驗收 | 測試 agent：簽名、想要的結果、測試檔路徑，只寫測試。實作 agent：簽名、想要的結果、測試檔路徑，原文寫「不得修改測試檔，認為測試錯就停下回報」 |
+| 任務與驗收 | 測試 agent：簽名、想要的結果、測試檔路徑，只寫測試。實作 agent：簽名、想要的結果、測試檔路徑，原文寫「不得修改測試檔，認為測試錯就停下回報」。附上派工前篩選的相關 Project Memory 經驗，沒有符合的就註明無 |
 | 要跑的驗證指令 | 寫出完整指令，例如 `go test ./...`、`npm test -- --run` |
-| 回報格式 | 改了哪些檔、每個結論的依據、不確定的地方、沒驗證的項目 |
+| 回報格式 | 改了哪些檔、每個結論的依據、不確定的地方、沒驗證的項目。另回報本輪反覆試錯或耗費大量時間、token 才找到的做法：觸發情境、失敗路徑、已確認原因、有效做法與驗證證據。發現舊記憶不適用時附原 key、條件差異與查證結果。沒有新增經驗就寫無，不湊數。經驗交由主 agent 核對並寫入 Project Memory，不自行寫入 |
 | 不要 commit | 原文寫「不要 commit，也不要 stash 或 reset」 |
 
-唯讀探索任務的「任務與驗收」寫要回答的問題，可省略「不要 commit」，其餘五項照列。
+唯讀探索任務的「任務與驗收」寫要回答的問題，仍附相關經驗並要求回報本輪教訓。可省略「不要 commit」，其餘六項照列。
 
 ### 3. 派工中
 
 - [ ] 背景 agent 被中斷時先看磁碟：`git status --short` 加 `git diff --stat`，判斷做到哪裡。
 - [ ] 需要重派時，原 prompt 從記錄檔取回，不憑記憶重寫。Claude Code 的 subagent 在 `head -1 ~/.claude/projects/<專案>/<session>/subagents/agent-<id>.jsonl`，其他 CLI 見速查表的續接欄。
+- [ ] 重派前把前一位執行者已驗證的相關教訓補進原 prompt，保留證據與不確定處，再交給接手者。
 - [ ] 重派前決定半成品去留：保留並告知新 agent，或 `git checkout -- <檔案>` 清掉。
 
 ### 4. 收件審查
@@ -176,6 +180,8 @@ claude 那欄在宿主是 Claude Code 時改用 Agent 工具（`model: haiku`／
 - [ ] 比對可改檔案清單，多改的檔案一律退回。實作 agent 的 diff 碰到測試檔也退回。
 - [ ] 全部格子完成後跑完整使用流程驗收。
 - [ ] 才決定採用、退修或丟棄。
+- [ ] 不論成果採用或退修，都核對 subagent 回報的試錯與探索經驗，連同主 agent 自己的發現，判斷能否避免下次重複耗費時間與 token。依 project-memory 的記錄標準篩選，不把推測、流水帳或未解問題當成已驗證教訓。
+- [ ] 對符合條件的經驗，在原專案目錄依 project-memory 的工具先搜尋去重，再新增或更新，無須逐筆詢問使用者。舊記憶須查證確實失效後才更新原 key，保留仍有效的適用條件。寫入後讀回確認，失敗時回報尚未保存，不宣稱已記住。
 
 ### 5. 工具失敗
 

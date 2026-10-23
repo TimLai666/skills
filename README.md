@@ -103,12 +103,12 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 
 | Skill | 適合什麼需求 |
 | --- | --- |
-| `agent-delegation` | 主 agent 派工給 subagent 或外部 CLI（agy、opencode、codex、Agent 工具）時的固定規則：主 agent 先寫骨架、測試與實作分給不同 agent、決策表、派工 prompt 七項、同檔單寫、親自審查、工具失敗照實回報。既有 API 命名、用法或行為變更時，先諮詢指定模型，再附前後對照與範例交由使用者決定。 |
+| `agent-delegation` | 主 agent 派工給 subagent 或外部 CLI（agy、opencode、codex、Agent 工具）時的固定規則：主 agent 先寫骨架、測試與實作分給不同 agent、決策表、派工 prompt 七項、同檔單寫、親自審查、工具失敗照實回報。派工時附相關專案經驗，收件後核對並保存值得重用的試錯教訓。既有 API 命名、用法或行為變更時，先諮詢指定模型，再附前後對照與範例交由使用者決定。 |
 | `eng-architect` | 設計技術架構、釐清模組邊界、按可驗收行為拆任務，或審查 UI。沿用專案既有文件與任務系統，沒有安排且需要完整交接時建立預設協作文件。 |
 | `diff-inspector` | 想在合併前審查 diff：scope drift check、critical code review、specialist 並行掃描、adversarial review。 |
 | `test-and-fix` | 依指定範圍或 diff 測試網站、API、命令列工具與函式庫，追查失敗原因、修復並驗證回歸測試。 |
 | `ship-it` | 整理功能分支並建立或更新 PR：依專案規則同步、測試與審查，確認 CI 狀態，收尾記錄實際經驗。 |
-| `project-memory` | 想記錄專案教訓、踩過的雷、學到的 pattern，支援搜尋與匯出。 |
+| `project-memory` | 保存反覆試錯或耗費大量時間、token 才找到的做法，供後續任務重用。舊經驗經查證失效後更新原紀錄，支援搜尋與匯出。 |
 | `investigate` | 錯誤原因不明時，依證據提出假說、追查資料流並驗證修正；也適用於明確要求根因調查。 |
 | `software-engineering-guidelines` | 任何軟體規劃、架構、實作、重構、review、測試前先載入：想清楚再做、最小變更、一次完整處理一個功能或問題、先寫骨架再填實作、每次變更都有測試，大改動採 TDD、目標驅動。 |
 | `db-engineering` | 任何資料庫相關工作都要先載入：先畫 ER model、以 BCNF 優先設計並至少維持 3NF，再處理 migration、稽核 log、軟刪除、效能、完整性與環境分離。 |
