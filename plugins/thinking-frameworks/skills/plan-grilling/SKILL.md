@@ -1,9 +1,10 @@
 ---
 name: plan-grilling
 description: >-
-  This skill MUST be used to clarify or pressure-test a plan before committing
-  resources, including requests such as 幫我規劃、規劃一下、幫我想一下、這個怎麼做、
-  逼問我、壓力測試這個計畫、幫我想這個功能、grill me、planning mode、動手之前先想清楚.
+  This skill MUST be used to clarify or pressure-test a plan and identify the
+  next useful, verifiable step, including requests such as 幫我規劃、規劃一下、
+  幫我想一下、這個怎麼做、逼問我、壓力測試這個計畫、幫我想這個功能、grill me、
+  planning mode、動手之前先想清楚.
   It SHOULD also be used when the user thinks aloud about a feature, campaign,
   proposal, process change, or personal decision with unresolved choices.
   It MUST NOT reopen settled decisions or turn an already authorized execution
@@ -19,107 +20,114 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "2.4.0"
+  version: "2.5.0"
 ---
 
 ## Overview
 
-Clarify the real problem, challenge assumptions and scope, and turn unresolved
-choices into a plan the user can act on. This applies to features, campaigns,
-proposals, process changes, hiring and personal decisions.
+Clarify the goal and plan far enough to take the next useful, verifiable step.
+Use implementation, experiments and observed results to resolve uncertainties
+that discussion cannot settle. Apply this to features, campaigns, proposals,
+process changes, hiring and personal decisions.
 
 ## Input Contract
 
-Identify the intended outcome, affected people, current approach, constraints,
-existing plan and decisions already made. Read available files, configuration,
-history and other relevant evidence before asking the user for facts.
+Identify the intended outcome, current scope, constraints, success criteria
+and decisions already made. Read available files, code, configuration and
+other relevant evidence before asking the user for facts.
 
-Use the user's chosen document location or existing project convention.
-Otherwise use `docs/plans/<slug>-plan.md` within the current workspace, whether
-or not it uses Git. If there is no clear workspace, ask where to save the plan.
-Read an existing document before updating it and preserve unrelated content.
+Use the requested format. Keep a short plan in the chat unless the user asks
+for a document or an identified reader needs it for execution or handoff.
+For a saved plan, use the user's chosen location or existing project convention;
+otherwise use `docs/plan-grilling/<slug>-plan.md`. Ask for a location only when
+saving is needed and no workspace is clear. Read before updating and preserve
+unrelated content. Keep the same path as the plan evolves.
 
 ## Workflow
 
-### 1. Understand the problem
+### 1. Identify what blocks the next step
 
-Before the interview, read [Interview guide](references/interview-guide.md).
-Check the pain, affected people and current workaround. Identify assumptions,
-contradictory evidence and consequences if the assumptions fail. Reframe the
-problem when that clarifies a meaningful difference, and confirm changes to
-the intended outcome before proceeding.
+Read [Interview guide](references/interview-guide.md) when deciding what needs
+clarification. Establish the problem, who encounters it and the result sought.
+Check assumptions and consequences that could change the immediate direction.
+Confirm a meaningful change to the intended outcome before proceeding.
 
-### 2. Resolve scope and decisions
+Distinguish a user decision from a fact that can be checked and an uncertainty
+that needs an experiment. Resolve available facts yourself. Decide reversible,
+low-cost implementation details within the authorized scope yourself.
 
-Review all ten areas in the interview guide. Reuse established answers and
-ask only about unresolved choices that affect direction, scope, resources or
-acceptance. Keep relevant findings even when they require no question.
-Tell the user at the start that saying 「先出草案」 ends the interview at any
-point.
+### 2. Ask only where an answer is needed now
 
-Ask one question at a time and wait for the answer. Before asking, state to
-yourself how the plan changes with each possible answer; a question whose
-answers lead to the same plan is not asked. For a choice, give concrete
-options and mark a recommendation with a reason based on the evidence. Use a
-plain question when asking for an experience or missing context rather than
-inventing choices for it.
+Ask when different answers would change the next action, its acceptance or a
+costly commitment. Compare the cost and value of another question with checking
+evidence or running a small experiment. Prefer an experiment when it can answer
+the uncertainty more reliably at lower cost within the authorized scope.
 
-A follow-up stays on the current thread and targets a contradiction, an
-unverified assumption or an ambiguity in the user's last answer. Switching
-thread is a separate move: close the current thread first and say which
-thread comes next. Decide reversible, low-cost choices yourself and hold them
-for the decided list in step 3.
+Ask one question at a time and wait for the answer. State the consequential
+choice and give a recommendation with its tradeoff. For missing experience or
+context, ask a plain question rather than inventing options. Follow-ups target
+a contradiction, consequential assumption or ambiguity in the answer.
 
-When the plan covers several features, list the feature threads before the
-first question. The opening question of each independent thread may go in
-one message; follow-ups go one at a time.
+Keep settled decisions closed unless new evidence contradicts them. Defer
+questions about later steps until their answers affect action. Deepen review
+where a wrong choice would cause substantial loss, irreversible effects or
+expensive rework. Pause only the affected action when a necessary decision or
+authorization is missing.
 
-Close a thread or area as soon as the next question in it would no longer
-change the plan, and say so in one line: 「這區確定了：…」. A closed one stays
-closed unless later evidence contradicts it. Attach a progress board to every
-question: which of the ten areas and which feature threads are closed, and
-which one is open now.
+End the interview as soon as the goal, scope of the next step, observable check
+and necessary constraints are clear, with no unresolved decision blocking that
+step. The user can also say 「先出草案」 to end it and receive current conclusions
+with remaining uncertainties. A request for a full plan or deeper pressure test
+sets the requested coverage; mark details needing evidence as unresolved rather
+than inventing precision.
 
-For build plans, check the guide's rules for verifiable scope items even when
-the scope is already settled. Clarify wording within the agreed scope yourself.
-Ask before a rewrite changes capabilities, dependencies, scope or acceptance
-criteria. Do not infer a new capability from a technical label alone.
+### 3. Choose the next verifiable step
 
-The interview ends when all ten areas and all feature threads are closed, or
-when the user says 「先出草案」. Record remaining uncertainties as assumptions to validate and
-deliver the current conclusions and unresolved items.
+For build work, select a small usable or executable part that tests an important
+assumption or delivers an observable improvement. Use the guide's scope rules
+when naming it. Clarify wording within agreed scope yourself; ask before changing
+capabilities, dependencies, scope or acceptance criteria.
 
-### 3. Consolidate the plan
+Specify what to do, what evidence to inspect and how the result changes the next
+decision. Bound an experiment's effort where cost or duration could grow. Keep
+later work at the level needed to understand dependencies and overall direction.
 
-Before writing or updating the plan, read [Plan and decision templates](references/plan-template.md).
-Record substantive decisions, reasons and consequential tradeoffs as they are
-settled. Consolidate repeated discussion into the current decision; preserve
-reasons for a superseded decision when they help explain the change.
+Use the code and observed behavior to describe the current implementation.
+Keep intended outcomes and acceptance criteria explicit; check behavior against
+them before treating it as correct. Record only consequential constraints,
+assumptions and decision reasons that the implementation cannot convey.
 
-Separate confirmed decisions from assumptions and unresolved choices. Check
-that the final scope, success criteria and next step agree with the discussion.
+### 4. Update from results
 
-In the chat reply that delivers the plan, list the choices you decided
-yourself under 「我先決定了這些」, one line each with the choice and reason,
-at most five lines. The user vetoes lines they disagree with; no reply means
-accepted. Everything else the user needs is in the chat reply, not the file.
+When execution is authorized, carry out the next step and inspect the result.
+Use that evidence to continue, adjust the approach or revisit the affected
+assumption. Reopen user choices only when the evidence requires a consequential
+change outside the agreed scope or direction.
+
+When the request is planning only, deliver the next action and how to evaluate
+it. Recommend further architecture work only when a concrete unresolved design
+choice blocks progress. A planning request does not authorize implementation.
 
 ## Output Contract
 
-Deliver the plan at its actual path, with the problem, scope, assumptions,
-success criteria, failure modes and decisions. Use the user's language and
-requested format. Include a reframe only when one was useful.
+Deliver the goal, scope of the next step, observable acceptance or learning
+criterion, and any blocking decision. Include consequential assumptions and
+constraints where relevant. State remaining uncertainties without making them
+all prerequisites for action.
 
-For development plans, recommend `eng-architect` as the next step when it is
-available, and provide the actual plan path for it to read. Otherwise describe
-the next planning action in ordinary language. For other plans, identify the
-next action that advances the decision. A planning request does not itself
-authorize implementation.
+Before writing a saved plan, read [Plan and decision templates](references/plan-template.md).
+Use only the sections needed by its reader and provide its actual path. Keep
+what the user needs for the current decision in the chat reply.
+
+Briefly disclose consequential assumptions and reversible choices made on the
+user's behalf. Distinguish these from decisions requiring explicit approval;
+silence does not grant additional authorization.
 
 ## Quality Rules
 
-- Facts come from available evidence; unresolved preferences belong to the user.
-- Recommendations explain the tradeoff and the consequences of a wrong assumption.
-- Success criteria specify what will be observed and when, using the plan's real horizon.
-- A decision to proceed, revise or reconsider follows the findings. Ask for a choice
-  only when the next action requires an unresolved user decision.
+- Planning depth follows the cost of a wrong decision and the evidence available.
+- A question must improve an immediate decision more than the available alternatives.
+- Experiments have an observable result and a decision that result will inform.
+- Acceptance criteria come from the intended outcome, not merely existing behavior.
+- Validate each completed step; success in one step does not complete the whole goal.
+- Keep documents focused on intent, constraints and reasons; let code express implementation details.

@@ -1,70 +1,70 @@
 # Interview guide
 
-## Understand the pain
+## Establish the immediate decision
 
-Use these questions where the context leaves a gap, one at a time:
+Use existing evidence to identify the problem, who encounters it, the intended
+result and the constraints on the next action. Ask about missing context only
+when it changes that action. For example, ask about the last observed occurrence
+when distinguishing an actual problem from a hypothetical one matters.
 
-- 「你上次遇到這個問題是什麼時候？給我一個具體的例子。」
-- 「誰有這個問題？他們在什麼情境下遇到？」
-- 「他們現在怎麼做？為什麼不夠好？」
+Check whether a smaller step could test the critical assumption. Compare broader
+scope only when it would materially change the user's decision. Confirm changes
+to the intended outcome or agreed scope before adopting them.
 
-Distinguish observed experience from a proposed scenario. Examine what the
-answers imply, which assumptions may fail, and whether another framing would
-change the solution. Confirm meaningful changes to the problem being solved.
-Each follow-up names the contradiction, assumption or ambiguity in the last
-answer that it targets.
+## Choose how to resolve uncertainty
 
-## Scope direction
-
-When the desired scope is unresolved, compare the relevant directions:
-
-- Expand: pursue a larger outcome, explaining each proposed addition and its cost.
-- Selectively expand: keep the core and consider specific extensions.
-- Hold: improve the current plan within its agreed scope.
-- Reduce: find the smallest version that can test the important assumptions.
-
-Recommend a direction from the actual context. A choice to explore expansion
-is not approval for every resulting addition.
-
-## Ten review areas
-
-Review each area; use existing evidence and decisions wherever sufficient.
-Ask about a gap only when resolving it needs a user choice or unavailable
-context, and only when different answers lead to different plans. Close the
-area once the next question would not change the plan, and show the closed
-areas on the progress board with every question. All ten closed ends the
-interview.
-
-| Area | What to examine |
+| Missing information | Response |
 | --- | --- |
-| Problem clarity | Is the pain concrete, and what evidence supports it? |
-| Who it is for | Who encounters it, in what situation? |
-| Scope in | How does each item address the problem? |
-| Scope out | Which exclusions matter to expectations and effort? |
-| Success metric | What observable result counts as success, and when can it be assessed? |
-| Assumptions | Which unverified assumptions could change the decision? |
-| Ambitious version | Would exploring the upper limit help the user's decision? |
-| Minimum version | Can a smaller version answer the critical question? |
-| Failure modes | What could make the plan fail, and how can that be addressed? |
-| Recommendation | Proceed, revise or reconsider, with reasons and outstanding decisions. |
+| A fact available in code, configuration, records or other sources | Inspect the source. |
+| A user preference or tradeoff that changes the next action | Ask one focused question with a recommendation. |
+| Behavior, feasibility or usability that needs observation | Propose the smallest useful experiment and its observable check; execute within authorization. |
+| A reversible, low-cost implementation choice within scope | Decide it and verify the result. |
+| A later detail that does not affect the next action or a costly commitment | Defer it until relevant evidence or a dependency makes it necessary. |
+| A choice with irreversible effects or substantial rework | Establish the necessary constraints and authorization before the affected action. |
 
-### Scope items name what someone can do
+Before another question, identify how each answer would change the next action.
+Compare asking with inspecting evidence or experimenting. Ask for context the
+user has; do not ask the user to predict results that need observation.
 
-This governs how Scope in and Scope out get written, and applies only when the plan is
-about building something — a feature, a product, a service. Campaigns, hiring
-calls and other non-build plans keep plain `- [item] - reason` entries.
+## Check readiness for the next step
 
-Every scope item must read as "<who> can <do what>". An item that cannot be said
-that way is not a scope item yet.
+End clarification when the intended result, scope of the next action, observable
+check and necessary constraints are clear. Review affected dependencies and
+consequences far enough to avoid a costly commitment made on an unchecked
+assumption. Open questions about later work can remain open.
 
-- Rewrite anything whose subject is a module, a layer or a technology.
-  「做會員 API」is not a scope item;「訪客可以用 email 註冊並登入」is.
-- Test each item: once this is done, can anyone see or use the difference? If
-  not, it is not a feature.
-- Foundations do not disappear, they move. Shared scaffolding, auth, core tables
-  and mechanical refactors that fan across the codebase are not user functions.
-  Collect them into one item the others depend on, rather than slicing them into
-  one item per layer.
-- Layers still matter, but only inside a single item — schema first, then logic,
-  then screen. Never as the axis that splits the whole plan.
+For an experiment, name the uncertainty, the action, the evidence to inspect and
+what would support continuing or changing direction. A failed experiment can
+answer the question. It does not satisfy the feature's acceptance criteria.
 
+Use deeper questioning when the cost of a wrong choice warrants it or the user
+requests a broader review. Apply the same readiness check to the requested scope.
+
+## Scope items name observable outcomes
+
+For build work, name a usable behavior or an executable result someone can check.
+Use "<who> can <do what>" for user-facing features. For a technical experiment,
+state the question it answers and the result that can be observed.
+
+- 「做會員 API」needs an outcome such as「訪客可以用 email 註冊並登入」;
+  confirm the capability instead of inferring it from the technical label.
+- Keep the layers needed for one behavior inside that step. Include foundations
+  only as required dependencies, rather than planning every layer in advance.
+- Describe later features only enough to understand the overall direction and
+  consequential dependencies. Elaborate when they become the next step.
+
+## Example applications
+
+These are hypothetical situations; use the actual task's evidence and constraints.
+
+- The user authorizes a small behavior change and supplies clear acceptance
+  criteria: inspect the affected code and make the change without a new interview.
+- A performance plan depends on whether an existing implementation can handle the
+  expected input: measure a representative case before designing an optimization.
+  Use the result to decide whether optimization is needed and where to focus it.
+- A data migration could discard records and retention requirements are unknown:
+  clarify those requirements before any destructive action. Read-only inspection
+  can continue within authorization.
+- A campaign's audience and budget are settled but the message is uncertain:
+  propose a small comparison with an observable response criterion. Obtain any
+  missing authorization before external publication or spending.
