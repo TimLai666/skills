@@ -7,22 +7,28 @@ description: >-
   changes to existing API names, signatures, usage or behavior（介面變更）.
   It SHOULD be loaded for questions about who should code or which model to use.
   Existing API changes MUST follow the conditional consultation rule before
-  implementation. Ordinary delegation MUST follow each task row in opencode, agy,
-  copilot, codex, claude order and MUST NOT skip a tool due to failure in an earlier turn. The main
+  implementation. Ordinary delegation MUST use scripts/dispatch.py and its task-local levels,
+  and MUST NOT skip a tool due to failure in an earlier turn. The main
   agent MUST write the skeleton and expected results before dispatching
   implementation, MUST NOT let implementers edit their tests, and MUST NOT
   dispatch to its own CLI. Workers marked as dispatched MUST NOT apply this
   skill or delegate further. Prompts MUST carry relevant project lessons; workers
   MUST report new lessons for main-agent verification and recording.
 metadata:
-  version: "2.18.0"
+  version: "2.19.0"
 ---
 
 # Agent 派工規範
 
 ## Overview
 
-主 agent 是強模型，負責寫骨架與每個格子的想要的結果、審查、驗證、提交。骨架鎖住範圍，弱模型照規格寫測試或填實作。一般派工的成本原則：依任務列的可用工具，照 OpenCode → Antigravity（agy）→ GitHub Copilot CLI → Codex → Claude 的順序派。測試、實作與雜事先交給 OpenCode 的免費模型，前端設計交給 agy 的 Gemini。Copilot 固定用 Auto，排在 agy 之後。方案取捨、技術選型與單一模組設計依序交給 agy 的 Opus、Codex 的 GPT-6 以上 sol、Claude 的 Opus。其他任務的模型與接手順序依下方決策表。任何 CLI 都能當主 agent，所以派工前先辨識自己是誰。各 CLI 的旗標見 [references/cli-cheatsheet.md](references/cli-cheatsheet.md)。
+主 agent 是強模型，負責寫骨架與每個格子的想要的結果、審查、驗證、提交。骨架鎖住範圍，弱模型照規格寫測試或填實作。一般派工的成本原則：依任務列的可用工具，照 OpenCode → Antigravity（agy）→ GitHub Copilot CLI → Codex → Claude 的順序派。測試、實作與雜事先交給 OpenCode 的免費模型，前端設計交給 agy 的 Gemini。Copilot 固定用 Auto，排在 agy 之後。方案取捨、技術選型與單一模組設計依序交給 agy 的 Opus、Codex 的 GPT-6 以上 sol、Claude 的 Opus。其他任務的模型與接手順序依下方決策表。任何 CLI 都能當主 agent，所以派工前先辨識自己是誰。原生 CLI 的說明入口見 [references/cli-cheatsheet.md](references/cli-cheatsheet.md)。
+
+## Input Contract
+
+一般派工使用 [scripts/dispatch.py](scripts/dispatch.py)，先執行無參數總覽或 `--help`，再讀相關子指令的 `--help`。使用 `list-types` 選擇任務類型，使用 `list-levels` 核對該類型的層級與宿主交接方式；混合任務先拆開，分類與雜事或探索重疊時選分類。
+
+主 agent 提供宿主、任務類型、專案目錄、角色、任務與驗收、可改檔案、驗證指令及篩選後的 Project Memory。記憶欄位必填，查過沒有適用經驗才填空陣列。提供實際可用模型與查證來源，不用別名推測版本下限。實作任務另列不可修改的測試檔；深度研究先完成廣度探索，只允許在指定沙盒試探。
 
 ## 0. 先辨識自己
 
@@ -49,33 +55,34 @@ Copilot 宿主依當前執行環境判定，不把登入、模型設定或繼承
 
 ## 決策表
 
-每列由左往右派，左邊的實際失敗或被禁才往右走。空格直接跳過，宿主自己的 CLI 改用內建 subagent 工具。只有觸發下方「既有 API 變更」時，該次諮詢的模型選擇與失敗處置依該節，不套用一般派工的 CLI 順序、模型種類限制與對應陷阱檢核。其他工作照原流程。
+每個任務類型從第 1 檔開始；層級只計算該類型實際支援的選項。一般派工順序、模型種類、推理強度與升級次數以 [scripts/policy.json](scripts/policy.json) 為唯一來源，下表由 `list-types --markdown` 產生。前一檔有實際失敗或被禁的證據才可往後接手。宿主自己的層級交由內建 subagent 工具。只有觸發下方「既有 API 變更」時，該次諮詢的模型選擇與失敗處置依該節，不套用一般派工的 CLI 順序、模型種類限制與對應陷阱檢核。其他工作照原流程。
 
-| 任務類型 | opencode | agy | copilot | codex | claude |
-| --- | --- | --- | --- | --- | --- |
-| 寫測試、填格子實作、照清單修 bug | 免費模型，推薦 `opencode/big-pickle`，`--agent build --auto` |  | Auto，可寫檔 | luna，`--approve-for-me` | Haiku → Sonnet → Opus 加 `--effort low`，可寫檔 |
-| 前端設計、版面、樣式 |  | Gemini Flash，`--mode accept-edits` | Auto，可寫檔 |  | Opus，可寫檔 |
-| 快速唯讀探索、找檔案、問「X 在哪」 | 免費模型，`--agent build --auto` | Gemini Flash，`--mode accept-edits` | Auto，任務唯讀 | luna，`--approve-for-me`，任務唯讀 | Haiku，宿主是 Claude Code 時用一般用途 Agent |
-| 雜事：機械性文件段落、證據整理、大量套版改寫 | 免費模型，`--agent build --auto` | Gemini Flash，`--mode accept-edits` | Auto，可寫檔 | luna，`--approve-for-me` | Haiku，可寫檔 |
-| 分類：把資料、評論、issue 或檔案歸進類別、打標籤或編碼 |  |  | Auto，可寫檔 | luna，`--approve-for-me` | Haiku，可寫檔 |
-| Review：審 diff、找漏洞、對契約 |  | Claude Opus，`--mode accept-edits` |  | GPT-6 以上的 sol，`--approve-for-me`，任務唯讀 | Opus，唯讀 |
-| 深度研究（深度層，先由「快速唯讀探索」那列做廣度層，主 agent 統合）：摸清陌生系統怎麼運作（程式碼庫、服務、協定、環境），或找非常規的做法（hack 式繞法）完成一件事 |  |  |  | GPT-6 以上的 sol，`--approve-for-me` | Opus，可寫檔 |
-| 決策：方案取捨、技術選型、只影響單一模組的設計 |  | Claude Opus，`--mode accept-edits`，任務唯讀 |  | GPT-6 以上的 sol，`--approve-for-me`，任務唯讀 | Opus，唯讀 |
-| 寫規則與複雜架構：skill、prompt 與規則檔條文，以及跨多個模組、改資料模型或 API 契約的架構決策 |  | Claude Opus，`--mode accept-edits` |  |  | Opus，可寫檔 |
+<!-- DISPATCH_POLICY_START -->
+| 任務類型 | 適用需求 | 層級數 | 接手順序 |
+| --- | --- | --- | --- |
+| `testing` | 寫測試 | 6 | 1. opencode / free → 2. copilot / auto → 3. codex / luna → 4. claude / haiku → 5. claude / sonnet → 6. claude / opus |
+| `implementation` | 填格子實作、照清單修 bug | 6 | 1. opencode / free → 2. copilot / auto → 3. codex / luna → 4. claude / haiku → 5. claude / sonnet → 6. claude / opus |
+| `frontend` | 前端設計、版面、樣式 | 3 | 1. agy / gemini-flash-medium → 2. copilot / auto → 3. claude / opus |
+| `exploration` | 快速唯讀探索、找檔案 | 5 | 1. opencode / free → 2. agy / gemini-flash-medium → 3. copilot / auto → 4. codex / luna → 5. claude / haiku |
+| `chores` | 機械性文件段落、證據整理、大量套版改寫 | 5 | 1. opencode / free → 2. agy / gemini-flash-medium → 3. copilot / auto → 4. codex / luna → 5. claude / haiku |
+| `classification` | 分類、打標籤、編碼 | 3 | 1. copilot / auto → 2. codex / luna → 3. claude / haiku |
+| `review` | 審 diff、找漏洞、對契約 | 3 | 1. agy / opus → 2. codex / sol → 3. claude / opus |
+| `research` | 深度研究的深度層 | 2 | 1. codex / sol → 2. claude / opus |
+| `decision` | 方案取捨、技術選型、單一模組設計 | 3 | 1. agy / opus → 2. codex / sol → 3. claude / opus |
+| `rules` | 寫 skill、prompt、規則與複雜架構 | 2 | 1. agy / opus → 2. claude / opus |
+<!-- DISPATCH_POLICY_END -->
 
 主 agent 自己做：寫骨架與想要的結果、審測試、派出去不划算的格子、讀 diff、跑測試、commit，以及統合深度研究的全部結果、做整體判斷。
 
-各 CLI 的指令：
+### Script 執行與內建工具交接
 
-```
-opencode run --auto --dir <project-dir> --agent build -m <free-model> '<prompt>'
-agy --model <model> --mode accept-edits -p='<prompt>'
-copilot -C <project-dir> --model auto --allow-all-tools --trust-folder -p '<prompt>'
-codex exec --approve-for-me -C <project-dir> -m <luna-model|sol-model> -c model_reasoning_effort=medium '<prompt>'
-claude -p --model <haiku|sonnet|opus> --effort medium --permission-mode auto '<prompt>'
-```
-
-claude 那欄在宿主是 Claude Code 時改用 Agent 工具（`model: haiku`／`sonnet`／`opus`）。codex 那欄在宿主是 Codex 時改用 Codex 內建的 subagent 功能，模型種類與任務可改範圍照該列填寫。
+- 主 agent 必須透過 script 發起與接續一般派工，不自行重排工具或拼接派工指令。操作與參數查詢使用 CLI 的總覽及子指令 `--help`；原生工具說明入口見 [CLI 速查表](references/cli-cheatsheet.md)。
+- 外部 CLI 的已知啟動、模型或額度錯誤，只有確認沒有專案檔案變動時才自動接手。正常回報、部分改檔、未知錯誤與逾時先交回主 agent 審查，不把 CLI 成功當成驗收通過。
+- 結果為 `native_required` 時，主 agent 使用輸出指定的內建工具、合規模型與完整 prompt。禁止改用宿主自己的 CLI。內建工具不可用或派工失敗時，帶原派工識別碼、實際錯誤與下一層級接續；不可跳級。
+- 結果為 `awaiting_review` 時，主 agent 讀 diff、核對範圍並親自驗證。回報已完成驗收、派工失敗或驗證失敗時，依 CLI 的條件接續。寫程式同級連續兩次驗證失敗才升級，不能把成果不合格冒充為未派出。
+- 每次接續讀取原派工狀態，保留原 prompt、失敗證據與補充教訓。逾時或中斷先確認程序及半成品，不盲目重派。所有層級失敗才交由使用者決定。
+- 狀態與原始輸出存於專案外的使用者狀態目錄，由 script 接續與主 agent 審查時讀取；不在使用者專案根目錄新增協調檔。script 只追蹤自身管理的併行派工，其他 agent 與未納管寫入仍由主 agent 查證。
+- 每次外部 CLI 結束，script 先停止其工作程序群，再檢查所有專案檔案（含忽略檔）與授權沙盒。掃描無法完成或有變動就先審查。需要持續執行的服務由主 agent 管理。
 
 - 外部 CLI 派工一律明確指定自動核准：OpenCode 加 `--auto`，Copilot 加 `--allow-all-tools`，Codex 加 `--approve-for-me`，Claude Code 加 `--permission-mode auto`，Claude Code 不改用 bypass。Claude Code 與 agy 從目標專案目錄啟動。
 - 自動核准不擴大任務可改檔案清單。表中的「唯讀」只表示 prompt 必須明寫「不得修改任何檔案」；探索、審查與實作沿用相同執行模式，不另設 plan、read-only 沙盒或唯讀工具清單，也不選唯讀專用 agent。宿主內建 subagent 不套用外部 CLI 旗標，可改範圍同樣寫在 prompt。
@@ -149,11 +156,11 @@ claude 那欄在宿主是 Claude Code 時改用 Agent 工具（`model: haiku`／
 - [ ] 跑 `git status --short`。有未提交變更時逐檔確認是自己這輪的、還是別的 agent 的半成品。是半成品就先處理完再派。
 - [ ] 確認這組檔案目前沒有別的會寫檔的 agent 在跑。同一組檔案同時只能有一個會寫檔的 agent。
 - [ ] 確認要用的 CLI 目前跑不到三條，滿了就等其中一條結束。
-- [ ] 依決策表選好工具與模型，記下實際旗標，回報時要列。
+- [ ] 透過 script 查詢任務類型及層級，提交結構化任務；回報使用輸出中的實際工具、模型與旗標。
 
 ### 2. 派工 prompt 必備七項
 
-少一項就不送。
+script 依主 agent 提供的結構化欄位補齊下列七項；必填資料不足就報錯，不派工。主 agent 核對生成的內容與原始驗收一致。
 
 | 項目 | 寫法 |
 | --- | --- |
@@ -185,11 +192,11 @@ claude 那欄在宿主是 Claude Code 時改用 Agent 工具（`model: haiku`／
 - [ ] 全部格子完成後跑完整使用流程驗收。
 - [ ] 才決定採用、退修或丟棄。
 - [ ] 不論成果採用或退修，都核對 subagent 回報的試錯與探索經驗，連同主 agent 自己的發現，判斷能否避免下次重複耗費時間與 token。依 project-memory 的記錄標準篩選，不把推測、流水帳或未解問題當成已驗證教訓。
-- [ ] 對符合條件的經驗，在原專案目錄依 project-memory 的工具先搜尋去重，再新增或更新，無須逐筆詢問使用者。舊記憶須查證確實失效後才更新原 key，保留仍有效的適用條件。寫入後讀回確認，失敗時回報尚未保存，不宣稱已記住。
+- [ ] 對符合條件的經驗，在原專案目錄依 project-memory 的工具先搜尋去重，再新增或更新，無須逐筆詢問使用者。舊記憶須查證確實失效後才更新原 key，保留仍有效的適用條件。寫入後讀回確認，不宣稱未完成的記錄已保存。
 
 ### 5. 工具失敗
 
-wrapper 或 CLI 失敗時直接照決策表往右轉下一個，不停下來問使用者。錯誤原文在回報裡照實列出，不默默換工具。該列的選項全部失敗才停下來，讓使用者決定。下一輪仍從最左邊派起。
+script 記錄每次失敗的原始輸出與實際旗標，依該任務類型的層級接手。部分改檔、逾時及未知錯誤先由主 agent 檢查。內建工具失敗由主 agent 帶實際錯誤接續，不默默換工具。該類型的選項全部失敗才停下來，讓使用者決定。新的派工從第 1 檔開始。
 
 | 症狀 | 回報寫法 |
 | --- | --- |
@@ -208,7 +215,7 @@ wrapper 或 CLI 失敗時直接照決策表往右轉下一個，不停下來問�
 工具與模型：opencode / <實際免費模型名> / --agent build --auto
 ```
 
-沒派工就寫「工具與模型：無」。派工 prompt 直接照第 2 節七項依序寫，每項一行。
+沒派工就寫「工具與模型：無」。每次交接與收件依 script 輸出提醒執行：核對教訓與經驗，依 project-memory 流程搜尋去重、記錄並讀回確認。
 
 ## 陷阱
 

@@ -1,31 +1,23 @@
-# CLI 速查表
+# CLI 說明入口
 
-五個 CLI 的常用旗標。CLI 更新後以各自 `--help` 為準並回報差異。Copilot 的詳細介面見 `copilot --help`、`copilot help permissions` 與 [官方指令參考](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference)。
+一般派工先執行 `python3 <skill-dir>/scripts/dispatch.py` 查看總覽，再讀需要的子指令 `--help`。工具順序、層級數、模型限制與推理強度由 [policy.json](../scripts/policy.json) 提供。
 
-## 對照表
+| 工具 | 原生說明入口 |
+| --- | --- |
+| OpenCode | `opencode --help`、`opencode run --help`、`opencode models` |
+| Antigravity（agy） | `agy --help`、`agy models` |
+| GitHub Copilot CLI | `copilot --help`、`copilot help permissions` |
+| Codex | `codex --help`、`codex exec --help` |
+| Claude Code | `claude --help` |
 
-| 需求 | OpenCode | Antigravity（agy） | GitHub Copilot CLI | Codex | Claude Code |
-| --- | --- | --- | --- | --- | --- |
-| 非互動執行 | `opencode run --auto '<prompt>'` | `agy -p='<prompt>'`，`-p=` 放所有旗標之後 | `copilot --model auto --allow-all-tools --trust-folder -p '<prompt>'` | `codex exec --approve-for-me '<prompt>'` | `claude -p --permission-mode auto '<prompt>'` |
-| 指定模型 | `-m <provider>/<name>` | `--model <name>` | 固定 `--model auto`，不指定具體模型 | `-m <name>` | `--model <name>` |
-| 推理強度 | `--variant <level>`，依 provider | `--effort low\|medium\|high`，Gemini 改選模型名結尾 `-low`／`-medium`／`-high` 的版本 | 交給 Auto，不指定 | `-c model_reasoning_effort=high`，無獨立旗標 | `--effort low\|medium\|high\|xhigh\|max` |
-| 列模型 | `opencode models` | `agy models` | 固定 Auto，不挑模型 | 無指令 | 無指令，用 `opus`、`sonnet`、`haiku` 別名 |
-| 可寫檔 | `--agent build --auto` | `--mode accept-edits` | `--allow-all-tools`，可改範圍依 prompt | `--approve-for-me` | `--permission-mode auto` |
-| 唯讀任務 | 沿用上述模式，prompt 寫「不得修改任何檔案」 | 同左 | 同左 | 同左 | 同左 |
-| 結構化輸出 | `--format json` | `--output-format json` | `--output-format json`（JSONL） | `--json`，或 `-o <file>` 只寫最後一則訊息 | `--output-format json` |
-| 續接上一次 | `-c`、`-s <id>` | `--continue`、`--conversation <id>` | `--continue`、`--resume <id>` | `codex exec resume --last` | `--continue`、`--resume <id>` |
-| 逾時 | 無 | `--print-timeout 5m` | 由呼叫端設定逾時 | 無 | 無，用 Bash 的 timeout 參數 |
-| 指定工作目錄 | `--dir <dir>` | 先 `cd`，額外工作區用 `--add-dir <dir>` | `-C <dir>` | `-C <dir>` | 先 `cd` |
-| 自我辨識 | `OPENCODE` | `ANTIGRAVITY_AGENT` | 依當前宿主資訊，不以登入或模型設定變數判定 | `CODEX_THREAD_ID` | `CLAUDECODE` |
+CLI 更新後核對實際介面。旗標不支援時保留錯誤並交由 script 接手，不改用未核准的模型或執行模式。
 
-## 背景執行
+## 內建工具交接
 
-五個都不需要各自的背景機制。從 Claude Code 派工時用 Bash 的 `run_in_background`，完成會自動叫醒主 agent。從其他宿主派工時用 shell 的 `&` 加輸出導向到檔案，再輪詢檔案。
+`native_required` 不是已派出。主 agent 使用該結果的模型與完整 prompt 呼叫目前宿主內建工具，不執行同名 CLI。可用模型以宿主實際提供的識別與版本為準；缺少合規模型時回報具體證據再接續。
 
-## 常見錯誤原文
+內建工具執行完成後，主 agent 親自審查與驗證，再向 script 回報結果。派不出去時提供原派工識別碼、實際錯誤與下一層級，不憑上一輪錯誤跳過本輪選項。
 
-| 錯誤片段 | 意思 | 處置 |
-| --- | --- | --- |
-| `requires a newer version of Codex` | 預設模型比 CLI 新 | 轉決策表該列右邊的下一個，回報時附錯誤原文，建議使用者升級 |
-| `-p took "--mode" as its prompt` | agy 的 `-p` 沒用 `=` 接 prompt | 改成 `-p='...'` 並放最後 |
-| `Model metadata for ... not found` | Codex 找不到模型描述 | 轉決策表該列右邊的下一個，回報時附 `-m` 實際值 |
+## 狀態與半成品
+
+script 的狀態保存原始任務、嘗試紀錄、錯誤與輸出位置。主 agent 接續前讀取紀錄、檢查程序及磁碟差異，補入已核對的經驗。部分成果由主 agent 決定保留與接續方式，script 不自動刪除、stash 或 reset。

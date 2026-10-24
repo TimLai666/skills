@@ -103,7 +103,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 
 | Skill | 適合什麼需求 |
 | --- | --- |
-| `agent-delegation` | 主 agent 派工給 subagent 或外部 CLI（OpenCode → agy → Copilot Auto → Codex → Claude，宿主可用內建 subagent）時的固定規則：主 agent 先寫骨架、測試與實作分給不同 agent、決策表、派工 prompt 七項、同檔單寫、親自審查、工具失敗照實回報。派工時附相關專案經驗，收件後核對並保存值得重用的試錯教訓。既有 API 命名、用法或行為變更時，先諮詢指定模型，再附前後對照與範例交由使用者決定。 |
+| `agent-delegation` | 以 script 查詢任務類型與支援層級、依規則派工及逐層接手，輪到宿主內建 subagent 時提供交接提示。自動補齊派工 prompt、專案經驗與教訓回報要求，提醒主 agent 核對並保存 Project Memory。主 agent 定骨架、親自驗收，測試與實作分開。既有 API 命名、用法或行為變更先諮詢指定模型，再交由使用者決定。 |
 | `eng-architect` | 設計技術架構、釐清模組邊界、按可驗收行為拆任務，或審查 UI。沿用專案既有文件與任務系統，沒有安排且需要完整交接時建立預設協作文件。 |
 | `diff-inspector` | 想在合併前審查 diff：scope drift check、critical code review、specialist 並行掃描、adversarial review。 |
 | `test-and-fix` | 依指定範圍或 diff 測試網站、API、命令列工具與函式庫，追查失敗原因、修復並驗證回歸測試。 |
