@@ -2,7 +2,7 @@
 name: software-engineering-guidelines
 description: "Software engineering guidelines for any software change. This skill MUST be loaded before requirement clarification, architecture/design, implementation, refactoring, code review, testing, shipping, or creating Git commits (including standalone commit requests), and MUST NOT be skipped because the change is a one-liner. Covers simplicity, complete delivery based on a coherent implementation design, testing-first for high-impact changes with TDD (Test-Driven Development), and verifiable success criteria. Triggers on: 任何軟體規劃, 需求釐清, 架構設計, 寫 code, 改 code, 做功能, 修 bug, refactor, 開發, coding, development, 實作, 實現, 寫程式, 改程式, 加功能, 修問題, code review, 測試, 重構, init, 初始化專案, 建立 CLAUDE.md, 建立 AGENTS.md"
 metadata:
-  version: "1.13.0"
+  version: "1.13.1"
 ---
 
 ## Core Principles
@@ -148,6 +148,15 @@ When designing or changing our CLI tools, MCP tools, or APIs, put their supporte
 - **MCP:** Document each operation in its registered tool description and input schema, including usage constraints and return behavior. Tool registration supplies discovery, so a separate overview tool is not required.
 - **Skills:** Explain tool selection, workflow, and decision-relevant constraints. Point to the tool's overview, help, registered schema, or OpenAPI document instead of duplicating its complete command and parameter manual in a skill or its references.
 - **Updates:** Change the overview, command help, operation descriptions, and OpenAPI JSON together with the affected functionality. Prefer generating them from the implementation's command or route definitions. Verify that every supported operation is discoverable and that documented examples, parameters, and responses match actual behavior before delivery.
+
+### 7. Docker Compose Environment Variables
+
+When creating or modifying Docker Compose files:
+
+- MUST use braced variable interpolation (`${VAR}`) for externally supplied values. Declare container environment variables explicitly under `environment`, for example `LOG_LEVEL: ${LOG_LEVEL}`. MUST NOT use the service-level `env_file` attribute.
+- MUST use `${VAR:?必須設定 VAR}` for every required variable, for example `DATABASE_URL: ${DATABASE_URL:?必須設定 DATABASE_URL}`. Required variables must reject both unset and empty values. MUST NOT supply fallback defaults for required variables.
+- Supply interpolation values through the shell environment, Compose's default `.env`, or the CLI `--env-file` option. These are interpolation sources, distinct from the prohibited service-level `env_file` attribute. Keep actual secrets out of version control and list required variable names in `.env.example` without real credentials.
+- Before delivery, validate with `docker compose config --quiet` using the same files and interpolation sources as the startup command. Verify that valid values pass and each required variable fails when unset or empty. Do not print or retain resolved configuration containing secrets.
 
 ## Workflow
 
