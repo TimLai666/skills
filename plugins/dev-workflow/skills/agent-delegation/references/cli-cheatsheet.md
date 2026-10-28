@@ -2,6 +2,8 @@
 
 一般派工先執行 `python3 <skill-dir>/scripts/dispatch.py` 查看總覽，再讀需要的子指令 `--help`。工具順序、層級數、模型限制與推理強度由 [policy.json](../scripts/policy.json) 提供。
 
+Windows 使用 `py -3 <skill-dir>/scripts/dispatch.py`，需要 Python 3.9+ 與 Windows 10+。平台限制、狀態目錄與 CLI 包裝格式見腳本的 `--help` 及 `dispatch --help`。
+
 | 工具 | 原生說明入口 |
 | --- | --- |
 | OpenCode | `opencode --help`、`opencode run --help`、`opencode models` |

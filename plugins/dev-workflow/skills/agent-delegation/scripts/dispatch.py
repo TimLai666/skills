@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Dispatch from policy.json. Python 3.9+, macOS/Linux, standard library only."""
+"""Dispatch from policy.json. Python 3.9+, Windows/macOS/Linux, stdlib only."""
 import argparse
 import contextlib
 import errno
-import fcntl
 import hashlib
 import json
 import math
@@ -16,6 +15,15 @@ import sys
 import tempfile
 import time
 import uuid
+
+if os.name == "nt":
+    import importlib.util
+    import msvcrt
+    _spec = importlib.util.spec_from_file_location("windows_runtime", Path(__file__).with_name("windows_runtime.py"))
+    windows = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(windows)
+else:
+    import fcntl
 
 POLICY_PATH = Path(__file__).with_name("policy.json")
 REMINDER = "核對教訓與經驗，依 project-memory 流程搜尋去重、記錄並讀回確認。"
@@ -218,7 +226,13 @@ def private_file(path):
     if path.is_symlink():
         raise DispatchError("狀態檔不可是 symlink：" + str(path))
     fd = os.open(path, os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0), 0o600)
-    if os.fstat(fd).st_mode & 0o077:
+    if os.name == "nt":
+        try:
+            windows.ensure_private(path)
+        except BaseException:
+            os.close(fd)
+            raise
+    elif os.fstat(fd).st_mode & 0o077:
         os.close(fd)
         raise DispatchError("既有狀態檔權限必須是 0600：" + str(path))
     return os.fdopen(fd, "r+", encoding="utf-8")
@@ -227,6 +241,24 @@ def private_file(path):
 @contextlib.contextmanager
 def lock_file(path, blocking=True):
     with private_file(path) as handle:
+        if os.name == "nt":
+            while True:
+                try:
+                    handle.seek(0)
+                    msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+                    break
+                except OSError as exc:
+                    if exc.errno not in (errno.EACCES, errno.EAGAIN, errno.EDEADLK):
+                        raise
+                    if not blocking:
+                        raise DispatchError("此派工正在執行，不可同時接續") from exc
+                    time.sleep(.05)
+            try:
+                yield
+            finally:
+                handle.seek(0)
+                msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+            return
         try:
             fcntl.flock(handle, fcntl.LOCK_EX | (0 if blocking else fcntl.LOCK_NB))
         except BlockingIOError:
@@ -240,6 +272,8 @@ def atomic_write(path, data):
     fd, temporary = tempfile.mkstemp(prefix=".dispatch-", dir=path.parent)
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            if os.name == "nt":
+                windows.ensure_private(Path(temporary))
             json.dump(data, handle, ensure_ascii=False, indent=2)
             handle.write("\n")
             handle.flush()
@@ -250,14 +284,24 @@ def atomic_write(path, data):
             os.unlink(temporary)
 
 
+def default_state_directory():
+    if os.name == "nt":
+        return Path(os.environ.get("LOCALAPPDATA", str(Path.home() / "AppData/Local"))) / "agent-delegation"
+    return Path(os.environ.get("XDG_STATE_HOME", str(Path.home() / ".local/state"))) / "agent-delegation"
+
+
 def state_directory(raw, project):
-    default = Path(os.environ.get("XDG_STATE_HOME", str(Path.home() / ".local/state"))) / "agent-delegation"
-    path = Path(raw).expanduser() if raw else default
+    path = Path(raw).expanduser() if raw else default_state_directory()
     if path.is_symlink():
         raise DispatchError("state-dir 不可是 symlink")
+    if os.name == "nt" and path.exists():
+        windows.ensure_private(path)
     path = path.resolve()
     if within(path, Path(project)):
         raise DispatchError("state-dir 必須位於專案外")
+    if os.name == "nt":
+        windows.ensure_private(path, directory=True)
+        return path
     path.mkdir(parents=True, mode=0o700, exist_ok=True)
     if path.stat().st_mode & 0o077:
         raise DispatchError("既有 state-dir 必須是專用私有目錄（0700），不會修改它的權限")
@@ -267,6 +311,8 @@ def state_directory(raw, project):
 def alive(pid):
     if not isinstance(pid, int) or pid < 1:
         return False
+    if os.name == "nt":
+        return windows.alive(pid)
     try:
         os.kill(pid, 0)
         return True
@@ -284,6 +330,8 @@ def claim(root, path, state, spec, write_paths, native, timeout):
             for other_path in root.glob("*.json"):
                 if other_path == path:
                     continue
+                if os.name == "nt":
+                    windows.ensure_private(other_path)
                 other = json.loads(other_path.read_text(encoding="utf-8"))
                 active = other.get("cleanup_pending") or other.get("status") == "native_required" or (
                     other.get("status") == "running" and
@@ -359,6 +407,8 @@ def group_live(pgid):
     """False only after a successful process query finds no executable group members."""
     if not isinstance(pgid, int) or pgid < 1:
         return None
+    if os.name == "nt":
+        return windows.group_live(pgid)
     try:
         result = subprocess.run(["ps", "-A", "-o", "pgid=,stat="], capture_output=True, text=True, timeout=5)
         if result.returncode:
@@ -386,6 +436,8 @@ def signal_group(pgid, signum):
 
 
 def terminate(proc):
+    if os.name == "nt":
+        return windows.terminate(proc)
     signal_group(proc.pid, signal.SIGTERM)
     with contextlib.suppress(subprocess.TimeoutExpired):
         proc.wait(timeout=2)
@@ -406,9 +458,15 @@ def execute(argv, cwd, root, name, timeout, state, path):
     proc = None
     with private_file(stdout_path) as out, private_file(stderr_path) as err:
         try:
-            proc = subprocess.Popen(argv, cwd=cwd, stdin=subprocess.DEVNULL, stdout=out, stderr=err, start_new_session=True)
+            if os.name == "nt":
+                proc = windows.start(argv, cwd, out, err)
+                state.update(cleanup_pending=True, process_group=proc.pid)
+            else:
+                proc = subprocess.Popen(argv, cwd=cwd, stdin=subprocess.DEVNULL, stdout=out, stderr=err, start_new_session=True)
             state["child_pid"] = proc.pid
             atomic_write(path, state)
+            if os.name == "nt":
+                windows.release(proc)
             proc.wait(timeout=timeout)
             result["returncode"] = proc.returncode
         except subprocess.TimeoutExpired:
@@ -580,11 +638,13 @@ def dispatch(a, policy):
     except ValueError:
         raise DispatchError("dispatch-id 必須是有效 UUID")
     # Resolve the requested store before opening any existing task. Do not create it on a bogus resume.
-    default = Path(os.environ.get("XDG_STATE_HOME", str(Path.home() / ".local/state"))) / "agent-delegation"
-    root = Path(a.state_dir).expanduser() if a.state_dir else default
+    root = Path(a.state_dir).expanduser() if a.state_dir else default_state_directory()
     path = root / (did + ".json")
     if not path.is_file() or path.is_symlink():
         raise DispatchError("找不到原派工狀態")
+    if os.name == "nt":
+        windows.ensure_private(root)
+        windows.ensure_private(path)
     with lock_file(root / (did + ".lock"), False):
         state = json.loads(path.read_text(encoding="utf-8"))
         r, paths = validate_request(state["request"], policy)
@@ -634,7 +694,7 @@ def dispatch(a, policy):
 
 
 def parser(policy):
-    p = argparse.ArgumentParser(description="依任務類型的層級派工。查詢不呼叫模型、不寫狀態。需要 Python 3.9+ 與 macOS/Linux。",
+    p = argparse.ArgumentParser(description="依任務類型的層級派工。查詢不呼叫模型、不寫狀態。需要 Python 3.9+，支援 Windows 10+/macOS/Linux。",
         epilog="操作：list-types 列任務；list-levels 列層級；dispatch 發起或接續。各操作加 --help 查完整說明。")
     sub = p.add_subparsers(dest="command")
     q = sub.add_parser("list-types", help="列出所有任務類型及各自層級數", description="純查詢。預設顯示人可讀表格。exit 0。")
@@ -672,7 +732,9 @@ awaiting_review：由主 agent 看 diff、親自驗證；script 不自動採用�
 每次 CLI 結束會停止其程序群，確認工作程序結束後才快照及接手；需持續執行的服務由主 agent 管理。
 部分改檔、未知錯誤、逾時與中斷均先審查，非 Git 專案無法確認一致時也先審查。
 exhausted：所有層級失敗；completed：主 agent 已回報驗收完成。兩者不可再啟動。
-state/log 預設在 $XDG_STATE_HOME/agent-delegation 或 ~/.local/state/agent-delegation，0700/0600。
+state/log 在 macOS/Linux 預設為 $XDG_STATE_HOME/agent-delegation 或 ~/.local/state/agent-delegation，0700/0600。
+Windows 預設為 %LOCALAPPDATA%/agent-delegation，以私有 DACL 保護，只授權目前使用者、SYSTEM 與系統管理員。
+Windows 使用原生檔案鎖與 Job Object 清理程序樹；支援 exe 與標準 npm cmd shim，未知 batch 包裝先回報審查。
 同一 dispatch 不允許並行接續；此目錄追蹤的同檔寫入排隊、各工具最多三條（含內建交接保留名額）。
 未納管程序仍由主 agent 檢查。中斷留下 running 時須檢查程序與半成品後回報，不自動重跑。
 exit 0：已產生上述狀態（不代表成果合格）；exit 2：參數、狀態或檔案錯誤，未繼續派工。
@@ -731,6 +793,9 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
+    if os.name == "nt":
+        for stream in (sys.stdin, sys.stdout, sys.stderr):
+            stream.reconfigure(encoding="utf-8")
     def interrupted(_signum, _frame):
         raise KeyboardInterrupt
     signal.signal(signal.SIGTERM, interrupted)
