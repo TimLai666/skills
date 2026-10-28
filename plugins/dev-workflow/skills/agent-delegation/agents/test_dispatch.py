@@ -23,13 +23,27 @@ class DispatchRegressions(unittest.TestCase):
         counter = self.root / "active-count"
         counter.write_text("0 0")
         self.env["ACTIVE_COUNT"] = str(counter)
-        body = """import fcntl,time
+        body = """import time,contextlib
 p=Path(os.environ['ACTIVE_COUNT'])
-with p.open('r+') as f:
- fcntl.flock(f,fcntl.LOCK_EX); a,m=map(int,f.read().split()); a+=1; m=max(m,a); f.seek(0); f.truncate(); f.write(f'{a} {m}'); f.flush(); fcntl.flock(f,fcntl.LOCK_UN)
+@contextlib.contextmanager
+def locked():
+ with p.open('r+') as f:
+  if os.name=='nt':
+   import msvcrt
+   while True:
+    try: msvcrt.locking(f.fileno(),msvcrt.LK_NBLCK,1); break
+    except OSError: time.sleep(.01)
+  else:
+   import fcntl
+   fcntl.flock(f,fcntl.LOCK_EX)
+  try: yield f
+  finally:
+   if os.name=='nt': f.seek(0); msvcrt.locking(f.fileno(),msvcrt.LK_UNLCK,1)
+with locked() as f:
+ a,m=map(int,f.read().split()); a+=1; m=max(m,a); f.seek(0); f.truncate(); f.write(f'{a} {m}'); f.flush()
 time.sleep(.35)
-with p.open('r+') as f:
- fcntl.flock(f,fcntl.LOCK_EX); a,m=map(int,f.read().split()); f.seek(0); f.truncate(); f.write(f'{a-1} {m}'); f.flush(); fcntl.flock(f,fcntl.LOCK_UN)
+with locked() as f:
+ a,m=map(int,f.read().split()); f.seek(0); f.truncate(); f.write(f'{a-1} {m}'); f.flush()
 print('completed')"""
         self.fake("copilot", body)
         return counter

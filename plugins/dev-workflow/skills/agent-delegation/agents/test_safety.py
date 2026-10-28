@@ -1,5 +1,7 @@
 """Failure and input boundaries exercised without a live model."""
 import json
+import os
+import subprocess
 from pathlib import Path
 import unittest
 
@@ -40,7 +42,7 @@ class Safety(unittest.TestCase):
         self.assertEqual(result["level"], 1)
 
     def test_unknown_model_probe_error_requires_review(self):
-        path = self.bin / "agy"
+        path = self.bin / ("agy.py" if os.name == "nt" else "agy")
         path.write_text("#!/usr/bin/env python3\nimport sys\nprint('internal database corruption',file=sys.stderr)\nsys.exit(1)\n")
         result = self.dispatch(task_type="review", allowed_files=[])
         self.assertEqual(result["status"], "awaiting_review")
@@ -52,8 +54,11 @@ class Safety(unittest.TestCase):
         result = self.dispatch()
         self.assertEqual(result["status"], "native_required")
         pid = int((self.root / "child.pid").read_text())
+        if os.name == "nt":
+            from test_portability import dispatch
+            self.assertFalse(dispatch.alive(pid))
+            return
         import subprocess
-        import os
         try:
             state = subprocess.run(["ps", "-p", str(pid), "-o", "stat="], text=True, capture_output=True)
             self.assertTrue(state.returncode != 0 or state.stdout.strip().startswith("Z"), state.stdout)
@@ -80,7 +85,13 @@ class Safety(unittest.TestCase):
     def test_forbidden_paths(self):
         outside = self.root / "outside"
         outside.mkdir()
-        (self.project / "link").symlink_to(outside, target_is_directory=True)
+        try:
+            (self.project / "link").symlink_to(outside, target_is_directory=True)
+        except OSError as exc:
+            if os.name != "nt":
+                raise
+            subprocess.run(["cmd.exe", "/d", "/c", "mklink", "/J", str(self.project / "link"), str(outside)],
+                           check=True, capture_output=True)
         for path in ("../outside/x", "/tmp/x", "*.py", "link/x", ".git/config"):
             with self.subTest(path=path):
                 result = self.cli("dispatch", "--request", "-", "--state-dir", str(self.state), request=self.request(allowed_files=[path]))
@@ -124,7 +135,11 @@ class Safety(unittest.TestCase):
         self.assertEqual(list(self.project.iterdir()), [self.project / ".git"])
         for path in self.state.rglob("*"):
             if path.is_file():
-                self.assertEqual(path.stat().st_mode & 0o077, 0, str(path))
+                if os.name == "nt":
+                    from test_portability import dispatch
+                    dispatch.windows.ensure_private(path)
+                else:
+                    self.assertEqual(path.stat().st_mode & 0o077, 0, str(path))
 
     def test_query_markdown_matches_shipped_table(self):
         result = self.cli("list-types", "--markdown")

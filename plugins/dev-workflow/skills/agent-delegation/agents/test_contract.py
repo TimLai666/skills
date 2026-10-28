@@ -1,6 +1,8 @@
 """Provider compatibility and instruction contracts without starting model CLIs."""
 import importlib.util
 import json
+import os
+import subprocess
 from pathlib import Path
 import tempfile
 import unittest
@@ -59,10 +61,18 @@ class Contract(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             project = Path(tmp).resolve()
             (project / ".git").mkdir()
-            (project / "alias").symlink_to(project / ".git", target_is_directory=True)
+            try:
+                (project / "alias").symlink_to(project / ".git", target_is_directory=True)
+            except OSError as exc:
+                if os.name != "nt":
+                    raise
+                subprocess.run(["cmd.exe", "/d", "/c", "mklink", "/J",
+                                str(project / "alias"), str(project / ".git")],
+                               check=True, capture_output=True)
             with self.assertRaises(dispatch.DispatchError):
                 dispatch.scoped_path("alias/config", project)
 
+    @unittest.skipIf(os.name == "nt", "POSIX signals; Windows jobs covered by test_portability")
     def test_signal_permission_error_after_group_exit_is_verified(self):
         proc = mock.Mock(pid=12345)
         with mock.patch.object(dispatch.os, "killpg", side_effect=PermissionError(1, "Operation not permitted")), \
@@ -70,6 +80,7 @@ class Contract(unittest.TestCase):
             dispatch.terminate(proc)
             check.assert_called_with(12345)
 
+    @unittest.skipIf(os.name == "nt", "POSIX signals; Windows jobs covered by test_portability")
     def test_signal_permission_error_with_live_group_is_not_ignored(self):
         proc = mock.Mock(pid=12345)
         with mock.patch.object(dispatch.os, "killpg", side_effect=PermissionError(1, "Operation not permitted")), \
@@ -82,6 +93,7 @@ class Contract(unittest.TestCase):
             root = Path(tmp)
             project = root / "project"
             project.mkdir()
+            root = dispatch.state_directory(str(root / "state"), project)
             request = dict(project_dir=str(project), host="codex", task_type="classification", role="tester",
                            prompt="classify", allowed_files=["data.txt"], project_memory=[], verification=[])
             state = dict(dispatch_id="fixture", request=request, attempts=[], feedback=[], status="new")

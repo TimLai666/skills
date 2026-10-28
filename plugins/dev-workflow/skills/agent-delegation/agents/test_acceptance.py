@@ -7,6 +7,7 @@ import signal
 import sys
 import tempfile
 import unittest
+import shutil
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "dispatch.py"
@@ -23,7 +24,7 @@ class Acceptance(unittest.TestCase):
         self.bin = self.root / "bin"
         self.bin.mkdir()
         self.state = self.root / "state"
-        self.env = dict(os.environ, PATH=str(self.bin) + os.pathsep + os.environ["PATH"])
+        self.env = dict(os.environ, PATH=str(self.bin) + os.pathsep + os.environ["PATH"], PYTHONUTF8="1")
         for key in ("CODEX_THREAD_ID", "CLAUDECODE", "ANTIGRAVITY_AGENT", "OPENCODE"):
             self.env.pop(key, None)
         self.env["HOME"] = str(self.root)
@@ -36,9 +37,21 @@ class Acceptance(unittest.TestCase):
         content += "if 'models' in sys.argv:\n print('opencode/big-pickle\\ngemini-3.8-flash-medium\\nclaude-opus-5-5'); sys.exit(0)\n"
         content += "with open(os.environ['CALL_LOG'],'a') as f: f.write(json.dumps(sys.argv)+'\\n')\n"
         content += behavior + "\n"
-        p = self.bin / tool
-        p.write_text(content)
+        p = self.bin / (tool + ".py" if os.name == "nt" else tool)
+        p.write_text(content, encoding="utf-8")
         p.chmod(0o755)
+        if os.name == "nt":
+            if not shutil.which("node"):
+                self.skipTest("Windows CLI doubles require Node.js for npm-shim coverage")
+            js = self.bin / (tool + ".js")
+            js.write_text("const cp=require('child_process');const r=cp.spawnSync(" +
+                          json.dumps(sys.executable) + ",[" + json.dumps(str(p)) +
+                          ",...process.argv.slice(2)],{stdio:'inherit'});process.exit(r.status ?? 127);", encoding="utf-8")
+            header = "@ECHO off\nGOTO start\n:find_dp0\nSET dp0=%~dp0\nEXIT /b\n:start\nSETLOCAL\nCALL :find_dp0\n"
+            node_block = ('IF EXIST "%dp0%\\node.exe" (\n  SET "_prog=%dp0%\\node.exe"\n) ELSE (\n'
+                          '  SET "_prog=node"\n  SET PATHEXT=%PATHEXT:;.JS;=;%\n)\n\n'
+                          'endLocal & goto #_undefined_# 2>NUL || title %COMSPEC% & "%_prog%" ')
+            (self.bin / (tool + ".cmd")).write_text(header + node_block + '"%dp0%\\' + tool + '.js" %*\n')
 
     def request(self, **extra):
         result = dict(host="codex", task_type="classification", project_dir=str(self.project),
@@ -54,15 +67,21 @@ class Acceptance(unittest.TestCase):
         # Allow slow interpreter starts on a busy host; each worker timeout is tested separately.
         proc = subprocess.Popen([sys.executable, str(SCRIPT), *args], stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                env=self.env, text=True, start_new_session=True)
+                                env=self.env, text=True, encoding="utf-8", start_new_session=os.name != "nt")
         try:
             out, err = proc.communicate(json.dumps(request) if request is not None else None, timeout=120)
         except subprocess.TimeoutExpired:
-            os.killpg(proc.pid, signal.SIGTERM)
+            if os.name == "nt":
+                proc.kill()
+            else:
+                os.killpg(proc.pid, signal.SIGTERM)
             try:
                 proc.communicate(timeout=10)
             except subprocess.TimeoutExpired:
-                os.killpg(proc.pid, signal.SIGKILL)
+                if os.name == "nt":
+                    proc.kill()
+                else:
+                    os.killpg(proc.pid, signal.SIGKILL)
                 proc.communicate()
             raise
         return subprocess.CompletedProcess(proc.args, proc.returncode, out, err)
@@ -115,6 +134,15 @@ class Acceptance(unittest.TestCase):
         self.assertEqual(result["status"], "awaiting_review")
         self.assertEqual(result["level"], 1)
         self.assertIn("project-memory", result["memory_reminder"])
+
+    def test_literal_prompt_survives_cli_wrapper(self):
+        self.fake("copilot", "print('accepted')")
+        prompt = '繁體中文 "quotes" & echo BAD | < > %PATH% !name! ^\nnext line \\ '
+        result = self.dispatch(prompt=prompt)
+        self.assertEqual(result["status"], "awaiting_review")
+        calls = [json.loads(line) for line in (self.root / "calls").read_text().splitlines()]
+        self.assertEqual(calls[-1][-1], result["prompt"])
+        self.assertIn(prompt, calls[-1][-1])
 
     def test_partial_work_stops_fallback(self):
         self.fake("copilot", "Path('labels.txt').write_text('partial'); print('quota exceeded', file=sys.stderr); sys.exit(1)")
