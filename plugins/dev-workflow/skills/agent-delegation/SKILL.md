@@ -5,17 +5,16 @@ description: >-
   antigravity、agy、opencode、copilot、codex or Claude Code Agent, before dispatching
   work even on small tasks, and when proposing
   changes to existing API names, signatures, usage or behavior（介面變更）.
+  It MUST also be loaded before delivering specifications, articles, or reports（規格、文章、報告）for fresh-context review.
   It SHOULD be loaded for questions about who should code or which model to use.
   Existing API changes MUST follow the conditional consultation rule before
   implementation. Ordinary delegation MUST use scripts/dispatch.py and its task-local levels,
-  and MUST NOT skip a tool due to failure in an earlier turn. The main
-  agent MUST write the skeleton and expected results before dispatching
-  implementation, MUST NOT let implementers edit their tests, and MUST NOT
-  dispatch to its own CLI. Workers marked as dispatched MUST NOT apply this
-  skill or delegate further. Prompts MUST carry relevant project lessons; workers
-  MUST report new lessons for main-agent verification and recording.
+  and MUST NOT skip tools based on earlier turns. Main agents MUST define skeletons
+  and expected results before implementation, protect tests, and avoid their own CLI.
+  Dispatched workers MUST NOT apply this skill or delegate. Ordinary prompts MUST
+  carry project lessons; workers MUST report lessons for verification and recording.
 metadata:
-  version: "2.19.1"
+  version: "2.20.1"
 ---
 
 # Agent 派工規範
@@ -28,7 +27,7 @@ metadata:
 
 一般派工使用 [scripts/dispatch.py](scripts/dispatch.py)，先執行無參數總覽或 `--help`，再讀相關子指令的 `--help`。使用 `list-types` 選擇任務類型，使用 `list-levels` 核對該類型的層級與宿主交接方式；混合任務先拆開，分類與雜事或探索重疊時選分類。
 
-主 agent 提供宿主、任務類型、專案目錄、角色、任務與驗收、可改檔案、驗證指令及篩選後的 Project Memory。記憶欄位必填，查過沒有適用經驗才填空陣列。提供實際可用模型與查證來源，不用別名推測版本下限。實作任務另列不可修改的測試檔；深度研究先完成廣度探索，只允許在指定沙盒試探。
+主 agent 提供宿主、任務類型、專案目錄、角色、任務與驗收、可改檔案、驗證指令及篩選後的 Project Memory。記憶欄位必填，查過沒有適用經驗才填空陣列；空 context 可讀性審查依該節隔離規則填空陣列。提供實際可用模型與查證來源，不用別名推測版本下限。實作任務另列不可修改的測試檔；深度研究先完成廣度探索，只允許在指定沙盒試探。
 
 ## 0. 先辨識自己
 
@@ -151,6 +150,8 @@ Copilot 宿主依當前執行環境判定，不把登入、模型設定或繼承
 
 ### 1. 派工前
 
+空 context 可讀性審查的輸入與重派依該節隔離規則，其餘檢查照常執行。
+
 - [ ] 主 agent 依照 `project-memory` skill 載入目前專案的記憶，按這次 subagent 的任務搜尋可能相關的經驗。已載入的內容可沿用，但任務範圍改變時重新篩選。把適用條件、踩坑重點、已驗證做法與來源帶進 prompt，不只給 key 或要求 subagent 自己找，也不整份貼上無關記憶。舊經驗與現況不符時依 project-memory 的失效查證規則處理。
 
 - [ ] 跑 `git status --short`。有未提交變更時逐檔確認是自己這輪的、還是別的 agent 的半成品。是半成品就先處理完再派。
@@ -160,7 +161,7 @@ Copilot 宿主依當前執行環境判定，不把登入、模型設定或繼承
 
 ### 2. 派工 prompt 必備七項
 
-script 依主 agent 提供的結構化欄位補齊下列七項；必填資料不足就報錯，不派工。主 agent 核對生成的內容與原始驗收一致。
+script 依主 agent 提供的結構化欄位補齊下列七項；必填資料不足就報錯，不派工。主 agent 核對生成的內容與原始驗收一致。空 context 可讀性審查不帶入 Project Memory，依該節限制提供任務資料。
 
 | 項目 | 寫法 |
 | --- | --- |
@@ -174,6 +175,17 @@ script 依主 agent 提供的結構化欄位補齊下列七項；必填資料不
 
 唯讀探索任務的「任務與驗收」寫要回答的問題，仍附相關經驗並要求回報本輪教訓。可省略「不要 commit」，其餘六項照列。
 
+### 空 context 可讀性審查
+
+規格、文章或報告完成、準備交付前，MUST 派一個未參與撰寫的 subagent，檢查目標讀者能否在沒有本次對話的情況下理解成品。主 agent 親自撰寫的成品也適用；程式實作與一般對話答覆不因此新增審查。
+
+- 依 `review` 類型透過 script 派工，使用全新 session；內建 subagent 明確關閉對話繼承。不能隔離時依工具失敗流程接手，不把同一 context 內的自我檢查當成已完成。
+- prompt 只交代目標讀者、閱讀目的、成品及讀者實際可取得的資料，並保留派工的角色、唯讀範圍、驗收與回報要求。不得提供主對話、寫作計畫、修改理由、預期解讀或前次審查答案；`project_memory` 填 `[]`，相關經驗由主 agent 自行核對，不交給審查者。
+- 提供規格、文章或報告的完整正文與隨附資料，包含讀者實際能取得的引用文件與附件；不要求讀者具備超出目標讀者設定的知識。
+- 審查者先用自己的話說明成品主旨，規格另說明要求的行為與驗收條件，報告另說明主要結論與依據，再逐項指出無法理解的位置、可能的誤解、缺少的資訊與最小修正建議，附段落、頁碼或檔案行號。不得修改任何檔案，不自行腦補缺失資訊；沒有發現問題就明說。
+- 主 agent 對照成品核對意見，修正確實依賴隱藏脈絡的部分。優先改善結構、命名或刪除無關內容，必要時才補說明；可讀性審查不取代事實查證、測試或正確性審查。
+- 修正後以更新成品重新發起派工，用新的空 context 複查，不沿用前次審查者或帶入前次回報。工具失敗依原流程接續，但接手 prompt 只保留啟動或執行失敗證據，不帶入成品解讀或審查意見。交付時如實區分已通過、仍有缺口與工具受阻。
+
 ### 3. 派工中
 
 - [ ] 背景 agent 被中斷時先看磁碟：`git status --short` 加 `git diff --stat`，判斷做到哪裡。
@@ -183,7 +195,7 @@ script 依主 agent 提供的結構化欄位補齊下列七項；必填資料不
 
 ### 4. 收件審查
 
-主 agent 親自做，不派另一個 agent 代審。
+主 agent 親自做，不派另一個 agent 代審。規格、文章或報告交付前，另依「空 context 可讀性審查」檢查成品能否獨立理解。
 
 - [ ] 讀完整 diff：`git diff`，不是只看 subagent 摘要。
 - [ ] 回報裡的每個數字、測試通過數、檔案數，都對回實際輸出或檔案。
