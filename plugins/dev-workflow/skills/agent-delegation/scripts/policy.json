@@ -210,7 +210,7 @@
         {
           "tool": "agy",
           "family": "opus",
-          "effort": "medium"
+          "effort": null
         },
         {
           "tool": "codex",
@@ -251,7 +251,7 @@
         {
           "tool": "agy",
           "family": "opus",
-          "effort": "medium"
+          "effort": null
         },
         {
           "tool": "codex",
@@ -274,7 +274,7 @@
         {
           "tool": "agy",
           "family": "opus",
-          "effort": "medium"
+          "effort": null
         },
         {
           "tool": "claude",

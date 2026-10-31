@@ -34,9 +34,9 @@ NATIVE_TOOLS = {"codex": "Codex 內建 subagent", "claude": "Agent",
                 "copilot": "Copilot 內建 subagent（Auto）",
                 "opencode": "OpenCode 內建 subagent", "agy": "Antigravity 內建 subagent"}
 KNOWN_FAILURE = re.compile(
-    r"quota (?:exceeded|exhausted)|exceeded (?:your )?(?:monthly |usage )?quota|"
+    r"quota (?:exceeded|exhausted|reached)|RESOURCE_EXHAUSTED|exceeded (?:your )?(?:monthly |usage )?quota|"
     r"hit your (?:session|usage) limit|rate.?limit|too many requests|"
-    r"not logged in|authentication (?:failed|required)|unauthori[sz]ed|invalid api key|"
+    r"not logged in|authentication (?:failed|required)|failed to authenticate|unauthori[sz]ed|invalid api key|"
     r"model[^\n]{0,120}(?:not found|not available|unavailable|does not exist|not supported)|"
     r"ModelNotFoundError|requires a newer version of Codex", re.I)
 
@@ -158,8 +158,6 @@ def validate_request(r, policy):
             raise DispatchError("effort 必須是 medium、high 或 xhigh")
         if r["effort"] != "medium":
             text_value(r.get("effort_reason"), "effort_reason")
-        if r["effort"] == "xhigh" and any(s["tool"] == "agy" and s.get("effort") for s in task["levels"]):
-            raise DispatchError("此任務類型包含 agy Claude，其 effort 最高為 high")
     return r, paths or ([str(sandbox)] if sandbox else [])
 
 
@@ -518,7 +516,7 @@ def cli_argv(spec, model, project, prompt):
     if tool == "opencode":
         return [tool, "run", "--auto", "--dir", project, "--agent", "build", "-m", model, "--format", "json", prompt]
     if tool == "agy":
-        return [tool, "--model", model, "--mode", "accept-edits"] + (["--effort", effort] if effort else []) + ["-p=" + prompt]
+        return [tool, "--model", model, "--mode", "accept-edits", "--dangerously-skip-permissions", "-p=" + prompt]
     if tool == "copilot":
         return [tool, "-C", project, "--model", "auto", "--allow-all-tools", "--trust-folder", "-p", prompt]
     if tool == "codex":
@@ -720,8 +718,8 @@ allowed_files 為精確專案相對路徑，不接受萬用字元、.. 或 .git�
 implementation 可另列 test_files 作為不可改的測試路徑；testing 只寫測試。
 research 必填 sandbox_dir，可用專案外的專用暫存目錄；allowed_files 非空時必須指向沙盒內。
 models 為已查證可用模型的工具名→名稱陣列，提供時必填 model_source。Codex、Claude 版本下限不能用別名推測。
-可選 effort 為 medium（預設）、high、xhigh，調高須附 effort_reason；agy Claude 最高 high。
-免費模型、Copilot Auto 與 Gemini 的固定種類不套 effort 覆寫，寫程式最後一檔 Opus 固定 low。
+可選 effort 為 medium（預設）、high、xhigh，調高須附 effort_reason。
+免費模型、Copilot Auto、Gemini 與 agy Claude 不套 effort 覆寫，寫程式最後一檔 Opus 固定 low。
 外部 OpenCode/agy 由 models 指令查證。輪到宿主時不執行自己的 CLI，僅回傳內建交接提示。
 困難寫程式格子可用 difficult_implementation:true、opencode_failure_evidence（同任務實際失敗證據）從第 2 檔開始。
 

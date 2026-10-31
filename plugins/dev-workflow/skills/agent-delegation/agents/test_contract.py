@@ -32,7 +32,7 @@ class Contract(unittest.TestCase):
         prompt = "literal 'quotes' $(touch SHOULD_NOT_RUN) `echo no`\nnext line"
         cases = [
             ("implementation", 0, "opencode/big-pickle", ["--auto", "--agent", "build"]),
-            ("frontend", 0, "gemini-3.8-flash-medium", ["--mode", "accept-edits"]),
+            ("frontend", 0, "gemini-3.8-flash-medium", ["--mode", "accept-edits", "--dangerously-skip-permissions"]),
             ("classification", 0, "auto", ["--allow-all-tools", "--trust-folder"]),
             ("review", 1, "gpt-6-sol", ["--approve-for-me", "model_reasoning_effort=medium"]),
             ("implementation", 5, "claude-opus-5-5", ["--permission-mode", "auto", "--effort", "low"]),
@@ -43,7 +43,8 @@ class Contract(unittest.TestCase):
                 for value in required:
                     self.assertIn(value, argv)
                 self.assertIn("-p=" + prompt if argv[0] == "agy" else prompt, argv)
-                self.assertNotIn("--dangerously-skip-permissions", argv)
+                if argv[0] != "agy":
+                    self.assertNotIn("--dangerously-skip-permissions", argv)
 
     def test_testing_and_readonly_prompt_requirements(self):
         request = dict(project_dir="/project", role="tester", prompt="Check the contract", allowed_files=[],

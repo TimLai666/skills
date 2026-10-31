@@ -135,6 +135,28 @@ print('completed')"""
         self.assertIn("quota", raw)
         self.assertIn("opencode", raw)
 
+    def test_agy_claude_omits_effort_and_quota_reached_hands_off(self):
+        self.fake("agy", "print('Error: Individual quota reached. Please upgrade your subscription.', file=sys.stderr)\n"
+                         "print('AGY_ERROR: ' + json.dumps({'status':'RESOURCE_EXHAUSTED','error_code':429}), file=sys.stderr); sys.exit(3)")
+        self.fake("codex", "print('accepted report')")
+        result = self.dispatch(host="claude", task_type="review", allowed_files=[])
+        self.assertEqual(result["status"], "awaiting_review")
+        self.assertEqual((result["level"], result["tool"]), (2, "codex"))
+        calls = [json.loads(line) for line in (self.root / "calls").read_text().splitlines()]
+        agy = [argv for argv in calls if "--mode" in argv]
+        self.assertEqual(len(agy), 1)
+        self.assertNotIn("--effort", agy[0])
+
+    def test_claude_expired_oauth_hands_off(self):
+        self.fake("claude", "if 'claude-haiku-5-5' in sys.argv:\n"
+                            " print('Failed to authenticate: OAuth session expired and could not be refreshed', file=sys.stderr); sys.exit(1)\n"
+                            "print('accepted report')")
+        result = self.dispatch(host="agy", task_type="implementation", allowed_files=["src.py"],
+                               models={"codex": ["gpt-6.1-luna"],
+                                       "claude": ["claude-haiku-5-5", "claude-sonnet-5-5"]})
+        self.assertEqual(result["status"], "awaiting_review")
+        self.assertEqual((result["level"], result["model"]), (5, "claude-sonnet-5-5"))
+
     def test_exhausted_is_terminal_and_does_not_relaunch(self):
         started = self.dispatch(host="claude", task_type="classification", **self.claude_catalog())
         self.assertEqual(started["status"], "native_required")

@@ -14,7 +14,7 @@ description: >-
   Dispatched workers MUST NOT apply this skill or delegate. Ordinary prompts MUST
   carry project lessons; workers MUST report lessons for verification and recording.
 metadata:
-  version: "2.20.2"
+  version: "2.20.4"
 ---
 
 # Agent 派工規範
@@ -83,7 +83,7 @@ Copilot 宿主依當前執行環境判定，不把登入、模型設定或繼承
 - 狀態與原始輸出存於專案外的使用者狀態目錄，由 script 接續與主 agent 審查時讀取；不在使用者專案根目錄新增協調檔。script 只追蹤自身管理的併行派工，其他 agent 與未納管寫入仍由主 agent 查證。
 - 每次外部 CLI 結束，script 先停止其工作程序群，再檢查所有專案檔案（含忽略檔）與授權沙盒。掃描無法完成或有變動就先審查。需要持續執行的服務由主 agent 管理。
 
-- 外部 CLI 派工一律明確指定自動核准：OpenCode 加 `--auto`，Copilot 加 `--allow-all-tools`，Codex 加 `--approve-for-me`，Claude Code 加 `--permission-mode auto`，Claude Code 不改用 bypass。Claude Code 與 agy 從目標專案目錄啟動。
+- 外部 CLI 派工一律明確指定自動核准：OpenCode 加 `--auto`，Copilot 加 `--allow-all-tools`，Codex 加 `--approve-for-me`，agy 加 `--mode accept-edits --dangerously-skip-permissions`，Claude Code 加 `--permission-mode auto`，Claude Code 不改用 bypass。Claude Code 與 agy 從目標專案目錄啟動。
 - 自動核准不擴大任務可改檔案清單。表中的「唯讀」只表示 prompt 必須明寫「不得修改任何檔案」；探索、審查與實作沿用相同執行模式，不另設 plan、read-only 沙盒或唯讀工具清單，也不選唯讀專用 agent。宿主內建 subagent 不套用外部 CLI 旗標，可改範圍同樣寫在 prompt。
 
 - 表中只寫模型種類。派工前先跑 `agy models` 或 `opencode models`，挑該種類最新版填進佔位符。
@@ -96,7 +96,7 @@ Copilot 宿主依當前執行環境判定，不把登入、模型設定或繼承
   3. 統合層：主 agent 合併廣度與深度的全部結果，核對關鍵依據、前後對照、做出整體判斷，決定採用哪個做法並親自執行。執行者的結論不直接當成定論。
   廣度層沒挑出值得深挖的項目時，不派深度研究。
 - 深度研究的 agent 可實際試探系統，但可改檔案只列暫存目錄或沙盒，專案檔一律不可改。試探造成的副作用（建立的檔案、啟動的程序、改過的設定）一併寫進回報，由主 agent 決定保留或清掉。
-- 非免費模型的 effort 預設 `medium`，主 agent 判斷任務需要時才調高，最高 `xhigh`。agy 的 Gemini 選模型名結尾是 `-medium` 的版本，agy 的 Claude 加 `--effort medium`，agy 最高只到 `high`。Agent 工具沒有 effort 參數，不用設。
+- 非免費模型的 effort 預設 `medium`，主 agent 判斷任務需要時才調高，最高 `xhigh`。agy 的 Gemini 選模型名結尾是 `-medium` 的版本，agy 的 Claude 不加 `--effort`，思考強度由模型名稱決定。Agent 工具沒有 effort 參數，不用設。
 - Haiku 與 Sonnet 只用 5.5 以上版本，所以 agy 的 Sonnet 4.6 不派。
 - Haiku 用在唯讀探索、雜事、分類與簡單的寫程式任務。
 - 任務同時符合分類與雜事或探索時，照分類那一列派。
@@ -227,7 +227,7 @@ script 記錄每次失敗的原始輸出與實際旗標。`native_required` 由�
 
 ```
 宿主：Claude Code
-工具與模型：agy / <實際 flash 模型名> / --mode accept-edits
+工具與模型：agy / <實際 flash 模型名> / --mode accept-edits --dangerously-skip-permissions
 工具與模型：opencode / <實際免費模型名> / --agent build --auto
 ```
 
