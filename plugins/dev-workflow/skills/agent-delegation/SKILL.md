@@ -14,7 +14,7 @@ description: >-
   Dispatched workers MUST NOT apply this skill or delegate. Ordinary prompts MUST
   carry project lessons; workers MUST report lessons for verification and recording.
 metadata:
-  version: "2.20.4"
+  version: "2.20.5"
 ---
 
 # Agent 派工規範
@@ -86,7 +86,7 @@ Copilot 宿主依當前執行環境判定，不把登入、模型設定或繼承
 - 外部 CLI 派工一律明確指定自動核准：OpenCode 加 `--auto`，Copilot 加 `--allow-all-tools`，Codex 加 `--approve-for-me`，agy 加 `--mode accept-edits --dangerously-skip-permissions`，Claude Code 加 `--permission-mode auto`，Claude Code 不改用 bypass。Claude Code 與 agy 從目標專案目錄啟動。
 - 自動核准不擴大任務可改檔案清單。表中的「唯讀」只表示 prompt 必須明寫「不得修改任何檔案」；探索、審查與實作沿用相同執行模式，不另設 plan、read-only 沙盒或唯讀工具清單，也不選唯讀專用 agent。宿主內建 subagent 不套用外部 CLI 旗標，可改範圍同樣寫在 prompt。
 
-- 表中只寫模型種類。派工前先跑 `agy models` 或 `opencode models`，挑該種類最新版填進佔位符。
+- 表中只寫模型種類。script 輪到 OpenCode、agy 或 Codex 時，自行以 `opencode models`、`agy models` 或 `codex debug models` 查實際可用模型，挑該種類最新版。
 - Copilot 依本專案的免費版使用方式固定設 `--model auto`，不指定具體模型、推理強度或付費替代方案。`--allow-all-tools` 允許自動執行包含改檔在內的工具，`--trust-folder` 僅信任本次 prompt 模式的工作目錄設定。prompt 的可改範圍不變。Copilot 只用於決策表中明列 Auto 的任務，手動指定模型的種類限制不套用 Auto 的內部選擇，但 Auto 不作為 Fable、Opus 或 Astra 的指定模型諮詢。
 - opencode 只能用免費模型：`opencode models | grep opencode/` 查得到才算。
 - Codex 照表主動派。Review、深度研究與決策只用 GPT-6 以上、名稱含 sol 的模型。名稱含 luna 的模型只用於寫測試、填格子實作、照清單修 bug、快速唯讀探索、雜事與分類。
@@ -216,7 +216,7 @@ script 記錄每次失敗的原始輸出與實際旗標。`native_required` 由�
 
 | 症狀 | 回報寫法 |
 | --- | --- |
-| 模型不存在或需升級 CLI | 貼錯誤原文與 `agy models`／`opencode models` 輸出 |
+| 模型不存在或需升級 CLI | 貼錯誤原文與 `agy models`／`opencode models`／`codex debug models` 輸出 |
 | 權限被拒、未登入 | 貼錯誤原文，說明需要哪個權限或登入指令 |
 | 逾時 | 貼逾時設定與已完成部分 |
 | 額度耗盡（rate limit、quota、usage limit） | 貼錯誤原文 |

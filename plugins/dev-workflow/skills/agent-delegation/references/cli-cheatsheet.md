@@ -9,7 +9,7 @@ Windows 使用 `py -3 <skill-dir>/scripts/dispatch.py`，需要 Python 3.9+ 與 
 | OpenCode | `opencode --help`、`opencode run --help`、`opencode models` |
 | Antigravity（agy） | `agy --help`、`agy models` |
 | GitHub Copilot CLI | `copilot --help`、`copilot help permissions` |
-| Codex | `codex --help`、`codex exec --help` |
+| Codex | `codex --help`、`codex exec --help`、`codex debug models` |
 | Claude Code | `claude --help` |
 
 CLI 更新後核對實際介面。旗標不支援時保留錯誤並交由 script 接手，不改用未核准的模型或執行模式。

@@ -157,6 +157,13 @@ print('completed')"""
         self.assertEqual(result["status"], "awaiting_review")
         self.assertEqual((result["level"], result["model"]), (5, "claude-sonnet-5-5"))
 
+    def test_codex_model_is_probed_without_caller_catalog(self):
+        self.fake("codex", "print('accepted report')")
+        result = self.dispatch(host="claude", task_type="classification", allowed_files=[],
+                               models={"claude": ["claude-haiku-5-5"]})
+        self.assertEqual(result["status"], "awaiting_review", result)
+        self.assertEqual((result["tool"], result["model"]), ("codex", "gpt-6.1-luna"))
+
     def test_exhausted_is_terminal_and_does_not_relaunch(self):
         started = self.dispatch(host="claude", task_type="classification", **self.claude_catalog())
         self.assertEqual(started["status"], "native_required")

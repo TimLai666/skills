@@ -34,6 +34,9 @@ class Acceptance(unittest.TestCase):
 
     def fake(self, tool, behavior):
         content = "#!/usr/bin/env python3\nimport os,sys,json\nfrom pathlib import Path\n"
+        content += ("if sys.argv[1:3] == ['debug', 'models']:\n print(json.dumps({'models': ["
+                    "{'slug': 'gpt-6.1-luna', 'visibility': 'list'}, {'slug': 'gpt-6.1-sol', 'visibility': 'list'}, "
+                    "{'slug': 'gpt-7-luna', 'visibility': 'hide'}]})); sys.exit(0)\n")
         content += "if 'models' in sys.argv:\n print('opencode/big-pickle\\ngemini-3.8-flash-medium\\nclaude-opus-5-5'); sys.exit(0)\n"
         content += "with open(os.environ['CALL_LOG'],'a') as f: f.write(json.dumps(sys.argv)+'\\n')\n"
         content += behavior + "\n"

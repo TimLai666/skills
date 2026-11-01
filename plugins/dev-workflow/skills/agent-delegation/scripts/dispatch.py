@@ -511,6 +511,19 @@ def error_event(output):
     return errors
 
 
+MODEL_PROBES = {"opencode": ["opencode", "models"], "agy": ["agy", "models"], "codex": ["codex", "debug", "models"]}
+
+
+def probe_catalog(tool, output):
+    if tool != "codex":
+        return [line.split()[0] for line in output.splitlines() if line.strip()]
+    try:
+        models = json.loads(output).get("models", [])
+    except (ValueError, AttributeError):
+        return []
+    return [m["slug"] for m in models if isinstance(m, dict) and isinstance(m.get("slug"), str) and m.get("visibility") != "hide"]
+
+
 def cli_argv(spec, model, project, prompt):
     tool, effort = spec["tool"], spec.get("effort")
     if tool == "opencode":
@@ -553,8 +566,8 @@ def drive(root, path, state, task, write_paths, start, timeout):
         atomic_write(path, state)
         before = snapshot(r, write_paths)
         catalog = r.get("models", {}).get(spec["tool"], [])
-        if not native and spec["tool"] in ("opencode", "agy"):
-            probe = execute([spec["tool"], "models"], r["project_dir"], root,
+        if not native and spec["tool"] in MODEL_PROBES:
+            probe = execute(MODEL_PROBES[spec["tool"]], r["project_dir"], root,
                             state["dispatch_id"] + "-" + str(len(state["attempts"])) + "-models",
                             min(timeout, 30), state, path)
             attempt["model_probe"] = probe
@@ -571,7 +584,7 @@ def drive(root, path, state, task, write_paths, start, timeout):
                 state["status"] = "dispatch_failed"
                 atomic_write(path, state)
                 continue
-            catalog = [line.split()[0] for line in probe["output"].splitlines() if line.strip()]
+            catalog = probe_catalog(spec["tool"], probe["output"])
         model = select_model(spec, catalog)
         if not model and not native and spec["tool"] == "claude" and spec["family"] == "opus" and "claude" not in r.get("models", {}):
             model = "opus"  # No version floor for this route; Claude resolves its official alias.
@@ -717,10 +730,10 @@ project_memory 必填陣列，每項含 condition/lesson/source，查過無經�
 allowed_files 為精確專案相對路徑，不接受萬用字元、.. 或 .git。唯讀任務必須 []。
 implementation 可另列 test_files 作為不可改的測試路徑；testing 只寫測試。
 research 必填 sandbox_dir，可用專案外的專用暫存目錄；allowed_files 非空時必須指向沙盒內。
-models 為已查證可用模型的工具名→名稱陣列，提供時必填 model_source。Codex、Claude 版本下限不能用別名推測。
+models 為已查證可用模型的工具名→名稱陣列，提供時必填 model_source。Claude 版本下限不能用別名推測。
 可選 effort 為 medium（預設）、high、xhigh，調高須附 effort_reason。
 免費模型、Copilot Auto、Gemini 與 agy Claude 不套 effort 覆寫，寫程式最後一檔 Opus 固定 low。
-外部 OpenCode/agy 由 models 指令查證。輪到宿主時不執行自己的 CLI，僅回傳內建交接提示。
+外部 OpenCode/agy 由 models 指令、Codex 由 debug models 查證，結果取代 request 的同工具清單。輪到宿主時不執行自己的 CLI，僅回傳內建交接提示。
 困難寫程式格子可用 difficult_implementation:true、opencode_failure_evidence（同任務實際失敗證據）從第 2 檔開始。
 
 所有 dispatch 結果輸出單一 JSON：status、dispatch_id、level、tool、model、prompt、attempts、state_path、memory_reminder。
