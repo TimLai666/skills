@@ -97,7 +97,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | `landing-page-studio` | 想產出偏高轉換導向的 landing page、hero section、行銷頁面。 |
 | `design-studio` | 所有設計事務的統一入口：網站、App、簡報、動畫、資訊圖、品牌設計。建立或變更共用視覺規範時更新 `DESIGN.md`，純評論與局部修改沿用既有設計資料。支援電影感（cinematic-ui）與實作導向（practical）雙引擎。 |
 | `open-slide-studio` | 想把簡報做成可放映、可部署成網址的網頁簡報（open-slide 框架），視覺由 design-studio 供給；要可編輯 .pptx 仍走 design-studio。 |
-| `human-writing` | 想要產出文案、文章、內容重寫或其他寫作支援。 |
+| `human-writing` | 撰寫或修改文案、文章、文件、規則、prompt 與 skill，沿用合適段落並檢查重複、衝突及相關引用，讓文字自然清楚。 |
 
 ### `dev-workflow` — 開發流程與工程支援
 

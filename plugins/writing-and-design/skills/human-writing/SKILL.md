@@ -3,7 +3,7 @@ name: human-writing
 description: >-
   This skill MUST be used by default for any user-facing writing, including
   answers to users, emails, documents, formal correspondence, reports,
-  proposals, project introductions, README files, repository descriptions,
+  proposals, rules, prompts, skill instructions, project introductions, README files, repository descriptions,
   landing-page copy, social posts, essays, commentary,
   explanations, summaries, product copy, internal updates, and other prose
   intended to be read by people. Apply it whenever the output contains
@@ -11,7 +11,7 @@ description: >-
   explicitly owns the writing style or the output is purely code, structured
   data, or a command. Supports Chinese and English.
 metadata:
-  version: "1.12.4"
+  version: "1.13.0"
 ---
 
 # Human Writing
@@ -36,6 +36,7 @@ This file gives the sequence. The rules are in the linked references. Read the r
    Read [references/human-writing-principles.md](./references/human-writing-principles.md), then read [references/human-writing-examples.md](./references/human-writing-examples.md) in full before drafting. Study how the examples turn the rules into natural sentences, including rewrites that still leave too much for the reader to infer.
 
 3. Write the draft.
+   When editing existing content, first apply principle 8A to choose the owning passage and reconcile related sections before adding text.
    Apply the principles and what the examples demonstrate about concrete detail, reader context, structure, vocabulary, rhythm, tone, and punctuation.
 
 4. Remove AI patterns.

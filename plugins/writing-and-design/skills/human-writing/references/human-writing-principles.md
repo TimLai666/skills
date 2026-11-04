@@ -70,6 +70,10 @@ The ban targets modifiers that replace content, not all modifiers. When a senten
 
 ### 8A. Write the current document for its current reader
 
+- Before adding or changing content in an existing document, rule set, prompt, or skill, read the relevant sections and linked references. Search for the same subject, its exceptions, and examples, then identify which file and section should own the information.
+- Update or merge the existing passage when it already covers the subject. Place genuinely new content where the reader needs it in the existing structure, not automatically at the end or in the section most recently edited. Preserve distinct conditions and authorized scope when consolidating.
+- Keep the full rule or explanation in one appropriate place. Other sections should link to it or give only the reminder needed at that step. Put operational detail in the existing reference or tool help when that is its established home.
+- After editing, reread the affected section with its neighboring paragraphs and relevant references. Remove duplicate or superseded wording, resolve contradictions, and update affected examples, headings, and links. Reorganize only as much as the requested change needs.
 - When revising rules or documents, state the adopted approach and its conditions. If A has been replaced by B, and A is absent from the current document and irrelevant to the reader's task, write B on its own.
 - Keep a contrast or prohibition when the reader needs it to distinguish live alternatives, avoid a likely consequential mistake, or follow a migration. Revision history belongs in a requested change log or comparison.
 - Review each negative qualification against the finished document: does it help the reader act, or merely echo an editing discussion, rejected approach, or the writer's self-defense? Remove the latter. See example 16A in [human-writing-examples.md](./human-writing-examples.md).

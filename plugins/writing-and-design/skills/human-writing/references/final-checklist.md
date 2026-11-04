@@ -13,6 +13,7 @@ The text:
 - [ ] distinguishes instructions addressed to the AI from reader-facing information: writing constraints guide the prose, background serves the reader's needs, and a request to avoid a misunderstanding has not automatically become an explicit denial
 - [ ] does not answer an objection, accusation, or inner judgment that no one raised
 - [ ] states the current approach, retaining contrasts or prohibitions only when they serve the reader's task rather than echo an editing discussion or rejected draft
+- [ ] places additions in the section that owns the subject, updates existing coverage instead of duplicating it, and keeps related exceptions, examples, headings, links, and neighboring paragraphs consistent (principle 8A)
 - [ ] achieves concision by removing unnecessary wording while preserving necessary details: the reader knows what must be marked, checked, or explained, including the content or criterion when needed
 - [ ] does not invent「XX 邊界」compounds in ordinary prose:「邊界」means a real dividing line or an established term the intended reader already uses, while ordinary limits, responsibilities, applicable cases, and conditions are named directly
 - [ ] uses「說法」only when referring to words someone actually said, wrote, claimed, or publicly expressed
