@@ -128,10 +128,11 @@ def main():
         reply = respond(sys.argv[1] if len(sys.argv) > 1 else "", event)
     except Exception:  # Reminders are optional; never interrupt the session.
         return 0
+    # Claude Code reads hook output as UTF-8; Windows consoles default to a legacy code page.
     if isinstance(reply, str):
-        print(reply)
+        sys.stdout.buffer.write(reply.encode("utf-8") + b"\n")
     elif reply:
-        print(json.dumps(reply, ensure_ascii=False))
+        sys.stdout.buffer.write(json.dumps(reply, ensure_ascii=False).encode("utf-8") + b"\n")
     return 0
 
 
