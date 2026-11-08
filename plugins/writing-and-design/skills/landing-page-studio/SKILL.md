@@ -8,7 +8,7 @@ description: >-
   Visual direction follows design-studio; this skill handles conversion
   structure, animation, implementation, and delivery.
 metadata:
-  version: "2.1.1"
+  version: "2.1.2"
 ---
 
 # Landing Page Studio
@@ -29,7 +29,7 @@ metadata:
 
 讀 design-studio 的 `shared/anti-slop.md`、`shared/hard-rules.md`、`shared/guardrails.md`，遵守其適用規則。沿用既有 `DESIGN.md` 與設計資訊；新設計依 design-studio 的公約建立並維護，局部修改依其流程判斷需要更新的範圍。
 
-沿用品牌與已確認的方向。方向未定時，依 design-studio 的 `practical/references/design-styles.md` 提出三個方向，完成既有風格選型與確認流程；選中風格後讀對應深度風格包與色彩推導協議。本 skill 不另維護風格庫。
+沿用品牌與已確認的方向。方向未定時，依 design-studio 的 `references/design-styles.md` 提出三個方向，完成既有風格選型與確認流程；選中風格後讀對應深度風格包與色彩推導協議。本 skill 不另維護風格庫。
 
 ### 2. 安排內容與行動
 

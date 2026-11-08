@@ -1,6 +1,6 @@
 # Anti-AI Slop Rules (Shared)
 
-Both cinematic-ui and practical enforce these rules. Read this before any build phase.
+Every design task enforces these rules. Read this before step 1 of the workflow in `SKILL.md`; the AI-look checklist in `verification.md` checks them before delivery.
 
 ## What is AI Slop?
 
@@ -13,8 +13,9 @@ AI slop = the visual lowest common denominator from training data. It's not ugly
 | Aggressive purple gradients | The universal "tech feel" formula across SaaS/AI/web3 | Brand actually uses it (e.g. Linear) |
 | Emoji as icons | The "not professional enough, add emoji" disease | Brand uses it (e.g. Notion), children's audience |
 | Rounded cards + left color border accent | 2020-2024 Material/Tailwind爛大街 combo | User explicitly requests it |
-| SVG-drawn imagery (faces/scenes) | AI SVG faces always have wrong proportions | Almost never — use real images or honest placeholders |
-| CSS silhouettes / SVG hand-drawn代替真實產品圖 | Generic "tech animation" — black + orange accent + rounded bars, zero brand recognition | Use real product images from brand protocol; honest placeholder as last resort |
+| Coloring-book illustrations: uniform outline + flat fill, no shading or brushwork | Reads as AI filler | Draw with brushwork, shading and texture in one style (`references/illustration-craft.md`) |
+| Illustrations without one consistent style (clip-art mix, wobbly random shapes) | Reads as AI filler | Draw objects and scenes in the single illustration style the direction defines (`composition-rules.md` Legible Visuals) |
+| Generic silhouettes standing in for a named product | Generic "tech animation" — black + orange accent + rounded bars, zero brand recognition | Use official product images when available; otherwise draw the product from its official look so people recognize it |
 | Inter/Roboto/Arial/system fonts as display | Too common, reader can't tell if this is a designed product or a demo | Brand spec explicitly uses them |
 | GitHub-dark lazy fix: uniform deep blue `#0D1117` + generic cyan/purple neon glow | One specific combo that's爛大街 in SaaS/AI landing pages — not all dark is banned | Developer tool product where brand actually goes this direction |
 
@@ -33,7 +34,7 @@ Empirical signatures of LLM-generated design — hard bans as default moves. Ove
 **Layout micro-labels**
 - No version labels as hero eyebrows (`V0.6`, `BETA`, `EARLY ACCESS`) unless the brief is about launch status
 - No section-number eyebrows (`00 / INDEX`, `001 · Capabilities`) — name the topic in plain language
-- No `01 / 4` pagination on tiles; no `Scroll · 001` cues; no rotated vertical text as agency flourish
+- No `01 / 4` pagination on tiles; no `Scroll · 001` cues; no rotated vertical text as agency flourish. CJK vertical writing (`writing-mode: vertical-rl`) is allowed when the vertical text is the content itself, such as a headline or a product name. Deck ornaments listed in `references/cinematic-slides.md` (chapter strip, slide counter in the deck shell) are allowed on slides
 - Middle-dot (`·`) rationed: max 1 per metadata line, never the default separator
 - No decorative colored status dots on every list / nav / badge — dots only for real semantic state
 - No crosshair / hairline grid lines drawn purely as decoration
@@ -55,7 +56,7 @@ Empirical signatures of LLM-generated design — hard bans as default moves. Ove
 
 - `text-wrap: pretty` + CSS Grid + advanced CSS: typography details are the "taste tax" AI can't fake
 - Use `oklch()` or spec-existing colors — never invent new colors from thin air
-- Prefer AI-generated images (Gemini/Flash/Lovart) over SVG hand-drawn; HTML screenshots only for precise data tables
+- Prefer real or AI-generated images; when neither is available, draw illustrations in the direction's style instead of falling back to abstract shapes. HTML screenshots only for precise data tables
 - Use「」quotes for Chinese, not "" — typographic proof of human review
 - One detail at 120%, everything else at 80%: taste = knowing where to be precise, not uniform effort
 
