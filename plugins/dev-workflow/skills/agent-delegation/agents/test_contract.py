@@ -31,7 +31,7 @@ class Contract(unittest.TestCase):
     def test_external_cli_permission_and_effort_flags(self):
         prompt = "literal 'quotes' $(touch SHOULD_NOT_RUN) `echo no`\nnext line"
         cases = [
-            ("implementation", 0, "opencode/big-pickle", ["--auto", "--agent", "build"]),
+            ("implementation", 0, "opencode/big-pickle", ["--auto", "--agent", "build", "--print-logs", "ERROR"]),
             ("frontend", 0, "gemini-3.8-flash-medium", ["--mode", "accept-edits", "--dangerously-skip-permissions"]),
             ("classification", 0, "auto", ["--allow-all-tools", "--trust-folder"]),
             ("review", 1, "gpt-6-sol", ["--approve-for-me", "model_reasoning_effort=medium"]),

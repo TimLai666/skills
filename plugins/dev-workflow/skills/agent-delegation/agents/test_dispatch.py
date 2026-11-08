@@ -216,6 +216,44 @@ print('completed')"""
         self.assertNotIn("replacement request", continued["prompt"])
         self.assertIn("preserve this", continued["prompt"])
 
+    OPENCODE_LOG = ('timestamp=2026-11-08T09:42:07.079Z level=ERROR run=f12e3a37 message="stream error" '
+                    'providerID=opencode modelID=big-pickle session.id=ses_x small={small} agent={agent} mode=primary '
+                    'error.error="AI_APICallError: {text}"')
+
+    def opencode_logs_then_hangs(self, agent="build", small="false",
+                                 text="Free usage limit reached. Subscribe to OpenCode Go to keep going: https://opencode.ai/go"):
+        line = self.OPENCODE_LOG.format(agent=agent, small=small, text=text)
+        self.fake("opencode", f"import time\nprint({line!r}, file=sys.stderr, flush=True)\ntime.sleep(60)")
+
+    def test_opencode_usage_limit_falls_back_without_waiting_for_timeout(self):
+        self.opencode_logs_then_hangs()
+        self.fake("copilot", "print('accepted report')")
+        began = time.monotonic()
+        result = self.cli("dispatch", "--request", "-", "--timeout", "40", "--state-dir", str(self.state),
+                          request=self.request(task_type="implementation", allowed_files=["src.py"]))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertLess(time.monotonic() - began, 20)
+        payload = json.loads(result.stdout)
+        self.assertEqual((payload["status"], payload["level"], payload["tool"]), ("awaiting_review", 2, "copilot"))
+        first = payload["attempts"][0]
+        self.assertFalse(first["timeout"])
+        self.assertIn("Free usage limit reached", first["fatal_error"])
+        calls = [json.loads(line) for line in (self.root / "calls").read_text().splitlines()]
+        self.assertIn("--print-logs", calls[0])
+
+    def test_opencode_title_or_unrecognized_errors_do_not_stop_the_run(self):
+        cases = [dict(agent="title", small="true"), dict(text="socket hang up")]
+        for case in cases:
+            with self.subTest(**case):
+                line = self.OPENCODE_LOG.format(**{**dict(agent="build", small="false", text="x"), **case})
+                self.fake("opencode", f"import time\nprint({line!r}, file=sys.stderr, flush=True)\n"
+                                      "time.sleep(2.5)\nprint(json.dumps({'type':'text','part':{'text':'done'}}))")
+                result = self.cli("dispatch", "--request", "-", "--state-dir", str(self.state),
+                                  request=self.request(task_type="implementation", allowed_files=["src.py"]))
+                payload = json.loads(result.stdout)
+                self.assertEqual((payload["status"], payload["level"]), ("awaiting_review", 1))
+                self.assertNotIn("fatal_error", payload["attempts"][0])
+
     def test_unreported_handoffs_do_not_block_a_new_dispatch(self):
         helpers_module = __import__("test_portability").dispatch
         self.state.mkdir(mode=0o700)
