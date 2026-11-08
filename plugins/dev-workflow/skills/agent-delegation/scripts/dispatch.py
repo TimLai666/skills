@@ -45,6 +45,12 @@ class DispatchError(Exception):
     """An invalid request or unsafe continuation; never starts another worker."""
 
 
+class NotStarted(DispatchError):
+    """No worker was launched for this level, so the same level may be retried."""
+
+
+ACTIVE = ("starting", "new", "running")
+
 def text_value(value, name):
     if not isinstance(value, str) or not value.strip() or "\0" in value:
         raise DispatchError(name + " 必須是非空字串，且不能含 NUL")
@@ -323,6 +329,8 @@ def alive(pid):
 def claim(root, path, state, spec, write_paths, native, timeout):
     deadline = time.monotonic() + timeout
     while True:
+        if stop_requested(root, state):
+            raise NotStarted("主 agent 已取消；尚未啟動執行者。")
         with lock_file(root / ".registry.lock"):
             leases = []
             for other_path in root.glob("*.json"):
@@ -344,8 +352,20 @@ def claim(root, path, state, spec, write_paths, native, timeout):
                 atomic_write(path, state)
                 return
         if time.monotonic() >= deadline:
-            raise DispatchError("等待同檔寫入或 CLI 三條併行上限逾時；未啟動新執行者。派工紀錄：" + state["dispatch_id"] + "，請解除佔用後重新發起")
+            raise NotStarted("等待同檔寫入或 CLI 三條併行上限逾時；未啟動新執行者。派工紀錄：" + state["dispatch_id"] + "，解除佔用後用 --outcome dispatch-failed 在同一層重來")
         time.sleep(0.05)
+
+
+def stop_path(root, state):
+    return root / (state["dispatch_id"] + ".stop")
+
+
+def stop_requested(root, state):
+    run = (state.get("run") or {}).get("id")
+    try:
+        return bool(run) and stop_path(root, state).read_text(encoding="utf-8").strip() == run
+    except OSError:
+        return False
 
 
 def snapshot(r, write_paths):
@@ -433,19 +453,28 @@ def signal_group(pgid, signum):
             raise DispatchError(f"無法停止程序群 {pgid}，尚未確認工作程序結束：{exc}")
 
 
+def stop_group(pgid, proc=None):
+    signal_group(pgid, signal.SIGTERM)
+    if proc is not None:
+        with contextlib.suppress(subprocess.TimeoutExpired):
+            proc.wait(timeout=2)
+    else:
+        deadline = time.monotonic() + 2
+        while group_live(pgid) is not False and time.monotonic() < deadline:
+            time.sleep(0.05)
+    if group_live(pgid) is not False:
+        signal_group(pgid, signal.SIGKILL)
+    deadline = time.monotonic() + 2
+    while group_live(pgid) is not False:
+        if time.monotonic() >= deadline:
+            raise DispatchError(f"尚未確認程序群 {pgid} 已停止，保留派工名額供主 agent 檢查")
+        time.sleep(0.05)
+
+
 def terminate(proc):
     if os.name == "nt":
         return windows.terminate(proc)
-    signal_group(proc.pid, signal.SIGTERM)
-    with contextlib.suppress(subprocess.TimeoutExpired):
-        proc.wait(timeout=2)
-    if group_live(proc.pid) is not False:
-        signal_group(proc.pid, signal.SIGKILL)
-    deadline = time.monotonic() + 2
-    while group_live(proc.pid) is not False:
-        if time.monotonic() >= deadline:
-            raise DispatchError(f"尚未確認程序群 {proc.pid} 已停止，保留派工名額供主 agent 檢查")
-        time.sleep(0.05)
+    stop_group(proc.pid, proc)
     proc.wait()
 
 
@@ -461,11 +490,22 @@ def execute(argv, cwd, root, name, timeout, state, path):
                 state.update(cleanup_pending=True, process_group=proc.pid)
             else:
                 proc = subprocess.Popen(argv, cwd=cwd, stdin=subprocess.DEVNULL, stdout=out, stderr=err, start_new_session=True)
-            state["child_pid"] = proc.pid
+                state["process_group"] = proc.pid
+            state.update(child_pid=proc.pid, current_log={"stdout": str(stdout_path), "stderr": str(stderr_path)})
             atomic_write(path, state)
             if os.name == "nt":
                 windows.release(proc)
-            proc.wait(timeout=timeout)
+            deadline = time.monotonic() + timeout
+            while True:
+                try:
+                    proc.wait(timeout=max(0, min(1, deadline - time.monotonic())))
+                    break
+                except subprocess.TimeoutExpired:
+                    if stop_requested(root, state):
+                        result.update(interrupted=True, cancelled=True)
+                        break
+                    if time.monotonic() >= deadline:
+                        raise
             result["returncode"] = proc.returncode
         except subprocess.TimeoutExpired:
             result["timeout"] = True
@@ -488,9 +528,10 @@ def execute(argv, cwd, root, name, timeout, state, path):
                 else:
                     state.update(cleanup_pending=False, process_group=None, child_pid=None)
                 result["cleanup_pending"] = state["cleanup_pending"]
+                state["current_log"] = None
                 atomic_write(path, state)
             else:
-                state["child_pid"] = None
+                state.update(child_pid=None, current_log=None)
     with stdout_path.open(encoding="utf-8", errors="replace") as handle:
         result["output"] = handle.read(65536)
     with stderr_path.open(encoding="utf-8", errors="replace") as handle:
@@ -548,7 +589,29 @@ def output_result(state, path):
             "memory_reminder": REMINDER, "reason": state.get("reason", ""),
             "native_tool": NATIVE_TOOLS[state["request"]["host"]] if native else None,
             "instruction": ("尚未派出。請使用目前宿主的內建 subagent、指定模型與完整 prompt。工具不可用時帶實際錯誤接續下一檔。"
-                            if native else "主 agent 親自核對範圍、diff 與驗證結果，再回報 outcome。")}
+                            if native else
+                            "此層尚未啟動執行者。解除佔用後用 --outcome dispatch-failed 在同一層重來。" if state["status"] == "not_started" else
+                            "仍在執行。再用 status --wait 查詢；判定卡住時用 cancel。" if state["status"] in ACTIVE else
+                            "主 agent 親自核對範圍、diff 與驗證結果，再回報 outcome。")}
+
+
+def with_runtime(result, state):
+    """Add progress details for a dispatch that has not reached a reviewable state."""
+    if state["status"] not in ACTIVE:
+        return result
+    log = state.get("current_log") or {}
+    phase = ("starting" if state["status"] == "starting" else "queued" if state["status"] == "new" else
+             "probing" if log.get("stdout", "").endswith("-models.stdout.log") else "executing" if log else "preparing")
+    started = (state.get("run") or {}).get("started_at")
+    info = {"elapsed": round(time.time() - started, 1) if started else None, "child_pid": state.get("child_pid")}
+    for stream in ("stdout", "stderr"):
+        try:
+            stat = os.stat(log[stream])
+            info[stream + "_bytes"], info[stream + "_age"] = stat.st_size, round(time.time() - stat.st_mtime, 1)
+        except (KeyError, OSError):
+            info[stream + "_bytes"] = info[stream + "_age"] = None
+    result.update(phase=phase, runtime=info)
+    return result
 
 
 def drive(root, path, state, task, write_paths, start, timeout):
@@ -558,13 +621,19 @@ def drive(root, path, state, task, write_paths, start, timeout):
         if spec.get("effort") and spec["effort"] != "low":
             spec["effort"] = r.get("effort", spec["effort"])
         native = spec["tool"] == r["host"]
-        state.update(current_level=level, current_model=None, current_family=spec["family"],
+        state.update(current_level=level, current_tool=spec["tool"], current_model=None, current_family=spec["family"],
                      current_effort=spec.get("effort"), reason="", prompt=build_prompt(r, task, state))
-        claim(root, path, state, spec, write_paths, native, timeout)
+        atomic_write(path, state)
+        try:
+            claim(root, path, state, spec, write_paths, native, timeout)
+        except NotStarted as exc:
+            state.update(status="not_started", reason=str(exc), write_paths=[])
+            atomic_write(path, state)
+            return output_result(state, path)
         attempt = {"level": level, "tool": spec["tool"], "model": None, "native": native}
         state["attempts"].append(attempt)
         atomic_write(path, state)
-        before = snapshot(r, write_paths)
+        before = attempt["snapshot_before"] = snapshot(r, write_paths)
         catalog = r.get("models", {}).get(spec["tool"], [])
         if not native and spec["tool"] in MODEL_PROBES:
             probe = execute(MODEL_PROBES[spec["tool"]], r["project_dir"], root,
@@ -581,7 +650,7 @@ def drive(root, path, state, task, write_paths, start, timeout):
                     state.update(status="awaiting_review", reason="模型探測發生未知錯誤，保留原始輸出供主 agent 檢查。")
                     atomic_write(path, state)
                     return output_result(state, path)
-                state["status"] = "dispatch_failed"
+                state["status"] = "new"  # moving on to the next level
                 atomic_write(path, state)
                 continue
             catalog = probe_catalog(spec["tool"], probe["output"])
@@ -596,7 +665,7 @@ def drive(root, path, state, task, write_paths, start, timeout):
         if not model:
             attempt["error"] = "實際模型清單沒有符合此層級種類及版本限制的模型"
             attempt["catalog"] = catalog
-            state["status"] = "dispatch_failed"
+            state["status"] = "new"  # moving on to the next level
             atomic_write(path, state)
             continue
         argv = cli_argv(spec, model, r["project_dir"], state["prompt"])
@@ -609,7 +678,7 @@ def drive(root, path, state, task, write_paths, start, timeout):
         failed_text = attempt["error"] + "\n" + (json.dumps(errors, ensure_ascii=False) if errors else attempt["output"])
         safe_failure = failed and (attempt["launch_error"] or bool(KNOWN_FAILURE.search(failed_text)))
         if safe_failure and not attempt.get("cleanup_pending") and not attempt["timeout"] and not attempt["interrupted"] and before is not None and after == before:
-            state["status"] = "dispatch_failed"
+            state["status"] = "new"  # moving on to the next level
             atomic_write(path, state)
             continue
         state.update(status="awaiting_review", reason=("無法確認工作程序已停止，保留名額與檔案範圍，請先檢查 cleanup_error。" if attempt.get("cleanup_pending") else
@@ -641,21 +710,10 @@ def dispatch(a, policy):
                  "policy_fingerprint": hashlib.sha256(POLICY_PATH.read_bytes()).hexdigest()}
         with lock_file(root / (did + ".lock"), False):
             atomic_write(path, state)
-            return drive(root, path, state, task, paths, start, a.timeout)
+            return run(root, path, state, task, paths, start, a)
     if not a.outcome:
         raise DispatchError("接續必須提供 --outcome")
-    try:
-        did = str(uuid.UUID(a.dispatch_id))
-    except ValueError:
-        raise DispatchError("dispatch-id 必須是有效 UUID")
-    # Resolve the requested store before opening any existing task. Do not create it on a bogus resume.
-    root = Path(a.state_dir).expanduser() if a.state_dir else default_state_directory()
-    path = root / (did + ".json")
-    if not path.is_file() or path.is_symlink():
-        raise DispatchError("找不到原派工狀態")
-    if os.name == "nt":
-        windows.ensure_private(root)
-        windows.ensure_private(path)
+    root, path, did = existing_dispatch(a)
     with lock_file(root / (did + ".lock"), False):
         state = json.loads(path.read_text(encoding="utf-8"))
         r, paths = validate_request(state["request"], policy)
@@ -669,7 +727,12 @@ def dispatch(a, policy):
         count = len(task["levels"])
         check_level(a.level, count)
         status = state["status"]
-        if status not in ("native_required", "awaiting_review", "running", "new", "dispatch_failed"):
+        if status == "starting":
+            if alive(state.get("owner_pid")):
+                raise DispatchError("背景程序正在接手執行此派工，不可同時接續")
+            state.update(status="not_started", reason="背景程序未接手就結束；尚未啟動執行者。")
+            status = "not_started"
+        if status not in ("native_required", "awaiting_review", "running", "new", "dispatch_failed", "not_started"):
             raise DispatchError("此派工已結束，不可重複啟動：" + status)
         if alive(state.get("child_pid")):
             raise DispatchError("前一個子程序仍在執行，請先檢查並停止")
@@ -686,9 +749,9 @@ def dispatch(a, policy):
         reason = text_value(a.failure_reason, "--failure-reason")
         current = state.get("current_level", 1)
         if a.outcome == "dispatch-failed":
-            if status != "native_required":
+            if status not in ("native_required", "not_started"):
                 raise DispatchError("外部執行成果必須先審查，不能冒充未派出")
-            wanted = current + 1
+            wanted = current + 1 if status == "native_required" else current
         else:
             if not a.partial_work_reviewed:
                 raise DispatchError("先檢查磁碟與半成品，再提供 --partial-work-reviewed")
@@ -701,12 +764,191 @@ def dispatch(a, policy):
         state["feedback"].append({"outcome": a.outcome, "reason": reason, "feedback": a.feedback or ""})
         state.update(status="new", write_paths=[])
         atomic_write(path, state)
-        return drive(root, path, state, task, paths, wanted, a.timeout)
+        return run(root, path, state, task, paths, wanted, a)
+
+
+def existing_dispatch(a):
+    try:
+        did = str(uuid.UUID(a.dispatch_id))
+    except ValueError:
+        raise DispatchError("dispatch-id 必須是有效 UUID")
+    # Resolve the requested store before opening any existing task. Do not create it on a bogus resume.
+    root = Path(a.state_dir).expanduser() if a.state_dir else default_state_directory()
+    path = root / (did + ".json")
+    if not path.is_file() or path.is_symlink():
+        raise DispatchError("找不到原派工狀態")
+    if os.name == "nt":
+        windows.ensure_private(root)
+        windows.ensure_private(path)
+    return root, path, did
+
+
+def run(root, path, state, task, paths, start, a):
+    """Run levels in this process, or hand them to a detached supervisor."""
+    state["run"] = {"id": uuid.uuid4().hex, "start": start, "timeout": a.timeout, "started_at": time.time()}
+    with contextlib.suppress(FileNotFoundError):
+        stop_path(root, state).unlink()
+    if a.foreground or task["levels"][start - 1]["tool"] == state["request"]["host"]:
+        return drive(root, path, state, task, paths, start, a.timeout)
+    log_path = root / (state["dispatch_id"] + ".supervisor.log")
+    argv = [sys.executable, str(Path(__file__).resolve()), "supervise",
+            "--dispatch-id", state["dispatch_id"], "--state-dir", str(root)]
+    with private_file(log_path) as log:
+        log.seek(0, os.SEEK_END)
+        # Every stream is redirected so the caller's shell does not wait for the supervisor.
+        options = dict(cwd=str(root), stdin=subprocess.DEVNULL, stdout=log, stderr=log)
+        try:
+            if os.name == "nt":
+                flags = 0x00000008 | 0x00000200  # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
+                try:
+                    proc = subprocess.Popen(argv, creationflags=flags | 0x01000000, **options)  # CREATE_BREAKAWAY_FROM_JOB
+                except OSError:
+                    proc = subprocess.Popen(argv, creationflags=flags, **options)
+            else:
+                proc = subprocess.Popen(argv, start_new_session=True, **options)
+        except OSError as exc:
+            state.update(status="not_started", reason="背景程序無法啟動：" + str(exc))
+            atomic_write(path, state)
+            raise DispatchError(state["reason"])
+    state.update(status="starting", owner_pid=proc.pid, supervisor_started=False, reason="")
+    atomic_write(path, state)
+    return {"spawned": proc, "root": root, "path": path, "log": log_path, "state": state}
+
+
+def handshake(spawned):
+    """Report the background start once the supervisor owns the dispatch, or report its startup failure."""
+    proc, path, state = spawned["spawned"], spawned["path"], spawned["state"]
+    deadline = time.monotonic() + 10
+    while time.monotonic() < deadline:
+        current = json.loads(path.read_text(encoding="utf-8"))
+        if current.get("supervisor_started") and current.get("owner_pid") == proc.pid:
+            break
+        if proc.poll() is not None:
+            log = spawned["log"].read_text(encoding="utf-8", errors="replace")[-4000:]
+            with contextlib.suppress(DispatchError):
+                with lock_file(spawned["root"] / (state["dispatch_id"] + ".lock"), False):
+                    current = json.loads(path.read_text(encoding="utf-8"))
+                    if current.get("status") == "starting":
+                        current.update(status="not_started", reason="背景程序未接手就結束；尚未啟動執行者。")
+                        atomic_write(path, current)
+            raise DispatchError("背景程序啟動失敗，未派出執行者。紀錄：" + str(spawned["log"]) + "\n" + log)
+        time.sleep(0.05)
+    return {"status": "started", "dispatch_id": state["dispatch_id"], "state_path": str(path),
+            "task_type": state["request"]["task_type"], "level": state["run"]["start"],
+            "supervisor_pid": proc.pid, "supervisor_log": str(spawned["log"]),
+            "timeout": state["run"]["timeout"], "memory_reminder": REMINDER,
+            "instruction": "背景執行中。用 status --dispatch-id " + state["dispatch_id"] +
+                           " --wait <秒數> 取得結果，秒數不超過自己指令工具的上限，等不到就再查；判定卡住時用 cancel。"}
+
+
+def supervise(a, policy):
+    root, path, did = existing_dispatch(a)
+    with lock_file(root / (did + ".lock")):
+        state = json.loads(path.read_text(encoding="utf-8"))
+        if state.get("status") != "starting" or state.get("owner_pid") != os.getpid():
+            raise DispatchError("此背景程序不是派工的指定接手者，未執行任何層級")
+        state.update(status="new", supervisor_started=True)
+        atomic_write(path, state)
+        task = policy["tasks"][state["request"]["task_type"]]
+        run = state["run"]
+        try:
+            return drive(root, path, state, task, state["scope_paths"], run["start"], run["timeout"])
+        except BaseException as exc:
+            if state.get("status") in ACTIVE:
+                state.update(status="awaiting_review", write_paths=state.get("write_paths", []) if state.get("cleanup_pending") else [],
+                             reason="背景程序發生錯誤：" + (str(exc) or type(exc).__name__) + "。先檢查原始輸出、程序與磁碟。")
+                atomic_write(path, state)
+            raise
+        finally:
+            with contextlib.suppress(OSError):
+                if stop_requested(root, state):
+                    stop_path(root, state).unlink()
+
+
+def repair(root, path, state, r):
+    """Settle an active state whose supervisor no longer holds the dispatch lock."""
+    status = state["status"]
+    if status == "starting":
+        if alive(state.get("owner_pid")):
+            return state
+        state.update(status="not_started", reason="背景程序未接手就結束；尚未啟動執行者。")
+    elif status == "new":
+        state.update(status="not_started", write_paths=[], reason="背景程序在啟動執行者前結束；可用 --outcome dispatch-failed 在同一層重來。")
+    else:
+        group = state.get("process_group") or state.get("child_pid")
+        live = group_live(group) if group else False
+        attempt = state["attempts"][-1] if state["attempts"] else {}
+        attempt["supervisor_lost"] = True
+        if live is not False:
+            state.update(status="awaiting_review", cleanup_pending=True, process_group=group,
+                         reason="背景程序已結束，但工作程序仍在執行。先用 cancel 停止，再檢查半成品。")
+        else:
+            after = snapshot(r, state.get("write_paths", []))
+            before = attempt.get("snapshot_before")
+            attempt["files_changed"] = None if before is None or after is None else after != before
+            state.update(status="awaiting_review", write_paths=[], child_pid=None, process_group=None,
+                         cleanup_pending=False, reason="背景程序意外結束，工作程序已不在。先檢查原始輸出、程序與磁碟。")
+    atomic_write(path, state)
+    return state
+
+
+def settle(root, path, did):
+    """Read the state, repairing it when nobody holds the dispatch lock."""
+    state = json.loads(path.read_text(encoding="utf-8"))
+    if state["status"] in ACTIVE:
+        with contextlib.suppress(DispatchError):
+            with lock_file(root / (did + ".lock"), False):
+                state = json.loads(path.read_text(encoding="utf-8"))
+                if state["status"] in ACTIVE:
+                    state = repair(root, path, state, state["request"])
+    return state
+
+
+def status(a):
+    root, path, did = existing_dispatch(a)
+    deadline = time.monotonic() + a.wait
+    while True:
+        state = settle(root, path, did)
+        if state["status"] not in ACTIVE or time.monotonic() >= deadline:
+            return with_runtime(output_result(state, path), state)
+        time.sleep(0.5)
+
+
+def cancel(a):
+    root, path, did = existing_dispatch(a)
+    state = settle(root, path, did)
+    if state["status"] in ACTIVE:
+        if not (state.get("run") or {}).get("id"):
+            raise DispatchError("此派工沒有可取消的執行識別，請停止原本的前景程序")
+        with private_file(stop_path(root, state)) as handle:
+            handle.truncate()
+            handle.write(state["run"]["id"])
+        deadline = time.monotonic() + 60
+        while state["status"] in ACTIVE:
+            if time.monotonic() >= deadline:
+                raise DispatchError("已送出取消請求，但 60 秒內未確認停止；用 status 檢查程序")
+            time.sleep(0.2)
+            state = settle(root, path, did)
+    if state.get("cleanup_pending") and state.get("status") not in ACTIVE:
+        with lock_file(root / (did + ".lock"), False):
+            state = json.loads(path.read_text(encoding="utf-8"))
+            group = state.get("process_group")
+            if state.get("cleanup_pending") and group:
+                if os.name == "nt":
+                    if windows.group_live(group) is not False:
+                        raise DispatchError("Windows 無法從外部停止此工作程序，請手動檢查")
+                else:
+                    stop_group(group)
+                state.update(cleanup_pending=False, process_group=None, child_pid=None,
+                             reason=state.get("reason", "") + " 已由 cancel 停止殘留的工作程序。")
+                atomic_write(path, state)
+    return output_result(state, path)
 
 
 def parser(policy):
     p = argparse.ArgumentParser(description="依任務類型的層級派工。查詢不呼叫模型、不寫狀態。需要 Python 3.9+，支援 Windows 10+/macOS/Linux。",
-        epilog="操作：list-types 列任務；list-levels 列層級；dispatch 發起或接續。各操作加 --help 查完整說明。")
+        epilog="操作：list-types 列任務；list-levels 列層級；dispatch 在背景發起或接續；status 查結果；cancel 停止執行中的派工。"
+               "supervise 僅供 dispatch 內部使用。各操作加 --help 查完整說明。")
     sub = p.add_subparsers(dest="command")
     q = sub.add_parser("list-types", help="列出所有任務類型及各自層級數", description="純查詢。預設顯示人可讀表格。exit 0。")
     form = q.add_mutually_exclusive_group()
@@ -736,8 +978,12 @@ models 為已查證可用模型的工具名→名稱陣列，提供時必填 mod
 外部 OpenCode/agy 由 models 指令、Codex 由 debug models 查證，結果取代 request 的同工具清單。輪到宿主時不執行自己的 CLI，僅回傳內建交接提示。
 困難寫程式格子可用 difficult_implementation:true、opencode_failure_evidence（同任務實際失敗證據）從第 2 檔開始。
 
-所有 dispatch 結果輸出單一 JSON：status、dispatch_id、level、tool、model、prompt、attempts、state_path、memory_reminder。
+會啟動外部 CLI 的發起與接續預設在背景執行：立即輸出 status=started、dispatch_id、supervisor_pid 與 supervisor_log，
+之後用 status --wait 取得結果，判定卡住時用 cancel。--outcome completed 與起始層級是宿主內建 subagent 時直接輸出結果。
+--foreground 改為在本程序等到結束，供測試與除錯。
+其餘結果輸出單一 JSON：status、dispatch_id、level、tool、model、prompt、attempts、state_path、memory_reminder。
 native_required：尚未派出，由主 agent 用 native_tool 指示的內建工具與完整 prompt 呼叫。
+not_started：等待同檔寫入或併行名額逾時、已取消或背景程序未接手，此層沒有執行者啟動；用 --outcome dispatch-failed 在同一層重來。
 awaiting_review：由主 agent 看 diff、親自驗證；script 不自動採用、不執行 verification 指令、不寫記憶。
 外部已知未派出失敗且快照一致才自動接手。快照涵蓋所有專案檔案（含忽略檔）與沙盒，掃描逾時就先審查。
 每次 CLI 結束會停止其程序群，確認工作程序結束後才快照及接手；需持續執行的服務由主 agent 管理。
@@ -750,7 +996,7 @@ Windows 使用原生檔案鎖與 Job Object 清理程序樹；支援 exe 與標�
 未納管程序仍由主 agent 檢查。中斷留下 running 時須檢查程序與半成品後回報，不自動重跑。
 exit 0：已產生上述狀態（不代表成果合格）；exit 2：參數、狀態或檔案錯誤，未繼續派工。
 """, epilog="request 範例（請替換為實際專案、任務與本輪模型清單）：\n" + json.dumps(example, ensure_ascii=False, indent=2) +
-        "\n\n範例：\n  dispatch.py dispatch --request task.json\n  dispatch.py dispatch --dispatch-id <UUID> --level 3 --outcome dispatch-failed --failure-reason '內建工具原始錯誤'\n  dispatch.py dispatch --dispatch-id <UUID> --outcome verification-failed --failure-reason '驗證指令及失敗輸出' --partial-work-reviewed\n  dispatch.py dispatch --dispatch-id <UUID> --outcome completed")
+        "\n\n範例：\n  dispatch.py dispatch --request task.json\n  dispatch.py status --dispatch-id <UUID> --wait 100\n  dispatch.py dispatch --dispatch-id <UUID> --level 3 --outcome dispatch-failed --failure-reason '內建工具原始錯誤'\n  dispatch.py dispatch --dispatch-id <UUID> --outcome verification-failed --failure-reason '驗證指令及失敗輸出' --partial-work-reviewed\n  dispatch.py dispatch --dispatch-id <UUID> --outcome completed")
     group = q.add_mutually_exclusive_group(required=True)
     group.add_argument("--request", metavar="FILE|-", help="新任務 JSON 檔案，- 從 stdin 讀取")
     group.add_argument("--dispatch-id", metavar="UUID", help="接續原派工，重用原 request 與全部失敗證據")
@@ -760,7 +1006,27 @@ exit 0：已產生上述狀態（不代表成果合格）；exit 2：參數、�
     q.add_argument("--feedback", help="選填，已核對的教訓、保留的半成品與修正要求，會累積帶進接手 prompt")
     q.add_argument("--partial-work-reviewed", action="store_true", help="verification-failed 必填，主 agent 已檢查程序、磁碟及半成品")
     q.add_argument("--state-dir", help="選填，專案外的專用私有狀態目錄，也作為此群派工的併行協調範圍")
-    q.add_argument("--timeout", type=float, default=600, help="每次執行及等待名額的正秒數，預設 600；模型探測最多 30 秒")
+    q.add_argument("--timeout", type=float, default=1800,
+                   help="每次執行外部 CLI 的上限秒數，等待名額也用同一值，預設 1800；模型探測最多 30 秒。不要為了配合呼叫端指令工具的時間上限而縮短")
+    q.add_argument("--foreground", action="store_true", help="在本程序等到結果才輸出，供測試與除錯；一般派工用背景")
+    q = sub.add_parser("status", help="查詢派工狀態，可等待結果",
+        description="輸出與 dispatch 相同結構的 JSON。仍在執行時另含 phase（starting/queued/preparing/probing/executing）"
+                    "與 runtime（elapsed、child_pid、stdout/stderr 的位元組數及距最後輸出秒數）。"
+                    "背景程序意外結束時，工作程序仍在就標為 awaiting_review 並保留 cleanup_pending，"
+                    "工作程序已不在就依檔案快照標為 awaiting_review；啟動執行者前結束標為 not_started。exit 0：已輸出狀態；exit 2：派工不存在或參數錯誤。",
+        epilog="範例：dispatch.py status --dispatch-id <UUID> --wait 100")
+    q.add_argument("--dispatch-id", required=True, metavar="UUID", help="dispatch 輸出的派工識別碼")
+    q.add_argument("--state-dir", help="選填，與 dispatch 相同的狀態目錄")
+    q.add_argument("--wait", type=float, default=0, help="仍在執行時最多等待的秒數，預設 0；不要超過自己指令工具的時間上限")
+    q = sub.add_parser("cancel", help="停止執行中的派工",
+        description="送出取消請求，等背景程序停止整個工作程序群並快照後輸出結果（通常為 awaiting_review，排隊中為 not_started）。"
+                    "背景程序已不在而工作程序殘留時，直接停止殘留程序群。已結束的派工只輸出現況。exit 2：60 秒內未確認停止或無法停止。",
+        epilog="範例：dispatch.py cancel --dispatch-id <UUID>")
+    q.add_argument("--dispatch-id", required=True, metavar="UUID", help="dispatch 輸出的派工識別碼")
+    q.add_argument("--state-dir", help="選填，與 dispatch 相同的狀態目錄")
+    q = sub.add_parser("supervise", help="內部使用：由 dispatch 啟動的背景程序", description="僅供 dispatch 啟動的背景程序使用，不要直接呼叫。")
+    q.add_argument("--dispatch-id", required=True)
+    q.add_argument("--state-dir", required=True)
     return p
 
 
@@ -793,9 +1059,21 @@ def main(argv=None):
                 print(f"{row['level']}. {row['tool']} / {row['family']} | {row['execution']} | effort={row.get('effort')} | minimum={row.get('minimum', '無')}")
         return 0
     try:
-        if not math.isfinite(a.timeout) or a.timeout <= 0:
-            raise DispatchError("--timeout 必須是有限正數")
-        result = dispatch(a, policy)
+        if a.command == "supervise":
+            supervise(a, policy)
+            return 0
+        if a.command == "status":
+            if not math.isfinite(a.wait) or a.wait < 0:
+                raise DispatchError("--wait 必須是有限的非負數")
+            result = status(a)
+        elif a.command == "cancel":
+            result = cancel(a)
+        else:
+            if not math.isfinite(a.timeout) or a.timeout <= 0:
+                raise DispatchError("--timeout 必須是有限正數")
+            result = dispatch(a, policy)
+            if "spawned" in result:
+                result = handshake(result)
         print(json.dumps(result, ensure_ascii=False))
         return 0
     except (DispatchError, OSError, ValueError, KeyError) as exc:

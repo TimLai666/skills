@@ -66,7 +66,10 @@ class Acceptance(unittest.TestCase):
         result.update(extra)
         return result
 
-    def cli(self, *args, request=None):
+    def cli(self, *args, request=None, background=False):
+        # Workflow tests read the final result directly; background behavior has its own tests.
+        if args and args[0] == "dispatch" and not background:
+            args = (args[0], "--foreground", *args[1:])
         # Allow slow interpreter starts on a busy host; each worker timeout is tested separately.
         proc = subprocess.Popen([sys.executable, str(SCRIPT), *args], stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,

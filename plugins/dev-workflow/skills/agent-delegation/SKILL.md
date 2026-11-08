@@ -14,7 +14,7 @@ description: >-
   Dispatched workers MUST NOT apply this skill or delegate. Ordinary prompts MUST
   carry project lessons; workers MUST report lessons for verification and recording.
 metadata:
-  version: "2.21.3"
+  version: "2.22.0"
 ---
 
 # Agent 派工規範
@@ -76,10 +76,12 @@ Copilot 宿主依當前執行環境判定，不把登入、模型設定或繼承
 ### Script 執行與內建工具交接
 
 - 主 agent 必須透過 script 發起新派工與處理層級接手，不自行重排工具或拼接派工指令。符合「Agent 與對話複用」時，依該節續接原 agent 或 session。操作與參數查詢使用 CLI 的總覽及子指令 `--help`；原生工具說明入口見 [CLI 速查表](references/cli-cheatsheet.md)。
+- 會啟動外部 CLI 的派工在背景執行，`dispatch` 輸出 `started` 後就結束。主 agent 用 `status --dispatch-id <ID> --wait <秒數>` 取得結果，秒數不超過自己指令工具的執行上限，結果仍是 `running` 就再查一次。宿主能在背景執行指令並在結束時通知，就可用它跑較長的 `status --wait`。`--timeout` 是單次執行外部 CLI 的上限，依任務需要設定，不為了配合自己指令工具的上限而縮短。
+- `status` 的 `runtime` 顯示工作程序很久沒有新輸出，主 agent 判斷它已經卡住時，用 `cancel` 停止，再依 `awaiting_review` 審查。結果為 `not_started` 表示此層還沒有啟動執行者，解除佔用後用 `--outcome dispatch-failed` 在同一層重來。
 - 外部 CLI 的已知啟動、模型或額度錯誤，只有確認沒有專案檔案變動時才自動接手。正常回報、部分改檔、未知錯誤與逾時先交回主 agent 審查，不把 CLI 成功當成驗收通過。
 - 結果為 `native_required` 時，主 agent 使用輸出指定的內建工具與合規模型，先依複用條件選擇既有 agent，再提供本次完整任務要求。禁止改用宿主自己的 CLI。內建工具不可用或派工失敗時，帶原派工識別碼、實際錯誤與下一層級接續；不可跳級。
 - 結果為 `awaiting_review` 時，主 agent 讀 diff、核對範圍並親自驗證。回報已完成驗收、派工失敗或驗證失敗時，依 CLI 的條件接續。寫程式同級連續兩次驗證失敗才升級，不能把成果不合格冒充為未派出。
-- 每次接續讀取原派工狀態，保留原 prompt、失敗證據與補充教訓。逾時或中斷先由主 agent 確認程序及半成品，再依「工具失敗」的接續與停止條件處理。
+- 每次接續讀取原派工狀態，保留原 prompt、失敗證據與補充教訓。逾時、中斷或取消後，先由主 agent 確認程序及半成品，再依「工具失敗」的接續與停止條件處理。
 - 狀態與原始輸出存於專案外的使用者狀態目錄，由 script 接續與主 agent 審查時讀取；不在使用者專案根目錄新增協調檔。script 只追蹤自身管理的併行派工，其他 agent 與未納管寫入仍由主 agent 查證。
 - 每次外部 CLI 結束，script 先停止其工作程序群，再檢查所有專案檔案（含忽略檔）與授權沙盒。掃描無法完成或有變動就先審查。需要持續執行的服務由主 agent 管理。
 
