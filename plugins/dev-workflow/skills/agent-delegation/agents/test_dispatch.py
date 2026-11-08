@@ -216,6 +216,19 @@ print('completed')"""
         self.assertNotIn("replacement request", continued["prompt"])
         self.assertIn("preserve this", continued["prompt"])
 
+    def test_unreported_handoffs_do_not_block_a_new_dispatch(self):
+        helpers_module = __import__("test_portability").dispatch
+        self.state.mkdir(mode=0o700)
+        for i in range(3):
+            helpers_module.atomic_write(self.state / f"0000000{i}-0000-4000-8000-000000000000.json", dict(
+                dispatch_id=f"0000000{i}-0000-4000-8000-000000000000", status="native_required",
+                current_tool="codex", owner_pid=None, write_paths=[str(self.project / "labels.txt")]))
+        result = self.cli("dispatch", "--request", "-", "--timeout", "5", "--state-dir", str(self.state),
+                          request=self.request())
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual((payload["status"], payload["level"], payload["tool"]), ("native_required", 2, "codex"))
+
     def test_same_file_dispatches_do_not_run_concurrently(self):
         counter = self.install_counting_copilot()
         payloads = self.parallel_classifications(["shared.txt", "shared.txt"])

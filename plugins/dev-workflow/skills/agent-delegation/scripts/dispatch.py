@@ -339,7 +339,8 @@ def claim(root, path, state, spec, write_paths, native, timeout):
                 if os.name == "nt":
                     windows.ensure_private(other_path)
                 other = json.loads(other_path.read_text(encoding="utf-8"))
-                active = other.get("cleanup_pending") or other.get("status") == "native_required" or (
+                # Built-in subagent handoffs launch nothing this script can watch, so only external workers hold leases.
+                active = other.get("cleanup_pending") or (
                     other.get("status") == "running" and
                     (alive(other.get("owner_pid")) or alive(other.get("child_pid"))))
                 if active:
@@ -348,7 +349,7 @@ def claim(root, path, state, spec, write_paths, native, timeout):
             conflict = any(overlap(a, b) for other in leases for a in write_paths for b in other.get("write_paths", []))
             if slots < 3 and not conflict:
                 state.update(status="native_required" if native else "running", owner_pid=os.getpid(),
-                             child_pid=None, current_tool=spec["tool"], write_paths=write_paths)
+                             child_pid=None, current_tool=spec["tool"], write_paths=[] if native else write_paths)
                 atomic_write(path, state)
                 return
         if time.monotonic() >= deadline:
@@ -982,7 +983,8 @@ models 為已查證可用模型的工具名→名稱陣列，提供時必填 mod
 之後用 status --wait 取得結果，判定卡住時用 cancel。--outcome completed 與起始層級是宿主內建 subagent 時直接輸出結果。
 --foreground 改為在本程序等到結束，供測試與除錯。
 其餘結果輸出單一 JSON：status、dispatch_id、level、tool、model、prompt、attempts、state_path、memory_reminder。
-native_required：尚未派出，由主 agent 用 native_tool 指示的內建工具與完整 prompt 呼叫。
+native_required：尚未派出，由主 agent 用 native_tool 指示的內建工具與完整 prompt 呼叫，完成後用 --outcome 回報。
+此交接會先等外部派工讓出該工具名額與同檔寫入，交出後不佔名額也不鎖檔，主 agent 自行把內建 subagent 計入上限與同檔檢查。
 not_started：等待同檔寫入或併行名額逾時、已取消或背景程序未接手，此層沒有執行者啟動；用 --outcome dispatch-failed 在同一層重來。
 awaiting_review：由主 agent 看 diff、親自驗證；script 不自動採用、不執行 verification 指令、不寫記憶。
 外部已知未派出失敗且快照一致才自動接手。快照涵蓋所有專案檔案（含忽略檔）與沙盒，掃描逾時就先審查。
@@ -992,7 +994,7 @@ exhausted：所有層級失敗；completed：主 agent 已回報驗收完成。�
 state/log 在 macOS/Linux 預設為 $XDG_STATE_HOME/agent-delegation 或 ~/.local/state/agent-delegation，0700/0600。
 Windows 預設為 %LOCALAPPDATA%/agent-delegation，以私有 DACL 保護，只授權目前使用者、SYSTEM 與系統管理員。
 Windows 使用原生檔案鎖與 Job Object 清理程序樹；支援 exe 與標準 npm cmd shim，未知 batch 包裝先回報審查。
-同一 dispatch 不允許並行接續；此目錄追蹤的同檔寫入排隊、各工具最多三條（含內建交接保留名額）。
+同一 dispatch 不允許並行接續；此目錄追蹤外部 CLI 的同檔寫入排隊，各工具最多三條。
 未納管程序仍由主 agent 檢查。中斷留下 running 時須檢查程序與半成品後回報，不自動重跑。
 exit 0：已產生上述狀態（不代表成果合格）；exit 2：參數、狀態或檔案錯誤，未繼續派工。
 """, epilog="request 範例（請替換為實際專案、任務與本輪模型清單）：\n" + json.dumps(example, ensure_ascii=False, indent=2) +

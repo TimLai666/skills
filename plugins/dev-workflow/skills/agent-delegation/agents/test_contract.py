@@ -119,5 +119,50 @@ class Contract(unittest.TestCase):
                                POLICY["tasks"]["classification"]["levels"][0], paths, False, .01)
 
 
+class NativeHandoffLeases(unittest.TestCase):
+    """A handoff to the host's built-in subagent launches nothing the script can watch."""
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.root = Path(tmp.name)
+        self.target = str(self.root / "project" / "shared.txt")
+
+    def lease(self, name, **fields):
+        dispatch.atomic_write(self.root / (name + ".json"), dict(dispatch_id=name, **fields))
+
+    def claim(self, tool, native, paths):
+        state = dict(dispatch_id="mine", status="new")
+        spec = dict(tool=tool, family="sol")
+        dispatch.claim(self.root, self.root / "mine.json", state, spec, paths, native, .2)
+        return state
+
+    def test_unreported_handoffs_do_not_hold_slots_or_files(self):
+        for i in range(3):
+            self.lease(f"stale-{i}", status="native_required", current_tool="codex",
+                       owner_pid=None, write_paths=[self.target])
+        state = self.claim("codex", False, [self.target])
+        self.assertEqual(state["status"], "running")
+
+    def test_running_external_workers_still_hold_the_host_slots_before_handoff(self):
+        for i in range(3):
+            self.lease(f"live-{i}", status="running", current_tool="claude",
+                       owner_pid=os.getpid(), write_paths=[])
+        with self.assertRaises(dispatch.NotStarted):
+            self.claim("claude", True, [])
+
+    def test_running_external_writer_still_blocks_handoff_on_the_same_file(self):
+        self.lease("writer", status="running", current_tool="copilot",
+                   owner_pid=os.getpid(), write_paths=[self.target])
+        with self.assertRaises(dispatch.NotStarted):
+            self.claim("claude", True, [self.target])
+
+    def test_handoff_records_no_file_lease(self):
+        state = self.claim("claude", True, [self.target])
+        self.assertEqual((state["status"], state["write_paths"]), ("native_required", []))
+        saved = json.loads((self.root / "mine.json").read_text())
+        self.assertEqual(saved["write_paths"], [])
+
+
 if __name__ == "__main__":
     unittest.main()
