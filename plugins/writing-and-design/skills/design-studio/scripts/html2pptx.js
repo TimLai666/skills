@@ -25,9 +25,11 @@
  *   { slide, placeholders } where placeholders is an array of { id, x, y, w, h }
  */
 
-const { chromium } = require('playwright');
 const path = require('path');
-const sharp = require('sharp');
+const { fileURLToPath } = require('url');
+const { loadModule, loadPlaywright, launchChromium, fileUrl } = require('./node-deps.cjs');
+const { chromium } = loadPlaywright();
+const sharp = loadModule('sharp', 'npm install playwright pptxgenjs sharp');
 
 const PT_PER_PX = 0.75;
 const PX_PER_IN = 96;
@@ -121,7 +123,7 @@ function validateTextBoxPosition(slideData, bodyDimensions) {
 async function addBackground(slideData, targetSlide, tmpDir) {
   if (slideData.background.type === 'image' && slideData.background.path) {
     let imagePath = slideData.background.path.startsWith('file://')
-      ? slideData.background.path.replace('file://', '')
+      ? fileURLToPath(slideData.background.path)
       : slideData.background.path;
     targetSlide.background = { path: imagePath };
   } else if (slideData.background.type === 'color' && slideData.background.value) {
@@ -133,7 +135,7 @@ async function addBackground(slideData, targetSlide, tmpDir) {
 function addElements(slideData, targetSlide, pres) {
   for (const el of slideData.elements) {
     if (el.type === 'image') {
-      let imagePath = el.src.startsWith('file://') ? el.src.replace('file://', '') : el.src;
+      let imagePath = el.src.startsWith('file://') ? fileURLToPath(el.src) : el.src;
       targetSlide.addImage({
         path: imagePath,
         x: el.position.x,
@@ -1105,7 +1107,7 @@ async function html2pptx(htmlFile, pres, options = {}) {
       launchOptions.channel = 'chrome';
     }
 
-    const browser = await chromium.launch(launchOptions);
+    const browser = await launchChromium(chromium, launchOptions);
 
     let bodyDimensions;
     let slideData;
@@ -1120,7 +1122,7 @@ async function html2pptx(htmlFile, pres, options = {}) {
         console.log(`Browser console: ${msg.text()}`);
       });
 
-      await page.goto(`file://${filePath}`);
+      await page.goto(fileUrl(filePath));
 
       bodyDimensions = await getBodyDimensions(page);
 

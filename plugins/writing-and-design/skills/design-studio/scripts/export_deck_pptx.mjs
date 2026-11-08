@@ -25,12 +25,14 @@
  * 按文件名排序（01-xxx.html → 02-xxx.html → ...）。
  */
 
-import pptxgen from 'pptxgenjs';
+import { createRequire as createRequireTop } from 'module';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const { loadModule } = createRequireTop(import.meta.url)('./node-deps.cjs');
+const pptxgen = loadModule('pptxgenjs', 'npm install playwright pptxgenjs sharp');
 
 function parseArgs() {
   const args = {};

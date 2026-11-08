@@ -91,7 +91,7 @@ PPTX 可編輯的前提是 `html2pptx.js` 能把 DOM 逐元素翻譯為 PowerPoi
 **只要 deck ≥ 5 頁，絕對不能從第 1 頁直接寫到最後一頁。** 2026-04-22 moxt brochure 實戰驗證的正確順序：
 
 1. 選 **2 個視覺差異最大的頁面類型**先做 showcase（如「封面」+「情緒/引用頁」，或「封面」+「產品展示頁」）
-2. 截圖讓使用者確認 grammar（masthead / 字型 / 色 / 間距 / 結構 / 中英雙語比例）
+2. 截圖確認 grammar（masthead / 字型 / 色 / 間距 / 結構 / 中英雙語比例）。使用者要求邊做邊看時給他看並等回覆；否則自己看截圖確認後繼續（`SKILL.md` 步驟 2）
 3. 方向通過了再批次推剩下 N-2 頁，每頁複用已建立的 grammar
 4. 全部完成後一起合成 HTML 聚合 + PDF / PPTX 衍生物
 
@@ -119,29 +119,29 @@ PPTX 可編輯的前提是 `html2pptx.js` 能把 DOM 逐元素翻譯為 PowerPoi
 │  [logo 22-28px] · A Product Brochure                Issue · Date · URL │
 ├──────────────────────────────────────────┤
 │                                          │
-│  ── kicker（綠色短橫 + uppercase 標籤）   │
-│  CHAPTER XX · SECTION NAME                 │
+│  ── kicker（綠色短橫 + 章節名，白話）     │
+│  章節名（白話主題，不寫編號）              │
 │                                          │
-│  H1（中文 Noto Serif SC 900）             │
+│  H1（繁中 Noto Serif TC 900）             │
 │  重點詞單獨上品牌主色                      │
 │                                          │
-│  English subtitle (Lora italic，副標題)   │
+│  副標題（中文不用斜體；英文副標可用斜體）│
 │  ─────────── 分隔線 ──────────            │
 │                                          │
 │  [具體內容：雙欄 60/40 / 2x2 grid / 列表] │
 │                                          │
 ├──────────────────────────────────────────┤
-│ section name                     XX / total │
+│ section name          （頁碼由 deck 外殼承載）│
 └──────────────────────────────────────────┘
 ```
 
 ### 樣式約定（直接抄走）
 
-- **H1**：中文 Noto Serif SC 900，字級 80-140px 看資訊量，重點詞單獨上品牌主色（不要全文堆色）
-- **英文副**：Lora italic 26-46px，品牌簽名詞（如 "AI team"）粗體 + 主色斜體
-- **正文**：Noto Serif SC 17-21px，line-height 1.75-1.85
+- **H1**：繁中 Noto Serif TC 900（簡中改用 SC），字級 80-140px 看資訊量，重點詞單獨上品牌主色（不要全文堆色）
+- **副標**：中文副標用正體 26-46px；英文副標才用 Lora italic，品牌簽名詞（如 "AI team"）粗體 + 主色
+- **正文**：Noto Serif TC 17-21px，line-height 1.75-1.85
 - **accent 高亮**：正文裡用主色加粗標註關鍵詞，每頁不超過 3 處（過多就失去錨點作用）
-- **背景**：暖米底 #FAFAFA + 極淡 radial-gradient noise（`rgba(33,33,33,0.015)`）增加紙感
+- **背景**：暖米底 #FAFAFA + 極淡 radial-gradient noise（`rgba(33,33,33,0.015)`）增加紙感（紙紋不算 `shared/composition-rules.md` 的景深層）
 
 ### 視覺主角必須差異化
 
@@ -170,11 +170,11 @@ Chromium 預設不帶彩色 emoji 字型，`page.pdf()` 或 `page.screenshot()` 
 
 **對策**：用 Unicode 文字元號（`✦` `✓` `✕` `→` `·` `—`）替代，或直接改純文字（「Email · 23」而不是「📧 23 emails」）。
 
-### 2. `export_deck_pdf.mjs` 報錯 `Cannot find package 'playwright'`
+### 2. `export_deck_pdf.mjs` 報錯找不到 `playwright` 或 `pdf-lib`
 
-原因：ESM 模組解析從腳本所在位置向上找 `node_modules`。腳本在 `~/.claude/skills/practical/scripts/`，那裡沒依賴。
+原因：skill 的 `scripts/` 目錄沒有自己的 `node_modules`。
 
-**對策**：把腳本複製到 deck 專案目錄（例如 `brochure/build-pdf.mjs`），在專案根跑 `npm install playwright pdf-lib`，然後 `node build-pdf.mjs --slides slides --out output/deck.pdf`。
+**對策**：腳本會依序到 `DESIGN_STUDIO_NODE_MODULES` 指定的資料夾、目前工作目錄、腳本目錄找依賴（`scripts/node-deps.cjs`）。在交付資料夾以外的工具資料夾跑 `npm install playwright pdf-lib`，再設 `DESIGN_STUDIO_NODE_MODULES` 指向那個 `node_modules` 執行，交付資料夾就不會多出依賴。沒裝 Playwright 自帶瀏覽器時，腳本會改用本機 Chrome（也可用 `CHROME_PATH` 指定）。用法見 `node scripts/export_deck_pdf.mjs --help`。
 
 ### 3. Google Fonts 沒載入完就截圖 → 中文顯示為系統預設黑體
 
@@ -522,12 +522,12 @@ Deck系統：
 我按這個系統做，有問題告訴我。
 ```
 
-使用者確認後再往下做。
+使用者要求邊做邊看時，等他確認再往下做；否則照這個系統繼續，並在交付說明列出。
 
 ### 2. 常用 slide layouts
 
 - **Title slide**：純色背景 + 巨大標題 + 副標題 + 作者/日期
-- **Section divider**：彩色背景 + 章節號 + 章節標題
+- **Section divider**：彩色背景 + 章節標題（白話主題，不加編號眉標），配一張該章的主視覺
 - **Content slide**：白底 + 標題 + 1-3 bullet points
 - **Data slide**：標題 + 大圖表/數字 + 簡短說明
 - **Image slide**：full-bleed 照片 + 底部小 caption
@@ -588,7 +588,7 @@ node scripts/export_deck_pdf.mjs --slides <slides-dir> --out deck.pdf
 ```
 
 **特點**：
-- 文字**保留向量**（可複製、可搜尋）
+- 英數文字保留向量可複製、可搜尋；部分中文網路字型嵌入後可能無法複製或搜尋，需要可搜尋時交付前用 PDF 閱讀器試一次
 - 視覺 100% 保真（Playwright 內嵌 Chromium 渲染後列印）
 - **不需要改 HTML 任何一個字**
 - 每個 slide 獨立 `page.pdf()`，再用 `pdf-lib` 合併

@@ -63,10 +63,10 @@ Use this file to decide what to read next. Load the smallest useful subset.
 Use targeted search instead of opening whole files.
 
 ```bash
-rg -n "Villeneuve|Nolan|Fincher|Wong Kar-wai" references/data/directors-200.md
-rg -n "^##|^###|Hero|split|sticky|timeline" references/data/hero-archetypes.md
-rg -n "spotlight|tilt|magnetic|scramble|cursor" references/data/interaction-effects-50.md
-rg -n "grain|mesh|orb|fog|grid" references/data/background-techniques.md
+rg -n "Villeneuve|Nolan|Fincher|Wong Kar-wai" data/directors-200.md
+rg -n "^##|^###|Hero|split|sticky|timeline" data/hero-archetypes.md
+rg -n "spotlight|tilt|magnetic|scramble|cursor" data/interaction-effects-50.md
+rg -n "grain|mesh|orb|fog|grid" data/background-techniques.md
 ```
 
 ## Suggested DNA Search
@@ -74,13 +74,13 @@ rg -n "grain|mesh|orb|fog|grid" references/data/background-techniques.md
 ### Bash / macOS / Linux
 
 ```bash
-awk -F'\t' '$2=="dark" && $7=="animated"' references/data/dna-index.tsv | head -10
+awk -F'\t' '$2=="dark" && $7=="animated"' data/dna-index.tsv | head -10
 ```
 
 ### PowerShell
 
 ```powershell
-Import-Csv references/data/dna-index.tsv -Delimiter "`t" |
+Import-Csv data/dna-index.tsv -Delimiter "`t" |
   Where-Object { $_.mood -eq "dark" -and $_.motion -eq "animated" } |
   Select-Object -First 10
 ```

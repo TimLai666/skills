@@ -21,23 +21,23 @@ open -a "Google Chrome" "/path/to/your/design.html"
 HTML檔案裡最常見的問題是JS報錯導致白屏。用Playwright跑一遍：
 
 ```bash
-python practical/scripts/verify.py path/to/design.html  # 路徑相對本 skill 的 practical/ 目錄
+python scripts/verify.py path/to/design.html  # 路徑相對本 skill 根目錄
 ```
 
 這個腳本會：
-1. 用headless chromium開啟HTML
-2. 截圖儲存到專案目錄
-3. 抓取控制台錯誤
-4. 報告status
+1. 用 headless Chromium 開啟 HTML（沒裝 Playwright 自帶瀏覽器時改用本機 Chrome）
+2. 以 1440x900 與 375x812 截首屏與整頁，存到系統暫存資料夾（`--output` 可改）
+3. 檢查橫向捲動、抓 pageerror 與 console 訊息
+4. 有 pageerror 或橫向捲動時以結束碼 1 結束
 
-詳見`scripts/verify.py`。
+依賴與完整參數見 `python scripts/verify.py --help`。
 
 ### 3. 多視口檢查
 
 如果是響應式設計，抓多個viewport：
 
 ```bash
-python verify.py design.html --viewports 1920x1080,1440x900,768x1024,375x667
+python scripts/verify.py design.html --viewports 1920x1080,1440x900,768x1024,375x667
 ```
 
 ### 4. 互動檢查
@@ -170,7 +170,7 @@ open screenshot.png
 python verify.py design.html
 
 # 多viewport
-python verify.py design.html --viewports 1920x1080,375x667
+python scripts/verify.py design.html --viewports 1920x1080,375x667
 
 # 多slide
 python verify.py deck.html --slides 10

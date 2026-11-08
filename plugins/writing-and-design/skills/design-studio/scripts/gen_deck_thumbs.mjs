@@ -18,10 +18,14 @@
  *
  * 提示：缩略图分辨率别太低（默认 1600px），否则画廊里卡片 hover 放大后会发虚。
  */
-import { chromium } from 'playwright';
-import sharp from 'sharp';
+import { createRequire } from 'module';
 import fs from 'fs';
 import path from 'path';
+
+const require = createRequire(import.meta.url);
+const { loadModule, loadPlaywright, launchChromium, fileUrl, waitForFonts } = require('./node-deps.cjs');
+const { chromium } = loadPlaywright();
+const sharp = loadModule('sharp');
 
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i > -1 && process.argv[i + 1] ? process.argv[i + 1] : d; };
 const slidesDir = arg('slides', 'slides');
@@ -36,15 +40,15 @@ fs.mkdirSync(outDir, { recursive: true });
 const files = fs.readdirSync(slidesDir).filter(f => f.endsWith('.html')).sort();
 if (!files.length) { console.error('slides 目录里没有 .html'); process.exit(1); }
 
-const browser = await chromium.launch();
+const browser = await launchChromium(chromium);
 const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
 let ok = 0;
 for (const f of files) {
   const base = f.replace(/\.html$/, '');
   const out = path.join(outDir, base + '.jpg');
   try {
-    await page.goto('file://' + path.resolve(slidesDir, f), { waitUntil: 'load' });
-    await page.waitForTimeout(2800);                 // 等 webfont / 图片 paint
+    await page.goto(fileUrl(path.resolve(slidesDir, f)), { waitUntil: 'load' });
+    await waitForFonts(page, 1500);                 // 等 webfont / 圖片 paint
     const buf = await page.screenshot({ type: 'png', clip: { x: 0, y: 0, width: W, height: H } });
     await sharp(buf).resize(width).jpeg({ quality }).toFile(out);
     ok++; console.log('[ok] ' + out);

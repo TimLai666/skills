@@ -490,7 +490,7 @@ stage.style.transform = `
 | **本檔案** | 正向運動設計語法 | 「**應該這樣做**」 |
 
 **呼叫順序**：
-1. 先看 GUIDE.md 工作流程 Step 3 的form推導五問（決定敘事角色和視覺溫度）
+1. 先看 `references/production-guide.md` 標準流程 Step 3 的form推導五問（決定敘事角色和視覺溫度）
 2. 選定方向後讀本檔案確定**運動語言**（配方 A/B/C）
 3. 寫程式碼時參考 `animations.md` 和 `animation-pitfalls.md`
 4. 匯出影片時走 `audio-design-rules.md` + `sfx-library.md`

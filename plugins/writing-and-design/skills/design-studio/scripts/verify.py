@@ -1,153 +1,165 @@
 #!/usr/bin/env python3
-"""
-verify.py — Playwright封装，用于验证claude-design产出的HTML
+"""verify.py：用 Playwright 開啟設計產出的 HTML，截圖、收集錯誤、檢查橫向捲動。
 
-Usage:
-    python verify.py path/to/design.html                    # 基础：打开+截图+抓控制台错误
-    python verify.py design.html --viewports 1920x1080,375x667  # 多viewport
-    python verify.py deck.html --slides 10                  # 幻灯片逐页截（前10张）
-    python verify.py design.html --output ./screenshots/   # 输出目录
-    python verify.py design.html --show                    # 非headless，打开真实浏览器
-
-依赖：
-    pip install playwright
-    playwright install chromium
+用法與依賴見 --help。
 """
 
 import argparse
-import sys
 import os
+import sys
+import tempfile
 import time
 from pathlib import Path
 
+HELP_EPILOG = """範例：
+  python verify.py design.html                          # 預設 1440x900 與 375x812 各截首屏與整頁
+  python verify.py design.html --viewports 1920x1080    # 只用一種視窗大小
+  python verify.py deck.html --slides 10                # 單檔投影片：按右鍵翻頁，逐頁截前 10 張
+  python verify.py design.html --output ./shots         # 指定截圖資料夾
+  python verify.py design.html --show                   # 開出看得到的瀏覽器視窗
 
-def parse_viewport(s):
-    w, h = s.split('x')
-    return {'width': int(w), 'height': int(h)}
+檢查項目：
+  - pageerror（JavaScript 執行錯誤）：有就以結束碼 1 結束
+  - 橫向捲動（scrollWidth 大於視窗寬度）：有就以結束碼 1 結束
+  - console 的 error 與 warning：列出供檢查，不影響結束碼
+
+依賴：
+  pip install playwright
+  沒有安裝 Playwright 自帶的 Chromium（playwright install chromium）時，會改用本機 Chrome，
+  也可用 --chrome 或環境變數 CHROME_PATH 指定。
+  多檔案投影片請改用 node scripts/export_deck_pdf.mjs 或 gen_deck_thumbs.mjs 截圖。
+"""
 
 
-def verify_html(html_path, viewports=None, slides=0, output_dir=None, show=False, wait=2000):
+def setup_stdout():
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8")
+        except (AttributeError, ValueError):
+            pass
+
+
+def parse_viewport(text):
+    w, h = text.lower().split("x")
+    return {"width": int(w), "height": int(h)}
+
+
+def local_chrome():
+    if os.environ.get("CHROME_PATH"):
+        return os.environ["CHROME_PATH"]
+    if sys.platform == "win32":
+        paths = [r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+                 r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"]
+    elif sys.platform == "darwin":
+        paths = ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"]
+    else:
+        paths = ["/usr/bin/google-chrome", "/usr/bin/google-chrome-stable", "/usr/bin/chromium", "/usr/bin/chromium-browser"]
+    return next((p for p in paths if Path(p).exists()), None)
+
+
+def launch(p, show, chrome):
+    if chrome:
+        return p.chromium.launch(headless=not show, executable_path=chrome)
+    try:
+        return p.chromium.launch(headless=not show)
+    except Exception:
+        fallback = local_chrome()
+        if not fallback:
+            raise
+        return p.chromium.launch(headless=not show, executable_path=fallback)
+
+
+def verify_html(html_path, viewports, slides, output_dir, show, wait, chrome):
     try:
         from playwright.sync_api import sync_playwright
     except ImportError:
-        print("ERROR: playwright未安装。")
-        print("运行: pip install playwright && playwright install chromium")
-        sys.exit(1)
+        print("錯誤：沒有安裝 Python 版 Playwright。請執行 pip install playwright。")
+        return 2
 
     html_path = Path(html_path).resolve()
     if not html_path.exists():
-        print(f"ERROR: 文件不存在: {html_path}")
-        sys.exit(1)
+        print(f"錯誤：找不到檔案 {html_path}")
+        return 2
 
     if output_dir is None:
-        output_dir = html_path.parent / 'screenshots'
+        output_dir = Path(tempfile.gettempdir()) / f"design-verify-{html_path.stem}-{time.strftime('%Y%m%d-%H%M%S')}"
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     file_url = html_path.as_uri()
     stem = html_path.stem
-
-    if viewports is None:
-        viewports = [{'width': 1440, 'height': 900}]
-
-    console_errors = []
-    page_errors = []
+    console_msgs, page_errors, overflow = [], [], []
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=not show)
-
+        browser = launch(p, show, chrome)
         for viewport in viewports:
-            context = browser.new_context(viewport=viewport, device_scale_factor=2)
+            context = browser.new_context(viewport=viewport)
             page = context.new_page()
+            size = f"{viewport['width']}x{viewport['height']}"
+            page.on("console", lambda msg, size=size: console_msgs.append(f"[{size} {msg.type}] {msg.text}")
+                    if msg.type in ("error", "warning") else None)
+            page.on("pageerror", lambda err, size=size: page_errors.append(f"[{size}] {err}"))
 
-            page.on("console", lambda msg: console_errors.append(f"[{msg.type}] {msg.text}") if msg.type in ("error", "warning") else None)
-            page.on("pageerror", lambda err: page_errors.append(str(err)))
-
-            print(f"\n→ 打开 {file_url} @ {viewport['width']}x{viewport['height']}")
-            page.goto(file_url, wait_until='networkidle')
+            print(f"\n→ 開啟 {file_url} @ {size}")
+            page.goto(file_url, wait_until="networkidle")
+            page.evaluate("document.fonts ? document.fonts.ready.then(() => true) : true")
             page.wait_for_timeout(wait)
+
+            widths = page.evaluate("[document.documentElement.scrollWidth, document.documentElement.clientWidth]")
+            if widths[0] > widths[1]:
+                overflow.append(f"{size}：scrollWidth {widths[0]} 大於視窗寬 {widths[1]}")
 
             if slides > 0:
                 for i in range(slides):
-                    screenshot_path = output_dir / f"{stem}-slide-{str(i + 1).zfill(2)}.png"
-                    page.screenshot(path=str(screenshot_path), full_page=False)
-                    print(f"  ✓ slide {i+1} → {screenshot_path.name}")
-
+                    shot = output_dir / f"{stem}-{size}-slide-{i + 1:02d}.png"
+                    page.screenshot(path=str(shot))
+                    print(f"  ✓ 第 {i + 1} 頁 → {shot.name}")
                     if i < slides - 1:
-                        page.keyboard.press('ArrowRight')
+                        page.keyboard.press("ArrowRight")
                         page.wait_for_timeout(500)
             else:
-                suffix = f"-{viewport['width']}x{viewport['height']}" if len(viewports) > 1 else ""
-                screenshot_path = output_dir / f"{stem}{suffix}.png"
-                page.screenshot(path=str(screenshot_path), full_page=False)
-                print(f"  ✓ 截图 → {screenshot_path.name}")
-
-                full_path = output_dir / f"{stem}{suffix}-full.png"
-                page.screenshot(path=str(full_path), full_page=True)
-                print(f"  ✓ 完整页 → {full_path.name}")
+                shot = output_dir / f"{stem}-{size}.png"
+                page.screenshot(path=str(shot))
+                full = output_dir / f"{stem}-{size}-full.png"
+                page.screenshot(path=str(full), full_page=True)
+                print(f"  ✓ 首屏 → {shot.name}，整頁 → {full.name}")
 
             if show:
-                print("  (浏览器窗口保持打开，按Enter关闭...)")
-                input()
-
+                input("  （瀏覽器視窗保持開啟，按 Enter 繼續）")
             context.close()
-
         browser.close()
 
-    print("\n" + "=" * 50)
-    print("验证报告")
-    print("=" * 50)
-
-    if page_errors:
-        print(f"\n❌ Page Errors ({len(page_errors)}):")
-        for e in page_errors:
-            print(f"  - {e}")
-    else:
-        print("\n✅ 无JavaScript错误")
-
-    if console_errors:
-        print(f"\n⚠️  Console Errors/Warnings ({len(console_errors)}):")
-        for e in console_errors[:20]:
-            print(f"  - {e}")
-        if len(console_errors) > 20:
-            print(f"  ... 还有{len(console_errors) - 20}条")
-    else:
-        print("✅ Console干净")
-
-    print(f"\n📸 截图保存至: {output_dir}")
-
-    return 0 if not page_errors else 1
+    print("\n" + "=" * 50 + "\n驗證結果\n" + "=" * 50)
+    print(f"\n{'❌' if page_errors else '✅'} pageerror：{len(page_errors)}")
+    for e in page_errors:
+        print(f"  - {e}")
+    print(f"{'❌' if overflow else '✅'} 橫向捲動：{'；'.join(overflow) if overflow else '沒有'}")
+    print(f"{'⚠️ ' if console_msgs else '✅'} console error／warning：{len(console_msgs)}")
+    for m in console_msgs[:20]:
+        print(f"  - {m}")
+    if len(console_msgs) > 20:
+        print(f"  …另外 {len(console_msgs) - 20} 則")
+    print(f"\n📸 截圖：{output_dir}")
+    return 1 if (page_errors or overflow) else 0
 
 
 def main():
+    setup_stdout()
     parser = argparse.ArgumentParser(
-        description="Verify HTML design outputs with Playwright",
+        description="用 Playwright 驗證設計產出的 HTML：截圖、pageerror、橫向捲動、console 訊息。",
+        epilog=HELP_EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument("html_path", help="HTML file path")
-    parser.add_argument("--viewports", default="1440x900",
-                        help="逗号分隔的viewport列表，格式 WxH（默认 1440x900）")
-    parser.add_argument("--slides", type=int, default=0,
-                        help="幻灯片模式：截取前N张（需要HTML支持ArrowRight翻页）")
-    parser.add_argument("--output", default=None,
-                        help="输出目录（默认HTML所在目录的screenshots/）")
-    parser.add_argument("--show", action="store_true",
-                        help="非headless，打开真实浏览器窗口")
-    parser.add_argument("--wait", type=int, default=2000,
-                        help="打开页面后等待的毫秒数（默认2000）")
-
+    parser.add_argument("html_path", help="要檢查的 HTML 檔")
+    parser.add_argument("--viewports", default="1440x900,375x812", help="逗號分隔的視窗大小 WxH（預設 1440x900,375x812）")
+    parser.add_argument("--slides", type=int, default=0, help="單檔投影片模式：按右鍵翻頁，截前 N 頁")
+    parser.add_argument("--output", default=None, help="截圖資料夾（預設：系統暫存資料夾，不寫進專案）")
+    parser.add_argument("--show", action="store_true", help="開出看得到的瀏覽器視窗")
+    parser.add_argument("--wait", type=int, default=1500, help="字型載入後再等幾毫秒（預設 1500）")
+    parser.add_argument("--chrome", default=None, help="指定 Chrome 執行檔路徑")
     args = parser.parse_args()
-
-    viewports = [parse_viewport(v) for v in args.viewports.split(",")]
-
-    return verify_html(
-        html_path=args.html_path,
-        viewports=viewports,
-        slides=args.slides,
-        output_dir=args.output,
-        show=args.show,
-        wait=args.wait,
-    )
+    viewports = [parse_viewport(v) for v in args.viewports.split(",") if v.strip()]
+    return verify_html(args.html_path, viewports, args.slides, args.output, args.show, args.wait, args.chrome)
 
 
 if __name__ == "__main__":

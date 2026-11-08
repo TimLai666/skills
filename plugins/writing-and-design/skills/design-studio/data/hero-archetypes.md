@@ -2,6 +2,7 @@
 
 > ⚠️ Every hero MUST include visual elements beyond text. See `visual-elements.md` for the library.
 > Minimum 2 visual elements per hero. Text-only heroes are GARBAGE (see anti-garbage.md).
+> The legible main visual required by `shared/composition-rules.md` counts as the first element. The suggested elements per archetype are options, not requirements: decorative grid lines, dotted grids and floating orbs are used only when they carry the film's meaning, never as filler (`shared/anti-slop.md`).
 
 Every hero section must start from an archetype. Archetypes define the **skeleton** (locked) while leaving **skin** (flex) to the director + DNA system.
 
@@ -133,9 +134,9 @@ Every hero section must start from an archetype. Archetypes define the **skeleto
 **背景本身就是視覺元素**（材質、動態漸層、粒子）。浮動元素要少而精（1-2 個高對比 badge）。
 
 ### 使用規則
-1. Phase 2 選定 Archetype 後，選 1-2 個 Pattern 作為**混搭起點**（記錄在 storyboard.md）
+1. 寫 storyboard 選定 Archetype 後，選 1-2 個 Pattern 作為**混搭起點**（記錄在 storyboard.md）
 2. **必須變形**：改變比例、旋轉方向、合併兩個 Pattern、移動元素位置、加入導演特色
-3. Phase 3 compile 時，寫出**具體的、已經混搭變形過的** CSS grid/position 佈局
+3. 寫 compiled-spec 時，寫出**具體的、已經混搭變形過的** CSS grid/position 佈局
 4. 浮動元素的**數量、位置、大小**都要根據導演風格調整：
    - Wes Anderson → 元素嚴格對稱、等距、精確定位
    - Villeneuve → 元素稀疏、大量留白、偏移到邊緣
@@ -179,7 +180,7 @@ The user is enveloped. Screen = world. No UI chrome feeling.
 
 **Reference:** 2001: A Space Odyssey star gate sequence, Apple product launch black-to-product
 
-**Required visual elements (min 2):** #15 (Gradient Fog Layer), #17 (Floating Orb), #27 (Animated Underline)
+**Suggested visual elements (pick 2):** #15 (Gradient Fog Layer), #17 (Floating Orb), #27 (Animated Underline)
 
 ---
 
@@ -211,7 +212,7 @@ The user is enveloped. Screen = world. No UI chrome feeling.
 
 **Reference:** Blade Runner 2049 orange wasteland, Dune Arrakis establishing shot
 
-**Required visual elements (min 2):** #14 (Radial Gradient Blob), #18 (Grain Texture Overlay), #29 (Subtle Grid Lines)
+**Suggested visual elements (pick 2):** #14 (Radial Gradient Blob), #18 (Grain Texture Overlay), #29 (Subtle Grid Lines)
 
 ---
 
@@ -243,7 +244,7 @@ The user is enveloped. Screen = world. No UI chrome feeling.
 
 **Reference:** Apple Vision Pro hero, Zajno.com scroll reveals
 
-**Required visual elements (min 2):** #16 (Aurora Gradient Band), #28 (Horizontal Rule Accent), #32 (Scroll Progress Indicator), #7 (Floating Circle)
+**Suggested visual elements (pick 2):** #16 (Aurora Gradient Band), #28 (Horizontal Rule Accent), #32 (Scroll Progress Indicator), #7 (Floating Circle)
 
 ---
 
@@ -275,7 +276,7 @@ The user is enveloped. Screen = world. No UI chrome feeling.
 
 **Reference:** Any Nolan IMAX-to-scope transition, Tarantino's The Hateful Eight 70mm
 
-**Required visual elements (min 2):** #26 (Thin Divider Line), #30 (Corner Bracket Frames), #8 (Rotating Square), #19 (Noise Particle Field)
+**Suggested visual elements (pick 2):** #26 (Thin Divider Line), #30 (Corner Bracket Frames), #8 (Rotating Square), #19 (Noise Particle Field)
 
 ---
 
@@ -308,7 +309,7 @@ The user is enveloped. Screen = world. No UI chrome feeling.
 
 **Reference:** Tesla.com car footage, Nike campaign heroes, Apple product motion
 
-**Required visual elements (min 2):** #15 (Gradient Fog Layer), #31 (Animated Border Stroke)
+**Suggested visual elements (pick 2):** #15 (Gradient Fog Layer), #31 (Animated Border Stroke)
 
 ---
 
@@ -340,7 +341,7 @@ The user is enveloped. Screen = world. No UI chrome feeling.
 
 **Reference:** Firewatch game site, any Disney multi-plane camera scene
 
-**Required visual elements (min 2):** #9 (Dotted Grid Pattern), #17 (Floating Orb)
+**Suggested visual elements (pick 2):** #9 (Dotted Grid Pattern), #17 (Floating Orb)
 
 ---
 
@@ -378,7 +379,7 @@ Typography IS the design. No hero image needed. The arrangement of text creates 
 
 **Reference:** Bloomberg Businessweek covers, Huge Inc website, any Kubrick title card
 
-**Required visual elements (min 2):** #10 (Half-Circle Arc), #26 (Thin Divider Line), #33 (Hover Glow Effect), #37 (Cursor Trail Particles)
+**Suggested visual elements (pick 2):** #10 (Half-Circle Arc), #26 (Thin Divider Line), #33 (Hover Glow Effect), #37 (Cursor Trail Particles)
 
 ---
 
@@ -410,7 +411,7 @@ Typography IS the design. No hero image needed. The arrangement of text creates 
 
 **Reference:** Studio Feixen, Huge Inc, editorial magazine covers
 
-**Required visual elements (min 2):** #11 (Triangle Pointer), #28 (Horizontal Rule Accent), #34 (Magnetic Button), #14 (Radial Gradient Blob)
+**Suggested visual elements (pick 2):** #11 (Triangle Pointer), #28 (Horizontal Rule Accent), #34 (Magnetic Button), #14 (Radial Gradient Blob)
 
 ---
 
@@ -442,7 +443,7 @@ Typography IS the design. No hero image needed. The arrangement of text creates 
 
 **Reference:** New York Times homepage, Bloomberg, Pitchfork
 
-**Required visual elements (min 2):** #12 (Diamond / Rhombus), #29 (Subtle Grid Lines), #30 (Corner Bracket Frames)
+**Suggested visual elements (pick 2):** #12 (Diamond / Rhombus), #29 (Subtle Grid Lines), #30 (Corner Bracket Frames)
 
 ---
 
@@ -475,7 +476,7 @@ Typography IS the design. No hero image needed. The arrangement of text creates 
 
 **Reference:** Supreme branding, Kanye album covers, museum exhibition titles
 
-**Required visual elements (min 2):** #7 (Floating Circle), #27 (Animated Underline), #16 (Aurora Gradient Band), #35 (Parallax Micro-Shift)
+**Suggested visual elements (pick 2):** #7 (Floating Circle), #27 (Animated Underline), #16 (Aurora Gradient Band), #35 (Parallax Micro-Shift)
 
 ---
 
@@ -508,7 +509,7 @@ Typography IS the design. No hero image needed. The arrangement of text creates 
 
 **Reference:** Medium article heroes, literary journal sites, brand manifesto pages
 
-**Required visual elements (min 2):** #13 (Cross / Plus Mark), #15 (Gradient Fog Layer), #27 (Animated Underline), #3 (Testimonial Quote Card), #36 (Text Scramble Effect)
+**Suggested visual elements (pick 2):** #13 (Cross / Plus Mark), #15 (Gradient Fog Layer), #27 (Animated Underline), #3 (Testimonial Quote Card), #36 (Text Scramble Effect)
 
 ---
 
@@ -541,7 +542,7 @@ Typography IS the design. No hero image needed. The arrangement of text creates 
 
 **Reference:** Spotify Wrapped, Apple keynote text animations, award show title cards
 
-**Required visual elements (min 2):** #8 (Rotating Square), #33 (Hover Glow Effect), #19 (Noise Particle Field), #36 (Text Scramble Effect)
+**Suggested visual elements (pick 2):** #8 (Rotating Square), #33 (Hover Glow Effect), #19 (Noise Particle Field), #36 (Text Scramble Effect)
 
 ---
 
@@ -579,7 +580,7 @@ The screen is divided. Two or more forces create visual tension.
 
 **Reference:** Fashion brand lookbooks, Fight Club poster, any De Palma split-screen
 
-**Required visual elements (min 2):** #38 (Feature Highlight Panel), #1 (Floating Badge), #26 (Thin Divider Line)
+**Suggested visual elements (pick 2):** #38 (Feature Highlight Panel), #1 (Floating Badge), #26 (Thin Divider Line)
 
 ---
 
@@ -611,7 +612,7 @@ The screen is divided. Two or more forces create visual tension.
 
 **Reference:** Nike campaign splits, Kill Bill poster, sports brand heroes
 
-**Required visual elements (min 2):** #11 (Triangle Pointer), #32 (Scroll Progress Indicator), #18 (Grain Texture Overlay)
+**Suggested visual elements (pick 2):** #11 (Triangle Pointer), #32 (Scroll Progress Indicator), #18 (Grain Texture Overlay)
 
 ---
 
@@ -643,7 +644,7 @@ The screen is divided. Two or more forces create visual tension.
 
 **Reference:** Portfolio case study heroes, product pages with large product + specs
 
-**Required visual elements (min 2):** #2 (Status Pill), #39 (Code/Terminal Block), #16 (Aurora Gradient Band)
+**Suggested visual elements (pick 2):** #2 (Status Pill), #39 (Code/Terminal Block), #16 (Aurora Gradient Band)
 
 ---
 
@@ -675,7 +676,7 @@ The screen is divided. Two or more forces create visual tension.
 
 **Reference:** Virgin Hyperloop site panels, comic-style portfolio sites, Bento grid heroes
 
-**Required visual elements (min 2):** #4 (Mini Feature Card), #40 (Comparison Table Snippet), #10 (Half-Circle Arc)
+**Suggested visual elements (pick 2):** #4 (Mini Feature Card), #40 (Comparison Table Snippet), #10 (Half-Circle Arc)
 
 ---
 
@@ -707,7 +708,7 @@ The screen is divided. Two or more forces create visual tension.
 
 **Reference:** Fashion editorial layouts, David Carson graphic design, deconstructed portfolio sites
 
-**Required visual elements (min 2):** #5 (Pricing Snippet Card), #14 (Radial Gradient Blob)
+**Suggested visual elements (pick 2):** #5 (Pricing Snippet Card), #14 (Radial Gradient Blob)
 
 ---
 
@@ -739,7 +740,7 @@ The screen is divided. Two or more forces create visual tension.
 
 **Reference:** Grand Budapest Hotel nested frames, gallery/museum websites, Ozu doorway shots
 
-**Required visual elements (min 2):** #30 (Corner Bracket Frames), #13 (Cross / Plus Mark), #17 (Floating Orb)
+**Suggested visual elements (pick 2):** #30 (Corner Bracket Frames), #13 (Cross / Plus Mark), #17 (Floating Orb)
 
 ---
 
@@ -778,7 +779,7 @@ The hero responds to user action. Not passive viewing — active participation.
 
 **Reference:** Apple AirPods Pro spatial audio page, Stripe homepage, Linear app
 
-**Required visual elements (min 2):** #37 (Cursor Trail Particles), #9 (Dotted Grid Pattern), #7 (Floating Circle)
+**Suggested visual elements (pick 2):** #37 (Cursor Trail Particles), #9 (Dotted Grid Pattern), #7 (Floating Circle)
 
 ---
 
@@ -811,7 +812,7 @@ The hero responds to user action. Not passive viewing — active participation.
 
 **Reference:** Apple product pages (iPhone, Mac Pro), Porsche Taycan configurator
 
-**Required visual elements (min 2):** #32 (Scroll Progress Indicator), #20 (Single Stat Counter), #8 (Rotating Square)
+**Suggested visual elements (pick 2):** #32 (Scroll Progress Indicator), #20 (Single Stat Counter), #8 (Rotating Square)
 
 ---
 
@@ -844,7 +845,7 @@ The hero responds to user action. Not passive viewing — active participation.
 
 **Reference:** Netflix interactive specials, financial product comparison heroes, "What type are you?" quiz landing pages
 
-**Required visual elements (min 2):** #34 (Magnetic Button), #12 (Diamond / Rhombus), #38 (Feature Highlight Panel)
+**Suggested visual elements (pick 2):** #34 (Magnetic Button), #12 (Diamond / Rhombus), #38 (Feature Highlight Panel)
 
 ---
 
@@ -877,7 +878,7 @@ The hero responds to user action. Not passive viewing — active participation.
 
 **Reference:** Portfolio grids (Awwwards sites), Airbnb experience grids, Nike SNKRS
 
-**Required visual elements (min 2):** #33 (Hover Glow Effect), #10 (Half-Circle Arc), #6 (Social Proof Stack)
+**Suggested visual elements (pick 2):** #33 (Hover Glow Effect), #10 (Half-Circle Arc), #6 (Social Proof Stack)
 
 ---
 
@@ -909,7 +910,7 @@ The hero responds to user action. Not passive viewing — active participation.
 
 **Reference:** Horizontal scrolling portfolio sites, Google Arts & Culture virtual tours
 
-**Required visual elements (min 2):** #35 (Parallax Micro-Shift), #11 (Triangle Pointer), #29 (Subtle Grid Lines)
+**Suggested visual elements (pick 2):** #35 (Parallax Micro-Shift), #11 (Triangle Pointer), #29 (Subtle Grid Lines)
 
 ---
 
@@ -942,7 +943,7 @@ The hero responds to user action. Not passive viewing — active participation.
 
 **Reference:** Stripe checkout visualizations, crypto/finance dashboards, Spotify data-driven features
 
-**Required visual elements (min 2):** #21 (Metric Bar Chart), #19 (Noise Particle Field)
+**Suggested visual elements (pick 2):** #21 (Metric Bar Chart), #19 (Noise Particle Field)
 
 ---
 
@@ -981,7 +982,7 @@ The hero tells a story. There's a beginning, development, and hook for what's ne
 
 **Reference:** Campaign landing pages, editorial longform, TED talk opening slides
 
-**Required visual elements (min 2):** #3 (Testimonial Quote Card), #22 (Percentage Ring), #15 (Gradient Fog Layer), #28 (Horizontal Rule Accent)
+**Suggested visual elements (pick 2):** #3 (Testimonial Quote Card), #22 (Percentage Ring), #15 (Gradient Fog Layer), #28 (Horizontal Rule Accent)
 
 ---
 
@@ -1014,7 +1015,7 @@ The hero tells a story. There's a beginning, development, and hook for what's ne
 
 **Reference:** Annual reports, NGO impact pages, SaaS metrics heroes, GitHub stats
 
-**Required visual elements (min 2):** #20 (Single Stat Counter), #23 (Mini Sparkline), #1 (Floating Badge)
+**Suggested visual elements (pick 2):** #20 (Single Stat Counter), #23 (Mini Sparkline), #1 (Floating Badge)
 
 ---
 
@@ -1046,7 +1047,7 @@ The hero tells a story. There's a beginning, development, and hook for what's ne
 
 **Reference:** Renovation/remodel sites, SaaS "old vs new" pages, fitness transformation pages
 
-**Required visual elements (min 2):** #24 (Progress Step Tracker), #6 (Social Proof Stack), #31 (Animated Border Stroke)
+**Suggested visual elements (pick 2):** #24 (Progress Step Tracker), #6 (Social Proof Stack), #31 (Animated Border Stroke)
 
 ---
 
@@ -1079,7 +1080,7 @@ The hero tells a story. There's a beginning, development, and hook for what's ne
 
 **Reference:** Film studio logo sequences, luxury brand sites, Kubrick pre-title darkness
 
-**Required visual elements (min 2):** #17 (Floating Orb), #26 (Thin Divider Line), #36 (Text Scramble Effect)
+**Suggested visual elements (pick 2):** #17 (Floating Orb), #26 (Thin Divider Line), #36 (Text Scramble Effect)
 
 ---
 
@@ -1112,7 +1113,7 @@ The hero tells a story. There's a beginning, development, and hook for what's ne
 
 **Reference:** Film strip portfolio sites, Instagram Stories style heroes, comic-style landing pages
 
-**Required visual elements (min 2):** #4 (Mini Feature Card), #2 (Status Pill), #25 (Rating Stars Display)
+**Suggested visual elements (pick 2):** #4 (Mini Feature Card), #2 (Status Pill), #25 (Rating Stars Display)
 
 ---
 
@@ -1145,7 +1146,7 @@ The hero tells a story. There's a beginning, development, and hook for what's ne
 
 **Reference:** Product launch pages (Apple event teasers), game announcement sites, event landing pages
 
-**Required visual elements (min 2):** #22 (Percentage Ring), #34 (Magnetic Button), #5 (Pricing Snippet Card)
+**Suggested visual elements (pick 2):** #22 (Percentage Ring), #34 (Magnetic Button), #5 (Pricing Snippet Card)
 
 ---
 

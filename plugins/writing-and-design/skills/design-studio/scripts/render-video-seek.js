@@ -28,7 +28,8 @@
  * Output: next to the HTML file, same basename with .mp4 suffix.
  */
 
-const { chromium } = require('playwright');
+const { loadPlaywright, launchChromium, fileUrl } = require('./node-deps.cjs');
+const { chromium } = loadPlaywright();
 const path = require('path');
 const fs = require('fs');
 const { spawnSync } = require('child_process');
@@ -118,8 +119,8 @@ async function renderFrames(context, url, frames) {
 (async () => {
   fs.mkdirSync(TMP_DIR, { recursive: true });
 
-  const browser = await chromium.launch();
-  const url = 'file://' + HTML_ABS;
+  const browser = await launchChromium(chromium);
+  const url = fileUrl(HTML_ABS);
 
   const context = await browser.newContext({
     viewport: { width: WIDTH, height: HEIGHT },

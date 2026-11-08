@@ -289,7 +289,7 @@ Reference database for cinematic-layout skill. Each director entry maps a visual
 
 | Director | Region | Signature | Key Films | Web Translation |
 |----------|--------|-----------|-----------|-----------------|
-| Abbas Kiarostami | 🇮🇷 | Cherry road+car interior+landscape simplicity | Taste of Cherry, Close-Up | Winding-road scroll path, car-window framing, minimal earth palette |
+| Abbas Kiarostami (road mode) | 🇮🇷 | Cherry road+car interior+landscape simplicity | Taste of Cherry, Close-Up | Winding-road scroll path, car-window framing, minimal earth palette |
 | Asghar Farhadi | 🇮🇷 | Domestic thriller+confined apartment+moral maze | A Separation, A Hero | Claustrophobic card stacking, warm domestic palette, text reveals in layers |
 | Jafar Panahi | 🇮🇷 | Constraint as form+car/apartment+meta-cinema | Taxi, 3 Faces | Single-viewport constraint, dashboard framing, intimate minimal layout |
 | Samira Makhmalbaf | 🇮🇷 | Child POV+village realism+desert school | The Apple, Blackboards | Child-scale proportions, chalkboard textures, desert sand backgrounds |
@@ -401,8 +401,6 @@ Reference database for cinematic-layout skill. Each director entry maps a visual
 | Director | Region | Signature | Key Films | Web Translation |
 |----------|--------|-----------|-----------|-----------------|
 | Kim Ki-duk 김기덕 | 🇰🇷 | Silence+water+floating temple+physical pain | Spring Summer Fall Winter and Spring, 3-Iron | Floating elements on water texture, temple symmetry, silence-heavy whitespace |
-| Hirokazu Kore-eda 是枝裕和 | 🇯🇵 | Found family+meal scenes+Ozu-gentle | Shoplifters, Like Father Like Son | Family dinner table grid, warm natural light palette, gentle hover reveals |
-| Terrence Malick | 🇺🇸 | Golden hour whisper+nature as cathedral+voiceover | Tree of Life, Days of Heaven | Full-bleed golden-hour photography, whispered text overlays, nature-dominant |
 | Spike Lee | 🇺🇸 | Dutch angle+direct-to-camera+Brooklyn color+political | Do the Right Thing, BlacKkKlansman | Dutch-angle tilted sections, bold political typography, Brooklyn warm tones |
 | Spike Jonze | 🇺🇸 | Whimsical surreal+tactile warmth+loneliness in color | Her, Being John Malkovich | Soft warm UI aesthetic (like Her OS), rounded corners, gentle coral/cream palette |
 | Barry Jenkins | 🇺🇸 | Moonlight blue+intimate close-up+triptych structure | Moonlight, If Beale Street Could Talk | Triptych section structure, moonlight blue/purple palette, intimate crop images |

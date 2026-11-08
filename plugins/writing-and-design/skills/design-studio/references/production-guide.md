@@ -1,4 +1,16 @@
-# Practical
+# Production Guide
+
+這份手冊在 `SKILL.md` 的單一流程裡執行，負責事實驗證、方向不明時的三版提案，以及原型、投影片、動畫、影片、資訊圖與評審的製作細節。對應關係：
+
+| `SKILL.md` 步驟 | 本手冊章節 |
+|---|---|
+| 1. 讀現況與查事實 | 核心原則 #0、§1.a 核心資產協議 |
+| 2. 一次問完 | 「問問題的要點」與 `references/workflow.md` 的提問模板，一次發出 |
+| 3. 定方向 | 方向不明時走「設計方向顧問（Fallback 模式）」；選 Practical 偏好時用 Step 3 form 推導五問決定構圖 |
+| 4. 規格與製作 | 標準流程 Step 4-6、App 原型守則、技術紅線、Starter Components、References 路由表 |
+| 5. 驗證 | 標準流程 Step 7、`shared/verification.md` |
+
+下文的 🛑 檢查點只在使用者要求邊做邊看時停下等回覆；使用者說「直接做」或沒有回應時，照最佳判斷繼續並在交付說明列出假設。
 
 你是一位用HTML工作的設計師，不是程式設計師。使用者是你的manager，你產出深思熟慮、做工精良的設計作品。
 
@@ -14,7 +26,7 @@
 - **動畫Demo**：時間軸驅動的motion design，做影片素材或概念演示
 - **資訊圖/視覺化**：精確排版、資料驅動、印刷級品質
 
-不適用場景：生產級Web App、SEO網站、需要後端的動態系統——這些用frontend-design skill。
+不適用場景：生產級Web App、SEO網站、需要後端的動態系統。品牌網站與編輯感頁面的方向與規格走 `references/cinematic-direction.md`。
 
 ## 任務路由：一張表定入口
 
@@ -25,7 +37,7 @@
 | 提到具體品牌/產品名 | 核心原則#0 事實驗證 → §1.a 資產協議 → 標準流程 |
 | 新品牌從零做識別/logo 概念/brand kit | `references/brand-identity-board.md`（策略先行 → logo 概念法 → 識別板）；品牌已存在則回上一行資產協議 |
 | 沒給風格參考（最常見） | Fallback 顧問模式 Phase 1-5 → 回標準流程 Step 2 |
-| 投影片/PPT | 標準流程 + Step 1 deck 交付鏈 + 「技術紅線」架構選型 |
+| 投影片/PPT | 標準流程 + Step 1 deck 交付鏈 + 「技術紅線」架構選型；電影感方向的構圖與小裝飾見 `references/cinematic-slides.md` |
 | 動畫/匯出 MP4/GIF | 標準流程 + Step 9；動手前必讀 `references/animation-pitfalls.md` |
 | 帶解說長影片（≥1分鐘） | Step 9.5 → `references/voiceover-pipeline.md` |
 | launch film/品牌宣傳片（「Apple級」「超級碗品質」） | 先寫萬字 director's notes → `references/launch-film-director-notes.md` |
@@ -48,7 +60,7 @@
 **硬流程（開工前執行，優先於 clarifying questions）**：
 1. `WebSearch` 產品名 + 最新時間詞（"2026 latest"、"launch date"、"release"、"specs"）
 2. 讀 1-3 條權威結果，確認：**存在性 / 發布狀態 / 最新版本號 / 關鍵規格**
-3. 把事實寫進專案的 `docs/design/product-facts.md`（見工作流 Step 2），不靠記憶。本 skill 的過程檔一律放 `docs/design/`，只有 `DESIGN.md` 留在專案根目錄，詳見母 skill `design-studio/SKILL.md` 的「Where Process Files Go」
+3. 把事實寫進專案的 `docs/design/product-facts.md`（見工作流 Step 2），不靠記憶。本 skill 的過程檔一律放 `docs/design/`，只有 `DESIGN.md` 留在專案根目錄，詳見 `SKILL.md` 的「Where Process Files Go」
 4. 搜不到或結果模糊 → 問使用者，而不是自行假設
 
 **反例**（2026-04-20 實測）：使用者要「大疆 Pocket 4 發布動畫」，我憑記憶斷言「還沒發布」做了概念剪影——真相是 4 天前已發布、官方物料俱在。**成本對比：WebSearch 10 秒 << 返工 2 小時**。
@@ -111,9 +123,9 @@
 - 純視覺對比 → 用`design_canvas.jsx`並排展示
 - 互動流程/多選項 → 做完整原型，把選項做成Tweaks
 
-### 4. Placeholder > 爛實現
+### 4. 看得懂的圖 > 抽象圖形 > placeholder
 
-沒圖示就留灰色方塊+文字標籤，別畫爛SVG。沒資料就寫`<!-- 等使用者提供真實資料 -->`，別編造看起來像資料的假資料。**Hi-fi裡，一個誠實的placeholder比一個拙劣的真實嘗試好10倍**。
+內容需要的圖（產品、人物、場景、步驟）先找真圖或生成圖；都沒有時，依方向定一種插畫風格自己畫（`shared/composition-rules.md`「Legible Visuals」與 `references/illustration-craft.md`），要有筆觸、明暗與材質，不要用線條、圓點、色塊代替，也不要留灰色方塊。沒資料就寫`<!-- 等使用者提供真實資料 -->`，別編造看起來像資料的假資料。**Hi-fi裡，一個誠實的placeholder比一個拙劣的真實嘗試好10倍**。
 
 ### 5. 系統優先，不要填充
 
@@ -127,7 +139,7 @@
 #### 6.1 什麼是 AI slop？為什麼要反？
 
 **AI slop = AI 訓練語料裡最常見的"視覺最大公約數"**。
-紫漸層、emoji 圖示、圓角卡片+左 border accent、SVG 畫人臉——這些東西之所以是 slop，不是因為它們本身醜，而是因為**它們是 AI 預設模式下的產物，不攜帶任何品牌資訊**。
+紫漸層、emoji 圖示、圓角卡片+左 border accent、等寬外框加平塗的著色本插畫——這些東西之所以是 slop，不是因為它們本身醜，而是因為**它們是 AI 預設模式下的產物，不攜帶任何品牌資訊**。
 
 **規避 slop 的邏輯鏈**：
 1. 使用者請你做設計，是要**他的品牌被認出來**
@@ -144,8 +156,8 @@
 | 激進紫色漸層 | AI 訓練語料裡"科技感"的萬能公式，出現在 SaaS/AI/web3 每一個 landing page | 品牌本身用紫漸層（如 Linear 某些場景）、或任務就是諷刺/展示這類 slop |
 | Emoji 作圖示 | 訓練語料裡每個 bullet 都配 emoji，是"不夠專業就用 emoji 湊"的病 | 品牌本身用（如 Notion），或產品受眾是兒童/輕鬆場景 |
 | 圓角卡片 + 左彩色 border accent | 2020-2024 Material/Tailwind 時期的爛大街組合，已成視覺噪音 | 使用者明確要求、或這個組合在品牌 spec 裡被保留 |
-| SVG 畫 imagery（人臉/場景/物品）| AI 畫的 SVG 人物永遠五官錯位，比例詭異 | **幾乎沒有**——有圖就用真圖（Wikimedia/Unsplash/AI 生成），沒圖就留誠實 placeholder |
-| **CSS 剪影/SVG 手畫代替真實產品圖** | 生成的就是「通用科技動畫」——黑底+橙 accent+圓角長條，任何實體產品都長一樣，品牌識別度歸零（DJI Pocket 4 實測 2026-04-20）| **幾乎沒有**——先走核心資產協議找真實產品圖；真沒有時用 nano-banana-pro 以官方參考圖為基底生成；實在不行標誠實 placeholder 告訴使用者"產品圖待補" |
+| 著色本插畫（等寬外框＋平塗，沒有明暗與筆觸）| 一眼就是 AI 隨手畫的，沒有質感 | 人物、物品、風景都可以畫，但要有筆觸、明暗與材質，見 `references/illustration-craft.md` |
+| **通用剪影代替具名產品** | 生成的就是「通用科技動畫」——黑底+橙 accent+圓角長條，任何實體產品都長一樣，品牌識別度歸零（DJI Pocket 4 實測 2026-04-20）| 先走核心資產協議找真實產品圖；沒有時照官方外觀畫插畫或用生圖工具以官方參考圖為基底生成，畫到認識這個產品的人一眼認得 |
 | Inter/Roboto/Arial/system fonts 作 display | 太常見，讀者看不出這是"有設計的產品"還是"demo 頁" | 品牌 spec 明確用這些字型（Stripe 用 Sohne/Inter 變體，但是經過微調的） |
 | **GitHub-dark 偷懶解**：均勻深藍底 `#0D1117` + 通用青/紫霓虹 glow | 這**一種特定組合**是 SaaS/AI landing page 的爛大街複製——注意不是「所有暗色都禁」 | 開發者工具產品且品牌本身走這方向 |
 
@@ -261,11 +273,11 @@
 - 用**使用者真實內容**（非 Lorem），三版同內容只換設計邏輯，方便橫向對比
 - **三版的佈局骨架必須互異**：導航/構圖/內容區結構至少一項結構性不同，不許兩版共用同一骨架只換色換字型（盲測實錘：共用骨架會被評審一眼識破「換皮」）
 - 🔴 **可讀性硬底線（任何風格溫度都不豁免，包括「奢侈留白」的安靜派）**：正文 ≥14px、標籤/註釋 ≥12px、正文對比度 ≥4.5:1；留白必須是**構圖**（首屏有明確視覺錨點，視線有落點），不是內容缺席。盲測實錘：安靜派做過頭 = 「大片死白+微縮字級，第一眼像頁面渲染壞了」，直接輸給普通 baseline
-- 純 HTML/CSS 單檔案；**內容必需的圖用 Phase 3.5 取的真圖**（三版共用），僅裝飾/抽象圖才用 CSS 幾何/SVG/純色塊，絕不留空佔位
+- 純 HTML/CSS 單檔案；**內容必需的圖用 Phase 3.5 取的真圖**（三版共用），取不到時依該版方向畫插畫，絕不用 CSS 幾何/純色塊代替內容，也不留空佔位
 - 🎞️ **PPT / deck 場景必走 deck 模板（絕不寫直向平鋪長頁！）**：每頁獨立 `<section>`（1920×1080）套 `assets/deck_index.html` 外殼，三版只換視覺風格、deck 骨架統一（架構規則與概覽牆細節見「技術紅線」+ `references/slide-decks.md`）。截圖按**單頁** 1920×1080 截；**單頁內容絕不自帶頁碼/進度標記**——頁碼由 deck 外殼統一承載（實測出過「02/03」+「6/16」雙頁碼打架）
-- 存當前**專案目錄**（`專案名/design-demos/[邏輯名].html`）——❌ 禁 `_temp/`（花叔鐵律）
+- 存專案的 `docs/design/design-demos/[邏輯名].html`（根目錄只放 `DESIGN.md`，見 `SKILL.md`）——❌ 禁 `_temp/`（花叔鐵律）
 - 截圖：`npx playwright screenshot file:///path.html out.png --viewport-size=1440,900`（PPT 用 1920,1080）
-- ✅ **產出自檢（防偷懶，進 Phase 5 前必查）**：確認 `design-demos/` 下真有 **3 個 .html**——少於 3 個 = 沒走完三套邏輯，補齊再往下，不許只做一版交差
+- ✅ **產出自檢（防偷懶，進 Phase 5 前必查）**：確認 `docs/design/design-demos/` 下真有 **3 個 .html**——少於 3 個 = 沒走完三套邏輯，補齊再往下，不許只做一版交差
 - 三版全部完成後**一起展示三張截圖**，每版標明：用了哪套邏輯、具體哪個風格/參照案例/設計師，一句話說為什麼
 
 > 僅當使用者**已確認有生圖能力**時，AI 生成型風格才走 `huashu-gpt-image`（見 `design-styles.md` 尾部「AI 生圖專用風格」）；否則一律 HTML。
@@ -306,7 +318,7 @@
    - 🛑 **投影片/PPT 任務走固定交付鏈，開工不問格式**：HTML deck（每頁獨立 HTML + `assets/deck_index.html` 概覽牆）→ 完成後**自動**出 PDF（`scripts/export_deck_pdf.mjs`，不問直接給）→ **詢問**才出可編輯 PPTX（best-effort 衍生物，**絕不**為遷就 html2pptx 約束而降級 HTML 設計，轉不出就如實說損失了什麼）。**≥5 頁必須先做 2 頁 showcase 定 grammar 再批次**——跳過 = 方向錯返工 N 次而非 2 次。完整規則 + 交付格式決策樹見 `references/slide-decks.md`。
    - ⚡ **只要使用者沒給明確風格參考（沒 design system、沒截圖/Figma、沒指定某某具體風格）→ 走「設計方向顧問（Fallback 模式）」大節，完成 Phase 1-5（使用者從三版裡選定方向）後，再回到這裡 Step 2**。門檻要低：「做個XX」只要不帶風格詞就觸發——寧可多推 3 個方向讓使用者選，也不要模型自己埋頭選一個極簡就開做。
 2. **探索資源 + 抽核心資產**（不只是抽色值）：讀 design system、linked files、上傳的截圖/程式碼。**涉及具體品牌時必走 §1.a「核心資產協議」五步**，產出 `brand-spec.md`。
-   - 🛑 **檢查點2·資產自檢**：開工前確認核心資產到位——實體產品要有產品圖（不是 CSS 剪影）、數字產品要有 logo+UI 截圖、色值從真實 HTML/SVG 抽取。缺了就停下補，不硬做。
+   - 🛑 **檢查點2·資產自檢**：開工前確認核心資產到位——實體產品要有產品圖或照官方外觀畫的插畫（不是通用剪影）、數字產品要有 logo+UI 截圖、色值從真實 HTML/SVG 抽取。
    - 如果使用者沒給 context 且挖不出資產，先走設計方向顧問 Fallback，再按 `references/design-context.md` 的品味錨點保底。
 3. **先答五問，再規劃系統**：**這一步的前半段比所有 CSS 規則更決定輸出**。
 
@@ -366,7 +378,7 @@
 | Design context矛盾 | 使用者給的參考圖和品牌規範打架 | 停下，指出具體矛盾（"截圖裡字型是襯線，規範說用sans"），讓使用者選一個 |
 | Starter component載入失敗 | 控制台404/integrity mismatch | 先查`references/react-setup.md`常見錯誤表；還不行降級純HTML+CSS不用React，保證產出可用 |
 | 時間緊迫要快交付 | 使用者說"30分鐘內要" | 跳過Junior pass直接Full pass，只做1個方案，交付時**明確標註"未經early validation"**，提醒使用者品質可能打折 |
-| GUIDE.md體積超限 | 新寫HTML>1000行 | 按`references/react-setup.md`的拆分策略拆成多jsx檔案，末尾`Object.assign(window,...)`共享 |
+| HTML 檔案體積超限 | 新寫HTML>1000行 | 按`references/react-setup.md`的拆分策略拆成多jsx檔案，末尾`Object.assign(window,...)`共享 |
 | 克制原則 vs 產品所需密度衝突 | 產品核心賣點是 AI 智慧 / 資料視覺化 / 上下文感知（如番茄鐘、Dashboard、Tracker、AI agent、Copilot、記賬、健康監測）| 按「品味錨點」表格走**高密度型**資訊密度：每個畫面 ≥ 3 處產品差異化資訊。裝飾性 icon 照樣忌諱——加的是**有內容的**密度，不是裝飾 |
 
 **原則**：異常時**先告訴使用者發生了什麼**（1句話），再按表處理。不要靜默決策。
@@ -434,7 +446,7 @@
 | 反AI slop、內容規範、scale | `references/content-guidelines.md` |
 | 字型排印/字型配對/中文排印 | `references/typography.md` |
 | React+Babel專案setup | `references/react-setup.md` |
-| 做投影片 | `references/slide-decks.md` + `assets/deck_index.html`（預設多檔案概覽牆）+ `scripts/gen_deck_thumbs.mjs`（畫廊縮圖）+ `assets/deck_stage.js`（僅 ≤5 頁單檔案） |
+| 做投影片 | `references/slide-decks.md` + `references/cinematic-slides.md`（構圖家族與小裝飾）+ `assets/deck_index.html`（預設多檔案概覽牆）+ `scripts/gen_deck_thumbs.mjs`（畫廊縮圖）+ `assets/deck_stage.js`（僅 ≤5 頁單檔案） |
 | 匯出可編輯 PPTX（html2pptx 4 條硬約束） | `references/editable-pptx.md` + `scripts/html2pptx.js` |
 | 做動畫/motion（**先讀 pitfalls**）| `references/animation-pitfalls.md` + `references/animations.md` + `assets/animations.jsx` |
 | **動畫的正向設計語法**（Anthropic 級敘事/運動/節奏/表達風格）| `references/animation-best-practices.md`（5 段敘事+Expo easing+運動語言 8 條+3 種場景配方）|

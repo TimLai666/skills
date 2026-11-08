@@ -29,7 +29,7 @@ Logo / product images / UI screenshots matter more than brand color values.
 ## Self-Check Gate
 
 Before any build, confirm core assets are in place:
-- Physical products → product images (not CSS silhouettes)
+- Physical products → official product images when available; otherwise an illustration drawn from the official look, recognizable at a glance (not a generic silhouette)
 - Digital products → logo + UI screenshots
 - Color values extracted from real HTML/SVG
 

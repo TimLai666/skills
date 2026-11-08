@@ -2,153 +2,156 @@
 name: design-studio
 description: >-
   Unified design skill for ALL design work — websites, apps, presentations,
-  animations, prototypes, infographics, branding. Creates or updates DESIGN.md (Google format) when establishing or changing
-  the project's visual identity. Routes to cinematic-ui or practical
-  engines based on task. This skill MUST be used for any design task. MUST
-  trigger on: 設計, design, 原型, prototype, PPT, 投影片, slides, 動畫, animation, 簡報,
-  deck, landing page, website, UI, mockup, MP4, GIF, infographic, branding,
-  logo, 評審, critique, film-inspired, cinematic.
+  animations, prototypes, infographics, branding, WebGPU visual effects. One
+  workflow: facts, one round of questions, direction (film grammar, color derived
+  from the subject, design data lookup), spec, build, verification. Creates or
+  updates DESIGN.md (Google format) when establishing visual identity. This skill
+  MUST be used for any design task, including work on Claude's built-in Design,
+  Design System or Slides artifacts, where it sets direction and the artifact
+  type sets the format. MUST trigger on: 設計, design, 原型, prototype, PPT,
+  投影片, slides, 動畫, animation, 簡報, deck, landing page, website, UI, mockup,
+  MP4, GIF, infographic, branding, logo, 評審, critique, film-inspired,
+  cinematic, WebGPU, shader, 特效. It SHOULD be preferred over generic UI/UX
+  skills. MUST NOT replace landing-page-studio for conversion-focused landing
+  pages or open-slide-studio for open-slide web decks.
 metadata:
-  version: "1.13.1"
+  version: "2.0.0"
 ---
 
 # Design Studio
 
-Unified design skill. One entry point, two engines, one design system file.
+One workflow for every design task. The output type only decides which production manual to follow in step 4. `DESIGN.md` carries the reusable visual rules between sessions.
 
-## DESIGN.md: The Design System File
+## Input Contract
 
-Create or update `DESIGN.md` when establishing or changing reusable visual rules. For a review or a small edit that leaves those rules unchanged, use existing design context and deliver the requested review or edit. Read an existing `DESIGN.md` before design work.
+- The request, plus any brand assets, references, screenshots, existing `DESIGN.md`, or a default design system from Claude's Design System artifacts.
+- When the user names Cinematic or Practical, treat it as a direction preference in step 3, not a separate workflow:
+  - **Cinematic**: film grammar, atmosphere, scroll-driven camera moves.
+  - **Practical**: restraint, fewer ornaments and less atmosphere. Legible main visuals and the richness rules still apply. The director library becomes optional and composition comes from the five form questions in [references/production-guide.md](references/production-guide.md). The depth layer may be a light color-plane separation.
+- When no preference is given, run every part of step 3 and lean toward film atmosphere plus rich, illustrated content.
 
-### Format
+## DESIGN.md
 
-Follow the [Google DESIGN.md spec](https://github.com/google-labs-code/design.md). Structure:
-
-```markdown
----
-version: alpha
-name: <Project Name>
-colors:
-  primary: "#hex"
-  secondary: "#hex"
-  tertiary: "#hex"
-  neutral: "#hex"
-typography:
-  h1:
-    fontFamily: <Font Name>
-    fontSize: 48px
-    fontWeight: 600
-    lineHeight: 1.1
-  body-md:
-    fontFamily: <Font Name>
-    fontSize: 16px
-    fontWeight: 400
-rounded:
-  sm: 4px
-  md: 8px
-spacing:
-  sm: 8px
-  md: 16px
-  lg: 32px
-components:
-  button-primary:
-    backgroundColor: "{colors.tertiary}"
-    textColor: "#fff"
----
-
-## Overview
-<Brand personality, audience, emotional intent>
-
-## Colors
-<Palette rationale and usage rules>
-
-## Typography
-<Type hierarchy and pairing logic>
-
-## Layout
-<Grid system, spacing rhythm>
-
-## Elevation & Depth
-<Shadows, layers, or flat alternatives>
-
-## Shapes
-<Corner radius language>
-
-## Components
-<Button, card, input, chip specs with token refs>
-
-## Do's and Don'ts
-<Guardrails>
-```
-
-### DESIGN.md Lifecycle
+Create or update `DESIGN.md` when establishing or changing reusable visual rules. For a review or a small edit that leaves those rules unchanged, use existing design context. Format: the [Google DESIGN.md spec](https://github.com/google-labs-code/design.md); start from [shared/DESIGN-template.md](shared/DESIGN-template.md).
 
 | Scenario | Action |
 |----------|--------|
-| No DESIGN.md exists and the task establishes visual rules | Copy `shared/DESIGN-template.md` to project root, rename to `DESIGN.md`, fill in during session |
-| DESIGN.md exists, user says "redesign" / "重新設計" | Run `shared/redesign-protocol.md` first — detect Preserve vs Overhaul, audit the current state — then rewrite DESIGN.md accordingly |
-| DESIGN.md exists, user wants changes | **Read first**, then expand/modify specific sections. Preserve unchanged tokens. |
-| DESIGN.md exists, new task on same project | **Read first**, stay consistent with existing tokens unless user says otherwise |
-
-**Iron rule**: Always read existing DESIGN.md before starting work. The design grows from what's already there, not from zero.
+| No DESIGN.md and the task establishes visual rules | Copy `shared/DESIGN-template.md` to the project root as `DESIGN.md`, fill it in during the session |
+| DESIGN.md exists, user says "redesign" / "重新設計" | Run [shared/redesign-protocol.md](shared/redesign-protocol.md) first, then rewrite DESIGN.md accordingly |
+| DESIGN.md exists, user wants changes | Read first, then modify specific sections; preserve unchanged tokens |
+| DESIGN.md exists, new task on the same project | Read first, stay consistent unless the user says otherwise |
+| Working on a Claude Design canvas with no project folder | Do not write DESIGN.md; put the direction in the reply (see [references/claude-design.md](references/claude-design.md)) |
 
 ## Where Process Files Go
 
-`DESIGN.md` is the only design file that belongs in the project root. Every working file a design session produces goes in `docs/design/`:
+`DESIGN.md` is the only design file in the project root. Working files go in `docs/design/`, created when needed:
 
-| File | Engine | Holds |
-|------|--------|-------|
-| `docs/design/decisions.md` | cinematic-ui | Phase 1 — director, film reference, shell-ban list, uniqueness audit |
-| `docs/design/storyboard.md` | cinematic-ui | Phase 2 — scene-by-scene treatment |
-| `docs/design/compiled-spec.md` | cinematic-ui | Phase 3 — the sole implementation source (web) |
-| `docs/design/slide-spec.md` | cinematic-ui | Phase 3 — replaces compiled-spec.md for PPTX |
-| `docs/design/product-facts.md` | practical | Verified product facts gathered before designing |
-| `docs/design/brand-spec.md` | shared | Frozen brand asset paths and extracted colors |
+| File | Step | Holds |
+|------|------|-------|
+| `docs/design/product-facts.md` | 1 | Verified product facts |
+| `docs/design/brand-spec.md` | 1 | Frozen brand asset paths and extracted colors |
+| `docs/design/decisions.md` | 3 | Direction: film or form answers, palette derivation, lookup results, uniqueness audit, shell-ban list |
+| `docs/design/storyboard.md` | 4 | Visual thesis, site grammar, per-page scenes and signature compositions |
+| `docs/design/compiled-spec.md` | 4 | The implementation spec, the only source for the build |
 
-Create the directory if it does not exist. Bare filenames elsewhere in this skill and its sub-skills resolve against `docs/design/`.
+These are session state, not project assets. Bare filenames elsewhere in this skill resolve against `docs/design/`.
 
-These are session working state, not project assets. A user opening the repo root should see `DESIGN.md` and their own files, not six intermediate artifacts from one design run.
+## Workflow
 
-## Route Decision
+Before step 1, read the shared rules that bind every step (`composition-rules.md` holds the legible-visual and richness rules that keep the work from turning into abstract shapes): [shared/anti-slop.md](shared/anti-slop.md), [shared/hard-rules.md](shared/hard-rules.md), [shared/composition-rules.md](shared/composition-rules.md), [shared/guardrails.md](shared/guardrails.md), [shared/brand-asset.md](shared/brand-asset.md).
 
-After reading DESIGN.md (or deciding to create one), route to the right engine:
+### 1. Context and facts
 
-| Signal | Engine | Sub-skill |
-|--------|--------|-----------|
-| Director, film, cinema, editorial feel | **Cinematic** | `cinematic-ui/GUIDE.md` |
-| High-end static website with visual narrative | **Cinematic** | `cinematic-ui/GUIDE.md` |
-| Prototype, mockup, interactive demo | **Practical** | `practical/GUIDE.md` |
-| PPT, slides, deck, 簡報 | **Practical** | `practical/GUIDE.md` |
-| Animation, motion, MP4, GIF | **Practical** | `practical/GUIDE.md` |
-| Expert review, critique, scoring | **Practical** | `practical/GUIDE.md` |
-| Infographic, data visualization | **Practical** | `practical/GUIDE.md` |
-| App/iOS/Android prototype | **Practical** | `practical/GUIDE.md` |
-| Quick design variants (3 directions) | **Practical** | `practical/GUIDE.md` |
-| Ambiguous / "make something good" | **Practical** (Fallback advisor) | `practical/GUIDE.md` |
-| Brand materials with specific brand | **Either** — use shared brand protocol | Depends on output type |
-| New brand identity from scratch (logo concepting, brand-kit board) | **Practical** | `practical/GUIDE.md` → `practical/references/brand-identity-board.md` |
-| High-conversion LP (explicit CTA / value props / conversion goal) | **Hand off** | `landing-page-studio` skill — it reads this skill's shared rules and style library, then runs its own conversion workflow |
-| Web-based deck — live presenting, presenter mode, deploy to a URL (not an editable PPTX) | **Hand off** | `open-slide-studio` skill — this skill supplies DESIGN.md and the style direction; it owns the open-slide workspace, authoring hand-off, and delivery |
+- Read `DESIGN.md` if it exists. When the user has a default Claude Design System, its tokens act like an existing `DESIGN.md`.
+- When the task names a real product, company, technology or event, verify it with web search before designing and write `product-facts.md` (fact verification in [references/production-guide.md](references/production-guide.md)).
+- When a real brand or named product appears in the design, run [shared/brand-asset.md](shared/brand-asset.md) and freeze `brand-spec.md`.
 
-**Ambiguous**: Ask one question: "Do you have a film or director in mind as visual reference, or want me to recommend directions?"
+### 2. One round of questions
 
-## Session Flow (this file drives every session)
+- Ask everything still missing in one batch: output type, pages or slide count, audience, references, assets, constraints. Skip questions the request already answers.
+- If the user says to just build it, or does not answer, decide with best judgment and list the assumptions in the delivery note.
+- Never stop on a question nobody can answer.
 
-1. **Context** — Read `DESIGN.md` if it exists (lifecycle table above); create one from `shared/DESIGN-template.md` when the task establishes visual rules.
-2. **Shared rules** — Read `shared/anti-slop.md`, `shared/hard-rules.md`, `shared/guardrails.md`, `shared/brand-asset.md`, `shared/verification.md`. They bind every route.
-3. **Route** — Pick the engine from the Route Decision table, then read **only** that engine's GUIDE and run its workflow:
-   - **Cinematic** → `cinematic-ui/GUIDE.md` — director + film → cinematic grammar → web structure, in 4 phases: decisions → storyboard → compiled-spec → build. Best for landing pages, brand websites, editorial layouts. References: `cinematic-ui/references/` (200 directors, hero archetypes, compositions, color grades).
-   - **Practical** → `practical/GUIDE.md` — task router → brand protocol → Fallback advisor → Junior Designer. Best for prototypes, presentations, animations, reviews, infographics. References: `practical/references/` (40 styles, animation pitfalls, slide decks, critique guide).
+### 3. Direction
 
-   A GUIDE is an execution manual, not a separate skill: it runs inside this session, under the shared rules and the `DESIGN.md` context already loaded. This file stays in charge of steps 4–6.
-4. **During design** — Record new or changed reusable colors, typography, spacing, and component rules in `DESIGN.md`.
-5. **Before delivery** — Run `shared/verification.md`; if visual rules changed, make `DESIGN.md` reflect the final design.
-6. **On revisit** — Read `DESIGN.md` first. Expand, don't restart.
+Work these in order and record the result in `decisions.md`:
 
-## Hybrid Tasks
+1. **Film grammar**: pick a director and film and translate them into composition, motion and atmosphere ([references/cinematic-direction.md](references/cinematic-direction.md)).
+2. **Color from the subject**: derive the palette from the subject itself with the color derivation protocol in [references/design-styles.md](references/design-styles.md).
+3. **Design data lookup**: query the bundled data for styles, type pairings and UX rules that similar products use. Run `scripts/design_lookup.py --help` for usage. English keywords only. Results are references and checks, never a template. If Python 3 is unavailable, skip this step and say so.
+4. **Unclear direction**: when the user gave no style reference, named no Cinematic or Practical preference, and the brief is open, build three independent directions in parallel and let the user choose from screenshots (the advisor flow in [references/production-guide.md](references/production-guide.md)). The chosen direction then goes through items 1–2: film grammar sets the skeleton, and the directions contribute palette, type and motifs. Save the direction files under `docs/design/design-demos/`.
 
-When both engines apply, pick the one matching the **primary output**. Reference the other's principles where useful. Never mix workflows.
+Priority when sources conflict:
 
-## PPTX
+1. An existing `DESIGN.md` or default design system decides type and color tokens.
+2. Film grammar decides composition and motion.
+3. Subject-derived color decides the palette when no tokens exist.
+4. Lookup data only rules options out or checks the result. It never overrides 1–3.
 
-Both engines produce PPTX. Cinematic uses PptxGenJS natively. Practical uses HTML deck → PptxGenJS export. Read the PPTX reference from the chosen route.
+### 4. Spec, then build
+
+Write `storyboard.md` and then `compiled-spec.md` before any code, with the templates in [references/output-templates.md](references/output-templates.md). The compiled spec includes three tables from [shared/composition-rules.md](shared/composition-rules.md):
+
+- **Section rhythm**: every section marked lead, support or pause.
+- **Depth layer**: what carries depth on each page.
+- **Shape language**: radius, shadow and border rules derived from the direction.
+
+The spec also carries the motion budget: at most one heavy interaction and two attention-seeking reveals per page.
+
+Then build with the manual for the output type:
+
+| Output | Manual |
+|--------|--------|
+| Website, brand page, editorial layout | [references/cinematic-direction.md](references/cinematic-direction.md) (spec and build) + [references/implementation-guardrails.md](references/implementation-guardrails.md) |
+| WebGPU / shader / particle effects | [references/webgpu-effects.md](references/webgpu-effects.md) + `assets/webgpu-starter.html` |
+| App / iOS / Android prototype | [references/app-prototype.md](references/app-prototype.md) |
+| Slides / deck (HTML, PDF, editable PPTX) | [references/slide-decks.md](references/slide-decks.md) + [references/cinematic-slides.md](references/cinematic-slides.md) + [references/editable-pptx.md](references/editable-pptx.md) |
+| Animation, MP4, GIF, narrated video | [references/animation-pitfalls.md](references/animation-pitfalls.md) first, then the animation rows in [references/production-guide.md](references/production-guide.md) |
+| Infographic, cover, scene templates | [references/scene-templates.md](references/scene-templates.md) |
+| Illustrations (any output without photos) | [references/illustration-craft.md](references/illustration-craft.md) + `assets/illustration-techniques.html` |
+| New brand identity, logo concepts | [references/brand-identity-board.md](references/brand-identity-board.md) |
+| Design review, scoring | [references/critique-guide.md](references/critique-guide.md) |
+| Claude Design canvas, Design System, Slides artifact | [references/claude-design.md](references/claude-design.md) on top of the manual above |
+
+Hand off instead of building:
+
+| Request | Skill |
+|---------|-------|
+| Conversion-focused landing page (explicit CTA, value props, conversion goal) | `landing-page-studio`. It reads this skill's shared rules and style library. |
+| Web deck for live presenting in the open-slide workspace (presenter mode, deploy to a URL) | `open-slide-studio`. This skill supplies DESIGN.md and the direction. |
+
+### 5. Verify
+
+Run [shared/verification.md](shared/verification.md) before delivery. It covers:
+
+- screenshots at 375px and 1440px (1920×1080 for slides);
+- console errors;
+- the AI-look checklist;
+- both color modes;
+- WebGPU fallback paths when effects are used.
+
+If reusable visual rules changed, make `DESIGN.md` match the final design. On a Claude Design canvas, follow the canvas rule instead: screenshot only when the user asks.
+
+## Output Contract
+
+- The deliverable in the requested format, plus a short note: assumptions, what the form came from in the content, anything not verified.
+- `DESIGN.md` updated when reusable rules changed; process files under `docs/design/`.
+- No director names, film titles or process labels in the user-facing UI unless the user asks for them.
+
+## Common Mistakes
+
+- Jumping from the request to HTML without `decisions.md`, `storyboard.md` and `compiled-spec.md`.
+- Letting lookup data or a style library pick the look instead of the subject and the film.
+- Abstract shapes standing in for content: a line with dots for a brewing process, a plain circle for a teacup. Draw the thing in the direction's illustration style.
+- Coloring-book illustrations: uniform outlines and flat fills with no shading, brushwork or texture.
+- Uniform rounded cards with drop shadows, hover lift on every card, line icons in circles: the shape-language rules ban them by default.
+- A middle section with only a sentence in empty space, repeated: more than two pause sections per page fails the rhythm rule.
+- A page with no depth at all: flat paper is not a direction unless the user asked for it, and paper grain alone does not count as depth.
+- Shipping a WebGPU effect without testing the WebGL 2 and static fallbacks.
+
+## Quick Reference
+
+- Shared rules: `shared/` (anti-slop, hard-rules, composition-rules, guardrails, brand-asset, verification, redesign-protocol, DESIGN-template).
+- Production manuals: `references/`. Film and composition libraries: `data/` (index in [references/library-index.md](references/library-index.md)).
+- Design lookup data (ported from ui-ux-pro-max, MIT): `data/ui-ux/`, queried with `scripts/design_lookup.py`.
+- Starter components, sound effects, showcases: `assets/`. Export and verification scripts: `scripts/` (dependencies in `package.json`).

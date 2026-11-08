@@ -182,7 +182,7 @@ font-family: "Newsreader", "Noto Serif SC", "Songti SC", serif;
 | 引號 | 直角引號「」『』，不用彎引號 "" | 彎引號在中文字型裡是全形佔位但形狀是西文的，視覺漂浮；「」是本 skill 硬規範 |
 | 避頭尾 | `line-break: strict;` | 禁止句號逗號出現在行首、開引號出現在行尾，這是中文排版的底線 |
 | 標點懸掛 | `hanging-punctuation: first allow-end;`（僅 Safari）；跨瀏覽器用 `text-indent: -0.5em` 處理段首開引號 | 段首的開引號不懸掛會讓首行看起來縮進了半格，視覺左邊緣不齊 |
-| 連續標點擠壓 | `font-feature-settings: "halt";`（行尾擠壓）或 `"palt"`（全比例寬度，需配合 letter-spacing） | 全形標點連排（如「）。」）會出現一個半字寬的空洞，halt 收窄它 |
+| 連續標點擠壓 | `font-feature-settings: "halt";`（行尾擠壓）或 `"palt"`（全比例寬度，需配合 letter-spacing） | 全形標點連排（如「）。」）會出現一個半字寬的空洞，halt 收窄它。繁體中文（台灣）不要全域開啟：Chrome 搭 Noto TC 時，halt 會把全形逗號、句號壓成像英文標點，只在確認過的標點連排處局部使用 |
 
 ### 4.5 中文 letter-spacing 區間
 
@@ -249,8 +249,8 @@ body {
 /* 西文小標籤：全大寫 + 大字距的唯一合法場景 */
 .label { text-transform: uppercase; letter-spacing: 0.1em; font-size: 12px; }
 
-/* 標點擠壓：中文 display 大字裡全形標點的空洞收窄 */
-.display-cjk { font-feature-settings: "halt" 1; }
+/* 標點擠壓：簡中、日文 display 大字裡全形標點的空洞收窄。繁中（台灣）字型會把逗號、句號壓得像英文標點，不要套用 */
+.display-cjk-sc { font-feature-settings: "halt" 1; }
 ```
 
 **中文字型載入**（單檔案 5-15MB，直接引全量會毀掉首屏）：

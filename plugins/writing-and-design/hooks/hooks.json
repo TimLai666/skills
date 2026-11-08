@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^Artifact$",
+        "hooks": [{"type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/design_reminder.py\" pre-artifact", "timeout": 10}]
+      }
+    ]
+  }
+}

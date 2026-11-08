@@ -31,10 +31,10 @@ AI設計裡最容易掉進去的陷阱。這是一份「不做什麼」的清單
 
 沒圖示用真icon庫（Lucide/Heroicons/Phosphor），或者用placeholder。
 
-**❌ SVG 畫 imagery**
-不要試圖用SVG畫：人物、場景、裝置、物品、抽象藝術。AI畫的SVG imagery一眼就是AI味，幼稚且廉價。**一個灰色矩形+"插畫位 1200×800"的文字標籤，比一個拙劣的SVG hero illustration強100倍**。
+**❌ 沒有風格的 SVG 插畫**
+人物、人臉、具名產品、物品、風景、靜物都可以畫，但整份作品只用一種從方向推導出的插畫風格（例如水墨、銅版線刻、剪紙），要有筆觸、明暗與材質（`references/illustration-craft.md`），畫完要通過 `shared/composition-rules.md` 的三秒看懂測試。風格混雜、歪七扭八的 clip-art，或等寬外框加平塗的著色本畫法，一眼就是AI味。
 
-唯一可以用SVG的場景：
+SVG 也用在：
 - 真正的icon（16×16到32×32級別）
 - 幾何圖形做裝飾元素
 - Data viz的chart
@@ -251,7 +251,7 @@ p {
 - 想加個漸層？→ 大機率不加
 - 想加個emoji？→ 不加
 - 想給卡片加圓角+border-left accent？→ 不加，換其他方式
-- 想用SVG畫個hero插畫？→ 不畫，用placeholder
+- 想用SVG畫個hero插畫？→ 先找真圖；沒有就依方向的插畫風格畫，要有筆觸與明暗
 - 想加一段quote裝飾？→ 先問使用者有沒有真quote
 - 想加一排icon features？→ 先問要不要icon，可能不需要
 - 用Inter？→ 換一個更有特點的

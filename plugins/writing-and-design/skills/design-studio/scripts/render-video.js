@@ -37,7 +37,8 @@
  * Output: next to the HTML file, same basename with .mp4 suffix.
  */
 
-const { chromium } = require('playwright');
+const { loadPlaywright, launchChromium, fileUrl } = require('./node-deps.cjs');
+const { chromium } = loadPlaywright();
 const path = require('path');
 const fs = require('fs');
 const { spawnSync } = require('child_process');
@@ -94,8 +95,8 @@ console.log(`  output: ${MP4_OUT}`);
 (async () => {
   fs.mkdirSync(TMP_DIR, { recursive: true });
 
-  const browser = await chromium.launch();
-  const url = 'file://' + HTML_ABS;
+  const browser = await launchChromium(chromium);
+  const url = fileUrl(HTML_ABS);
 
   // ── Phase 1: WARMUP (no recording, caches fonts/assets) ─────────────
   console.log('▸ Warmup (caching fonts)…');

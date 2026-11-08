@@ -19,7 +19,7 @@
  *   挂到 body 下一个普通 div，内联 style 强制 position:relative + 固定尺寸，
  *   每个 section 加 page-break-after: always，最后一个改 auto 避免尾部空白页。
  *
- * 依赖：playwright
+ * 依賴：playwright（或 playwright-core）。找不到時的處理與本機 Chrome 備援見 node-deps.cjs。
  *   npm install playwright
  *
  * 输出特点：
@@ -28,9 +28,13 @@
  *   - 字体必须能被 Chromium 加载（本地字体或 Google Fonts）
  */
 
-import { chromium } from 'playwright';
+import { createRequire } from 'module';
 import fs from 'fs/promises';
 import path from 'path';
+
+const require = createRequire(import.meta.url);
+const { loadPlaywright, launchChromium, fileUrl, waitForFonts } = require('./node-deps.cjs');
+const { chromium } = loadPlaywright();
 
 function parseArgs() {
   const args = { width: 1920, height: 1080 };
@@ -60,12 +64,12 @@ async function main() {
 
   console.log(`Rendering ${path.basename(htmlAbs)} → ${path.basename(outFile)}`);
 
-  const browser = await chromium.launch();
+  const browser = await launchChromium(chromium);
   const ctx = await browser.newContext({ viewport: { width, height } });
   const page = await ctx.newPage();
 
-  await page.goto('file://' + htmlAbs, { waitUntil: 'networkidle' });
-  await page.waitForTimeout(2500);  // 等 Google Fonts + deck-stage init
+  await page.goto(fileUrl(htmlAbs), { waitUntil: 'networkidle' });
+  await waitForFonts(page, 1500);  // 等 Google Fonts + deck-stage init
 
   // 核心修复：把 section 从 shadow DOM slot 拔出来摊平
   const sectionCount = await page.evaluate(({ W, H }) => {

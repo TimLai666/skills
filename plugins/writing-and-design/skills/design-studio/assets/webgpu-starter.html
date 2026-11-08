@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="zh-Hant-TW" data-renderer="pending">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>霧中光 · WebGPU 背景範本</title>
+<!--
+  webgpu-starter.html：全螢幕霧氣背景範本（單檔，可直接開啟）
+
+  三層降級：WebGPU（原生）→ WebGL 2 → 靜態 CSS/SVG 畫面
+  實際走到哪一層，寫在 <html data-renderer="webgpu|webgl|static">，
+  原因寫在 data-renderer-reason（例如 reduced-motion、forced、no-webgpu）。
+
+  網址參數：
+    ?renderer=auto|webgpu|webgl|static   強制路徑（預設 auto）。強制 webgpu/webgl 時略過「裝置太弱」判斷，
+                                         但使用者開了「減少動態效果」仍一律走靜態。
+    ?debug=1                             右下角顯示目前路徑、幀時間、解析度倍率
+    ?stress=<n>                          測試用：讓著色器多算 n 輪雜訊，模擬弱 GPU，用來驗證自動降解析度
+
+  套品牌色：只改 :root 的 --fx-* 變數（任何 CSS 顏色寫法都可以），特效與靜態畫面會一起換色。
+-->
+<style>
+  :root {
+    /* ── 品牌色：特效與靜態畫面共用 ── */
+    --fx-bg: #0b1016;        /* 最深的底色 */
+    --fx-fog-1: #3c5a6e;     /* 霧的冷色 */
+    --fx-fog-2: #9fb4bf;     /* 霧的亮部 */
+    --fx-light: #f2c58a;     /* 左上角打進來的光 */
+
+    /* ── 文字與介面 ── */
+    --text: #eef2f4;
+    --text-dim: rgba(238, 242, 244, 0.72);
+    --accent: #f2c58a;
+    --accent-ink: #1a1206;
+    --line: rgba(238, 242, 244, 0.16);
+    --surface: #10161d;
+
+    --font: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--fx-bg);
+    color: var(--text);
+    font-family: var(--font);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── 首屏：內容是普通 HTML，不等特效就先出現 ── */
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    align-items: end;
+    padding: clamp(24px, 6vw, 96px);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  /* 第三層：靜態畫面。永遠墊在最底下，特效失敗、減少動態或裝置太弱時，看到的就是它 */
+  .fx-static {
+    position: absolute; inset: 0; z-index: -3;
+    background:
+      /* 左上斜射的光 */
+      radial-gradient(ellipse 60% 50% at 10% 0%, color-mix(in srgb, var(--fx-light) 45%, transparent), transparent 70%),
+      /* 幾團霧 */
+      radial-gradient(ellipse 70% 42% at 30% 55%, color-mix(in srgb, var(--fx-fog-2) 26%, transparent), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 78% 62%, color-mix(in srgb, var(--fx-fog-2) 18%, transparent), transparent 70%),
+      radial-gradient(ellipse 65% 38% at 80% 42%, color-mix(in srgb, var(--fx-fog-1) 75%, transparent), transparent 72%),
+      radial-gradient(ellipse 95% 45% at 50% 100%, color-mix(in srgb, var(--fx-fog-1) 85%, transparent), transparent 75%),
+      var(--fx-bg);
+  }
+  /* 靜態畫面的光束：從左上角放射的幾道光，用遮罩讓它往外漸淡 */
+  .fx-static::before {
+    content: ""; position: absolute; inset: 0; filter: blur(7px);
+    background: conic-gradient(from 95deg at 6% -4%, transparent 0deg, color-mix(in srgb, var(--fx-light) 14%, transparent) 4deg, transparent 9deg, transparent 15deg, color-mix(in srgb, var(--fx-light) 22%, transparent) 19deg, transparent 22deg, color-mix(in srgb, var(--fx-light) 14%, transparent) 30deg, transparent 37deg, transparent 46deg, color-mix(in srgb, var(--fx-light) 14%, transparent) 50deg, transparent 56deg, color-mix(in srgb, var(--fx-light) 14%, transparent) 66deg, transparent 75deg);
+    -webkit-mask: radial-gradient(ellipse 70% 75% at 6% 0%, #000 0%, transparent 70%);
+    mask: radial-gradient(ellipse 70% 75% at 6% 0%, #000 0%, transparent 70%);
+  }
+  /* 靜態畫面的顆粒感（SVG 雜訊），讓漸層不會像一片塑膠 */
+  .fx-static::after {
+    content: ""; position: absolute; inset: 0; opacity: 0.09; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* 第一、二層：特效畫布。第一幀畫好才淡入，所以初始化期間看到的是靜態畫面，不會閃黑 */
+  .fx-canvas {
+    position: absolute; inset: 0; z-index: -2;
+    width: 100%; height: 100%; display: block;
+    opacity: 0; transition: opacity 1.2s ease;
+  }
+  .fx-canvas.is-live { opacity: 1; }
+
+  /* 壓暗文字後方，確保任何一層背景上文字都讀得清楚 */
+  .hero::after {
+    content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      linear-gradient(to top, color-mix(in srgb, var(--fx-bg) 88%, transparent) 0%, transparent 55%),
+      radial-gradient(ellipse at center, transparent 55%, color-mix(in srgb, var(--fx-bg) 70%, transparent) 100%);
+  }
+
+  .hero-copy { max-width: 40rem; }
+  .eyebrow {
+    margin: 0 0 1rem; font-size: 0.8125rem; letter-spacing: 0.24em; color: var(--accent);
+  }
+  h1 {
+    margin: 0; font-size: clamp(2.4rem, 6.4vw, 5.2rem); line-height: 1.12; font-weight: 700; letter-spacing: 0.02em;
+    text-wrap: balance;
+  }
+  .lede { margin: 1.25rem 0 2rem; font-size: clamp(1rem, 1.6vw, 1.2rem); color: var(--text-dim); max-width: 34rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn {
+    display: inline-flex; align-items: center; min-height: 48px; padding: 0 1.5rem; border-radius: 999px;
+    font: inherit; font-weight: 600; text-decoration: none; border: 1px solid var(--line); color: var(--text);
+    background: color-mix(in srgb, var(--surface) 55%, transparent); backdrop-filter: blur(8px);
+    transition: transform .2s ease, background .2s ease;
+  }
+  .btn:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--surface) 80%, transparent); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  /* ── 首屏以下的一般內容 ── */
+  .section { padding: clamp(56px, 9vw, 128px) clamp(24px, 6vw, 96px); background: var(--fx-bg); }
+  .section h2 { margin: 0 0 2rem; font-size: clamp(1.6rem, 3vw, 2.4rem); line-height: 1.3; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 16px; }
+  .card { padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+  .card h3 { margin: 0 0 .5rem; font-size: 1.05rem; }
+  .card p { margin: 0; color: var(--text-dim); font-size: .95rem; }
+  code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: .9em; color: var(--accent); }
+
+  /* ?debug=1 的狀態小框 */
+  .fx-debug {
+    position: fixed; right: 12px; bottom: 12px; z-index: 10; padding: 6px 10px; border-radius: 8px;
+    font: 12px/1.4 ui-monospace, Consolas, monospace; color: #fff; background: rgba(0,0,0,.6); white-space: pre;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fx-canvas { transition: none; }
+    .btn { transition: none; }
+  }
+</style>
+</head>
+<body>
+  <header class="hero" id="hero">
+    <div class="fx-static" aria-hidden="true"></div>
+    <canvas class="fx-canvas" id="fx" aria-hidden="true"></canvas>
+    <div class="hero-copy">
+      <p class="eyebrow">FOG · LIGHT · DEPTH</p>
+      <h1>霧散之前，<br>先看見重點。</h1>
+      <p class="lede">背景是緩慢流動的霧與一道斜光。文字和按鈕先出現，特效等畫面穩定後才淡入；裝置跑不動時，自動換成同色調的靜態畫面。</p>
+      <div class="actions">
+        <a class="btn primary" href="#how">怎麼套用</a>
+        <a class="btn" href="?renderer=static">看靜態版</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="section" id="how">
+    <h2>換成你的品牌，只要改四個顏色</h2>
+    <div class="grid">
+      <article class="card"><h3>底色與霧</h3><p>改 <code>--fx-bg</code>、<code>--fx-fog-1</code>、<code>--fx-fog-2</code>，特效和靜態畫面一起換色。</p></article>
+      <article class="card"><h3>光的顏色</h3><p><code>--fx-light</code> 是左上角打進來的光，暖色像黃昏，冷色像清晨。</p></article>
+      <article class="card"><h3>檢查走哪條路</h3><p>網址加 <code>?debug=1</code> 看目前路徑與幀時間，加 <code>?renderer=webgl</code> 強制走備案。</p></article>
+      <article class="card"><h3>捲動時</h3><p>霧會隨捲動往上飄並變濃；首屏離開畫面後特效自動暫停，不耗電。</p></article>
+    </div>
+  </main>
+
+<script type="module">
+// ─────────────────────────────────────────────────────────────
+// 設定值（數值來源見 references/webgpu-effects.md「效能上限」）
+// ─────────────────────────────────────────────────────────────
+const CONFIG = {
+  dprCapMobile: 1.5,       // 手機（觸控為主或窄螢幕）的像素密度上限
+  dprCapDesktop: 2,        // 桌機的像素密度上限
+  slowAvgMs: 24,           // 一個量測區間內，平均幀間隔超過這個毫秒數（約低於 42fps）就降一級解析度
+  windowMs: 1000,          // 量測區間長度：累積滿這麼多毫秒的幀才判斷一次，取平均避免偶發卡頓誤判
+  settleMs: 500,           // 剛啟動或剛改解析度後，先略過這段時間不判斷（著色器編譯、重配記憶體會卡一下）
+  scaleSteps: [1, 0.75, 0.5, 0.35], // 解析度倍率階梯；最低一級還是太慢就改走靜態畫面
+};
+
+const root = document.documentElement;
+const params = new URLSearchParams(location.search);
+const requested = (params.get('renderer') || 'auto').toLowerCase();
+const forced = requested === 'webgpu' || requested === 'webgl';
+const stress = Math.max(0, Math.min(64, parseInt(params.get('stress') || '0', 10) || 0));
+const debug = params.has('debug');
+
+const hero = document.getElementById('hero');
+let canvas = document.getElementById('fx');   // 降級或重啟時會換成新的一張，所以用 let
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+// 給驗證腳本和除錯用的狀態
+const fx = (window.__fx = { renderer: 'pending', reason: '', scale: 1, dpr: 1, lastFrameMs: 0 });
+
+function setRenderer(name, reason) {
+  fx.renderer = name;
+  fx.reason = reason;
+  root.dataset.renderer = name;
+  root.dataset.rendererReason = reason;
+  updateDebug();
+}
+
+// ─────────────────────────────────────────────────────────────
+// 著色器：同一套霧氣演算法，WGSL（WebGPU）與 GLSL（WebGL 2）各一份
+// 統一參數（uniform）排列：
+//   a = (寬, 高, 時間秒, 捲動進度 0~1)
+//   b = (stress 輪數, 0, 0, 0)
+//   bg / fog1 / fog2 / light = 四個品牌色（RGB 0~1）
+// ─────────────────────────────────────────────────────────────
+const WGSL = /* wgsl */ `
+struct U { a: vec4f, b: vec4f, bg: vec4f, fog1: vec4f, fog2: vec4f, light: vec4f };
+@group(0) @binding(0) var<uniform> u: U;
+
+// 一個蓋滿畫面的大三角形，比兩個三角形組成的方塊少一條接縫
+@vertex fn vs(@builtin(vertex_index) i: u32) -> @builtin(position) vec4f {
+  var p = array<vec2f, 3>(vec2f(-1.0, -1.0), vec2f(3.0, -1.0), vec2f(-1.0, 3.0));
+  return vec4f(p[i], 0.0, 1.0);
+}
+
+fn hash(p: vec2f) -> f32 {
+  var p3 = fract(vec3f(p.xyx) * 0.1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
+}
+fn noise(p: vec2f) -> f32 {
+  let i = floor(p); let f = fract(p);
+  let w = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2f(1.0, 0.0)), w.x),
+             mix(hash(i + vec2f(0.0, 1.0)), hash(i + vec2f(1.0, 1.0)), w.x), w.y);
+}
+fn fbm(p0: vec2f) -> f32 {
+  var p = p0; var v = 0.0; var amp = 0.5;
+  let m = mat2x2f(1.6, 1.2, -1.2, 1.6);
+  for (var k = 0; k < 5; k++) { v += amp * noise(p); p = m * p; amp *= 0.5; }
+  return v;
+}
+
+@fragment fn fs(@builtin(position) pos: vec4f) -> @location(0) vec4f {
+  let res = u.a.xy; let t = u.a.z; let scroll = u.a.w;
+  // WebGPU 的像素座標 y 朝下，翻成 y 朝上，跟 GLSL 版本一致
+  let uv = vec2f(pos.x, res.y - pos.y) / res;
+  var p = (uv - 0.5) * vec2f(res.x / res.y, 1.0) * 1.4;
+  p.y -= scroll * 0.9;                                  // 捲動時霧往上飄
+
+  var extra = 0.0;                                      // ?stress 用：白算幾輪雜訊模擬弱 GPU
+  for (var s = 0; s < i32(u.b.x); s++) { extra += fbm(p * 1.3 + f32(s)); }
+
+  // 兩層「扭曲座標」讓霧有捲動、翻騰的感覺
+  let q = vec2f(fbm(p + vec2f(0.0, t * 0.020)), fbm(p + vec2f(5.2, 1.3) - t * 0.015));
+  let r = vec2f(fbm(p + 1.8 * q + vec2f(1.7, 9.2) + t * 0.030), fbm(p + 1.8 * q + vec2f(8.3, 2.8)));
+  var density = fbm(p * 0.8 + 1.4 * r);
+  density = smoothstep(0.25, 0.85, density + scroll * 0.25) * (0.55 + 0.45 * (1.0 - uv.y));
+
+  // 左上角的斜光：一團光暈加幾道被霧切開的光束
+  let lp = uv - vec2f(0.08, 1.05);
+  let glow = exp(-dot(lp * vec2f(1.1, 1.6), lp * vec2f(1.1, 1.6)) * 3.2);
+  let ang = atan2(lp.y, lp.x);
+  let beams = smoothstep(0.35, 1.0, noise(vec2f(ang * 9.0, t * 0.05))) * exp(-length(lp) * 1.8);
+
+  var col = u.bg.rgb;
+  let fogCol = mix(u.fog1.rgb, u.fog2.rgb, clamp(r.x * 1.2 + glow * 0.6, 0.0, 1.0));
+  col = mix(col, fogCol, density * 0.85);
+  col += u.light.rgb * (glow * 0.9 + beams * 0.45) * (0.4 + 0.6 * density);
+  col *= 1.0 - 0.45 * length((uv - 0.5) * vec2f(1.1, 1.3));   // 暗角
+  col += (hash(pos.xy + fract(t) * 91.0) - 0.5) / 255.0 * 2.0; // 細微顆粒，避免漸層出現色階
+  col += extra * 1e-6;
+  return vec4f(clamp(col, vec3f(0.0), vec3f(1.0)), 1.0);
+}`;
+
+const GLSL_VS = `#version 300 es
+void main() {
+  vec2 p = vec2(gl_VertexID == 1 ? 3.0 : -1.0, gl_VertexID == 2 ? 3.0 : -1.0);
+  gl_Position = vec4(p, 0.0, 1.0);
+}`;
+
+const GLSL_FS = `#version 300 es
+precision highp float;
+uniform vec4 u_a, u_b, u_bg, u_fog1, u_fog2, u_light;
+out vec4 outColor;
+
+float hash(vec2 p) {
+  vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
+}
+float noise(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  vec2 w = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), w.x),
+             mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), w.x), w.y);
+}
+float fbm(vec2 p) {
+  float v = 0.0, amp = 0.5;
+  mat2 m = mat2(1.6, 1.2, -1.2, 1.6);
+  for (int k = 0; k < 5; k++) { v += amp * noise(p); p = m * p; amp *= 0.5; }
+  return v;
+}
+void main() {
+  vec2 res = u_a.xy; float t = u_a.z; float scroll = u_a.w;
+  vec2 uv = gl_FragCoord.xy / res;
+  vec2 p = (uv - 0.5) * vec2(res.x / res.y, 1.0) * 1.4;
+  p.y -= scroll * 0.9;
+
+  float extra = 0.0;
+  for (int s = 0; s < 64; s++) { if (s >= int(u_b.x)) break; extra += fbm(p * 1.3 + float(s)); }
+
+  vec2 q = vec2(fbm(p + vec2(0.0, t * 0.020)), fbm(p + vec2(5.2, 1.3) - t * 0.015));
+  vec2 r = vec2(fbm(p + 1.8 * q + vec2(1.7, 9.2) + t * 0.030), fbm(p + 1.8 * q + vec2(8.3, 2.8)));
+  float density = fbm(p * 0.8 + 1.4 * r);
+  density = smoothstep(0.25, 0.85, density + scroll * 0.25) * (0.55 + 0.45 * (1.0 - uv.y));
+
+  vec2 lp = uv - vec2(0.08, 1.05);
+  vec2 lps = lp * vec2(1.1, 1.6);
+  float glow = exp(-dot(lps, lps) * 3.2);
+  float ang = atan(lp.y, lp.x);
+  float beams = smoothstep(0.35, 1.0, noise(vec2(ang * 9.0, t * 0.05))) * exp(-length(lp) * 1.8);
+
+  vec3 col = u_bg.rgb;
+  vec3 fogCol = mix(u_fog1.rgb, u_fog2.rgb, clamp(r.x * 1.2 + glow * 0.6, 0.0, 1.0));
+  col = mix(col, fogCol, density * 0.85);
+  col += u_light.rgb * (glow * 0.9 + beams * 0.45) * (0.4 + 0.6 * density);
+  col *= 1.0 - 0.45 * length((uv - 0.5) * vec2(1.1, 1.3));
+  col += (hash(gl_FragCoord.xy + fract(t) * 91.0) - 0.5) / 255.0 * 2.0;
+  col += extra * 1e-6;
+  outColor = vec4(clamp(col, 0.0, 1.0), 1.0);
+}`;
+
+// ─────────────────────────────────────────────────────────────
+// 工具：讀 CSS 變數顏色（任何寫法都轉成 0~1 的 RGB）
+// ─────────────────────────────────────────────────────────────
+const colorCtx = document.createElement('canvas').getContext('2d');
+function cssColor(name) {
+  const raw = getComputedStyle(root).getPropertyValue(name).trim() || '#000';
+  colorCtx.fillStyle = '#000';
+  colorCtx.fillStyle = raw;                 // 瀏覽器把任何合法顏色正規化成 #rrggbb 或 rgba()
+  colorCtx.fillRect(0, 0, 1, 1);
+  const d = colorCtx.getImageData(0, 0, 1, 1).data;
+  return [d[0] / 255, d[1] / 255, d[2] / 255, 1];
+}
+function readPalette() {
+  return [...cssColor('--fx-bg'), ...cssColor('--fx-fog-1'), ...cssColor('--fx-fog-2'), ...cssColor('--fx-light')];
+}
+
+// ─────────────────────────────────────────────────────────────
+// 降級判斷
+// ─────────────────────────────────────────────────────────────
+function isMobileLike() {
+  return matchMedia('(pointer: coarse)').matches || innerWidth < 768;
+}
+function weakDeviceReason() {
+  const cores = navigator.hardwareConcurrency;
+  const mem = navigator.deviceMemory;          // 只有 Chromium 提供，單位 GB
+  if (navigator.connection && navigator.connection.saveData) return 'save-data';
+  if (cores && cores <= 2) return 'low-cpu';
+  if (mem && mem <= 2) return 'low-memory';
+  return '';
+}
+
+// ─────────────────────────────────────────────────────────────
+// 第一層：原生 WebGPU
+// ─────────────────────────────────────────────────────────────
+async function createWebGPU() {
+  if (!navigator.gpu) throw new Error('no-webgpu');
+  const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'low-power' });
+  if (!adapter) throw new Error('no-adapter');
+  // 「後備轉接器」是用 CPU 模擬的 GPU，跑全螢幕特效會很慢；自動模式下改試 WebGL 2
+  const isFallback = adapter.info ? adapter.info.isFallbackAdapter : adapter.isFallbackAdapter;
+  if (isFallback && !forced) throw new Error('fallback-adapter');
+
+  const device = await adapter.requestDevice();
+  const ctx = canvas.getContext('webgpu');
+  if (!ctx) throw new Error('no-webgpu-context');
+  const format = navigator.gpu.getPreferredCanvasFormat();
+  ctx.configure({ device, format, alphaMode: 'opaque' });
+
+  device.pushErrorScope('validation');
+  const module = device.createShaderModule({ code: WGSL });
+  const info = await module.getCompilationInfo();
+  const errors = info.messages.filter((m) => m.type === 'error');
+  if (errors.length) throw new Error('wgsl: ' + errors.map((m) => m.message).join('; '));
+  const pipeline = device.createRenderPipeline({
+    layout: 'auto',
+    vertex: { module, entryPoint: 'vs' },
+    fragment: { module, entryPoint: 'fs', targets: [{ format }] },
+    primitive: { topology: 'triangle-list' },
+  });
+  const ubo = device.createBuffer({ size: 24 * 4, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+  const bind = device.createBindGroup({ layout: pipeline.getBindGroupLayout(0), entries: [{ binding: 0, resource: { buffer: ubo } }] });
+  const err = await device.popErrorScope();
+  if (err) throw new Error('webgpu-validation: ' + err.message);
+
+  const data = new Float32Array(24);
+  device.lost.then((e) => { if (e.reason !== 'destroyed') degrade('static', 'device-lost'); });
+
+  return {
+    name: 'webgpu',
+    setPalette(p) { data.set(p, 8); },
+    draw(t, scroll) {
+      data[0] = canvas.width; data[1] = canvas.height; data[2] = t; data[3] = scroll; data[4] = stress;
+      device.queue.writeBuffer(ubo, 0, data);
+      const enc = device.createCommandEncoder();
+      const pass = enc.beginRenderPass({ colorAttachments: [{ view: ctx.getCurrentTexture().createView(), loadOp: 'clear', storeOp: 'store', clearValue: { r: 0, g: 0, b: 0, a: 1 } }] });
+      pass.setPipeline(pipeline);
+      pass.setBindGroup(0, bind);
+      pass.draw(3);
+      pass.end();
+      device.queue.submit([enc.finish()]);
+    },
+    destroy() { device.destroy(); },
+  };
+}
+
+// ─────────────────────────────────────────────────────────────
+// 第二層：WebGL 2
+// ─────────────────────────────────────────────────────────────
+function createWebGL() {
+  const targetCanvas = canvas;
+  const gl = targetCanvas.getContext('webgl2', { antialias: false, alpha: false, powerPreference: 'low-power' });
+  if (!gl) throw new Error('no-webgl2');
+  // 軟體繪圖（SwiftShader、llvmpipe 等）跑全螢幕特效太慢，自動模式下直接改靜態
+  const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+  const rendererName = String(gl.getParameter(dbg ? dbg.UNMASKED_RENDERER_WEBGL : gl.RENDERER));
+  if (!forced && /swiftshader|llvmpipe|software|basic render/i.test(rendererName)) throw new Error('software-gl');
+
+  const compile = (type, src) => {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error('glsl: ' + gl.getShaderInfoLog(s));
+    return s;
+  };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, GLSL_VS));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, GLSL_FS));
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error('link: ' + gl.getProgramInfoLog(prog));
+  gl.useProgram(prog);
+  gl.bindVertexArray(gl.createVertexArray());   // WebGL 2 需要綁一個（空的）頂點陣列才能畫
+
+  const loc = Object.fromEntries(['u_a', 'u_b', 'u_bg', 'u_fog1', 'u_fog2', 'u_light'].map((n) => [n, gl.getUniformLocation(prog, n)]));
+  targetCanvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); degrade('static', 'context-lost'); });
+
+  return {
+    name: 'webgl',
+    setPalette(p) {
+      gl.uniform4fv(loc.u_bg, p.slice(0, 4)); gl.uniform4fv(loc.u_fog1, p.slice(4, 8));
+      gl.uniform4fv(loc.u_fog2, p.slice(8, 12)); gl.uniform4fv(loc.u_light, p.slice(12, 16));
+    },
+    draw(t, scroll) {
+      gl.viewport(0, 0, targetCanvas.width, targetCanvas.height);
+      gl.uniform4f(loc.u_a, targetCanvas.width, targetCanvas.height, t, scroll);
+      gl.uniform4f(loc.u_b, stress, 0, 0, 0);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    },
+    destroy() { const ext = gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext(); },
+  };
+}
+
+// ─────────────────────────────────────────────────────────────
+// 主迴圈：DPR 上限、離場暫停、分頁隱藏暫停、自適應解析度
+// ─────────────────────────────────────────────────────────────
+let engine = null;
+let rafId = 0, running = false, lastNow = 0, time = 0;
+let heroVisible = true, settle = CONFIG.settleMs, scaleIndex = 0, sizeDirty = true;
+
+let winSum = 0, winCount = 0;              // 目前量測區間累積的幀間隔總和（毫秒）與幀數
+function resetWindow() { winSum = 0; winCount = 0; }
+
+function resize() {
+  const cap = isMobileLike() ? CONFIG.dprCapMobile : CONFIG.dprCapDesktop;
+  fx.dpr = Math.min(devicePixelRatio || 1, cap);
+  fx.scale = CONFIG.scaleSteps[scaleIndex];
+  const w = Math.max(1, Math.round(canvas.clientWidth * fx.dpr * fx.scale));
+  const h = Math.max(1, Math.round(canvas.clientHeight * fx.dpr * fx.scale));
+  if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+  sizeDirty = false;
+}
+
+function scrollProgress() {
+  const rect = hero.getBoundingClientRect();
+  return Math.min(1, Math.max(0, -rect.top / Math.max(1, rect.height)));
+}
+
+function frame(now) {
+  if (!running) return;
+  rafId = requestAnimationFrame(frame);
+  const dt = lastNow ? now - lastNow : 16.7;
+  lastNow = now;
+  fx.lastFrameMs = dt;
+  time += Math.min(dt, 50) / 1000;           // 卡頓或剛恢復時不讓霧瞬間跳一大段
+
+  // 自適應解析度：最近一段幀間隔的平均持續過長就降一級；最低一級還是慢就放棄特效
+  if (settle > 0) settle -= dt;
+  else if (dt < 1000) {                     // 超過 1 秒的間隔是分頁切換或除錯中斷，不算
+    winSum += dt; winCount++;
+    if (winSum >= CONFIG.windowMs) {
+      const avg = winSum / winCount;
+      resetWindow();
+      if (avg > CONFIG.slowAvgMs) {
+        if (scaleIndex < CONFIG.scaleSteps.length - 1) { scaleIndex++; sizeDirty = true; settle = CONFIG.settleMs; }
+        else { degrade('static', 'too-slow'); return; }
+      }
+    }
+  }
+
+  if (sizeDirty) resize();
+  engine.draw(time, scrollProgress());
+  if (!canvas.classList.contains('is-live')) canvas.classList.add('is-live');
+  if (debug) updateDebug();
+}
+
+function syncRunning() {
+  const shouldRun = !!engine && heroVisible && document.visibilityState === 'visible';
+  if (shouldRun && !running) {
+    running = true; lastNow = 0; resetWindow(); settle = CONFIG.settleMs;
+    rafId = requestAnimationFrame(frame);
+  } else if (!shouldRun && running) {
+    running = false; cancelAnimationFrame(rafId);
+  }
+  fx.running = running;
+}
+
+function degrade(to, reason) {
+  running = false; cancelAnimationFrame(rafId);
+  if (engine) { try { engine.destroy(); } catch {} engine = null; }
+  canvas.classList.remove('is-live');
+  setRenderer(to, reason);
+}
+
+async function start() {
+  if (reducedMotion.matches) return setRenderer('static', 'reduced-motion');
+  if (requested === 'static') return setRenderer('static', 'forced');
+  if (!forced) {
+    const weak = weakDeviceReason();
+    if (weak) return setRenderer('static', weak);
+  }
+
+  const tries = requested === 'webgpu' ? ['webgpu'] : requested === 'webgl' ? ['webgl'] : ['webgpu', 'webgl'];
+  const failures = [];
+  for (const kind of tries) {
+    try {
+      // 同一張 canvas 拿過 webgpu context 後就拿不到 webgl2（反之亦然），所以每次嘗試都用乾淨的一張
+      freshCanvas();
+      engine = kind === 'webgpu' ? await createWebGPU() : createWebGL();
+      engine.setPalette(readPalette());
+      setRenderer(kind, forced ? 'forced' : failures.join(',') || 'auto');
+      resize();
+      syncRunning();
+      return;
+    } catch (e) {
+      failures.push(kind + ':' + (e && e.message ? e.message.split(':')[0] : 'error'));
+      if (e && /wgsl|glsl|link|validation/.test(e.message)) console.warn('[fx]', e.message);
+    }
+  }
+  setRenderer('static', failures.join(','));
+}
+
+// 換一張乾淨的 canvas（第一次使用時不用換）
+let canvasUsed = false;
+function freshCanvas() {
+  if (!canvasUsed) { canvasUsed = true; return; }
+  const el = canvas.cloneNode(false);
+  canvas.replaceWith(el);
+  canvasResize.unobserve(canvas);
+  canvas = el;
+  canvasResize.observe(el);
+}
+
+// ─────────────────────────────────────────────────────────────
+// 事件
+// ─────────────────────────────────────────────────────────────
+new IntersectionObserver((entries) => {
+  heroVisible = entries[0].isIntersecting;
+  syncRunning();
+}).observe(hero);
+
+document.addEventListener('visibilitychange', syncRunning);
+addEventListener('resize', () => { sizeDirty = true; });
+const canvasResize = new ResizeObserver(() => { sizeDirty = true; });
+canvasResize.observe(canvas);
+reducedMotion.addEventListener('change', (e) => {
+  if (e.matches) degrade('static', 'reduced-motion');
+  else if (fx.renderer === 'static' && fx.reason === 'reduced-motion') start();
+});
+
+let debugBox = null;
+function updateDebug() {
+  if (!debug) return;
+  if (!debugBox) { debugBox = document.createElement('div'); debugBox.className = 'fx-debug'; document.body.append(debugBox); }
+  debugBox.textContent = `renderer ${fx.renderer} (${fx.reason})\nframe ${fx.lastFrameMs.toFixed(1)} ms\nscale ${fx.scale} · dpr ${fx.dpr}${stress ? `\nstress ${stress}` : ''}`;
+}
+
+// 首屏先畫：等頁面載完、瀏覽器空閒時才初始化特效
+function whenIdle(fn) {
+  const go = () => ('requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 1200 }) : setTimeout(fn, 200));
+  if (document.readyState === 'complete') go(); else addEventListener('load', go, { once: true });
+}
+whenIdle(start);
+</script>
+</body>
+</html>

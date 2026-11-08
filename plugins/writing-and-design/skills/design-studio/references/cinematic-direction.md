@@ -1,38 +1,16 @@
-# Cinematic Layout
+# Cinematic Direction
 
 Design the site like a film production, not like a generic landing page.
-Treat this as a research-and-translation skill plus a design-library skill. Its job is to study film references, extract usable cinematic signals, then turn those signals into page narrative, section structure, motion direction, and implementable web specs.
+Treat this as a research-and-translation manual plus a design library. Its job is to study film references, extract usable cinematic signals, then turn those signals into page narrative, section structure, motion direction, and implementable web specs.
 The core mechanism is fixed: use a director and a specific film to determine the site's emotional language, then translate that language into web structure and implementation. Do not replace this with generic premium-brand logic.
 Do not confuse the film with the workflow artifact. The film is research input and emotional source material. The computer-operable workflow begins only when those observations are translated into `decisions.md`, `storyboard.md`, `compiled-spec.md`, and implementation.
-
-## Start
-
-- Every invocation must complete the start questionnaire before Phase 1 begins.
-- Do not enter `decisions.md`, director selection, film selection, architecture, or visual planning until the questionnaire is complete.
-- Mirror the user's language in every question and deliverable.
-- Keep questions short and ask only one blocking question at a time.
-- Run this start questionnaire on every invocation:
-  1. **Ask for output medium** (if not already clear from context):
-  - `Website / Web app` — HTML/CSS/JS output
-  - `Presentation / PPTX` — PowerPoint .pptx output via PptxGenJS
-  - If the user's request clearly implies one medium (e.g. "簡報", "投影片", "slides", "pptx"), record it and skip this question.
-  2. Ask how to start:
-  - `Screenshot`: reverse-engineer a visual reference from an image or URL.
-  - `Step-by-step`: let the user choose genre, director, and film.
-  - `Surprise me`: pick a fresh combination that differs from previous work when project history is available.
-  3. Ask whether the design should include image placeholders. *(Web only — skip for PPTX.)*
-  4. Ask for the site's niche and page list **or** the deck's topic and slide count before moving into architecture.
-- If the environment supports structured questionnaires or forms, use them.
-- If the environment does not support structured questionnaires, ask the same items in plain language.
-- If the user pre-answers some items in the initial request, confirm or record those answers and only ask for the missing items.
-- Phase 1 starts only after all required start-questionnaire items are answered or explicitly inferred from the user's request.
 
 ## Demo Uniqueness Protocol
 
 Use this whenever the same user has already used this skill to create one or more other sites, demos, or homepage concepts.
 
 - Treat prior outputs for the same user as design-history context, not as reusable shells.
-- Before Phase 1 is complete, inspect the immediately previous outputs when available and record a uniqueness audit in `decisions.md`.
+- Before the decisions step is complete, inspect the immediately previous outputs when available and record a uniqueness audit in `decisions.md`.
 - Write a `Previous-work audit` that names the recurring traits most likely to repeat. Examples:
   - left-copy right-object hero
   - top nav plus stacked framed panels
@@ -52,24 +30,26 @@ Use this whenever the same user has already used this skill to create one or mor
 - A new demo fails if its wireframe would still look like a previous demo after removing color, type styling, and decorative effects.
 - If project history is unavailable, state that and still write a `Shell-ban list` against the most common fallback templates you might otherwise drift toward.
 
-## Operating Model
+## How This Maps To The Workflow
 
-Use four strict phases. Do not skip forward. Keep each phase's output in its own markdown file under `docs/design/` in the working project — see "Where Process Files Go" in the parent `design-studio/SKILL.md`. Bare filenames below resolve against that directory.
+This manual runs inside the single workflow in `SKILL.md`. The user's questions are already answered in step 2.
 
-1. Phase 1: decisions
-2. Phase 2: storyboard
-3. Phase 3: compiled spec
-4. Phase 4: build and verify
+| Workflow step | This manual | Output file (`docs/design/`) |
+|---|---|---|
+| 3. Direction | Film grammar: director, film, research, uniqueness audit | `decisions.md` |
+| 4. Spec | Storyboard, then compiled spec | `storyboard.md`, `compiled-spec.md` |
+| 4. Build | Build from the compiled spec | the deliverable |
+| 5. Verify | Screening room and anti-pattern checks below, plus `shared/verification.md` | — |
 
-Inside Phases 2 and 3, follow this order without skipping:
+Inside the storyboard and the compiled spec, follow this order without skipping:
 1. Define the site-wide cinematic grammar.
-2. Write one independent scene thesis for each major page role (web) or each slide group (pptx).
+2. Write one independent scene thesis for each major page role (web) or each slide group (deck).
 3. Lock one irreplaceable signature composition per page / per slide.
 4. Derive the shared system only after the page/slide compositions are already clear.
 
-**If output medium is `pptx`**: after Phase 2, switch to `## PPTX Mode` instead of the standard Phase 3/4.
+For slides, the film grammar from step 3 and the storyboard still apply; the build follows `slide-decks.md` and `cinematic-slides.md`.
 
-Read [references/output-templates.md](references/output-templates.md) before creating those files.
+Read [output-templates.md](output-templates.md) before creating those files.
 
 ## Delegation Model
 
@@ -82,24 +62,24 @@ Read [references/output-templates.md](references/output-templates.md) before cre
   - implementation or verification on separate files
 - Do not let multiple agents independently redefine the director, film, or site-wide visual thesis.
 - Merge delegated work back into one directed system. The result must still feel like one film, not a committee.
-- Do not skip delegation unless the task is too small to benefit from it or the environment does not support sub-agents.
+- Do not skip delegation unless the task is too small to benefit from it, the environment does not support sub-agents, or you are yourself a delegated worker told not to delegate. Without delegation, do the same work in sequence under the same lead-agent rules.
 
 ## Progressive Loading
 
-Keep `GUIDE.md` lean. Load only the references needed for the current phase.
+Load only the references needed for the current step.
 
 ### Always read first
 
-- [references/library-index.md](references/library-index.md)
-- [references/premium-calibration.md](references/premium-calibration.md)
+- [references/library-index.md](library-index.md)
+- [references/premium-calibration.md](premium-calibration.md)
 
-### Phase 1: Decisions
+### Step 3: Decisions (film grammar)
 
-- Read `references/data/directors-200.md` only.
+- Read `../data/directors-200.md` only.
 - If sub-agents are available, delegate film research, niche research, or reference breakdown as separate bounded tasks after the user direction is clear.
 - If the user has prior sites or demos in the workspace, review them just enough to identify what must not repeat.
 - If the user starts from a screenshot or live site, inspect that reference first and infer a likely genre, director, and film. Ask for confirmation before committing.
-- When web access is available, research the chosen director and film before finalizing the phase. This is required, not optional.
+- When web access is available, research the chosen director and film before finalizing `decisions.md`. This is required, not optional.
 - Use external sources to gather richer creative input such as:
   - film palette and lighting behavior
   - cinematography patterns, framing logic, and scene rhythm
@@ -109,20 +89,20 @@ Keep `GUIDE.md` lean. Load only the references needed for the current phase.
 - Prefer primary or authoritative sources when available, then add secondary analysis only to deepen interpretation.
 - Record the research sources and a short interpretation note. Do not dump plot summaries or generic trivia.
 - If web access is unavailable, say so explicitly and continue with best-effort inference from local libraries. Mark the result as a weaker research pass.
-- If the user provides references, do not copy them whole. Read [references/reference-protocol.md](references/reference-protocol.md) and decompose each reference into traits such as rhythm, materiality, typography, framing, or image treatment.
+- If the user provides references, do not copy them whole. Read [references/reference-protocol.md](reference-protocol.md) and decompose each reference into traits such as rhythm, materiality, typography, framing, or image treatment.
 - Record the uniqueness audit, shell-ban list, and primary composition family in `decisions.md`.
 - Write `decisions.md`.
 
-### Phase 2: Storyboard
+### Step 4a: Storyboard
 
 - Read these files one at a time, not all at once:
-  - `references/anti-convergence.md`
-  - `references/data/hero-archetypes.md`
-  - `references/data/narrative-beats.md`
-  - `references/data/section-functions.md`
-  - `references/data/section-archetypes.md`
-- Use `references/data/dna-index.tsv` to cast 2-3 compatible design DNA sources by mood, font direction, shape language, motion, restraint, density, and material richness.
-- Read `references/data/design-dna-db.txt` only when the index points to a promising source and deeper site-level DNA details are needed.
+  - `anti-convergence.md`
+  - `../data/hero-archetypes.md`
+  - `../data/narrative-beats.md`
+  - `../data/section-functions.md`
+  - `../data/section-archetypes.md`
+- Use `../data/dna-index.tsv` to cast 2-3 compatible design DNA sources by mood, font direction, shape language, motion, restraint, density, and material richness.
+- Read `../data/design-dna-db.txt` only when the index points to a promising source and deeper site-level DNA details are needed.
 - Define the site-wide cinematic grammar before designing any individual page. Capture:
   - page-shell logic
   - navigation posture
@@ -130,38 +110,38 @@ Keep `GUIDE.md` lean. Load only the references needed for the current phase.
   - density cadence
   - recurring material or atmospheric layers
   - composition families that fit the chosen film
-- Make sure the selected page-shell logic and composition family do not violate the shell-ban list from Phase 1.
+- Make sure the selected page-shell logic and composition family do not violate the shell-ban list in `decisions.md`.
 - Build a director brief with:
   - one-sentence visual thesis
   - 3 signature techniques and their web translation
   - exact color tokens
   - typography direction
   - motion rules
-- Run the prestige calibration from [references/premium-calibration.md](references/premium-calibration.md).
+- Run the prestige calibration from [references/premium-calibration.md](premium-calibration.md).
 - For every major page role, write an independent scene thesis before defining shared components. Treat each page as a standalone scene or poster first, then connect the pages into one site.
 - If sub-agents are available, assign distinct page roles to different agents only after the site-wide cinematic grammar is approved.
 - Define one page-level visual thesis per page. This is the single dominant idea that makes the page memorable. Examples: monumental type, sculptural light, editorial framing, void plus glow, object-as-stage. Everything else must support this idea rather than compete with it.
 - Write a hero dominance statement explaining exactly why the hero feels expensive or cinematic without relying on generic gradients or generic app UI.
 - Define one irreplaceable signature composition per page before introducing reusable layout primitives.
-- Map each page to a narrative arc instead of defaulting to `Hero -> Features -> Stats -> CTA`.
-- Apply the anti-convergence system from [references/anti-convergence.md](references/anti-convergence.md) when choosing hero archetypes, narrative arcs, and section archetypes.
+- Map each page to a narrative arc instead of defaulting to `Hero -> Features -> Stats -> CTA`. When the chosen director has no arc template in `../data/narrative-beats.md` or no fit row in `../data/hero-archetypes.md`, build the arc from the Universal Beats, pick archetypes by the film's composition traits, and record the reasoning in `storyboard.md`.
+- Apply the anti-convergence system from [references/anti-convergence.md](anti-convergence.md) when choosing hero archetypes, narrative arcs, and section archetypes.
 - Write `storyboard.md`.
-- Get user approval before moving to Phase 3 when the task is collaborative or exploratory.
+- When the user asked to review direction before the build, show the storyboard and wait; otherwise continue.
 
-### Phase 3: Compiled Spec
+### Step 4b: Compiled Spec
 
-- Read [references/implementation-guardrails.md](references/implementation-guardrails.md) before extracting final CSS and JS.
+- Read [references/implementation-guardrails.md](implementation-guardrails.md) before extracting final CSS and JS.
 - Read only the specific entries needed for the approved storyboard:
-  - `references/data/camera-shots-50.md`
-  - `references/data/interaction-effects-50.md`
-  - `references/data/compositions.md`
-  - `references/data/visual-elements.md`
-  - `references/data/background-techniques.md`
-  - `references/data/typography-cinema.md`
-  - `references/data/color-grades.md`
-  - `references/data/font-moods.md`
-  - `references/data/textures.md`
-- Read [references/anti-garbage.md](references/anti-garbage.md) before finalizing the spec.
+  - `../data/camera-shots-50.md`
+  - `../data/interaction-effects-50.md`
+  - `../data/compositions.md`
+  - `../data/visual-elements.md`
+  - `../data/background-techniques.md`
+  - `../data/typography-cinema.md`
+  - `../data/color-grades.md`
+  - `../data/font-moods.md`
+  - `../data/textures.md`
+- Read [references/anti-garbage.md](anti-garbage.md) before finalizing the spec.
 - Lock each page's signature composition before deriving shared layout primitives.
 - Shared systems come last. Extract navigation, footer, spacing rhythm, typography, tokens, and utilities only after the page-specific compositions are already clear.
 - If sub-agents are available, delegate disjoint page-spec extraction or implementation tasks, then merge them back under one lead agent review.
@@ -175,9 +155,9 @@ Keep `GUIDE.md` lean. Load only the references needed for the current phase.
 - Create an entrance map per page before writing section specs.
 - `fadeUp` / `opacity + translateY` may appear at most 2 times per page.
 - Use at least 4 distinct entrance types per page when the page has enough sections to support that range.
-- If a selected interaction-effect id is JS-required under [references/implementation-guardrails.md](references/implementation-guardrails.md), the full JS is mandatory in `compiled-spec.md`.
-- Include the `External Library Decision` block from [references/implementation-guardrails.md](references/implementation-guardrails.md) in `compiled-spec.md`.
-- Run the Phase 3 quality checklist from [references/implementation-guardrails.md](references/implementation-guardrails.md) before treating the spec as complete.
+- If a selected interaction-effect id is JS-required under [references/implementation-guardrails.md](implementation-guardrails.md), the full JS is mandatory in `compiled-spec.md`.
+- Include the `External Library Decision` block from [references/implementation-guardrails.md](implementation-guardrails.md) in `compiled-spec.md`.
+- Run the compiled-spec quality checklist from [references/implementation-guardrails.md](implementation-guardrails.md) before treating the spec as complete.
 - Do not invent core interactions or atmospheric devices from memory when an appropriate library entry already exists.
 - For each page, record the selected library source ids for:
   - camera / reveal behavior
@@ -189,91 +169,30 @@ Keep `GUIDE.md` lean. Load only the references needed for the current phase.
 - If a custom effect is still necessary, mark it explicitly as `Custom`, explain why the library was insufficient, and keep it subordinate to the chosen film language.
 - Extract complete CSS for layout, entrances, and interactions.
 - Include complete JS whenever the selected interaction requires it.
+- Add the section rhythm, depth layer and shape language tables from `shared/composition-rules.md`.
+- When a WebGPU or canvas atmosphere is chosen, record the effect, its fallback and its budget from `webgpu-effects.md`.
+- Effects that read scroll position (`--scroll` in `../data/camera-shots-50.md`) get the value from CSS scroll-driven animations, GSAP ScrollTrigger or IntersectionObserver, never from a raw `window` scroll listener.
 - Write `compiled-spec.md` as the only source of truth for implementation.
 
-### Phase 4: Build And Verify
+### Step 4c: Build, Then Step 5 Checks
 
 - Read only:
   - `compiled-spec.md`
-  - `references/anti-garbage.md`
-  - `references/implementation-guardrails.md`
+  - `anti-garbage.md`
+  - `implementation-guardrails.md`
 - Build from the spec without improvising new layout logic.
 - Add reduced-motion handling and responsive behavior without breaking the chosen film language.
 - Verify the output against the storyboard and compiled spec.
-- Use the Screening Room and Post-Screening Adjustments rules from [references/implementation-guardrails.md](references/implementation-guardrails.md) when refining the result after the first build.
+- Use the Screening Room and Post-Screening Adjustments rules from [references/implementation-guardrails.md](implementation-guardrails.md) when refining the result after the first build.
 - **Anti-pattern check**: after the first build passes visual inspection, run both checks:
-  1. Run the impeccable anti-pattern detector:
+  1. Run the impeccable anti-pattern detector when it can run (it downloads an npm package; if that is not possible, say so and answer the AI-look checklist in `shared/verification.md` by hand):
      ```bash
      npx impeccable detect <output-dir-or-file>
      ```
      Fix any flagged issues (overused fonts, purple gradients, nested cards, bounce easing, low-contrast text, flat type hierarchy, side-tab borders, icon-tile stacking).
-  2. Read [references/anti-garbage.md](references/anti-garbage.md) and check the output against it. The detector catches deterministic issues; anti-garbage.md catches film-language violations that only a human/LLM can judge.
+  2. Read [references/anti-garbage.md](anti-garbage.md) and check the output against it. The detector catches deterministic issues; anti-garbage.md catches film-language violations that only a human/LLM can judge.
   Fix all issues from both checks before declaring done.
 
-
-## PPTX Mode
-
-When output medium is `pptx`, this section replaces Phase 3 (Compiled Spec) and Phase 4 (Build and Verify). Phases 1 and 2 (decisions + storyboard) run identically — the director and film still drive everything.
-
-### What changes in PPTX mode
-
-| Web mode | PPTX mode |
-|---|---|
-| HTML/CSS/JS output | PptxGenJS `.pptx` output |
-| Page sections | Slides |
-| CSS entrances / animations | Static composition tension (no animation in PPTX) |
-| Navigation bar | Sidebar strip or persistent rule line |
-| Responsive layout | Fixed 16:9 canvas (10" × 5.625") |
-| `compiled-spec.md` | `slide-spec.md` (see below) |
-
-### Phase 3-PPTX: Slide Spec
-
-Read **[references/pptx-cinematic.md](references/pptx-cinematic.md)** before writing any code.
-
-Also read from the standard library only what is needed:
-- `references/data/color-grades.md` — for palette extraction
-- `references/data/typography-cinema.md` — for type direction
-- `references/data/compositions.md` — for slide composition family
-
-Write `slide-spec.md` containing:
-- Director brief (same as web: visual thesis, signature techniques, color tokens, type direction)
-- Composition family selected (from pptx-cinematic.md Composition Families table)
-- Slide sequence with rhythm annotation (spectacle / information / derivation / verdict / summary)
-- Per-slide: composition description, which content goes left vs right, accent color usage, verdict box placement
-
-### Phase 4-PPTX: Build and Verify
-
-1. Read `slide-spec.md` and `references/pptx-cinematic.md` only.
-2. Install dependency: `npm install -g pptxgenjs`
-3. Build with PptxGenJS. Follow all rules in `references/pptx-cinematic.md`:
-   - All tables as shape+text loops — zero `addTable()` calls
-   - `makeShadow()` factory for every shadow
-   - 4-token color palette enforced
-   - Verdict boxes on every decision slide
-   - Footer with slide counter on all non-cover slides
-4. Run QA pipeline (requires LibreOffice for `soffice` and poppler for `pdftoppm`):
-   ```bash
-   node deck.js
-   soffice --headless --convert-to pdf output.pptx
-   rm -f slide-*.jpg && pdftoppm -jpeg -r 150 output.pdf slide
-   ```
-5. Visually inspect every slide image. Look for:
-   - Text overflow at slide edges
-   - Table rendering issues (double-text, misaligned columns)
-   - Sidebar rotated text bleed (acceptable in LibreOffice preview; verify spec is correct)
-   - Slides missing structure or accent layer
-6. Fix all issues, re-render, re-inspect. Do not declare done until one full clean pass.
-7. Deliver the final `.pptx` to the user the way the current environment expects (file path, download, or attachment).
-
-### PPTX Anti-Patterns
-
-- Never use `addTable()` — always shape+text loops.
-- Never overlay a shape on top of `addTable()` to fake a header — this causes double-render.
-- Never reuse a shadow options object across calls — use a `makeShadow()` factory.
-- Never use more than 4 colors in the deck.
-- Never put formula content in a sans-serif font — Courier New is required.
-- Never produce a slide that is only text with no structural or accent layer.
-- Never default to "Title + Bullets" layout — every slide needs a composition reason.
 
 ## Hard Rules
 
@@ -310,14 +229,14 @@ Write `slide-spec.md` containing:
 - Do not reuse the previous demo's hero posture, navigation posture, section rhythm, or dominant geometry unless the user explicitly requests continuity.
 - Do not read the entire library at once.
 - Do not jump from user request directly to HTML without writing `decisions.md`, `storyboard.md`, and `compiled-spec.md`.
-- Do not ship output with any of these deterministic flags: overused fonts, purple gradients, nested cards, bounce easing, low-contrast text, flat type hierarchy. Run `npx impeccable detect` as a final gate.
+- Do not ship output with any of these deterministic flags: overused fonts, purple gradients, nested cards, bounce easing, low-contrast text, flat type hierarchy. Run `npx impeccable detect` as a final gate when it can run; otherwise the AI-look checklist in `shared/verification.md` is the gate.
 
 ## File Guide
 
-- Use [references/library-index.md](references/library-index.md) to decide which library to load.
-- Use [references/output-templates.md](references/output-templates.md) to structure deliverables.
-- Use [references/premium-calibration.md](references/premium-calibration.md) to decide what makes the page feel expensive without breaking the cinematic concept.
-- Use [references/reference-protocol.md](references/reference-protocol.md) when the user provides visual references but wants to avoid template copying.
-- Use [references/anti-garbage.md](references/anti-garbage.md) as the final filter before coding.
-- Use [references/pptx-cinematic.md](references/pptx-cinematic.md) for all PPTX-mode builds — PptxGenJS rules, composition families, table patterns, and QA checklist.
-- Use `npx impeccable detect` as the final deterministic anti-pattern gate after build.
+- Use [references/library-index.md](library-index.md) to decide which library to load.
+- Use [references/output-templates.md](output-templates.md) to structure deliverables.
+- Use [references/premium-calibration.md](premium-calibration.md) to decide what makes the page feel expensive without breaking the cinematic concept.
+- Use [references/reference-protocol.md](reference-protocol.md) when the user provides visual references but wants to avoid template copying.
+- Use [references/anti-garbage.md](anti-garbage.md) as the final filter before coding.
+- Use [cinematic-slides.md](cinematic-slides.md) for slide compositions and ornaments in film-driven decks.
+- Use `npx impeccable detect` as the final deterministic anti-pattern gate after build when it can run, and the AI-look checklist in `shared/verification.md` either way.

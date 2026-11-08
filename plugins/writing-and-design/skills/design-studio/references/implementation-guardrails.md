@@ -1,6 +1,6 @@
 # Implementation Guardrails
 
-Use this during Phase 3 and Phase 4.
+Use this while writing `compiled-spec.md` and while building from it (workflow step 4).
 
 This file restores the concrete anti-laziness rules that prevent the agent from collapsing back to generic web output while compiling and building.
 
@@ -75,9 +75,9 @@ Rules:
 - `fadeUp` / `opacity + translateY` may appear at most 2 times per page.
 - Each page must use at least 4 different entrance types when the page has enough sections to support that range.
 
-## Phase 3 Quality Checklist
+## Compiled-Spec Quality Checklist
 
-Do not treat Phase 3 as complete until all checks pass:
+Do not treat `compiled-spec.md` as complete until all checks pass:
 
 - Every section has complete layout CSS.
 - Every section has complete entrance behavior.

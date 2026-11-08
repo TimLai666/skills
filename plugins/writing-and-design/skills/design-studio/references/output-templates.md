@@ -206,7 +206,22 @@ Use these files as working artifacts inside the target project directory.
 - Repeated motifs allowed only after page compositions are locked:
 - Uniqueness check against previous demos:
 
-## Phase 3 Quality Check
+## Section Rhythm
+| Section | Weight (lead / support / pause) | Subject |
+|---------|---------------------------------|---------|
+
+## Depth Layer
+| Page | Depth carrier | Fallback without motion or GPU |
+|------|---------------|--------------------------------|
+
+## Shape Language
+| Element | Radius | Shadow / border | Hover |
+|---------|--------|-----------------|-------|
+
+## Compiled-Spec Quality Check
+- [ ] At most two pause sections, none adjacent, none right after the hero
+- [ ] Depth layer named for every page, with its fallback
+- [ ] Shape language derived from the direction; no uniform rounded-card-plus-shadow system
 - [ ] Every section has complete layout CSS
 - [ ] Every section has complete entrance behavior
 - [ ] Every section has complete interaction behavior or intentional `none`
@@ -219,7 +234,7 @@ Use these files as working artifacts inside the target project directory.
 ## Derived Global Tokens
 ```css
 :root {
-  --bg: #000000;
+  --bg: #0B0B0C;
   --text: #f3f3f3;
   --accent: #d4a35f;
   --radius-card: 8px;

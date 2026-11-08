@@ -1,151 +1,101 @@
-# Cinematic PPTX Reference
+# Cinematic Slides: Compositions And Ornaments
 
-This reference is loaded **only** when output medium is `pptx`. It governs how cinematic grammar translates into PptxGenJS slide construction.
-
----
+Film-driven decks keep the director and film from workflow step 3 and translate them into slide composition and small ornaments. The deck itself is built as an HTML deck (`slide-decks.md`), exported to PDF, and to editable PPTX with `editable-pptx.md` when asked. Everything here is written so it survives that export.
 
 ## Medium Mapping: Film → Slide
 
 | Web concept | Slide equivalent |
 |---|---|
-| Full-bleed hero section | Cover slide: dominant shape panel + oversized type |
-| Section reveal / entrance | Slide-level composition hierarchy (not animation) |
-| Motion / parallax | Static composition tension: diagonal crop, asymmetric weight |
-| Navigation bar | Sidebar strip or top rule line — consistent across all slides |
-| Page rhythm (spectacle → info → rest) | Slide sequence rhythm (cover → argument → data → verdict) |
-| Atmospheric layer | Background texture via semi-transparent shape overlay |
+| Full-bleed hero section | Cover slide: dominant panel + oversized type |
+| Section reveal / entrance | Composition hierarchy inside the slide (export drops animation) |
+| Motion / parallax | Static tension: diagonal crop, asymmetric weight |
+| Navigation bar | Chapter strip or top rule line, the same on every content slide |
+| Page rhythm (spectacle → info → rest) | Slide rhythm (cover → argument → data → verdict → summary) |
+| Atmospheric layer | Semi-transparent panel or tinted band behind the content |
 
----
+## A Legible Main Visual On Every Slide
 
-## Slide Anatomy Rules
+Every slide carries a picture of its content that passes the three-second test in `shared/composition-rules.md`: the teacup, the tea garden, the hand pouring water. Ornaments, rule lines and large numbers frame that picture; they never replace it. Process slides show each step as its own drawn action.
 
-Every content slide must have exactly **three visual layers**:
+## Three Layers Per Content Slide
 
-1. **Structure layer** — background color, panel shapes, rule lines
-2. **Content layer** — text, formulas, tables (all-shape, never addTable)
-3. **Accent layer** — verdict boxes, pull-quote bars, chapter marks
+1. **Structure**: background color, panels, rule lines, the chapter strip.
+2. **Content**: headings, text, tables, formulas.
+3. **Accent**: verdict box, pull-quote bar, chapter tag.
 
-A slide that is only layer 2 is not cinematic. A slide that is only layer 1+3 is incomplete.
+A slide with only the content layer is not finished. A slide with only structure and accent has nothing to say.
 
----
+## Ornaments
 
-## Composition Families for Slides
+Small, repeated marks that make a deck feel directed. Pick two or three per deck and use them the same way on every slide that has them.
+
+| Ornament | What it is | Rule |
+|---|---|---|
+| Chapter strip | A narrow band on the left or top edge carrying the chapter name. On the left edge, set CJK vertically (`writing-mode: vertical-rl`) and Latin as a small rotated label; on the top edge, set it horizontally | Same position and width on every content slide; text is the real chapter name, not a number code |
+| Chapter tag | Small monospace label above the heading, letter-spaced | Names the topic in plain words; one per slide |
+| Rule lines | Thin lines in the accent or muted token dividing panels | One weight across the deck; never decoration on top of content |
+| Verdict box | Tinted box with a solid edge bar holding the decision or key result | Only on slides that state a decision or result |
+| Pull-quote bar | Accent bar beside one quoted or emphasized line | At most one per slide |
+| Footer rule | A hairline above the footer area | Footer holds source notes; the slide number comes from the deck shell, never hand-written on the slide |
+| Corner mark | A small film-derived mark (frame corner, registration mark, aperture) in one corner | Same corner throughout; skip it if the film offers no fitting mark |
+
+Export rules for ornaments (from `editable-pptx.md`):
+
+- Build every ornament as a real element with its text inside `<p>` or `<h*>`; no `::before` / `::after` content, no background-image text.
+- Rotated Latin labels may render differently in LibreOffice previews; check them in the PDF export.
+- When an ornament cannot survive PPTX export, keep it in the HTML and PDF and say in the delivery note what the PPTX loses.
+
+## Composition Families
 
 Choose one per deck. Do not mix families.
 
 | Family | Description | Best for |
 |---|---|---|
-| **Editorial split** | Left panel (30–40%) + right content column, gold/ink rule divider | Academic, research, analytical |
-| **Monumental type** | Oversized heading (60pt+) dominates, data in subordinate zone | Thesis-driven, keynote |
-| **Archive wall** | Tight grid of data blocks, dark frame, specimen card feel | Data-heavy, taxonomy |
-| **Corridor** | Full-width dark band top + bottom, content in lit centre | Cinematic, dramatic |
-| **Cover poster** | Left half solid dark + right half white/cream, editorial title | Journal, dispatch, report |
-
----
+| **Editorial split** | Picture panel + text column, rule divider; the picture panel takes 50–65% so the main visual stays legible | Academic, research, analytical, brand stories |
+| **Monumental type** | Oversized heading dominates, data in a subordinate zone | Thesis-driven, keynote |
+| **Archive wall** | Tight grid of data blocks, dark frame, specimen-card feel | Data-heavy, taxonomy |
+| **Corridor** | Full-width dark band top and bottom, content in a lit center | Cinematic, dramatic |
+| **Cover poster** | Left half solid dark, right half light, editorial title | Journal, dispatch, report |
 
 ## Color Discipline
 
-- Extract exactly **4 tokens** from the chosen film palette before writing any code: background, primary, accent, muted.
-- Never use more than 4 colors per deck. Gold rule lines and shape borders count toward the 4.
-- Dark backgrounds belong on the cover slide and verdict/summary slides. Content slides use the light background.
-- Accent color is reserved for: Reject H₀ decisions, key results, chapter markers. Do not use it decoratively.
+- Extract four tokens from the film palette before building: background, primary, accent, muted.
+- No more than four colors for type, panels, rules and ornaments; rule lines and borders count. Illustrations may use lighter and darker mixes of those tokens plus natural colors the subject needs (skin, wood, tea), so objects can carry base, shadow and highlight.
+- Dark backgrounds belong on the cover and verdict or summary slides; content slides use the light background unless the film commits to dark. Dark bands that are part of the composition family (Corridor) are structure, not a dark background.
+- The accent marks decisions, key results and chapter tags. It is not decoration.
 
----
+## Typography
 
-## Typography Rules
+| Role | Direction | Notes |
+|---|---|---|
+| Deck title | Serif display from the film's type direction | Not centered unless the family is Corridor |
+| Section heading | Same serif, bold | Left-aligned |
+| Chapter tag | Monospace, small, letter-spaced | Uppercase for Latin |
+| Formula / code | Monospace | The monospace is part of the cinematic signal |
+| Body | Sans from `DESIGN.md` | Size floors from `content-guidelines.md` (slides ≥24px body at 1920×1080) |
 
-| Role | Font | Size | Notes |
-|---|---|---|---|
-| Deck title (cover) | Georgia / Garamond bold | 34–48pt | Never centered unless corridor family |
-| Section heading | Georgia bold | 13–16pt | Left-aligned |
-| Chapter tag | Courier New bold | 7–9pt, charSpacing 3+ | ALL CAPS |
-| Formula / code | Courier New | 10–13pt | The monospace IS the cinematic signal |
-| Body / explanation | Calibri | 10–11pt | Italic for footnotes/captions |
-| Footer | Courier New | 7–8pt | Slide number right-aligned |
-
-Never use Arial or sans-serif for headings in a cinematic deck. Serif + monospace is the editorial pairing.
-
----
-
-## Table Rules
-
-**Never use `addTable()`** — it produces unpredictable rendering across platforms. Always build tables as shape+text loops:
-
-```javascript
-// Pattern: all-shape table
-const rows = [...];
-const colX = [x0, x1, x2, ...];
-const colW = [w0, w1, w2, ...];
-rows.forEach((row, ri) => {
-  const y = startY + ri * rowH;
-  const bg = ri === 0 ? HEADER_COLOR : (ri % 2 === 0 ? ALT_COLOR : BASE_COLOR);
-  colX.forEach((cx, ci) => {
-    s.addShape(pres.shapes.RECTANGLE, { x: cx, y, w: colW[ci], h: rowH, fill: { color: bg }, line: { color: BORDER_COLOR } });
-    s.addText(row[ci], { x: cx + 0.05, y: y + 0.05, w: colW[ci] - 0.1, h: rowH - 0.1, fontSize: 10, fontFace: "Courier New", color: ri === 0 ? WHITE : BODY_COLOR, bold: ri === 0, margin: 0 });
-  });
-});
-```
-
----
-
-## Verdict Box Pattern
-
-Use for hypothesis decisions, key results, and final conclusions:
-
-```javascript
-function verdict(s, text, accentColor, x, y, w = 3.5, h = 0.5) {
-  // Semi-transparent fill
-  s.addShape(pres.shapes.RECTANGLE, { x, y, w, h, fill: { color: accentColor, transparency: 88 }, line: { color: accentColor, transparency: 50 } });
-  // Left accent bar
-  s.addShape(pres.shapes.RECTANGLE, { x, y, w: 0.06, h, fill: { color: accentColor }, line: { color: accentColor } });
-  // Text
-  s.addText(text, { x: x + 0.12, y: y + 0.06, w: w - 0.18, h: h - 0.12,
-    fontSize: 11, color: accentColor, fontFace: "Georgia", bold: true, italic: true,
-    valign: "middle", margin: 0, wrap: true });
-}
-```
-
----
-
-## Slide Sequence Rhythm
-
-A cinematic deck follows scene rhythm, not topic-dump order:
+## Slide Rhythm
 
 ```
 Cover (spectacle)
-  → Problem/data slides (information, 2-column split)
-  → Derivation slides (step progression, numbered rows)
+  → Problem / data slides (information, two-column split)
+  → Derivation slides (step progression)
   → Verdict slides (decision, dark accent)
-  → Summary (echo of cover energy)
+  → Summary (echoes the cover)
 ```
 
-Do not default to: Title → Bullet 1 → Bullet 2 → Thank you.
+Do not default to Title → Bullet → Bullet → Thank you. Mark each slide lead, support or pause (`shared/composition-rules.md`).
 
----
+## Compiled Spec For Decks
 
-## pptx Phase 4 Checklist
+Decks fill `compiled-spec.md` with the slide sequence, composition per slide, the chosen ornaments, the four color tokens, and the rhythm and shape tables. Entrance maps and per-section CSS/JS fields are `none (static deck)` unless the deck is presented live with animation.
 
-Before declaring the deck complete, verify:
+## Checklist
 
-- [ ] All tables built as shape+text loops (zero `addTable()` calls)
-- [ ] No header+overlay pattern (causes double-render) — shapes only
-- [ ] Shadow objects use `makeShadow()` factory function (prevents EMU corruption)
-- [ ] Cover slide has ≥ 3 visual elements beyond plain text
-- [ ] Each content slide has structure + content + accent layers
-- [ ] Verdict boxes present on every hypothesis-decision slide
-- [ ] Footer with slide counter on all non-cover slides
-- [ ] Color stays within 4-token palette
-- [ ] QA: convert to PDF → pdftoppm → visually inspect all slides
-
----
-
-## PptxGenJS Quick-Reference Pitfalls
-
-- **Never `"#RRGGBB"`** — use bare hex `"RRGGBB"` or file corrupts
-- **Never 8-char hex in shadow** — use `opacity` property separately
-- **`breakLine: true`** required between array text items
-- **`margin: 0`** on text boxes when aligning with shape edges
-- **`makeShadow()` factory** — never reuse shadow object across calls
-- **`ROUNDED_RECTANGLE` + accent border** — use `RECTANGLE` instead
-- **Sidebar rotated text** — LibreOffice may mis-render; PowerPoint renders correctly
-
+- [ ] One composition family across the deck
+- [ ] Every content slide has structure, content and accent layers
+- [ ] Two or three ornaments chosen, used identically on every slide that has them
+- [ ] Verdict boxes on every decision or key-result slide
+- [ ] No hand-written slide numbers; the deck shell carries them
+- [ ] Color stays within four tokens
+- [ ] PDF export checked; PPTX losses listed when PPTX was requested
