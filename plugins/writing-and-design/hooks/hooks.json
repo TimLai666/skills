@@ -1,9 +1,18 @@
 {
   "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [{"type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/reminders.py\" prompt", "timeout": 10}]
+      }
+    ],
     "PreToolUse": [
       {
+        "matcher": "^(Write|Edit)$",
+        "hooks": [{"type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/reminders.py\" pre-write", "timeout": 10}]
+      },
+      {
         "matcher": "^Artifact$",
-        "hooks": [{"type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/design_reminder.py\" pre-artifact", "timeout": 10}]
+        "hooks": [{"type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/reminders.py\" pre-artifact", "timeout": 10}]
       }
     ]
   }

@@ -98,7 +98,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | `design-studio` | 所有設計事務的統一入口：網站、App、簡報、動畫、資訊圖、品牌設計與 WebGPU 特效。單一流程結合電影語法、從題目推導的配色與設計資料查詢，建立或變更共用視覺規範時更新 `DESIGN.md`。也能搭配 Claude 內建的 Design、Design System、Slides 使用。 |
 | `open-slide-studio` | 想把簡報做成可放映、可部署成網址的網頁簡報（open-slide 框架），視覺由 design-studio 供給；要可編輯 .pptx 仍走 design-studio。 |
 
-在 Claude Code 安裝整個 `writing-and-design` plugin 時，會另外帶一個提醒用的 hook：每次要建立或修改 artifact，而這個 session 還沒載入 `design-studio` 時，提醒 agent：如果這是設計類成品就先載入它，由 agent 自己判斷。這個 hook 只提醒、不擋動作，需要 `python3`。用 `npx skills` 或 zip 只裝 skill 不會有這個提醒，skill 照常可用。
+在 Claude Code 安裝整個 `writing-and-design` plugin 時，會另外帶一組提醒用的 hooks：使用者每次送出訊息時，提醒 agent 用 `human-writing` 寫回覆；要寫 .md、.txt 這類給人讀的文件而還沒載入 `human-writing` 時，提醒先載入；要建立或修改 artifact 而還沒載入 `design-studio` 時，提醒 agent 如果是設計類成品就先載入它，由 agent 自己判斷。這些 hooks 只提醒、不擋動作，需要 `python3`。用 `npx skills` 或 zip 只裝 skill 不會有這些提醒，skill 照常可用。
 | `human-writing` | 撰寫或修改文案、文章、文件、規則、prompt 與 skill，沿用合適段落並檢查重複、衝突及相關引用，讓文字自然清楚。 |
 
 ### `dev-workflow` — 開發流程與工程支援
