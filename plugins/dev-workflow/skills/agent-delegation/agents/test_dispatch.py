@@ -1,5 +1,7 @@
 """Focused dispatch workflow regressions using the local fake CLIs only."""
 import json
+import sys
+import os
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 import time
@@ -14,6 +16,13 @@ class DispatchRegressions(unittest.TestCase):
     request = helpers.Acceptance.request
     cli = helpers.Acceptance.cli
     dispatch = helpers.Acceptance.dispatch
+
+    def hand_off(self, result, *extra):
+        self.assertEqual(result["status"], "cli_failed", result.get("reason"))
+        resumed = self.resume(result["dispatch_id"], "--outcome", "dispatch-failed",
+                              "--failure-reason", "agent read the CLI error", *extra)
+        self.assertEqual(resumed.returncode, 0, resumed.stderr)
+        return json.loads(resumed.stdout)
 
     def resume(self, dispatch_id, *extra):
         return self.cli("dispatch", "--dispatch-id", dispatch_id,
@@ -87,8 +96,8 @@ print('completed')"""
     def test_coding_verification_retries_same_level_before_escalation(self):
         self.fake("copilot", "print('accepted report')")
         self.fake("codex", "print('accepted report')")
-        started = self.dispatch(host="agy", task_type="implementation",
-                                allowed_files=["src.py"])
+        started = self.hand_off(self.dispatch(host="agy", task_type="implementation",
+                                              allowed_files=["src.py"]))
         self.assertEqual(started["status"], "awaiting_review")
         self.assertEqual(started["level"], 2)
 
@@ -111,7 +120,7 @@ print('completed')"""
         self.assertEqual(escalated["status"], "awaiting_review")
 
     def test_native_dispatch_failure_cannot_skip_level(self):
-        started = self.dispatch()
+        started = self.hand_off(self.dispatch())
         self.assertEqual(started["status"], "native_required")
         invalid = self.resume(started["dispatch_id"], "--outcome", "dispatch-failed",
                               "--level", "4", "--failure-reason", "native unavailable")
@@ -125,7 +134,7 @@ print('completed')"""
         self.fake("opencode", "print(json.dumps({'type':'error','error':'quota exceeded'}))")
         result = self.dispatch(host="claude", task_type="chores", allowed_files=["notes.md"],
                                **self.claude_catalog())
-        self.assertEqual(result["status"], "native_required")
+        self.assertEqual((result["status"], result["level"], result["tool"]), ("cli_failed", 1, "opencode"))
         state = next(path for path in self.state.rglob("*.json")
                      if result["dispatch_id"] in path.read_text())
         saved = json.loads(state.read_text())
@@ -139,7 +148,7 @@ print('completed')"""
         self.fake("agy", "print('Error: Individual quota reached. Please upgrade your subscription.', file=sys.stderr)\n"
                          "print('AGY_ERROR: ' + json.dumps({'status':'RESOURCE_EXHAUSTED','error_code':429}), file=sys.stderr); sys.exit(3)")
         self.fake("codex", "print('accepted report')")
-        result = self.dispatch(host="claude", task_type="review", allowed_files=[])
+        result = self.hand_off(self.dispatch(host="claude", task_type="review", allowed_files=[]))
         self.assertEqual(result["status"], "awaiting_review")
         self.assertEqual((result["level"], result["tool"]), (2, "codex"))
         calls = [json.loads(line) for line in (self.root / "calls").read_text().splitlines()]
@@ -147,25 +156,29 @@ print('completed')"""
         self.assertEqual(len(agy), 1)
         self.assertNotIn("--effort", agy[0])
 
-    def test_claude_expired_oauth_hands_off(self):
+    def test_any_cli_error_text_is_handed_to_the_agent(self):
         self.fake("claude", "if 'claude-haiku-5-5' in sys.argv:\n"
-                            " print('Failed to authenticate: OAuth session expired and could not be refreshed', file=sys.stderr); sys.exit(1)\n"
+                            " print('Some wording no script could predict', file=sys.stderr); sys.exit(1)\n"
                             "print('accepted report')")
         result = self.dispatch(host="agy", task_type="implementation", allowed_files=["src.py"],
                                models={"codex": ["gpt-6.1-luna"],
                                        "claude": ["claude-haiku-5-5", "claude-sonnet-5-5"]})
+        for _ in range(4):
+            result = self.hand_off(result)
+        self.assertIn("Some wording no script could predict", result["attempts"][-2]["error"])
         self.assertEqual(result["status"], "awaiting_review")
         self.assertEqual((result["level"], result["model"]), (5, "claude-sonnet-5-5"))
 
     def test_codex_model_is_probed_without_caller_catalog(self):
         self.fake("codex", "print('accepted report')")
-        result = self.dispatch(host="claude", task_type="classification", allowed_files=[],
-                               models={"claude": ["claude-haiku-5-5"]})
+        result = self.hand_off(self.dispatch(host="claude", task_type="classification", allowed_files=[],
+                                             models={"claude": ["claude-haiku-5-5"]}))
         self.assertEqual(result["status"], "awaiting_review", result)
         self.assertEqual((result["tool"], result["model"]), ("codex", "gpt-6.1-luna"))
 
     def test_exhausted_is_terminal_and_does_not_relaunch(self):
-        started = self.dispatch(host="claude", task_type="classification", **self.claude_catalog())
+        started = self.hand_off(self.hand_off(self.dispatch(host="claude", task_type="classification",
+                                                            **self.claude_catalog())))
         self.assertEqual(started["status"], "native_required")
         next_stage = self.resume(started["dispatch_id"], "--outcome", "dispatch-failed",
                                  "--failure-reason", "native unavailable")
@@ -197,7 +210,7 @@ print('completed')"""
         self.assertFalse((self.root / "calls").exists())
 
     def test_resume_preserves_original_request_and_appends_feedback(self):
-        started = self.dispatch(**self.claude_catalog())
+        started = self.hand_off(self.dispatch(**self.claude_catalog()))
         self.fake("claude", "print('accepted report')")
         changed = self.cli("dispatch", "--dispatch-id", started["dispatch_id"],
                            "--outcome", "dispatch-failed", "--level", "2",
@@ -225,16 +238,16 @@ print('completed')"""
         line = self.OPENCODE_LOG.format(agent=agent, small=small, text=text)
         self.fake("opencode", f"import time\nprint({line!r}, file=sys.stderr, flush=True)\ntime.sleep(60)")
 
-    def test_opencode_usage_limit_falls_back_without_waiting_for_timeout(self):
+    def test_opencode_silent_after_an_error_is_stopped_without_waiting_for_timeout(self):
         self.opencode_logs_then_hangs()
-        self.fake("copilot", "print('accepted report')")
         began = time.monotonic()
-        result = self.cli("dispatch", "--request", "-", "--timeout", "40", "--state-dir", str(self.state),
+        result = self.cli("dispatch", "--request", "-", "--timeout", "40", "--stall-timeout", "2",
+                          "--state-dir", str(self.state),
                           request=self.request(task_type="implementation", allowed_files=["src.py"]))
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertLess(time.monotonic() - began, 20)
         payload = json.loads(result.stdout)
-        self.assertEqual((payload["status"], payload["level"], payload["tool"]), ("awaiting_review", 2, "copilot"))
+        self.assertEqual((payload["status"], payload["level"], payload["tool"]), ("cli_failed", 1, "opencode"))
         first = payload["attempts"][0]
         self.assertFalse(first["timeout"])
         self.assertIn("Free usage limit reached", first["fatal_error"])
@@ -248,11 +261,49 @@ print('completed')"""
                 line = self.OPENCODE_LOG.format(**{**dict(agent="build", small="false", text="x"), **case})
                 self.fake("opencode", f"import time\nprint({line!r}, file=sys.stderr, flush=True)\n"
                                       "time.sleep(2.5)\nprint(json.dumps({'type':'text','part':{'text':'done'}}))")
-                result = self.cli("dispatch", "--request", "-", "--state-dir", str(self.state),
+                result = self.cli("dispatch", "--request", "-", "--stall-timeout", "5", "--state-dir", str(self.state),
                                   request=self.request(task_type="implementation", allowed_files=["src.py"]))
                 payload = json.loads(result.stdout)
                 self.assertEqual((payload["status"], payload["level"]), ("awaiting_review", 1))
                 self.assertNotIn("fatal_error", payload["attempts"][0])
+
+    def test_opencode_retrying_or_working_after_an_error_is_not_stopped(self):
+        error = self.OPENCODE_LOG.format(agent="build", small="false", text="Provider rate limit exceeded")
+        retrying = (f"import time\nprint({error!r}, file=sys.stderr, flush=True)\ntime.sleep(1.5)\n"
+                    f"print({error!r}, file=sys.stderr, flush=True)\ntime.sleep(1.5)\n"
+                    "print(json.dumps({'type':'text','part':{'text':'done'}}))")
+        long_tool = (f"import time\nprint({error!r}, file=sys.stderr, flush=True)\ntime.sleep(0.5)\n"
+                     "print(json.dumps({'type':'step_start'}), flush=True)\ntime.sleep(4)\n"
+                     "print(json.dumps({'type':'text','part':{'text':'done'}}))")
+        for name, body in (("retrying", retrying), ("long tool after recovery", long_tool)):
+            with self.subTest(name):
+                self.fake("opencode", body)
+                result = self.cli("dispatch", "--request", "-", "--stall-timeout", "2.5", "--state-dir", str(self.state),
+                                  request=self.request(task_type="implementation", allowed_files=["src.py"]))
+                payload = json.loads(result.stdout)
+                self.assertEqual((payload["status"], payload["level"]), ("awaiting_review", 1))
+                self.assertNotIn("fatal_error", payload["attempts"][0])
+
+    def test_missing_cli_is_handed_to_the_agent(self):
+        # Only the doubles and basic system tools, so no real copilot can stand in for the missing one.
+        self.env["PATH"] = os.pathsep.join([str(self.bin), os.path.dirname(sys.executable)] +
+                                           ([os.environ["SystemRoot"] + "\\System32"] if os.name == "nt" else ["/usr/bin", "/bin"]))
+        (self.bin / ("copilot.py" if os.name == "nt" else "copilot")).unlink()
+        if os.name == "nt":
+            for suffix in (".js", ".cmd"):
+                (self.bin / ("copilot" + suffix)).unlink()
+        result = self.dispatch()
+        self.assertEqual((result["status"], result["level"]), ("cli_failed", 1))
+        self.assertTrue(result["attempts"][0]["launch_error"])
+
+    def test_cli_failure_resumes_only_to_the_next_level(self):
+        failed = self.dispatch()
+        for level in ("1", "3"):
+            with self.subTest(level=level):
+                rejected = self.resume(failed["dispatch_id"], "--outcome", "dispatch-failed", "--level", level,
+                                       "--failure-reason", "quota")
+                self.assertNotEqual(rejected.returncode, 0)
+        self.assertEqual(self.hand_off(failed)["level"], 2)
 
     def test_unreported_handoffs_do_not_block_a_new_dispatch(self):
         helpers_module = __import__("test_portability").dispatch
@@ -265,7 +316,8 @@ print('completed')"""
                           request=self.request())
         self.assertEqual(result.returncode, 0, result.stderr)
         payload = json.loads(result.stdout)
-        self.assertEqual((payload["status"], payload["level"], payload["tool"]), ("native_required", 2, "codex"))
+        self.assertEqual((payload["status"], payload["level"], payload["tool"]), ("cli_failed", 1, "copilot"))
+        self.assertEqual(self.hand_off(payload)["status"], "native_required")
 
     def test_same_file_dispatches_do_not_run_concurrently(self):
         counter = self.install_counting_copilot()

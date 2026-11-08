@@ -107,8 +107,18 @@ class Acceptance(unittest.TestCase):
         self.assertFalse((self.root / "calls").exists())
         self.assertFalse(self.state.exists())
 
+    def hand_off(self, result, *extra):
+        resumed = self.cli("dispatch", "--dispatch-id", result["dispatch_id"], "--outcome", "dispatch-failed",
+                           "--failure-reason", "agent read the CLI error", "--state-dir", str(self.state), *extra)
+        self.assertEqual(resumed.returncode, 0, resumed.stderr)
+        return json.loads(resumed.stdout)
+
     def test_external_failure_to_native_with_prompt_and_lessons(self):
-        result = self.dispatch()
+        failed = self.dispatch()
+        self.assertEqual((failed["status"], failed["level"], failed["tool"]), ("cli_failed", 1, "copilot"))
+        self.assertIn("quota exceeded", failed["attempts"][-1]["error"])
+        self.assertIn("dispatch-failed", failed["instruction"])
+        result = self.hand_off(failed, "--level", "2")
         self.assertEqual(result["status"], "native_required")
         self.assertEqual(result["level"], 2)
         self.assertEqual(result["tool"], "codex")
@@ -156,9 +166,14 @@ class Acceptance(unittest.TestCase):
         self.assertEqual(result["status"], "awaiting_review")
         self.assertEqual(result["level"], 1)
         self.assertEqual(len((self.root / "calls").read_text().splitlines()), 1)
+        disguised = self.cli("dispatch", "--dispatch-id", result["dispatch_id"], "--outcome", "dispatch-failed",
+                             "--failure-reason", "quota", "--state-dir", str(self.state))
+        self.assertNotEqual(disguised.returncode, 0)
+        self.assertIn("不能冒充未派出", disguised.stderr)
 
     def test_native_failure_resume_then_complete(self):
-        result = self.dispatch()
+        result = self.hand_off(self.dispatch(), "--level", "2")
+        self.assertEqual(result["status"], "native_required")
         args = ("dispatch", "--dispatch-id", result["dispatch_id"], "--level", "3",
                 "--outcome", "dispatch-failed", "--failure-reason", "native tool quota exceeded",
                 "--state-dir", str(self.state))

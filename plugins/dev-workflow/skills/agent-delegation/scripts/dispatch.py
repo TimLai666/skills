@@ -33,12 +33,6 @@ HOST_ENV = {"codex": "CODEX_THREAD_ID", "claude": "CLAUDECODE",
 NATIVE_TOOLS = {"codex": "Codex 內建 subagent", "claude": "Agent",
                 "copilot": "Copilot 內建 subagent（Auto）",
                 "opencode": "OpenCode 內建 subagent", "agy": "Antigravity 內建 subagent"}
-KNOWN_FAILURE = re.compile(
-    r"quota (?:exceeded|exhausted|reached)|RESOURCE_EXHAUSTED|exceeded (?:your )?(?:monthly |usage )?quota|"
-    r"hit your (?:session|usage) limit|usage limit (?:reached|exceeded)|rate.?limit|too many requests|"
-    r"not logged in|authentication (?:failed|required)|failed to authenticate|unauthori[sz]ed|invalid api key|"
-    r"model[^\n]{0,120}(?:not found|not available|unavailable|does not exist|not supported)|"
-    r"ModelNotFoundError|requires a newer version of Codex", re.I)
 
 
 class DispatchError(Exception):
@@ -505,7 +499,7 @@ def execute(argv, cwd, root, name, timeout, state, path, fatal=None):
                     if stop_requested(root, state):
                         result.update(interrupted=True, cancelled=True)
                         break
-                    failure = fatal(stderr_path) if fatal else None
+                    failure = fatal(stdout_path, stderr_path) if fatal else None
                     if failure:
                         result["fatal_error"] = failure
                         break
@@ -557,16 +551,26 @@ def error_event(output):
     return errors
 
 
-def opencode_fatal(stderr_path):
-    """A known provider failure of the main agent, which `opencode run` logs and then waits on forever."""
+def opencode_stalled(stdout_path, stderr_path, stall):
+    """The main agent's last act was a logged stream error, then nothing for `stall` seconds.
+
+    `opencode run` retries recoverable provider errors on its own, but after a non-retryable one it
+    neither prints nor exits. Only the silence after the error is judged, never the error text.
+    """
     try:
+        last = ""
         with open(stderr_path, encoding="utf-8", errors="replace") as handle:
             for line in handle:
-                if 'message="stream error"' in line and "agent=title" not in line and KNOWN_FAILURE.search(line):
-                    return line.strip()[:2000]
+                if line.strip():
+                    last = line.strip()
+        error_written = os.stat(stderr_path).st_mtime
+        if 'message="stream error"' not in last or "agent=title" in last or os.stat(stdout_path).st_mtime > error_written:
+            return None
+        if time.time() - error_written < stall:
+            return None
+        return last[:2000] + f"（之後 {stall:g} 秒沒有任何輸出）"
     except OSError:
-        pass
-    return None
+        return None
 
 
 MODEL_PROBES = {"opencode": ["opencode", "models"], "agy": ["agy", "models"], "codex": ["codex", "debug", "models"]}
@@ -610,6 +614,10 @@ def output_result(state, path):
             "instruction": ("尚未派出。請使用目前宿主的內建 subagent、指定模型與完整 prompt。工具不可用時帶實際錯誤接續下一檔。"
                             if native else
                             "此層尚未啟動執行者。解除佔用後用 --outcome dispatch-failed 在同一層重來。" if state["status"] == "not_started" else
+                            ("外部 CLI 失敗，檔案沒有變動。讀 attempts 最後一筆的 error、output、model_probe 與 fatal_error 判斷原因；"
+                             "launch_error 為 true 時先依 SKILL.md「CLI 未安裝」查證。判定這一層無法執行後，用 dispatch --dispatch-id "
+                             + state["dispatch_id"] + " --outcome dispatch-failed --failure-reason '<錯誤原文與判斷>' 接下一層。")
+                            if state["status"] == "cli_failed" else
                             "仍在執行。再用 status --wait 查詢；判定卡住時用 cancel。" if state["status"] in ACTIVE else
                             "主 agent 親自核對範圍、diff 與驗證結果，再回報 outcome。")}
 
@@ -633,7 +641,7 @@ def with_runtime(result, state):
     return result
 
 
-def drive(root, path, state, task, write_paths, start, timeout):
+def drive(root, path, state, task, write_paths, start, timeout, stall=180):
     r = state["request"]
     for level in range(start, len(task["levels"]) + 1):
         spec = dict(task["levels"][level - 1])
@@ -665,13 +673,10 @@ def drive(root, path, state, task, write_paths, start, timeout):
                 atomic_write(path, state)
                 return output_result(state, path)
             if probe["returncode"] != 0 or error_event(probe["output"]):
-                if not probe["launch_error"] and not KNOWN_FAILURE.search(probe["error"] + "\n" + probe["output"]):
-                    state.update(status="awaiting_review", reason="模型探測發生未知錯誤，保留原始輸出供主 agent 檢查。")
-                    atomic_write(path, state)
-                    return output_result(state, path)
-                state["status"] = "new"  # moving on to the next level
+                state.update(status="cli_failed", write_paths=[],
+                             reason="模型探測失敗，檔案沒有變動。原始輸出在 attempts 最後一筆的 model_probe。")
                 atomic_write(path, state)
-                continue
+                return output_result(state, path)
             catalog = probe_catalog(spec["tool"], probe["output"])
         model = select_model(spec, catalog)
         if not model and not native and spec["tool"] == "claude" and spec["family"] == "opus" and "claude" not in r.get("models", {}):
@@ -690,20 +695,19 @@ def drive(root, path, state, task, write_paths, start, timeout):
         argv = cli_argv(spec, model, r["project_dir"], state["prompt"])
         attempt.update(execute(argv, r["project_dir"], root,
                                state["dispatch_id"] + "-" + str(len(state["attempts"])), timeout, state, path,
-                               opencode_fatal if spec["tool"] == "opencode" else None))
+                               (lambda out, err: opencode_stalled(out, err, stall)) if spec["tool"] == "opencode" else None))
         after = snapshot(r, write_paths)
         errors = error_event(attempt["output"])
-        failed = attempt["returncode"] != 0 or bool(errors)
+        failed = attempt["returncode"] != 0 or bool(errors) or bool(attempt.get("fatal_error"))
         attempt["files_changed"] = None if before is None or after is None else after != before
-        failed_text = attempt["error"] + "\n" + (json.dumps(errors, ensure_ascii=False) if errors else attempt["output"])
-        safe_failure = failed and (attempt["launch_error"] or bool(KNOWN_FAILURE.search(failed_text)))
-        if safe_failure and not attempt.get("cleanup_pending") and not attempt["timeout"] and not attempt["interrupted"] and before is not None and after == before:
-            state["status"] = "new"  # moving on to the next level
+        if failed and not attempt.get("cleanup_pending") and not attempt["timeout"] and not attempt["interrupted"] and before is not None and after == before:
+            state.update(status="cli_failed", write_paths=[],
+                         reason="外部 CLI 失敗，檔案沒有變動。原始輸出在 attempts 最後一筆。")
             atomic_write(path, state)
-            continue
+            return output_result(state, path)
         state.update(status="awaiting_review", reason=("無法確認工作程序已停止，保留名額與檔案範圍，請先檢查 cleanup_error。" if attempt.get("cleanup_pending") else
                      "逾時或中斷，程序已停止。檢查半成品後再接續。" if attempt["timeout"] or attempt["interrupted"]
-                     else "先親自驗證成果；部分改檔、未知錯誤與正常回報都不可自動接手。"))
+                     else "先親自驗證成果；正常回報與部分改檔都不可自動接手。"))
         atomic_write(path, state)
         return output_result(state, path)
     state.update(status="exhausted", reason="此任務類型的所有層級都已失敗，請由使用者決定。")
@@ -752,7 +756,7 @@ def dispatch(a, policy):
                 raise DispatchError("背景程序正在接手執行此派工，不可同時接續")
             state.update(status="not_started", reason="背景程序未接手就結束；尚未啟動執行者。")
             status = "not_started"
-        if status not in ("native_required", "awaiting_review", "running", "new", "dispatch_failed", "not_started"):
+        if status not in ("native_required", "cli_failed", "awaiting_review", "running", "new", "not_started"):
             raise DispatchError("此派工已結束，不可重複啟動：" + status)
         if alive(state.get("child_pid")):
             raise DispatchError("前一個子程序仍在執行，請先檢查並停止")
@@ -769,9 +773,9 @@ def dispatch(a, policy):
         reason = text_value(a.failure_reason, "--failure-reason")
         current = state.get("current_level", 1)
         if a.outcome == "dispatch-failed":
-            if status not in ("native_required", "not_started"):
+            if status not in ("native_required", "cli_failed", "not_started"):
                 raise DispatchError("外部執行成果必須先審查，不能冒充未派出")
-            wanted = current + 1 if status == "native_required" else current
+            wanted = current if status == "not_started" else current + 1
         else:
             if not a.partial_work_reviewed:
                 raise DispatchError("先檢查磁碟與半成品，再提供 --partial-work-reviewed")
@@ -805,11 +809,12 @@ def existing_dispatch(a):
 
 def run(root, path, state, task, paths, start, a):
     """Run levels in this process, or hand them to a detached supervisor."""
-    state["run"] = {"id": uuid.uuid4().hex, "start": start, "timeout": a.timeout, "started_at": time.time()}
+    state["run"] = {"id": uuid.uuid4().hex, "start": start, "timeout": a.timeout, "stall": a.stall_timeout,
+                    "started_at": time.time()}
     with contextlib.suppress(FileNotFoundError):
         stop_path(root, state).unlink()
     if a.foreground or task["levels"][start - 1]["tool"] == state["request"]["host"]:
-        return drive(root, path, state, task, paths, start, a.timeout)
+        return drive(root, path, state, task, paths, start, a.timeout, a.stall_timeout)
     log_path = root / (state["dispatch_id"] + ".supervisor.log")
     argv = [sys.executable, str(Path(__file__).resolve()), "supervise",
             "--dispatch-id", state["dispatch_id"], "--state-dir", str(root)]
@@ -872,7 +877,7 @@ def supervise(a, policy):
         task = policy["tasks"][state["request"]["task_type"]]
         run = state["run"]
         try:
-            return drive(root, path, state, task, state["scope_paths"], run["start"], run["timeout"])
+            return drive(root, path, state, task, state["scope_paths"], run["start"], run["timeout"], run.get("stall", 180))
         except BaseException as exc:
             if state.get("status") in ACTIVE:
                 state.update(status="awaiting_review", write_paths=state.get("write_paths", []) if state.get("cleanup_pending") else [],
@@ -1006,9 +1011,11 @@ native_required：尚未派出，由主 agent 用 native_tool 指示的內建工
 此交接會先等外部派工讓出該工具名額與同檔寫入，交出後不佔名額也不鎖檔，主 agent 自行把內建 subagent 計入上限與同檔檢查。
 not_started：等待同檔寫入或併行名額逾時、已取消或背景程序未接手，此層沒有執行者啟動；用 --outcome dispatch-failed 在同一層重來。
 awaiting_review：由主 agent 看 diff、親自驗證；script 不自動採用、不執行 verification 指令、不寫記憶。
-外部已知未派出失敗且快照一致才自動接手。快照涵蓋所有專案檔案（含忽略檔）與沙盒，掃描逾時就先審查。
+cli_failed：外部 CLI 或模型探測失敗（非 0 結束、JSON 錯誤事件、指令無法啟動、opencode 停滯），且快照確認檔案沒變。
+script 不解讀錯誤內容、不自動接手；主 agent 讀 attempts 的原始輸出判斷後，用 --outcome dispatch-failed 接下一層。
+快照涵蓋所有專案檔案（含忽略檔）與沙盒，掃描逾時就先審查。實際模型清單沒有合規模型時才自動換下一層。
 每次 CLI 結束會停止其程序群，確認工作程序結束後才快照及接手；需持續執行的服務由主 agent 管理。
-部分改檔、未知錯誤、逾時與中斷均先審查，非 Git 專案無法確認一致時也先審查。
+部分改檔、逾時與中斷均先審查，非 Git 專案無法確認一致時也先審查。
 exhausted：所有層級失敗；completed：主 agent 已回報驗收完成。兩者不可再啟動。
 state/log 在 macOS/Linux 預設為 $XDG_STATE_HOME/agent-delegation 或 ~/.local/state/agent-delegation，0700/0600。
 Windows 預設為 %LOCALAPPDATA%/agent-delegation，以私有 DACL 保護，只授權目前使用者、SYSTEM 與系統管理員。
@@ -1022,13 +1029,17 @@ exit 0：已產生上述狀態（不代表成果合格）；exit 2：參數、�
     group.add_argument("--request", metavar="FILE|-", help="新任務 JSON 檔案，- 從 stdin 讀取")
     group.add_argument("--dispatch-id", metavar="UUID", help="接續原派工，重用原 request 與全部失敗證據")
     q.add_argument("--level", type=int, help="要執行的任務內層級，從 1 起；新任務預設 1，接續依失敗次數計算，超出支援範圍報錯")
-    q.add_argument("--outcome", choices=["dispatch-failed", "verification-failed", "completed"], help="接續必填。未派出僅用於內建交接；驗證失敗需先檢查半成品；completed 表示主 agent 驗收完成")
+    q.add_argument("--outcome", choices=["dispatch-failed", "verification-failed", "completed"],
+                   help="接續必填。dispatch-failed 用於 native_required、cli_failed（接下一層）與 not_started（同一層重來）；"
+                        "驗證失敗需先檢查半成品；completed 表示主 agent 驗收完成")
     q.add_argument("--failure-reason", help="失敗結果必填，提供實際錯誤或驗證輸出")
     q.add_argument("--feedback", help="選填，已核對的教訓、保留的半成品與修正要求，會累積帶進接手 prompt")
     q.add_argument("--partial-work-reviewed", action="store_true", help="verification-failed 必填，主 agent 已檢查程序、磁碟及半成品")
     q.add_argument("--state-dir", help="選填，專案外的專用私有狀態目錄，也作為此群派工的併行協調範圍")
     q.add_argument("--timeout", type=float, default=1800,
                    help="每次執行外部 CLI 的上限秒數，等待名額也用同一值，預設 1800；模型探測最多 30 秒。不要為了配合呼叫端指令工具的時間上限而縮短")
+    q.add_argument("--stall-timeout", type=float, default=180,
+                   help="opencode 記下主任務錯誤後，持續多少秒完全沒有新輸出就停止並標為 cli_failed，預設 180")
     q.add_argument("--foreground", action="store_true", help="在本程序等到結果才輸出，供測試與除錯；一般派工用背景")
     q = sub.add_parser("status", help="查詢派工狀態，可等待結果",
         description="輸出與 dispatch 相同結構的 JSON。仍在執行時另含 phase（starting/queued/preparing/probing/executing）"
@@ -1092,6 +1103,8 @@ def main(argv=None):
         else:
             if not math.isfinite(a.timeout) or a.timeout <= 0:
                 raise DispatchError("--timeout 必須是有限正數")
+            if not math.isfinite(a.stall_timeout) or a.stall_timeout <= 0:
+                raise DispatchError("--stall-timeout 必須是有限正數")
             result = dispatch(a, policy)
             if "spawned" in result:
                 result = handshake(result)

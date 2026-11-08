@@ -14,7 +14,7 @@ description: >-
   Dispatched workers MUST NOT apply this skill or delegate. Ordinary prompts MUST
   carry project lessons; workers MUST report lessons for verification and recording.
 metadata:
-  version: "2.22.2"
+  version: "2.23.0"
 ---
 
 # Agent 派工規範
@@ -78,7 +78,7 @@ Copilot 宿主依當前執行環境判定，不把登入、模型設定或繼承
 - 主 agent 必須透過 script 發起新派工與處理層級接手，不自行重排工具或拼接派工指令。符合「Agent 與對話複用」時，依該節續接原 agent 或 session。操作與參數查詢使用 CLI 的總覽及子指令 `--help`；原生工具說明入口見 [CLI 速查表](references/cli-cheatsheet.md)。
 - 會啟動外部 CLI 的派工在背景執行，`dispatch` 輸出 `started` 後就結束。主 agent 用 `status --dispatch-id <ID> --wait <秒數>` 取得結果，秒數不超過自己指令工具的執行上限，結果仍是 `running` 就再查一次。宿主能在背景執行指令並在結束時通知，就可用它跑較長的 `status --wait`。`--timeout` 是單次執行外部 CLI 的上限，依任務需要設定，不為了配合自己指令工具的上限而縮短。
 - `status` 的 `runtime` 顯示工作程序很久沒有新輸出，主 agent 判斷它已經卡住時，用 `cancel` 停止，再依 `awaiting_review` 審查。結果為 `not_started` 表示此層還沒有啟動執行者，解除佔用後用 `--outcome dispatch-failed` 在同一層重來。
-- 外部 CLI 的已知啟動、模型或額度錯誤，只有確認沒有專案檔案變動時才自動接手。正常回報、部分改檔、未知錯誤與逾時先交回主 agent 審查，不把 CLI 成功當成驗收通過。
+- 外部 CLI 失敗而且檔案沒有變動時，結果為 `cli_failed`。script 不解讀錯誤內容，主 agent 讀 attempts 最後一筆的原始輸出判斷原因；指令無法啟動（`launch_error`）先依「CLI 未安裝」查證。判定這一層無法執行後，帶錯誤原文與判斷用 `--outcome dispatch-failed` 接下一層。正常回報、部分改檔與逾時先交回主 agent 審查，不把 CLI 成功當成驗收通過。
 - 結果為 `native_required` 時，主 agent 使用輸出指定的內建工具與合規模型，先依複用條件選擇既有 agent，再提供本次完整任務要求。禁止改用宿主自己的 CLI。內建 subagent 完成後，照 `awaiting_review` 的方式審查並用 `--outcome` 回報。內建工具不可用或派工失敗時，帶原派工識別碼、實際錯誤與下一層級接續；不可跳級。
 - 結果為 `awaiting_review` 時，主 agent 讀 diff、核對範圍並親自驗證。回報已完成驗收、派工失敗或驗證失敗時，依 CLI 的條件接續。寫程式同級連續兩次驗證失敗才升級，不能把成果不合格冒充為未派出。
 - 每次接續讀取原派工狀態，保留原 prompt、失敗證據與補充教訓。逾時、中斷或取消後，先由主 agent 確認程序及半成品，再依「工具失敗」的接續與停止條件處理。
@@ -227,7 +227,7 @@ Reviewer MUST 與受審成果的實作者 context 隔離，包括主 agent 親�
 
 一般派工的授權包含依 script 規則重試與改派。主 agent MUST 自行處理工具失敗並接續，MUST NOT 因單一工具失敗、額度耗盡、模型不可用、未登入或內建工具不可用，就詢問使用者是否重試、改派或繼續。接手順序與複用條件依決策表及「Agent 與對話複用」執行。
 
-script 記錄每次失敗的原始輸出與實際旗標。`native_required` 由主 agent 使用指定的內建工具派工，失敗時帶實際錯誤接續。`awaiting_review` 是主 agent 的審查點，不是使用者的確認點：主 agent 自行檢查程序、磁碟、半成品與驗證結果，再帶原派工識別碼及實際證據依 script 接續，遵守同級重試與不可跳級的限制。無法確認程序已停止或半成品可安全接續時，先排除阻礙，不盲目重派。
+script 記錄每次失敗的原始輸出與實際旗標。`native_required` 由主 agent 使用指定的內建工具派工，失敗時帶實際錯誤接續。`cli_failed` 與 `awaiting_review` 都是主 agent 的判斷點，不是使用者的確認點：主 agent 自行檢查程序、磁碟、半成品與驗證結果，再帶原派工識別碼及實際證據依 script 接續，遵守同級重試與不可跳級的限制。無法確認程序已停止或半成品可安全接續時，先排除阻礙，不盲目重派。
 
 該類型的選項全部失敗，或接續確實需要使用者登入、授予權限、額外付費、擴大任務範圍或決定可能遺失成果的處置時，才停下來請使用者決定。單一工具需要這些操作，但後續仍有已授權且可安全接續的選項時，先依 script 改派，不要求使用者修復該工具。既有 API 變更的指定模型諮詢沿用該節的失敗處置。
 

@@ -15,10 +15,11 @@ class Safety(unittest.TestCase):
     cli = helpers.Acceptance.cli
     dispatch = helpers.Acceptance.dispatch
 
-    def test_unknown_error_requires_review(self):
+    def test_unknown_error_is_handed_to_the_agent(self):
         self.fake("copilot", "print('unexpected internal failure',file=sys.stderr);sys.exit(17)")
         result = self.dispatch()
-        self.assertEqual(result["status"], "awaiting_review")
+        self.assertEqual(result["status"], "cli_failed")
+        self.assertIn("unexpected internal failure", result["attempts"][-1]["error"])
         self.assertEqual(result["level"], 1)
         self.assertEqual(len((self.root / "calls").read_text().splitlines()), 1)
 
@@ -45,14 +46,14 @@ class Safety(unittest.TestCase):
         path = self.bin / ("agy.py" if os.name == "nt" else "agy")
         path.write_text("#!/usr/bin/env python3\nimport sys\nprint('internal database corruption',file=sys.stderr)\nsys.exit(1)\n")
         result = self.dispatch(task_type="review", allowed_files=[])
-        self.assertEqual(result["status"], "awaiting_review")
+        self.assertEqual(result["status"], "cli_failed")
         self.assertEqual(result["level"], 1)
         self.assertIn("internal database corruption", result["attempts"][-1]["model_probe"]["error"])
 
     def test_descendants_stopped_before_fallback(self):
         self.fake("copilot", "import subprocess;child=subprocess.Popen([sys.executable,'-c','import time; time.sleep(120)']);Path('../child.pid').write_text(str(child.pid));print('quota exceeded',file=sys.stderr);sys.exit(1)")
         result = self.dispatch()
-        self.assertEqual(result["status"], "native_required")
+        self.assertEqual(result["status"], "cli_failed")
         pid = int((self.root / "child.pid").read_text())
         if os.name == "nt":
             from test_portability import dispatch
@@ -126,7 +127,7 @@ class Safety(unittest.TestCase):
 
     def test_declared_test_files_are_protected(self):
         result = self.dispatch(task_type="implementation", allowed_files=["src.py"], test_files=["test_src.py"])
-        self.assertEqual(result["status"], "native_required")
+        self.assertEqual(result["status"], "cli_failed")
         self.assertIn("test_src.py", result["prompt"])
         self.assertIn("不得修改測試檔", result["prompt"])
 

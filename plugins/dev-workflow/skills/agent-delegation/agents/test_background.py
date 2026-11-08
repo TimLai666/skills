@@ -101,11 +101,11 @@ class Background(unittest.TestCase):
         self.assertIn("執行", rejected.stderr)
 
     def test_stale_stop_request_does_not_cancel_next_run(self):
-        self.fake("copilot", "import time; time.sleep(30)")
+        self.fake("opencode", "import time; time.sleep(30)")
         started = self.start(task_type="implementation", host="agy", allowed_files=["src.py"])
         wait_until(lambda: self.status(started["dispatch_id"]).get("phase") == "executing")
         self.assertTrue(self.cancel(started["dispatch_id"])["attempts"][-1]["interrupted"])
-        self.fake("copilot", "print('second run')")
+        self.fake("opencode", "print('second run')")
         resumed = self.resume(started["dispatch_id"], "--outcome", "verification-failed",
                               "--failure-reason", "cancelled run reviewed", "--partial-work-reviewed")
         self.assertEqual(resumed.returncode, 0, resumed.stderr)
@@ -149,7 +149,7 @@ class Background(unittest.TestCase):
         final = self.status(blocked["dispatch_id"], wait=30)
         self.assertEqual((final["status"], final["level"]), ("awaiting_review", 1))
 
-    def test_status_keeps_waiting_while_falling_back_to_next_level(self):
+    def test_status_keeps_waiting_while_the_next_level_is_queued(self):
         self.fake("codex", "import time\nif 'HOLD' in sys.argv[-1]: time.sleep(30)\nprint('accepted report')")
         holders = []
         for i in range(3):
@@ -161,6 +161,9 @@ class Background(unittest.TestCase):
             wait_until(lambda: self.status(holder["dispatch_id"]).get("phase") == "executing")
         moving = self.start(host="claude", task_type="classification", allowed_files=[],
                             models={"claude": ["claude-haiku-5-5"]}, model_source="isolated test catalog")
+        self.assertEqual(self.status(moving["dispatch_id"], wait=20)["status"], "cli_failed")
+        resumed = self.resume(moving["dispatch_id"], "--outcome", "dispatch-failed", "--failure-reason", "copilot quota")
+        self.assertEqual(json.loads(resumed.stdout)["status"], "started", resumed.stderr)
         waiting = wait_until(lambda: (lambda s: s if s["level"] == 2 else None)(self.status(moving["dispatch_id"])))
         self.assertEqual((waiting["status"], waiting["phase"], waiting["tool"]), ("new", "queued", "codex"))
         self.assertEqual(self.status(moving["dispatch_id"], wait=1)["status"], "new")
@@ -189,6 +192,7 @@ class Background(unittest.TestCase):
         parsed = module.parser(policy).parse_args(["dispatch", "--request", "task.json"])
         self.assertEqual(parsed.timeout, 1800)
         self.assertFalse(parsed.foreground)
+        self.assertEqual(parsed.stall_timeout, 180)
 
 
 if __name__ == "__main__":
