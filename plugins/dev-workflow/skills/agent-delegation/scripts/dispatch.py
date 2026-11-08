@@ -35,7 +35,7 @@ NATIVE_TOOLS = {"codex": "Codex 內建 subagent", "claude": "Agent",
                 "opencode": "OpenCode 內建 subagent", "agy": "Antigravity 內建 subagent"}
 KNOWN_FAILURE = re.compile(
     r"quota (?:exceeded|exhausted|reached)|RESOURCE_EXHAUSTED|exceeded (?:your )?(?:monthly |usage )?quota|"
-    r"hit your (?:session|usage) limit|rate.?limit|too many requests|"
+    r"hit your (?:session|usage) limit|usage limit (?:reached|exceeded)|rate.?limit|too many requests|"
     r"not logged in|authentication (?:failed|required)|failed to authenticate|unauthori[sz]ed|invalid api key|"
     r"model[^\n]{0,120}(?:not found|not available|unavailable|does not exist|not supported)|"
     r"ModelNotFoundError|requires a newer version of Codex", re.I)
@@ -479,7 +479,7 @@ def terminate(proc):
     proc.wait()
 
 
-def execute(argv, cwd, root, name, timeout, state, path):
+def execute(argv, cwd, root, name, timeout, state, path, fatal=None):
     stdout_path, stderr_path = root / (name + ".stdout.log"), root / (name + ".stderr.log")
     result = {"argv": argv, "returncode": None, "timeout": False, "interrupted": False,
               "launch_error": False, "stdout_path": str(stdout_path), "stderr_path": str(stderr_path)}
@@ -504,6 +504,10 @@ def execute(argv, cwd, root, name, timeout, state, path):
                 except subprocess.TimeoutExpired:
                     if stop_requested(root, state):
                         result.update(interrupted=True, cancelled=True)
+                        break
+                    failure = fatal(stderr_path) if fatal else None
+                    if failure:
+                        result["fatal_error"] = failure
                         break
                     if time.monotonic() >= deadline:
                         raise
@@ -553,6 +557,18 @@ def error_event(output):
     return errors
 
 
+def opencode_fatal(stderr_path):
+    """A known provider failure of the main agent, which `opencode run` logs and then waits on forever."""
+    try:
+        with open(stderr_path, encoding="utf-8", errors="replace") as handle:
+            for line in handle:
+                if 'message="stream error"' in line and "agent=title" not in line and KNOWN_FAILURE.search(line):
+                    return line.strip()[:2000]
+    except OSError:
+        pass
+    return None
+
+
 MODEL_PROBES = {"opencode": ["opencode", "models"], "agy": ["agy", "models"], "codex": ["codex", "debug", "models"]}
 
 
@@ -569,7 +585,9 @@ def probe_catalog(tool, output):
 def cli_argv(spec, model, project, prompt):
     tool, effort = spec["tool"], spec.get("effort")
     if tool == "opencode":
-        return [tool, "run", "--auto", "--dir", project, "--agent", "build", "-m", model, "--format", "json", prompt]
+        # Error logs on stderr expose provider failures that `opencode run` otherwise never reports or exits on.
+        return [tool, "run", "--print-logs", "--log-level", "ERROR", "--auto", "--dir", project,
+                "--agent", "build", "-m", model, "--format", "json", prompt]
     if tool == "agy":
         return [tool, "--model", model, "--mode", "accept-edits", "--dangerously-skip-permissions", "-p=" + prompt]
     if tool == "copilot":
@@ -671,7 +689,8 @@ def drive(root, path, state, task, write_paths, start, timeout):
             continue
         argv = cli_argv(spec, model, r["project_dir"], state["prompt"])
         attempt.update(execute(argv, r["project_dir"], root,
-                               state["dispatch_id"] + "-" + str(len(state["attempts"])), timeout, state, path))
+                               state["dispatch_id"] + "-" + str(len(state["attempts"])), timeout, state, path,
+                               opencode_fatal if spec["tool"] == "opencode" else None))
         after = snapshot(r, write_paths)
         errors = error_event(attempt["output"])
         failed = attempt["returncode"] != 0 or bool(errors)

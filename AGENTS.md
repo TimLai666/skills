@@ -132,7 +132,7 @@ skill 若會在使用者專案裡產生檔案，額外檢查三條：
 
 | ID | Task | Status |
 |---|---|---|
-| agent-delegation-opencode-silent-hang | opencode 有一類派工給了 15–75 分鐘仍全程零輸出（成功案例第一筆輸出最慢 64 秒），根因未查明；目前只能靠 `status` 的 `runtime` 判斷後 `cancel` | 待調查 |
+| agent-delegation-opencode-startup-stall | opencode 有 4 次派工全程零輸出，紀錄停在啟動初期（`init`、`event connected`），沒有 provider 錯誤；同期另有 `database is locked`，疑似多條 opencode 搶同一個資料庫，未證實。遇到時用 `status` 的 `runtime` 判斷後 `cancel` | 待調查 |
 
 <!-- ACTIVE_ISSUES_END -->
 
