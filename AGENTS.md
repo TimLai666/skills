@@ -129,6 +129,8 @@ skill 若會在使用者專案裡產生檔案，額外檢查三條：
 
 | ID | Task | Status |
 |---|---|---|
+| agent-delegation-stale-native-leases | `dispatch.py` 的 `claim()` 把 `native_required` 永遠算成佔用名額，主 agent 沒回報 `--outcome` 時會永久佔住該 CLI 的 3 條名額之一（狀態目錄裡有 3 筆 10/25–10/30 留下的 Codex 紀錄佔滿名額）。需要讓交接紀錄過期後釋放名額；屬既有 API 變更，先諮詢再請使用者確認 | 待處理 |
+| agent-delegation-opencode-silent-hang | opencode 有一類派工給了 15–75 分鐘仍全程零輸出（成功案例第一筆輸出最慢 64 秒），根因未查明；目前只能靠 `status` 的 `runtime` 判斷後 `cancel` | 待調查 |
 
 <!-- ACTIVE_ISSUES_END -->
 
