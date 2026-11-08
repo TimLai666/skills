@@ -18,8 +18,11 @@ python3 zip_subfolders.py
 .claude-plugin/marketplace.json      ← marketplace 宣告，列出所有 plugins
 plugins/<plugin>/
 ├── .claude-plugin/plugin.json       ← plugin 名稱、描述、版本
+├── hooks/                           ← 選用，Claude Code plugin hooks（hooks.json 與腳本）
 └── skills/<skill>/                  ← skill 本體
 ```
+
+plugin hooks 只做提醒，skill 的內容與流程不得依賴 hook：只裝 skill 的使用者沒有 hook。hook 的提醒只指向 skill，不重複 skill 的規則。改了 hook 要跑該 plugin `hooks/` 裡的測試，並調升 plugin 的 `plugin.json` version。
 
 安裝方式：`/plugin marketplace add TimLai666/skills` 後 `/plugin install <plugin>@skills`；也支援 `npx skills add`（靠該 CLI 的遞迴 fallback 探測）。
 

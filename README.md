@@ -117,6 +117,8 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | `openclaw-agent-builder` | 想建立、配置或改造 OpenClaw agent，包括 workspace、channel、bindings、RAG 知識庫與安全設定。 |
 | `openclaw-ops` | 想在運行中的 OpenClaw 機器上做運維、配置、診斷。 |
 
+在 Claude Code 安裝整個 `dev-workflow` plugin 時，會另外帶一組提醒用的 hooks：session 開始和壓縮對話後，提醒 agent 載入 `project-memory`、`software-engineering-guidelines` 和 `agent-delegation`。還沒載入 `agent-delegation` 就開 subagent 時，第一次會被擋下並提醒先載入，同一個 session 只擋一次。subagent 回報後、`git commit` 之後和壓縮對話前，會提醒核對並記錄 project memory。用 `npx skills` 或 zip 只裝 skill 不會有這些提醒，skill 照常可用。
+
 ### `data-and-research` — 資料分析與研究
 
 | Skill | 適合什麼需求 |
