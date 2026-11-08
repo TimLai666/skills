@@ -3,7 +3,8 @@
 
 Usage: reminders.py MODE, with the hook event JSON on stdin.
 Modes:
-  prompt        UserPromptSubmit: the reply to the user follows human-writing.
+  prompt        UserPromptSubmit: the reply to the user follows human-writing and
+                uses the reply language the user or the instruction files set.
   pre-write     PreToolUse on Write/Edit: a prose file (report, document, README)
                 is being written and human-writing is not loaded yet.
   pre-artifact  PreToolUse on Artifact: design-studio is not loaded yet; the agent
@@ -23,6 +24,12 @@ PROMPT_LOAD = (
     "回覆使用者，或寫報告、文件、說明等給人讀的文字之前，先載入 human-writing skill，照它的流程寫。"
     "純程式碼、結構化資料或指令不在此限。")
 PROMPT_FOLLOW = "這一輪回覆使用者，以及要寫的報告、文件，照已載入的 human-writing skill 的流程與檢查清單寫。"
+LANGUAGE = (
+    "回覆用的語言依序這樣決定："
+    "使用者這一則訊息明確指定了語言，就用那個語言；"
+    "沒有的話，用 CLAUDE.md、AGENTS.md、系統或專案指示，或使用者先前訊息裡指定的回覆語言；"
+    "都沒有指定，才跟著使用者這則訊息的語言。"
+    "不要因為使用者這次剛好用了別的語言，或自己思考時用的語言，就換掉指定的回覆語言。")
 WRITE_LOAD = (
     "正要寫的是給人讀的文件。先載入 human-writing skill，照它的流程寫。"
     "如果這個檔案是程式設定或機器讀的資料，就忽略這個提醒。")
@@ -72,7 +79,7 @@ def respond(mode, event):
         return None  # Delegated subagents follow their task prompt.
     loaded = loaded_skills(event.get("transcript_path"))
     if mode == "prompt":
-        return context("UserPromptSubmit", PROMPT_FOLLOW if WRITING in loaded else PROMPT_LOAD)
+        return context("UserPromptSubmit", (PROMPT_FOLLOW if WRITING in loaded else PROMPT_LOAD) + LANGUAGE)
     if mode == "pre-write":
         if WRITING in loaded or not is_prose_file(event.get("tool_input")):
             return None

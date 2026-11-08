@@ -55,6 +55,15 @@ class Reminders(unittest.TestCase):
         text = self.context("prompt", "UserPromptSubmit", {"prompt": "好"})
         self.assertIn("已載入的 human-writing", text)
 
+    def test_prompt_always_carries_reply_language_rule(self):
+        for loaded in (False, True):
+            if loaded:
+                self.load("human-writing")
+            text = self.context("prompt", "UserPromptSubmit", {"prompt": "hello"})
+            self.assertIn("回覆用的語言", text)
+            self.assertIn("CLAUDE.md、AGENTS.md", text)
+            self.assertIn("自己思考時用的語言", text)
+
     def test_prompt_after_compaction_asks_to_load_again(self):
         self.load("writing-and-design:human-writing")
         self.compact()
