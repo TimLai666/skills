@@ -78,7 +78,7 @@ Claude Code 另有 `disable-model-invocation`、`user-invocable`、`disallowed-t
 
 自製 CLI、MCP 與 API 的功能及用法由工具介面提供。CLI 必須有總覽與 `--help`，各指令的參數與用法放在各自 help。API 提供端點總覽、個別操作說明及 OpenAPI JSON。MCP 使用工具註冊描述與參數 schema，不強制新增總覽工具。
 
-Skill 說明何時使用、工作流程及必要注意事項，指向工具的說明入口，不在主檔或 references 重複完整指令手冊。功能更新時，同步更新總覽、help、操作說明及 OpenAPI，並驗證與實際介面一致。完整開發規則見 tstack 的 [software-engineering-guidelines](https://github.com/TimLai666/tstack/blob/main/skills/software-engineering-guidelines/SKILL.md#6-tool-and-api-discoverability)。
+Skill 說明何時使用、工作流程及必要注意事項，指向工具的說明入口，不在主檔或 references 重複完整指令手冊。功能更新時，同步更新總覽、help、操作說明及 OpenAPI，並驗證與實際介面一致。完整開發規則見 tstack 的 [software-engineering-guidelines](https://github.com/TimLai666/tstack/blob/main/skills/software-engineering-guidelines/references/tool-discoverability.md)。
 
 ## 增減修改 skills 的必做事項
 
