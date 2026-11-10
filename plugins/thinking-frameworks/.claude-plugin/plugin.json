@@ -1,7 +1,7 @@
 {
   "name": "thinking-frameworks",
   "description": "通用思考框架：ultrathink 以任務脈絡與外部證據支持推導，保留第一性原理與現有框架，六語分析與完整謬誤檢核依條件啟用。另含 plan-grilling 與 subtraction-thinking。",
-  "version": "0.46.0",
+  "version": "0.46.1",
   "author": {
     "name": "TimLai666"
   }
