@@ -113,7 +113,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | `openclaw-agent-builder` | 想建立、配置或改造 OpenClaw agent，包括 workspace、channel、bindings、RAG 知識庫與安全設定。 |
 | `openclaw-ops` | 想在運行中的 OpenClaw 機器上做運維、配置、診斷。 |
 
-原本在這組的開發流程 skills（`software-engineering-guidelines`、`eng-architect`、`investigate`、`test-and-fix`、`diff-inspector`、`ship-it`、`agent-delegation`、`project-memory`）與提醒用的 hooks 已移到 [tstack](https://github.com/TimLai666/tstack)。
+原本在這組的開發流程 skills（`software-engineering-guidelines`、`eng-architect`、`investigate`、`test-and-fix`、`diff-inspector`（在 tstack 改名為 `diff-review`）、`ship-it`、`agent-delegation`、`project-memory`）與提醒用的 hooks 已移到 [tstack](https://github.com/TimLai666/tstack)。
 
 ### `data-and-research` — 資料分析與研究
 
