@@ -4,7 +4,7 @@ This file provides guidance to coding agents (Claude Code and others) when worki
 
 ## Repo 性質
 
-這是一個 Agent Skills 集合 repo（59 個 skill，分成 10 個 plugin），同時是 Claude Code plugin marketplace。沒有 build、lint、test 流程，唯一的腳本是打包工具：
+這是一個 Agent Skills 集合 repo（52 個 skill，分成 10 個 plugin），同時是 Claude Code plugin marketplace。沒有 build、lint、test 流程，唯一的腳本是打包工具：
 
 ```bash
 python3 zip_subfolders.py
@@ -78,7 +78,7 @@ Claude Code 另有 `disable-model-invocation`、`user-invocable`、`disallowed-t
 
 自製 CLI、MCP 與 API 的功能及用法由工具介面提供。CLI 必須有總覽與 `--help`，各指令的參數與用法放在各自 help。API 提供端點總覽、個別操作說明及 OpenAPI JSON。MCP 使用工具註冊描述與參數 schema，不強制新增總覽工具。
 
-Skill 說明何時使用、工作流程及必要注意事項，指向工具的說明入口，不在主檔或 references 重複完整指令手冊。功能更新時，同步更新總覽、help、操作說明及 OpenAPI，並驗證與實際介面一致。完整開發規則見 [software-engineering-guidelines](plugins/dev-workflow/skills/software-engineering-guidelines/SKILL.md#6-tool-and-api-discoverability)。
+Skill 說明何時使用、工作流程及必要注意事項，指向工具的說明入口，不在主檔或 references 重複完整指令手冊。功能更新時，同步更新總覽、help、操作說明及 OpenAPI，並驗證與實際介面一致。完整開發規則見 tstack 的 [software-engineering-guidelines](https://github.com/TimLai666/tstack/blob/main/skills/software-engineering-guidelines/SKILL.md#6-tool-and-api-discoverability)。
 
 ## 增減修改 skills 的必做事項
 
@@ -132,7 +132,6 @@ skill 若會在使用者專案裡產生檔案，額外檢查三條：
 
 | ID | Task | Status |
 |---|---|---|
-| agent-delegation-opencode-startup-stall | opencode 有 4 次派工全程零輸出，紀錄停在啟動初期（`init`、`event connected`），沒有 provider 錯誤；同期另有 `database is locked`，疑似多條 opencode 搶同一個資料庫，未證實。遇到時用 `status` 的 `runtime` 判斷後 `cancel` | 待調查 |
 
 <!-- ACTIVE_ISSUES_END -->
 

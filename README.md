@@ -1,6 +1,8 @@
 # Agent Skills
 
-60 個 agent skills，分成 10 個 plugins，這個 repo 同時是 Claude Code plugin marketplace。
+52 個 agent skills，分成 10 個 plugins，這個 repo 同時是 Claude Code plugin marketplace。
+
+開發工作流（工程準則、架構、除錯、測試、審查、交付、派工、專案記憶、資安掃描）已獨立成 [tstack](https://github.com/TimLai666/tstack)，請到那邊安裝。
 
 ## 安裝方式
 
@@ -13,7 +15,7 @@
 /plugin marketplace add TimLai666/skills
 
 # 2. 安裝想要的 plugin，格式是 <plugin名>@<marketplace名>（marketplace 名固定是 skills）
-/plugin install dev-workflow@skills
+/plugin install writing-and-design@skills
 ```
 
 裝一個 plugin 就會拿到該組全部 skills。plugin 名稱見下方目錄，也可以直接輸入 `/plugin` 開選單挑著裝。
@@ -28,7 +30,7 @@ npx skills add TimLai666/skills
 npx skills add TimLai666/skills --all
 
 # 裝單一 skill（指定完整路徑）
-npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflow/skills/software-engineering-guidelines
+npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflow/skills/db-engineering
 ```
 
 ### claude.ai（逐個上傳 zip）
@@ -101,25 +103,17 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 在 Claude Code 安裝整個 `writing-and-design` plugin 時，會另外帶一組提醒用的 hooks：使用者每次送出訊息時，提醒 agent 用 `human-writing` 寫回覆，並照指定的語言回覆（這則訊息有指定就照它，否則照 CLAUDE.md、AGENTS.md 等指示，都沒有才跟著使用者的語言）；要寫 .md、.txt 這類給人讀的文件而還沒載入 `human-writing` 時，提醒先載入；要建立或修改 artifact 而還沒載入 `design-studio` 時，提醒 agent 如果是設計類成品就先載入它，由 agent 自己判斷。這些 hooks 只提醒、不擋動作，需要 `python3`。用 `npx skills` 或 zip 只裝 skill 不會有這些提醒，skill 照常可用。
 | `human-writing` | 撰寫或修改文案、文章、文件、規則、prompt 與 skill，沿用合適段落並檢查重複、衝突及相關引用，讓文字自然清楚。 |
 
-### `dev-workflow` — 開發流程與工程支援
+### `dev-workflow` — 後端與部署工程支援
 
 | Skill | 適合什麼需求 |
 | --- | --- |
-| `agent-delegation` | 內建 agent 與外部 CLI 先依分工表及回退規則選定模型，再優先複用相同模型且符合隔離條件的既有對話。新派工以 script 查詢任務類型與支援層級、依規則派工及逐層接手，輪到宿主內建 subagent 時提供交接提示。自動補齊派工 prompt、專案經驗與教訓回報要求，提醒主 agent 核對並保存 Project Memory。主 agent 定骨架、親自驗收，測試與實作分開。規格、文章與報告交付前由符合脈絡隔離條件的 subagent 審查能否獨立理解。既有 API 命名、用法或行為變更先諮詢指定模型，再交由使用者決定。 |
-| `eng-architect` | 設計技術架構、釐清模組邊界、按可驗收行為拆任務，或審查 UI。沿用專案既有文件與任務系統，沒有安排且需要完整交接時建立預設協作文件。 |
-| `diff-inspector` | 想在合併前審查 diff：scope drift check、critical code review、specialist 並行掃描、adversarial review。 |
-| `test-and-fix` | 依指定範圍或 diff 測試網站、API、命令列工具與函式庫，追查失敗原因、修復並驗證回歸測試。 |
-| `ship-it` | 整理功能分支並建立或更新 PR：依專案規則同步、測試與審查，確認 CI 狀態，收尾記錄實際經驗。 |
-| `project-memory` | 保存反覆試錯或耗費大量時間、token 才找到的做法，供後續任務重用。舊經驗經查證失效後更新原紀錄，支援搜尋與匯出。 |
-| `investigate` | 錯誤原因不明時，依證據提出假說、追查資料流並驗證修正；也適用於明確要求根因調查。 |
-| `software-engineering-guidelines` | 任何軟體規劃、架構、實作、重構、review、測試前先載入：想清楚再做、最小變更、一次完整處理一個功能或問題、先寫骨架再填實作、每次變更都有測試，大改動採 TDD、目標驅動。 |
 | `db-engineering` | 任何資料庫相關工作都要先載入：先畫 ER model、以 BCNF 優先設計並至少維持 3NF，再處理 migration、稽核 log、軟刪除、效能、完整性與環境分離。 |
 | `postgrest-baas-builder` | 用 Supabase / InsForge 做後端時：RLS policy、Auth 串接、PostgREST 查詢、MCP 設定。需搭配 db-engineering。 |
 | `set-zeabur-conventions` | 想為專案設定 Zeabur 部署規範（寫入 AGENTS.md，給所有 agent 看）。 |
 | `openclaw-agent-builder` | 想建立、配置或改造 OpenClaw agent，包括 workspace、channel、bindings、RAG 知識庫與安全設定。 |
 | `openclaw-ops` | 想在運行中的 OpenClaw 機器上做運維、配置、診斷。 |
 
-在 Claude Code 安裝整個 `dev-workflow` plugin 時，會另外帶一組提醒用的 hooks：session 開始和壓縮對話後，提醒 agent 載入 `project-memory`、`software-engineering-guidelines` 和 `agent-delegation`。還沒載入 `agent-delegation` 就開 subagent 時，第一次會被擋下並提醒先載入，同一個 session 只擋一次。subagent 回報後、`git commit` 之後和壓縮對話前，會提醒核對並記錄 project memory。用 `npx skills` 或 zip 只裝 skill 不會有這些提醒，skill 照常可用。
+原本在這組的開發流程 skills（`software-engineering-guidelines`、`eng-architect`、`investigate`、`test-and-fix`、`diff-inspector`、`ship-it`、`agent-delegation`、`project-memory`）與提醒用的 hooks 已移到 [tstack](https://github.com/TimLai666/tstack)。
 
 ### `data-and-research` — 資料分析與研究
 
