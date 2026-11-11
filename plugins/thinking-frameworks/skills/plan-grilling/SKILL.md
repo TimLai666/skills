@@ -20,7 +20,7 @@ allowed-tools:
   - AskUserQuestion
   - WebSearch
 metadata:
-  version: "2.5.0"
+  version: "2.6.0"
 ---
 
 ## Overview
@@ -39,7 +39,7 @@ other relevant evidence before asking the user for facts.
 Use the requested format. Keep a short plan in the chat unless the user asks
 for a document or an identified reader needs it for execution or handoff.
 For a saved plan, use the user's chosen location or existing project convention;
-otherwise use `docs/plan-grilling/<slug>-plan.md`. Ask for a location only when
+otherwise use `plans/<slug>.md` at the workspace root. Ask for a location only when
 saving is needed and no workspace is clear. Read before updating and preserve
 unrelated content. Keep the same path as the plan evolves.
 
