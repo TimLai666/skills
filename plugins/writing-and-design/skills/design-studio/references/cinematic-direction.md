@@ -172,7 +172,7 @@ Load only the references needed for the current step.
 - Add the section rhythm, depth layer and shape language tables from `shared/composition-rules.md`.
 - When a WebGPU or canvas atmosphere is chosen, record the effect, its fallback and its budget from `webgpu-effects.md`.
 - Effects that read scroll position (`--scroll` in `../data/camera-shots-50.md`) get the value from CSS scroll-driven animations, GSAP ScrollTrigger or IntersectionObserver, never from a raw `window` scroll listener.
-- Write `compiled-spec.md` as the only source of truth for implementation.
+- Write `compiled-spec.md` as the only source of truth for how the implementation looks. Screen states and exact copy come from the feature specification when the project has one.
 
 ### Step 4c: Build, Then Step 5 Checks
 

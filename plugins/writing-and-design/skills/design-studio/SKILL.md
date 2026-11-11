@@ -15,7 +15,7 @@ description: >-
   skills. MUST NOT replace landing-page-studio for conversion-focused landing
   pages or open-slide-studio for open-slide web decks.
 metadata:
-  version: "2.1.0"
+  version: "2.2.0"
 ---
 
 # Design Studio
@@ -52,7 +52,9 @@ Create or update `DESIGN.md` when establishing or changing reusable visual rules
 | `design/brand-spec.md` | 1 | Frozen brand asset paths and extracted colors |
 | `design/decisions.md` | 3 | Direction: film or form answers, palette derivation, lookup results, uniqueness audit, shell-ban list |
 | `design/storyboard.md` | 4 | Visual thesis, site grammar, per-page scenes and signature compositions |
-| `design/compiled-spec.md` | 4 | The implementation spec, the only source for the build |
+| `design/compiled-spec.md` | 4 | The visual implementation spec: composition, motion, assets and tokens. The only source for how the build looks |
+
+When the project has a feature specification, such as `engineering/specs/<feature>.md`, that specification decides what each screen does: its states and the exact copy of labels and messages. `compiled-spec.md` takes them from it and does not set its own. A difference between the two is settled in the feature specification first.
 
 These are session state, not project assets. Bare filenames elsewhere in this skill resolve against `design/`.
 
