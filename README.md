@@ -1,6 +1,6 @@
 # Agent Skills
 
-52 個 agent skills，分成 10 個 plugins，這個 repo 同時是 Claude Code plugin marketplace。
+51 個 agent skills，分成 10 個 plugins，這個 repo 同時是 Claude Code plugin marketplace。
 
 開發工作流（工程準則、架構、除錯、測試、審查、交付、派工、專案記憶、資安掃描）已獨立成 [tstack](https://github.com/TimLai666/tstack)，請到那邊安裝。
 
@@ -109,7 +109,6 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | --- | --- |
 | `db-engineering` | 任何資料庫相關工作都要先載入：先畫 ER model、以 BCNF 優先設計並至少維持 3NF，再處理 migration、稽核 log、軟刪除、效能、完整性與環境分離。 |
 | `postgrest-baas-builder` | 用 Supabase / InsForge 做後端時：RLS policy、Auth 串接、PostgREST 查詢、MCP 設定。需搭配 db-engineering。 |
-| `set-zeabur-conventions` | 想為專案設定 Zeabur 部署規範（寫入 AGENTS.md，給所有 agent 看）。 |
 | `openclaw-agent-builder` | 想建立、配置或改造 OpenClaw agent，包括 workspace、channel、bindings、RAG 知識庫與安全設定。 |
 | `openclaw-ops` | 想在運行中的 OpenClaw 機器上做運維、配置、診斷。 |
 

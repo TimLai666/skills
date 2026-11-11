@@ -1,7 +1,7 @@
 {
   "name": "dev-workflow",
-  "description": "後端與部署工程支援：DB 工程、PostgREST BaaS、Zeabur 部署規範、OpenClaw。開發流程 skills 已移至 tstack。",
-  "version": "2.0.0",
+  "description": "後端與部署工程支援：DB 工程、PostgREST BaaS、OpenClaw。開發流程 skills 已移至 tstack。",
+  "version": "3.0.0",
   "author": {
     "name": "TimLai666"
   }
