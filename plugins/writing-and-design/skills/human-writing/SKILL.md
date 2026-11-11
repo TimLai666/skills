@@ -11,7 +11,7 @@ description: >-
   explicitly owns the writing style or the output is purely code, structured
   data, or a command. Supports Chinese and English.
 metadata:
-  version: "1.13.0"
+  version: "1.14.0"
 ---
 
 # Human Writing
@@ -44,6 +44,7 @@ This file gives the sequence. The rules are in the linked references. Read the r
 
 5. Check the finished text.
    Read [references/final-checklist.md](./references/final-checklist.md). Test every item against the actual text, fix failures, and check it again.
+   A specification, article or report delivered as a document of its own SHOULD then be read by a reader outside this conversation: read [references/empty-context-review.md](./references/empty-context-review.md) and follow it.
 
 6. Report ongoing task progress.
    At every turn end for any ongoing task, append a compact progress bar to the conversational reply, not the deliverable. Anchor it to the original goal: verified completed/total agreed items, current work, and what remains before completion. Show pending acceptance separately. Keep the denominator stable unless scope is explicitly changed; when the total is unknown, show milestones without a fabricated percentage or finish date. 100% requires all agreed completion and delivery conditions to be met.
