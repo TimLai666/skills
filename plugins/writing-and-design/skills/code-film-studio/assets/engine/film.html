@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>film</title>
+<style>html,body{margin:0;background:#000}canvas{display:block;max-width:100vw;max-height:100vh;height:auto;margin:0 auto}</style>
+<script type="importmap">{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/",
+  "postprocessing": "https://cdn.jsdelivr.net/npm/postprocessing@6.39.5/build/index.js" } }</script></head><body>
+<script>
+// capture.mjs waits only 30 s for READY and captureFrame. They exist before the modules load; the heavy build
+// resolves READY later, and any load error rejects it so the error is reported instead of a silent timeout.
+window.__r = {}; window.READY = new Promise((res, rej) => { window.__r.res = res; window.__r.rej = rej; });
+window.captureFrame = (...a) => window.__cap(...a);
+window.addEventListener('error', (e) => window.__r.rej(new Error('page error: ' + (e.message || e.error) + ' @ ' + (e.filename || '') + ':' + (e.lineno || ''))));
+window.addEventListener('unhandledrejection', (e) => window.__r.rej(new Error('rejection: ' + (e.reason && (e.reason.stack || e.reason.message) || e.reason))));
+</script>
+<script type="module">
+// The whole film on one page. Frame i -> T = i / FPS -> the shot that holds T -> the scene -> the picture.
+// Every pixel is a function of T and SEED only: no clocks, no unseeded randomness, no state kept between frames.
+// URL: w, h, seed, capture=1 · sheet=1 (one frame per shot) · at=<sec,sec,...> (stills at those times)
+import * as THREE from 'three';
+import { LOOKS, buildLook } from './looks.mjs';
+
+const q = new URLSearchParams(location.search);
+const W = +q.get('w') || 1920, H = +q.get('h') || 1080, SEED = +q.get('seed') || 1, FPS = 24, DURATION = 12;
+const FRAMES = DURATION * FPS, SHEET = q.get('sheet'), AT = (q.get('at') || '').split(',').filter(Boolean).map(Number);
+const look = LOOKS['cinematic-realistic'];                      // replace with the film's own look
+
+const renderer = new THREE.WebGLRenderer({ antialias: false, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(1); renderer.setSize(W, H, false); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(35, W / H, 0.03, 200);
+let lk = null, stage = null;
+
+// ---- the stage: build everything once; reset(T) puts every object where the story has it at time T
+function buildStage() {
+  const S = {};
+  scene.background = new THREE.Color(0x101216);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({ color: 0x55605a, roughness: 0.6 }));
+  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+  S.thing = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), new THREE.MeshStandardMaterial({ color: 0xb0523a, roughness: 0.5 }));
+  S.thing.castShadow = true; scene.add(S.thing);
+  const key = new THREE.DirectionalLight(0xbfd0e0, 2.5); key.position.set(-3, 4, 2); key.castShadow = true; key.shadow.mapSize.set(2048, 2048);
+  scene.add(key, new THREE.HemisphereLight(0x8090a0, 0x302820, 0.4));
+  S.reset = (T) => { S.thing.position.set(0, 0.2, 0); S.thing.rotation.set(0, 0, 0); };
+  return S;
+}
+// ---- the shots: [id, start s, end s, fn(t, S, C)] with t in shot seconds; C is the camera (pos, tgt, lens in mm)
+const SHOTS = [
+  ['S01', 0, 6, (t, S, C) => { C.pos = [2.2, 1.2, 2.6 - 0.1 * t]; C.tgt = [0, 0.25, 0]; C.lens = 35; S.thing.rotation.y = t * 0.5; }],
+  ['S02', 6, 12, (t, S, C) => { C.pos = [0.2, 0.5, 1.4]; C.tgt = [0, 0.22, 0]; C.lens = 65; S.thing.position.y = 0.2 + 0.25 * Math.abs(Math.sin(t * 2)); }],
+];
+const C = {};
+const shotAt = (T) => SHOTS.find((s) => T >= s[1] && T < s[2]) || SHOTS[SHOTS.length - 1];
+function setTime(T) {
+  const sh = shotAt(T); stage.reset(T);
+  C.pos = [0, 1.5, 4]; C.tgt = [0, 1, 0]; C.lens = 35; C.up = [0, 1, 0];
+  sh[3](T - sh[1], stage, C);
+  camera.fov = 2 * Math.atan(10.125 / C.lens) * 180 / Math.PI; camera.up.set(...C.up); camera.position.set(...C.pos); camera.lookAt(...C.tgt); camera.updateProjectionMatrix();
+}
+const out = document.createElement('canvas'); out.width = W; out.height = H; document.body.appendChild(out);
+const g2 = out.getContext('2d');
+const frameOf = (i) => (SHEET ? Math.round(((SHOTS[i][1] + SHOTS[i][2]) / 2) * FPS) : AT.length ? Math.round(AT[i] * FPS) : i);
+window.renderFrame = (i0) => { const i = frameOf(i0), T = i / FPS; setTime(T); lk.render(i, T); g2.drawImage(renderer.domElement, 0, 0); /* titles and subtitles are drawn on g2 here */ };
+window.__cap = (i, type = 'image/png', quality = 0.95) => { window.renderFrame(i); return out.toDataURL(type, quality); };
+const built = new Promise((r) => setTimeout(r, 50)).then(() => { stage = buildStage(); lk = buildLook({ renderer, scene, camera, look, fps: FPS, seed: SEED }); return document.fonts.ready; })
+  .then(() => ({ frames: SHEET ? SHOTS.length : AT.length || FRAMES, fps: FPS, width: W, height: H, renderer: 'three.js r' + THREE.REVISION }));
+built.then(window.__r.res, window.__r.rej);
+if (!q.get('capture')) built.then(() => { let f = 0; const loop = () => { window.renderFrame(f); f = (f + 1) % FRAMES; requestAnimationFrame(loop); }; requestAnimationFrame(loop); });
+</script></body></html>
