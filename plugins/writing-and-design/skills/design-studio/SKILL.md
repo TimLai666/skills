@@ -15,7 +15,7 @@ description: >-
   skills. MUST NOT replace landing-page-studio for conversion-focused landing
   pages or open-slide-studio for open-slide web decks.
 metadata:
-  version: "2.0.0"
+  version: "2.1.0"
 ---
 
 # Design Studio
@@ -44,17 +44,17 @@ Create or update `DESIGN.md` when establishing or changing reusable visual rules
 
 ## Where Process Files Go
 
-`DESIGN.md` is the only design file in the project root. Working files go in `docs/design/`, created when needed:
+`DESIGN.md` is the only design file in the project root. Working files go in `design/` at the project root, created when needed:
 
 | File | Step | Holds |
 |------|------|-------|
-| `docs/design/product-facts.md` | 1 | Verified product facts |
-| `docs/design/brand-spec.md` | 1 | Frozen brand asset paths and extracted colors |
-| `docs/design/decisions.md` | 3 | Direction: film or form answers, palette derivation, lookup results, uniqueness audit, shell-ban list |
-| `docs/design/storyboard.md` | 4 | Visual thesis, site grammar, per-page scenes and signature compositions |
-| `docs/design/compiled-spec.md` | 4 | The implementation spec, the only source for the build |
+| `design/product-facts.md` | 1 | Verified product facts |
+| `design/brand-spec.md` | 1 | Frozen brand asset paths and extracted colors |
+| `design/decisions.md` | 3 | Direction: film or form answers, palette derivation, lookup results, uniqueness audit, shell-ban list |
+| `design/storyboard.md` | 4 | Visual thesis, site grammar, per-page scenes and signature compositions |
+| `design/compiled-spec.md` | 4 | The implementation spec, the only source for the build |
 
-These are session state, not project assets. Bare filenames elsewhere in this skill resolve against `docs/design/`.
+These are session state, not project assets. Bare filenames elsewhere in this skill resolve against `design/`.
 
 ## Workflow
 
@@ -79,7 +79,7 @@ Work these in order and record the result in `decisions.md`:
 1. **Film grammar**: pick a director and film and translate them into composition, motion and atmosphere ([references/cinematic-direction.md](references/cinematic-direction.md)).
 2. **Color from the subject**: derive the palette from the subject itself with the color derivation protocol in [references/design-styles.md](references/design-styles.md).
 3. **Design data lookup**: query the bundled data for styles, type pairings and UX rules that similar products use. Run `scripts/design_lookup.py --help` for usage. English keywords only. Results are references and checks, never a template. If Python 3 is unavailable, skip this step and say so.
-4. **Unclear direction**: when the user gave no style reference, named no Cinematic or Practical preference, and the brief is open, build three independent directions in parallel and let the user choose from screenshots (the advisor flow in [references/production-guide.md](references/production-guide.md)). The chosen direction then goes through items 1–2: film grammar sets the skeleton, and the directions contribute palette, type and motifs. Save the direction files under `docs/design/design-demos/`.
+4. **Unclear direction**: when the user gave no style reference, named no Cinematic or Practical preference, and the brief is open, build three independent directions in parallel and let the user choose from screenshots (the advisor flow in [references/production-guide.md](references/production-guide.md)). The chosen direction then goes through items 1–2: film grammar sets the skeleton, and the directions contribute palette, type and motifs. Save the direction files under `design/design-demos/`.
 
 Priority when sources conflict:
 
@@ -135,7 +135,7 @@ If reusable visual rules changed, make `DESIGN.md` match the final design. On a 
 ## Output Contract
 
 - The deliverable in the requested format, plus a short note: assumptions, what the form came from in the content, anything not verified.
-- `DESIGN.md` updated when reusable rules changed; process files under `docs/design/`.
+- `DESIGN.md` updated when reusable rules changed; process files under `design/`.
 - No director names, film titles or process labels in the user-facing UI unless the user asks for them.
 
 ## Common Mistakes

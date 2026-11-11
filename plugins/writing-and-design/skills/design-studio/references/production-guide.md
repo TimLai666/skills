@@ -60,7 +60,7 @@
 **硬流程（開工前執行，優先於 clarifying questions）**：
 1. `WebSearch` 產品名 + 最新時間詞（"2026 latest"、"launch date"、"release"、"specs"）
 2. 讀 1-3 條權威結果，確認：**存在性 / 發布狀態 / 最新版本號 / 關鍵規格**
-3. 把事實寫進專案的 `docs/design/product-facts.md`（見工作流 Step 2），不靠記憶。本 skill 的過程檔一律放 `docs/design/`，只有 `DESIGN.md` 留在專案根目錄，詳見 `SKILL.md` 的「Where Process Files Go」
+3. 把事實寫進專案的 `design/product-facts.md`（見工作流 Step 2），不靠記憶。本 skill 的過程檔一律放 `design/`，只有 `DESIGN.md` 留在專案根目錄，詳見 `SKILL.md` 的「Where Process Files Go」
 4. 搜不到或結果模糊 → 問使用者，而不是自行假設
 
 **反例**（2026-04-20 實測）：使用者要「大疆 Pocket 4 發布動畫」，我憑記憶斷言「還沒發布」做了概念剪影——真相是 4 天前已發布、官方物料俱在。**成本對比：WebSearch 10 秒 << 返工 2 小時**。
@@ -275,9 +275,9 @@
 - 🔴 **可讀性硬底線（任何風格溫度都不豁免，包括「奢侈留白」的安靜派）**：正文 ≥14px、標籤/註釋 ≥12px、正文對比度 ≥4.5:1；留白必須是**構圖**（首屏有明確視覺錨點，視線有落點），不是內容缺席。盲測實錘：安靜派做過頭 = 「大片死白+微縮字級，第一眼像頁面渲染壞了」，直接輸給普通 baseline
 - 純 HTML/CSS 單檔案；**內容必需的圖用 Phase 3.5 取的真圖**（三版共用），取不到時依該版方向畫插畫，絕不用 CSS 幾何/純色塊代替內容，也不留空佔位
 - 🎞️ **PPT / deck 場景必走 deck 模板（絕不寫直向平鋪長頁！）**：每頁獨立 `<section>`（1920×1080）套 `assets/deck_index.html` 外殼，三版只換視覺風格、deck 骨架統一（架構規則與概覽牆細節見「技術紅線」+ `references/slide-decks.md`）。截圖按**單頁** 1920×1080 截；**單頁內容絕不自帶頁碼/進度標記**——頁碼由 deck 外殼統一承載（實測出過「02/03」+「6/16」雙頁碼打架）
-- 存專案的 `docs/design/design-demos/[邏輯名].html`（根目錄只放 `DESIGN.md`，見 `SKILL.md`）——❌ 禁 `_temp/`（花叔鐵律）
+- 存專案的 `design/design-demos/[邏輯名].html`（根目錄只放 `DESIGN.md`，見 `SKILL.md`）——❌ 禁 `_temp/`（花叔鐵律）
 - 截圖：`npx playwright screenshot file:///path.html out.png --viewport-size=1440,900`（PPT 用 1920,1080）
-- ✅ **產出自檢（防偷懶，進 Phase 5 前必查）**：確認 `docs/design/design-demos/` 下真有 **3 個 .html**——少於 3 個 = 沒走完三套邏輯，補齊再往下，不許只做一版交差
+- ✅ **產出自檢（防偷懶，進 Phase 5 前必查）**：確認 `design/design-demos/` 下真有 **3 個 .html**——少於 3 個 = 沒走完三套邏輯，補齊再往下，不許只做一版交差
 - 三版全部完成後**一起展示三張截圖**，每版標明：用了哪套邏輯、具體哪個風格/參照案例/設計師，一句話說為什麼
 
 > 僅當使用者**已確認有生圖能力**時，AI 生成型風格才走 `huashu-gpt-image`（見 `design-styles.md` 尾部「AI 生圖專用風格」）；否則一律 HTML。

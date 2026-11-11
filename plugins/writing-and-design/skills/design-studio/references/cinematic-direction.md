@@ -34,7 +34,7 @@ Use this whenever the same user has already used this skill to create one or mor
 
 This manual runs inside the single workflow in `SKILL.md`. The user's questions are already answered in step 2.
 
-| Workflow step | This manual | Output file (`docs/design/`) |
+| Workflow step | This manual | Output file (`design/`) |
 |---|---|---|
 | 3. Direction | Film grammar: director, film, research, uniqueness audit | `decisions.md` |
 | 4. Spec | Storyboard, then compiled spec | `storyboard.md`, `compiled-spec.md` |

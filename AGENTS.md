@@ -122,7 +122,7 @@ Skill 說明何時使用、工作流程及必要注意事項，指向工具的�
 
 skill 若會在使用者專案裡產生檔案，額外檢查三條：
 
-- **不自創根目錄檔案。** 用既有的協調檔（`AGENTS.md`、`CLAUDE.md`、`DESIGN.md`），或放進 `docs/<skill-name>/`。`plan-grilling` 的計畫放專案根目錄的 `plans/`。開發用的工程文件（規格、架構、決策紀錄、票）放專案的 `engineering/`，照 tstack 的 [Engineering Documents](https://github.com/TimLai666/tstack/blob/main/skills/software-engineering-guidelines/references/engineering-documents.md)。根目錄是使用者的，不是 skill 的工作檯。
+- **不自創根目錄檔案。** 用既有的協調檔（`AGENTS.md`、`CLAUDE.md`、`DESIGN.md`），或放進 `docs/<skill-name>/`。`plan-grilling` 的計畫放專案根目錄的 `plans/`，`design-studio` 的過程檔放專案根目錄的 `design/`。開發用的工程文件（規格、架構、決策紀錄、票）放專案的 `engineering/`，照 tstack 的 [Engineering Documents](https://github.com/TimLai666/tstack/blob/main/skills/software-engineering-guidelines/references/engineering-documents.md)。根目錄是使用者的，不是 skill 的工作檯。
 - **寫了要有人讀。** 新增一個檔之前先講得出誰讀、在哪一步讀。找不到讀者就別落檔，或降級成交給使用者的成品——成品沒有下游是正常的，協調檔沒有下游就是死檔。共用同一個檔時只更新自己那幾段，不刪不認得的段落。
 - **狀態檔不帶日期與 branch。** 反映當前狀態、就地更新的檔（多數屬於此類）用固定檔名，版本歷史與分支隔離交給 git。只有一次性、多份並存才有意義的紀錄檔（例如 `plan-grilling` 的訪談紀錄）才帶日期。覆寫前先讀，不要盲寫。
 
