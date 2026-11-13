@@ -2,18 +2,18 @@
 
 Read before modelling, painting, lighting or animating.
 
-## Code or software
+## Start from what exists
 
-The rule: if code you write yourself reaches the same result, use code. Use other software only where it is clearly better, and only software you can drive from a script. Never drive a tool that needs an account, a cloud service or a generative model unless the user asked for that.
+The rule: when a ready-made or parametric base exists for the thing and its licence allows a published film, start from it and spend the rounds on fitting it to the film. Write geometry yourself only for what no base covers. Use only software you can drive from a script. Never drive a tool that needs an account, a cloud service or a generative model unless the user asked for that.
 
 | Stage | Use | Why |
 |---|---|---|
-| Rooms, furniture, hard-surface props | code: built from parts by your own scripts | props are a few lines of geometry each; in a film without realistic people, three.js with a path tracer renders them well |
-| Human bodies, faces, hands | Blender through Python, with the MPFB add-on as the base | a parametric human starts out looking like a person, with skeleton, fingers and skin; output is CC0 |
+| Rooms, furniture, hard-surface props | a CC0 model from Poly Haven where one fits; otherwise built from parts by your own scripts | props are a few lines of geometry each; in a film without realistic people, three.js with a path tracer renders them well |
+| Human bodies, faces, hands | Blender through Python, with the MPFB add-on as the base. Never sculpt a realistic face or body from nothing | MPFB gives a whole person to start from: body, face, skeleton, fingers, skin, eyes, brows, lashes and teeth, with hair and clothes from asset packs. Its face packs add expression and mouth-shape controls. Output is CC0 |
 | Rendering, when realistic people are in the film | Blender Cycles, driven by Python | dedicated skin scattering, hair shading and fine displacement; nothing in the browser matches it yet |
 | Cloth | Blender cloth simulation, baked | a solver you would otherwise spend weeks rewriting |
 | Body motion | code: key poses plus procedural layers, with motion-capture clips where the licence allows | see Motion below |
-| Lip sync | code, timed by hand to the recorded line | automatic tools assume English |
+| Lip sync | mouth-shape timings from Rhubarb Lip Sync on the command line (`-r phonetic` for lines that are not in English), mapped onto MPFB's viseme shape keys, then corrected by hand against the recorded line | the phonetic recognizer works in any language but is less precise than its English one, so every line still gets checked syllable by syllable. The Lip Sync extension for Blender handles Mandarin and other languages through Vosk; its page does not say it runs headless, so test that before relying on it |
 | Materials | CC0 scans from Poly Haven and ambientCG where one fits; painted by you otherwise | both have open download APIs |
 | Compositing, titles, subtitles, editing, sound | code and ffmpeg | equal to the tools, and reproducible |
 
@@ -48,15 +48,15 @@ The user does not install anything by hand. You do it, by command, after one app
 |---|---|---|
 | Blender application | the renderer and everything around it | from blender.org; macOS `.dmg` copied to /Applications, Windows installer or zip, Linux tarball |
 | MPFB add-on | the parametric human | download the release zip yourself and install it from the file with Blender's extension command, then enable it. Installing from a file does not depend on Blender's online access setting, which is off by default |
-| MPFB asset packs | skins, eyes, hair, clothes | separate downloads, hundreds of megabytes; take only the packs the cast needs. Most are CC0; some hair packs need a credit: log each pack's licence when you download it |
+| MPFB asset packs | skins, eyes, hair, clothes, face shape keys | separate downloads, hundreds of megabytes; take only the packs the cast needs. For faces that act or speak, take `faceunits01` (54 ARKit face units) and `visemes02` (15 mouth shapes). Most packs are CC0; some hair packs need a credit: log each pack's licence when you download it |
 
 After installing, run the proof script from the section above. Only when it has rendered a frame is the setup done.
 
 The exact commands are not written here because they were not run when this was written, and a guessed installer is worse than none. The first time the setup works on a machine, save the commands that worked as `scripts/setup_blender.sh` (or `.ps1`) in this skill, with the versions they were run against, and replace this paragraph with a pointer to that script. From then on the setup is one command.
 
-If the user wants no extra software at all, everything can stay in code. Say what that costs: characters will take far more rounds and will read as stylised or game-like in close-up.
+If the user wants no extra software at all, everything can stay in code. Say what that costs: realistic people are then out of reach, so the characters have to be designed as stylised figures.
 
-Avoid: Blender bridge servers that execute whatever is sent to an open socket (known remote-execution holes); image-to-3D and text-to-3D generators unless the user asks; anything whose licence forbids commercial use (see the table at the end).
+Avoid: Blender bridge servers that execute whatever is sent to an open socket (known remote-execution holes); image-to-3D and text-to-3D generators unless the user asks; anything whose licence forbids commercial use (see the table at the end). Bases that cost money or need an account (MetaHuman, Character Creator, Human Generator) are used only when the user asks for one; read its current licence then, because the terms for use outside the vendor's own software have changed before.
 
 ## References: look, blend, add your own
 
@@ -71,8 +71,8 @@ Avoid: Blender bridge servers that execute whatever is sent to an open socket (k
 Climb only as far as the shot needs. Change rungs when rounds stop helping.
 
 1. **Parts and primitives.** Boxes, cylinders, lathes, extrusions, with bevels and real proportions. Right for furniture and most props.
-2. **Blob sculpting.** Shapes made of many small volumes blended together, then turned into a mesh (`assets/engine/sdf.mjs`). Good for organic props and for stylised figures. For a realistic face it needs thousands of small shapes placed against references, and even then the evidence says it stays below a parametric base. Use it for faces only when the user wants no extra software.
-3. **Parametric base, then adjust.** Generate a human with MPFB (age, build, proportions), then run the quality loop on its parameters and on local shape changes: render, compare with references, adjust. This is the route with evidence behind it.
+2. **Blob sculpting.** Shapes made of many small volumes blended together, then turned into a mesh (`assets/engine/sdf.mjs`). Good for organic props and for stylised figures. Not for realistic faces or bodies.
+3. **Ready-made base, then adjust.** For people, generate the human with MPFB: age, build and proportions first, then its detail targets (nose, eyes, jaw and the rest). The random-human panel with a fixed seed gives a quick starting face to adjust. Then run the quality loop on those parameters and on local shape changes: render, compare with references, adjust. For a stylised figure, or a single part such as a hand, an ear or a foot, Blender's Human Base Meshes bundle (CC0, meshes ready for multiresolution sculpting, no skeleton) is the starting shape. For props, a CC0 model. Every realistic character starts on this rung.
 4. **Painting with colour patches.** Colour belongs to the surface, and you can lay it down patch by patch: skin zones (redder cheeks and nose, cooler under the eyes, paler forehead), blemishes, veins, wear on wood, stains on a wall. Paint onto the model's surface or its texture, a few hundred to a few thousand patches, checking against references each round. Paint only the object's own colour; leave light and shadow to the renderer, or the surface will look wrong when the light changes. Be honest about its reach: painted patches read as illustration rather than photograph when they carry the whole surface, so use them on top of a base that already looks right (a parametric human's skin, a scanned material) and for things that are painted in real life (signs, a calendar page, a printed cloth, the artwork on an altar). Open skin scans for a specific kind of person rarely exist, so this is also how a face gets its own character.
 5. **Painted backdrops for locked cameras.** When the camera does not move, the background can be one painted image projected onto simple geometry, with invisible stand-in surfaces to catch the characters' shadows. A backdrop may include light, because the light in that shot is fixed. Render or paint it at high quality once and reuse it for every frame of the shot. Most quiet films have many locked shots; this is the cheapest large gain in realism.
 6. **Captured from reality.** Photogrammetry or splats from the user's own photos of a real place or object. Not generative. Splats keep the light they were captured in and do not receive new shadows well, so use meshes for anything the film's light touches.
@@ -80,7 +80,7 @@ Climb only as far as the shot needs. Change rungs when rounds stop helping.
 ## Characters
 
 - A skeleton with one continuous skin. Limbs as separate rigid pieces always show at the joints.
-- A face that changes continuously: controls for brows, lids, gaze, jaw, lip corners, lip press. Swapping whole head meshes pops.
+- A face that changes continuously: controls for brows, lids, gaze, jaw, lip corners, lip press. Swapping whole head meshes pops. Load MPFB's face shape key packs (`faceunits01` for expressions, `visemes02` for speech) from your script, calling the operation behind MPFB's Face operations panel (find it in the add-on's source), and animate their weights. Make your own shape keys only for a movement those packs lack.
 - Eyes carry the face: a dark pupil, an iris with depth, a highlight on the cornea, a wet line on the lower lid, lashes, a slight redness at the corners. Eyes dart before the head turns; blinks are fast and irregular.
 - Asymmetry everywhere. A perfectly mirrored face reads as a mask.
 - Hands get fingers and a pose for every contact. A hand that hovers near an object instead of gripping it breaks the shot.
@@ -124,6 +124,6 @@ Check the current terms before use; these were true when written and are the kin
 |---|---|---|
 | Human base | MPFB / MakeHuman output (CC0; two hair packs need credit), Blender human base meshes (CC0) | SMPL / SMPL-X, most free scanned head samples |
 | Motion capture | 100STYLE (CC BY, walking only), Rokoko free packs, Mixamo (no redistribution of the files) | AMASS, Bandai Namco dataset, LAFAN1 |
-| Materials, HDRIs | Poly Haven, ambientCG (CC0) | check every other library item by item |
+| Models, materials, HDRIs | Poly Haven, ambientCG (CC0) | check every other library item by item |
 | Reconstruction code | Brush, Spark | the original 3D Gaussian splatting code, nvdiffrast |
 | Pose estimation from video | MediaPipe | OpenPose |

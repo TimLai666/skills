@@ -12,7 +12,7 @@ description: >-
   This skill MUST NOT be used for editing existing footage, slide decks, or web
   animations; web animations belong to design-studio.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Code Film Studio
@@ -63,7 +63,7 @@ A fast pace is the user's to ask for. If they say "just get me a draft", build f
 For anything the viewer will look at (a face, a hand, a prop in close-up, a movement):
 
 1. Gather references: several images or clips of the real thing. Look at them; do not copy one. Blend what you learn from several and add your own design. No reference pixel goes into the film unless the user allows it and the licence does (`references/building.md`).
-2. Build a first version.
+2. Start the first version from a ready-made base: MPFB for people, a CC0 model or scan for props and surfaces (`references/building.md`). Build by hand only what no base covers. The rounds go into fitting the base to the film, not into making it from nothing.
 3. Render it **at the size and angle the film will show it**, plus two other angles. Look at a full-resolution crop, never only a thumbnail; a thumbnail hides exactly the errors that make CG look fake.
 4. Put it beside the reference. Write down the three worst differences, in plain words ("the jaw is too wide below the ear", "the skin has no colour change at the cheek").
 5. Fix those three. Go to 3.
@@ -110,7 +110,7 @@ Chats about films grow large, and every step re-reads the whole chat. At a natur
 ## What is in this skill
 
 - `references/quality-bar.md`: what "finished" means for faces, bodies, props, motion, light; limit versus effort; the bar shot. Read at stage 4 and whenever the user questions quality.
-- `references/building.md`: the ways to build things, from blob sculpting and colour-block painting to painted backdrops, skeletons and motion; how to use references. Read before modelling or animating.
+- `references/building.md`: which ready-made bases to start from (MPFB for people, CC0 models and scans), then the ways to adjust and build on them, from colour-block painting to painted backdrops, skeletons, motion and lip sync; how to use references. Read before modelling or animating.
 - `references/story.md`: writing a film that a cold viewer understands; the shot list; the storyboard test. Read at stages 1 to 3.
 - `references/sound.md`: voices, music, effects, the event audit, the mix and master. Read at stage 7.
 - `references/pipeline.md`: the frame contract, rendering, encoding, checks, disk, long jobs, and the failures already met with their fixes. Read before the first render.

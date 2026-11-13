@@ -39,13 +39,14 @@ When the user asks why something looks unreal, answer in this shape. Fill both c
 
 Known limits, so you do not overpromise:
 
-- **Realistic human faces in close-up** are the hardest thing in this craft. Public work by language-model agents shows strong scenes, objects and light; it does not show a photoreal face built from scratch. Start faces from a parametric human base and adjust it against references, rather than sculpting from nothing (`building.md`).
+- **Realistic human faces in close-up** are the hardest thing in this craft. Public work by language-model agents shows strong scenes, objects and light; it does not show a photoreal face built from scratch. Start every realistic face from MPFB and adjust it against references (`building.md`).
 - **Browser path tracing** now handles hard-surface interiors well. Skin, hair and cloth are better in Blender Cycles, which has dedicated skin scattering and hair shading.
 - **You see through small images.** Fine errors in a face can be invisible to you and obvious to the user. Ask them to look at crops.
 - **You cannot hear.**
 
 Known effort traps, because they were all fallen into once:
 
+- building a face or body by hand when MPFB already gives one,
 - stopping a face after a handful of rounds because the pace felt urgent,
 - rendering at interactive speed when a minute per frame was affordable,
 - building every shot roughly instead of one shot well,

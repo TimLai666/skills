@@ -98,7 +98,7 @@ npx skills add https://github.com/TimLai666/skills/tree/main/plugins/dev-workflo
 | `commercial-proposal-writing` | 撰寫完整商業提案、局部改稿或純審查，涵蓋合作方案、募資 deck 與商業計畫。 |
 | `landing-page-studio` | 想產出偏高轉換導向的 landing page、hero section、行銷頁面。 |
 | `design-studio` | 所有設計事務的統一入口：網站、App、簡報、動畫、資訊圖、品牌設計與 WebGPU 特效。單一流程結合電影語法、從題目推導的配色與設計資料查詢，建立或變更共用視覺規範時更新 `DESIGN.md`。也能搭配 Claude 內建的 Design、Design System、Slides 使用。 |
-| `code-film-studio` | 想用程式從頭做一部短片、動畫或寫實 3D 影片。Agent 自己寫劇本、建模、上色、打光、做動畫與收音，每個鏡頭都要對照參考畫面逐輪修到你認可的程度。接續已有 `STATE.md` 的影片資料夾也用這個。 |
+| `code-film-studio` | 想用程式從頭做一部短片、動畫或寫實 3D 影片。Agent 自己寫劇本、上色、打光、做動畫與收音。人物從 MPFB 產生的現成人體改起，道具優先用 CC0 模型，不從零手刻。每個鏡頭都要對照參考畫面逐輪修到你認可的程度。接續已有 `STATE.md` 的影片資料夾也用這個。 |
 | `open-slide-studio` | 想把簡報做成可放映、可部署成網址的網頁簡報（open-slide 框架），視覺由 design-studio 供給；要可編輯 .pptx 仍走 design-studio。 |
 
 在 Claude Code 安裝整個 `writing-and-design` plugin 時，會另外帶一組提醒用的 hooks：使用者每次送出訊息時，提醒 agent 用 `human-writing` 寫回覆，並照指定的語言回覆（這則訊息有指定就照它，否則照 CLAUDE.md、AGENTS.md 等指示，都沒有才跟著使用者的語言）；要寫 .md、.txt 這類給人讀的文件而還沒載入 `human-writing` 時，提醒先載入；要建立或修改 artifact 而還沒載入 `design-studio` 時，提醒 agent 如果是設計類成品就先載入它，由 agent 自己判斷。這些 hooks 只提醒、不擋動作，需要 `python3`。用 `npx skills` 或 zip 只裝 skill 不會有這些提醒，skill 照常可用。
